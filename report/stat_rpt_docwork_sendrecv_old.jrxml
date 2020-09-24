@@ -1,0 +1,759 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="stat_rpt_docwork_sendrecv" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="344a1b0e-62e0-4388-827b-2eea39e478a3">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.137:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/stat_rpt_docwork_sendrecv_old"/>
+	<property name="com.jaspersoft.studio.report.description" value="17.การยืมเอกสาร/หลักประกันประจำวัน"/>
+	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table 1_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table 1_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table 1_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<subDataset name="DSET_BOOKRECV" uuid="cdb0d64d-73e0-4421-ad76-dddaea9a614f">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+		<queryString language="SQL">
+			<![CDATA[SELECT   pwdr.DOCUMENT_DATE,--วันที่รับหนังสือ
+         THAISDATE(pwdr.DOCUMENT_DATE) DOCUMENT_DATE_TEXT,
+         NVL(pwdt.TITLE_DESC,' ')||pwdr.DOCUMENT_IDNUM||'/'||pwdr.DOCUMENT_YEAR  DOCUMENT_NO, --เลขที่รับหนนังสือ
+         NVL(pwdr.DOCUMENT_SUBJECT,'-')   DOCUMENT_SUBJECT,  --เรื่องที่ได้รับ
+         NVL(pwdty.WF_DOC_TYPE_NAME,'-')  DOCUMENT_TYPE,     --ประเภทหนังสือ
+         NVL(pwdc.WF_DOC_CATE_NAME,'-')   DOCUMENT_CATEGORY, --ประเภททะเบียน
+         pwdr.SENDER_NAME,                          -- ชื่อผู้ส่ง
+         pwdr.RECEIVER_NAME,                        -- ชื่อผู้รับ
+         pwdr.SENDER_DOC_DATE       SENDRECV_DATE,  -- วันที่ออกหนังสือจากต้นสังกัดส่งมา
+         pwdr.SENDER_DOC_NO         SENDRECV_NO,    -- เลขหนังสือต้นสังกัดส่งมา
+         CASE WHEN pc.CASE_ID IS NULL THEN '-' 
+              ELSE pltc.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR END  CASE_BLACK_NO  --หมายเลขคดีดำ
+FROM PC_WF_DOCUMENT_RECEIVE pwdr 
+LEFT JOIN PC_WF_DOCUMENT_TITLE pwdt ON pwdt.WF_DOCUMENT_TITLE_ID = pwdr.DOCUMENT_TITLE_ID AND pwdt.REMOVED_BY = 0 
+LEFT JOIN PC_WF_DOCUMENT_TYPE pwdty ON pwdty.WF_DOCUMENT_TYPE_ID = pwdr.WF_DOC_TYPE_ID AND pwdty.REMOVED_BY = 0
+LEFT JOIN PC_WF_DOCUMENT_CATE pwdc ON pwdc.WF_DOC_CATE_ID = pwdr.WF_DOC_CATE_ID AND pwdc.REMOVED_BY = 0
+--
+LEFT JOIN PC_CASE pc ON pc.CASE_ID = pwdr.CASE_ID AND pc.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc.REMOVED_BY = 0
+--
+WHERE pwdr.REMOVED_BY = 0
+AND TO_CHAR(pwdr.DOCUMENT_DATE,'DD-MM-YYYY') = '06-04-2020']]>
+		</queryString>
+		<field name="DOCUMENT_DATE" class="java.util.Date">
+			<property name="com.jaspersoft.studio.field.label" value="DOCUMENT_DATE"/>
+		</field>
+		<field name="DOCUMENT_DATE_TEXT" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="DOCUMENT_DATE_TEXT"/>
+		</field>
+		<field name="DOCUMENT_NO" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="DOCUMENT_NO"/>
+		</field>
+		<field name="DOCUMENT_SUBJECT" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="DOCUMENT_SUBJECT"/>
+		</field>
+		<field name="DOCUMENT_TYPE" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="DOCUMENT_TYPE"/>
+		</field>
+		<field name="DOCUMENT_CATEGORY" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="DOCUMENT_CATEGORY"/>
+		</field>
+		<field name="SENDER_NAME" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="SENDER_NAME"/>
+		</field>
+		<field name="RECEIVER_NAME" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="RECEIVER_NAME"/>
+		</field>
+		<field name="SENDRECV_DATE" class="java.util.Date">
+			<property name="com.jaspersoft.studio.field.label" value="SENDRECV_DATE"/>
+		</field>
+		<field name="SENDRECV_NO" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="SENDRECV_NO"/>
+		</field>
+		<field name="CASE_BLACK_NO" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_BLACK_NO"/>
+		</field>
+	</subDataset>
+	<subDataset name="DSET_BOOKSEND" uuid="82e5b9b2-f343-498e-95b9-82d84c8abe3b">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+		<queryString language="SQL">
+			<![CDATA[SELECT pwds.DOCUMENT_DATE,
+       THAISDATE(pwds.DOCUMENT_DATE) DOCUMENT_DATE_TEXT,
+       NVL(pwdt.TITLE_DESC,' ')||pwds.DOCUMENT_IDNUM||'/'||pwds.DOCUMENT_YEAR DOCUMENT_NO,
+       NVL(pwds.DOCUMENT_SUBJECT,'-') DOCUMENT_SUBJECT,
+       NVL(pwdty.WF_DOC_TYPE_NAME,'-')  DOCUMENT_TYPE,     --ประเภทหนังสือ
+       NVL(pwdc.WF_DOC_CATE_NAME,'-')   DOCUMENT_CATEGORY, --ประเภททะเบียน
+       pwds.SENDER_NAME,                         -- ชื่อผู้ส่ง
+       pwds.RECEIVER_NAME,                      -- ชื่อผู้รับ
+       CASE WHEN pc.CASE_ID IS NULL THEN '-' 
+            ELSE pltc.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR END  CASE_BLACK_NO  --หมายเลขคดีดำ*/
+--
+FROM PC_WF_DOCUMENT_SEND pwds 
+LEFT JOIN PC_WF_DOCUMENT_TITLE pwdt ON pwdt.WF_DOCUMENT_TITLE_ID = pwds.DOCUMENT_TITLE_ID AND pwdt.REMOVED_BY = 0
+LEFT JOIN PC_WF_DOCUMENT_TYPE pwdty ON pwdty.WF_DOCUMENT_TYPE_ID = pwds.WF_DOC_TYPE_ID AND pwdty.REMOVED_BY = 0
+LEFT JOIN PC_WF_DOCUMENT_CATE pwdc ON pwdc.WF_DOC_CATE_ID = pwds.WF_DOC_CATE_ID AND pwdc.REMOVED_BY = 0
+--
+LEFT JOIN PC_CASE pc ON pc.CASE_ID = pwds.CASE_ID AND pc.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc.REMOVED_BY = 0
+--
+WHERE pwds.REMOVED_BY = 0
+AND TO_CHAR(pwds.DOCUMENT_DATE,'DD-MM-YYYY') = '06-04-2020']]>
+		</queryString>
+		<field name="DOCUMENT_DATE" class="java.util.Date">
+			<property name="com.jaspersoft.studio.field.label" value="DOCUMENT_DATE"/>
+		</field>
+		<field name="DOCUMENT_DATE_TEXT" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="DOCUMENT_DATE_TEXT"/>
+		</field>
+		<field name="DOCUMENT_NO" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="DOCUMENT_NO"/>
+		</field>
+		<field name="DOCUMENT_SUBJECT" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="DOCUMENT_SUBJECT"/>
+		</field>
+		<field name="DOCUMENT_TYPE" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="DOCUMENT_TYPE"/>
+		</field>
+		<field name="DOCUMENT_CATEGORY" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="DOCUMENT_CATEGORY"/>
+		</field>
+		<field name="SENDER_NAME" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="SENDER_NAME"/>
+		</field>
+		<field name="RECEIVER_NAME" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="RECEIVER_NAME"/>
+		</field>
+		<field name="CASE_BLACK_NO" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_BLACK_NO"/>
+		</field>
+	</subDataset>
+	<queryString language="SQL">
+		<![CDATA[SELECT plc.COURT_NAME_TH,
+             THAILDATE(TO_TIMESTAMP('06-04-2020','DD-MM-YYYY')) TODAY
+FROM PC_PARAM pp
+JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
+	</queryString>
+	<field name="COURT_NAME_TH" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
+	</field>
+	<field name="TODAY" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TODAY"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="77" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="802" height="25" uuid="0f41c48e-dc33-4309-b456-80adcb7cd5ed">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="27" width="802" height="25" uuid="9bfb1255-1f45-472e-b29a-84dbcc75f9ec">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17" isBold="true"/>
+				</textElement>
+				<text><![CDATA[การยืมเอกสาร/หลักประกันประจำวัน]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="52" width="802" height="25" uuid="50d235b0-1006-42cb-953f-e2369b35bdae">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["ประจำวันที่ " + $F{TODAY}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<detail>
+		<band height="88" splitType="Stretch">
+			<componentElement>
+				<reportElement x="0" y="28" width="802" height="60" uuid="3cbc261b-bac8-406f-ad77-9c45b49cdec3">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="DSET_BOOKRECV" uuid="81d0cf16-93fd-4e53-b7b8-981840936b9a">
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:column width="80" uuid="fa3a19a7-d3d3-40eb-afef-2df8a3983dd2">
+						<jr:columnHeader height="30">
+							<staticText>
+								<reportElement x="0" y="0" width="80" height="30" uuid="084ee815-c660-4e18-88bb-ffef370ca712"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<text><![CDATA[เลขคดี]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="30">
+							<textField>
+								<reportElement x="0" y="0" width="80" height="30" uuid="e22a70f9-5598-4609-8984-24e936be0225"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="80" uuid="0284ff4b-a931-4b21-b64e-8d8fd56bbc0e">
+						<jr:columnHeader height="30">
+							<staticText>
+								<reportElement x="0" y="0" width="80" height="30" uuid="a6b9b126-0919-4354-a1c0-6a2d5b39a627"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<text><![CDATA[วันที่ยืมมา]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="30">
+							<textField>
+								<reportElement x="0" y="0" width="80" height="30" uuid="2f42c33b-53db-47f9-89ff-6e67c3aab5f4"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{DOCUMENT_DATE_TEXT}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="80" uuid="6f6cd2b8-94bd-4e9d-9dc6-93b51aa5dfc8">
+						<jr:columnHeader height="30">
+							<staticText>
+								<reportElement x="0" y="0" width="80" height="30" uuid="2479d074-36dc-4939-b3ec-7c82c8fce570"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<text><![CDATA[เลขที่หนังสือ]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="30">
+							<textField>
+								<reportElement x="0" y="0" width="80" height="30" uuid="eb014b96-d879-4eb8-a950-756ed9a0dbb2"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{DOCUMENT_NO}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="81" uuid="6979ec5c-4c5f-47d7-965b-abbf9a141ff4">
+						<jr:columnHeader height="30">
+							<staticText>
+								<reportElement x="0" y="0" width="81" height="30" uuid="218d5208-d3ee-4331-baea-2f419dcfd2b0"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<text><![CDATA[เรื่อง]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="30">
+							<textField>
+								<reportElement x="0" y="0" width="81" height="30" uuid="321a8a1e-a6ac-4838-94da-8ce1d6412878"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{DOCUMENT_SUBJECT}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="80" uuid="4dd332a4-8212-4705-adad-d8af5ae1a3c8">
+						<jr:columnHeader height="30">
+							<staticText>
+								<reportElement x="0" y="0" width="80" height="30" uuid="63b6a0ff-4fa3-4f30-b12d-557b9134c83d"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<text><![CDATA[ประเภท]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="30">
+							<textField>
+								<reportElement x="0" y="0" width="80" height="30" uuid="cbf807df-e865-49cb-abd2-70a9945aa78e"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{DOCUMENT_TYPE}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="80" uuid="44e2981b-37a5-4d05-afc0-bf25e879c3a6">
+						<jr:columnHeader height="30">
+							<staticText>
+								<reportElement x="0" y="0" width="80" height="30" uuid="2f79b427-aec8-46ea-81d5-52ea88599076"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<text><![CDATA[ทะเบียน]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="30">
+							<textField>
+								<reportElement x="0" y="0" width="80" height="30" uuid="b5b520e1-02dd-4436-9d76-feb1b7861b15"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{DOCUMENT_CATEGORY}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="80" uuid="a8a2223e-26bd-4961-ae98-4e4debe215bf">
+						<jr:columnHeader height="30">
+							<staticText>
+								<reportElement x="0" y="0" width="80" height="30" uuid="62ec27b9-6e04-446a-b1de-37b4d4da7829"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<text><![CDATA[ผู้ส่ง]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="30">
+							<textField>
+								<reportElement x="0" y="0" width="80" height="30" uuid="149798be-2187-4267-a127-057026ab4c1b"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{SENDER_NAME}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="80" uuid="a69054bc-d7f5-433d-bb9b-fcecf0c511c5">
+						<jr:columnHeader height="30">
+							<staticText>
+								<reportElement x="0" y="0" width="80" height="30" uuid="92fbe2e5-8db8-435d-854e-eb0608d59f1e"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<text><![CDATA[ผู้รับ]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="30">
+							<textField>
+								<reportElement x="0" y="0" width="80" height="30" uuid="207bb280-c006-4bc5-bf7b-24bef36e68f7"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{RECEIVER_NAME}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="80" uuid="f222bf91-2df1-4f62-8c96-0c9568af12ee">
+						<jr:columnHeader height="30">
+							<staticText>
+								<reportElement x="0" y="0" width="80" height="30" uuid="e307ef71-81a8-47b7-91be-e3b7dee739d1"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<text><![CDATA[วันที่ส่งหนังสือมา]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="30">
+							<textField>
+								<reportElement x="0" y="0" width="80" height="30" uuid="29981660-0379-42f5-b1ce-895dae419d7f"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{SENDRECV_DATE}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="81" uuid="d7de1ce2-d5f1-4de5-a764-9c5ba408d61c">
+						<jr:columnHeader height="30">
+							<staticText>
+								<reportElement x="0" y="0" width="81" height="30" uuid="c46fd819-c931-4ed8-bfe7-64c788277ec0"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<text><![CDATA[เลขที่ส่ง]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="30">
+							<textField>
+								<reportElement x="0" y="0" width="81" height="30" uuid="2166c2e7-3e73-4cd9-aece-b85ae584e02e"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{SENDRECV_NO}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+				</jr:table>
+			</componentElement>
+			<staticText>
+				<reportElement x="0" y="0" width="802" height="25" uuid="251a0d2c-b2d8-467f-a2c4-baa6b2665d88">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17" isBold="true"/>
+				</textElement>
+				<text><![CDATA[การยืม]]></text>
+			</staticText>
+		</band>
+		<band height="99">
+			<componentElement>
+				<reportElement x="0" y="40" width="802" height="59" uuid="035a87a5-2eeb-407d-8d7f-408d80dc9df4">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="DSET_BOOKSEND" uuid="343f7924-d534-459c-a16b-73a351946e0b">
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:column width="100" uuid="d358b7ce-0cdc-41be-86c3-7104a810f437">
+						<jr:columnHeader height="30">
+							<staticText>
+								<reportElement x="0" y="0" width="100" height="30" uuid="392e0b74-3f12-4f29-bbc3-39aafcf8e7c7"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<text><![CDATA[เลขคดี]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="30">
+							<textField>
+								<reportElement x="0" y="0" width="100" height="30" uuid="7ad9467e-5fec-4d0f-b08e-8bbbc829138c"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="100" uuid="ba290ff5-500b-4182-9595-dec5473cd6e8">
+						<jr:columnHeader height="30">
+							<staticText>
+								<reportElement x="0" y="0" width="100" height="30" uuid="69579b69-f981-4b5f-9617-9d2f934ad696"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<text><![CDATA[วันที่ส่งคืน]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="30">
+							<textField>
+								<reportElement x="0" y="0" width="100" height="30" uuid="900e75a8-ce96-4988-87ee-0a9a7f21d98a"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{DOCUMENT_DATE_TEXT}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="100" uuid="ec245b8f-8060-4f61-88fb-a3d148d7c68b">
+						<jr:columnHeader height="30">
+							<staticText>
+								<reportElement x="0" y="0" width="100" height="30" uuid="d70e98ab-27e3-404f-990e-414cbac68255"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<text><![CDATA[เลขที่หนังสือ]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="30">
+							<textField>
+								<reportElement x="0" y="0" width="100" height="30" uuid="29fd3f2e-876e-4596-94e5-e8d0af9d0059"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{DOCUMENT_NO}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="101" uuid="582ce7e3-17ea-4202-8227-3ed8743e9d91">
+						<jr:columnHeader height="30">
+							<staticText>
+								<reportElement x="0" y="0" width="101" height="30" uuid="c04b8500-676c-40e9-b16a-4dfe116422fa"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<text><![CDATA[เรื่อง]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="30">
+							<textField>
+								<reportElement x="0" y="0" width="101" height="30" uuid="2519a050-5a48-41c6-b912-ffad12249b5f"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{DOCUMENT_SUBJECT}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="100" uuid="4f25e3e2-ba0b-4292-b056-878d2b643174">
+						<jr:columnHeader height="30">
+							<staticText>
+								<reportElement x="0" y="0" width="100" height="30" uuid="f595315b-f316-4053-adc3-96dcac922561"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<text><![CDATA[ประเภท]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="30">
+							<textField>
+								<reportElement x="0" y="0" width="100" height="30" uuid="b7353a11-4020-41e8-9fc1-ef67db3952e3"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{DOCUMENT_TYPE}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="101" uuid="086936a8-a60f-496d-8f27-cbfc3b777389">
+						<jr:columnHeader height="30">
+							<staticText>
+								<reportElement x="0" y="0" width="101" height="30" uuid="503923c2-f82d-472e-bd69-c396e027425e"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<text><![CDATA[ทะเบียน]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="30">
+							<textField>
+								<reportElement x="0" y="0" width="101" height="30" uuid="cc54801c-a770-4f4a-9981-b73241f9745f"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{DOCUMENT_CATEGORY}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="100" uuid="d9edcda1-d4a2-494f-a9bd-d6da0c153711">
+						<jr:columnHeader height="30">
+							<staticText>
+								<reportElement x="0" y="0" width="100" height="30" uuid="ae59a173-26fa-4f52-9e47-2522d896aa3d"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<text><![CDATA[ผู้ส่ง]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="30">
+							<textField>
+								<reportElement x="0" y="0" width="100" height="30" uuid="f98d70f8-920c-45b7-8a77-1445299b9535"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{SENDER_NAME}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="100" uuid="4a71796e-2414-4128-80e6-9591615c3ef9">
+						<jr:columnHeader height="30">
+							<staticText>
+								<reportElement x="0" y="0" width="100" height="30" uuid="91cb6b67-8804-4f14-b971-a827008a2314"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<text><![CDATA[ผู้รับ]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="30">
+							<textField>
+								<reportElement x="0" y="0" width="100" height="30" uuid="7be6f5bc-033c-46fc-9e58-5878f53bb52b"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{RECEIVER_NAME}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+				</jr:table>
+			</componentElement>
+			<staticText>
+				<reportElement x="0" y="13" width="802" height="25" uuid="fd3e27d3-967f-4811-9e0f-bd75fea08748">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17" isBold="true"/>
+				</textElement>
+				<text><![CDATA[การคืน]]></text>
+			</staticText>
+		</band>
+	</detail>
+</jasperReport>

@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="stat_rpt_month_civil02" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="4d9f7095-cbdc-4956-a730-9d7c354065ba">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCoj160"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+	<parameter name="LAST_FROMDATE" class="java.lang.String"/>
+	<parameter name="LAST_TODATE" class="java.lang.String"/>
+	<parameter name="THIS_FROMDATE" class="java.lang.String"/>
+	<parameter name="THIS_TODATE" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT CASE_CATE_NAME CASE_TYPE, 
+       NVL(c1.CNT,0) CASE_PREVMONTH_REMAIN,
+       NVL(c2.CNT,0) CASE_CURRMONTH_RECV,
+       NVL(c3.CNT,0) CASE_CURRMONTH_FINISH,
+       NVL(c1.CNT,0)+NVL(c2.CNT,0)-NVL(c3.CNT,0) CASE_CURRMONTH_REMAIN
+FROM PC_LOOKUP_CASE_CATE plcc 
+--คดีค้างมาจากเดือนที่แล้ว
+LEFT JOIN (SELECT plcc.CASE_CATE_CODE, COUNT(pc.CASE_ID) CNT
+	        FROM PC_CASE pc 
+	        LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
+	  	 	JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+	  		WHERE pc.CASE_DATE BETWEEN TO_DATE($P{LAST_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+            		                                      AND TO_DATE($P{LAST_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+			AND pc.REMOVED_BY = 0       
+			AND pj.CASE_ID IS NULL 
+      		GROUP BY plcc.CASE_CATE_CODE)c1 ON c1.CASE_CATE_CODE = plcc.CASE_CATE_CODE       		
+--คดีรับใหม่ในเดือนนี้
+LEFT JOIN (SELECT plcc.CASE_CATE_CODE, COUNT(pc.CASE_ID) CNT
+	        FROM PC_CASE pc 
+	  	 	JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+	  		WHERE pc.CASE_DATE BETWEEN TO_DATE($P{THIS_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+            		                                      AND TO_DATE($P{THIS_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+			AND pc.REMOVED_BY = 0        
+      		GROUP BY plcc.CASE_CATE_CODE)c2 ON c2.CASE_CATE_CODE = plcc.CASE_CATE_CODE      		
+--คดีที่เสร็จไปในเดือนนี้
+LEFT JOIN (SELECT plcc.CASE_CATE_CODE, COUNT(pc.CASE_ID) CNT
+	        FROM PC_CASE pc 
+	        JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID
+	  	 	JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+	  		WHERE pj.JUDGE_DATE BETWEEN TO_DATE($P{THIS_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+            		                                       AND TO_DATE($P{THIS_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+			AND pc.REMOVED_BY = 0        
+      		GROUP BY plcc.CASE_CATE_CODE)c3 ON c3.CASE_CATE_CODE = plcc.CASE_CATE_CODE 
+--
+WHERE plcc.CASE_CATE_CODE IN ('201','209','310')]]>
+	</queryString>
+	<field name="CASE_TYPE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CASE_TYPE"/>
+	</field>
+	<field name="CASE_PREVMONTH_REMAIN" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="CASE_PREVMONTH_REMAIN"/>
+	</field>
+	<field name="CASE_CURRMONTH_RECV" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="CASE_CURRMONTH_RECV"/>
+	</field>
+	<field name="CASE_CURRMONTH_FINISH" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="CASE_CURRMONTH_FINISH"/>
+	</field>
+	<field name="CASE_CURRMONTH_REMAIN" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="CASE_CURRMONTH_REMAIN"/>
+	</field>
+	<variable name="SUM_PREVMONTH_REMAIN" class="java.lang.Long" calculation="Sum">
+		<variableExpression><![CDATA[$F{CASE_PREVMONTH_REMAIN}]]></variableExpression>
+	</variable>
+	<variable name="SUM_CURRMONTH_RECV" class="java.lang.Long" calculation="Sum">
+		<variableExpression><![CDATA[$F{CASE_CURRMONTH_RECV}]]></variableExpression>
+	</variable>
+	<variable name="SUM_CURRMONTH_FINISH" class="java.lang.Long" calculation="Sum">
+		<variableExpression><![CDATA[$F{CASE_CURRMONTH_FINISH}]]></variableExpression>
+	</variable>
+	<variable name="SUM_CURRMONTH_REMAIN" class="java.lang.Long" calculation="Sum">
+		<variableExpression><![CDATA[$F{CASE_CURRMONTH_REMAIN}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="48" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="555" height="25" uuid="3a80a448-cf58-43d7-bc8a-6a5aa9ab21e7"/>
+				<box leftPadding="5">
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17" isBold="true"/>
+				</textElement>
+				<text><![CDATA[2. คดีแพ่งในเดือนนี้]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="25" width="146" height="23" uuid="f83623fc-9211-466c-8580-70afe94cf632"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ประเภทคดี]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="146" y="25" width="102" height="23" uuid="bf90b764-d214-4612-8628-5a4384f9f003"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[คดีค้างมาจากเดือนที่แล้ว]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="248" y="25" width="102" height="23" uuid="cad1b6d6-6a3e-44d3-88ce-330b9ccf98cd"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[คดีรับใหม่ในเดือนนี้]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="350" y="25" width="104" height="23" uuid="2b3e8bfa-1013-4f09-a6c0-2dddbab9d817"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[คดีเสร็จไปในเดือนนี้]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="454" y="25" width="101" height="23" uuid="e4e5b9d3-dc5b-49df-89d9-786dcb99b895"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[คดีค้างไปเดือนหน้า]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="23" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="146" height="23" uuid="9f774256-d7b8-4b41-a4dd-0402f9cae703"/>
+				<box leftPadding="5">
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CASE_TYPE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="146" y="0" width="102" height="23" uuid="387d3497-0602-4b17-b5c2-10bc4b672f91"/>
+				<box rightPadding="5">
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CASE_PREVMONTH_REMAIN}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="248" y="0" width="102" height="23" uuid="04003a17-175a-4517-b2ef-bcbc9eb45059"/>
+				<box rightPadding="5">
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CASE_CURRMONTH_RECV}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="350" y="0" width="104" height="23" uuid="fe339bf2-39ed-4e9e-8d45-7f36950ac3fc"/>
+				<box rightPadding="5">
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CASE_CURRMONTH_FINISH}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="454" y="0" width="101" height="23" uuid="5c1189b4-0e2d-4ce3-903f-cc210bb1297c"/>
+				<box rightPadding="5">
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CASE_CURRMONTH_REMAIN}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="23" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="146" height="23" uuid="672ad34e-4015-4e5e-b63f-9081a67789ff"/>
+				<box rightPadding="5">
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<text><![CDATA[รวม]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="146" y="0" width="102" height="23" uuid="c0d06dc9-6644-447a-835f-8aade471622f"/>
+				<box rightPadding="5">
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_PREVMONTH_REMAIN}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="248" y="0" width="102" height="23" uuid="bc38c809-ef99-4b43-9a85-31712cfdb740"/>
+				<box rightPadding="5">
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CURRMONTH_RECV}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="350" y="0" width="104" height="23" uuid="c59223f8-d4ce-4180-8e94-c91483b7af77"/>
+				<box rightPadding="5">
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CURRMONTH_FINISH}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="454" y="0" width="101" height="23" uuid="e13b14af-9bfe-4119-a9a7-9709bc527597"/>
+				<box rightPadding="5">
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CURRMONTH_REMAIN}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

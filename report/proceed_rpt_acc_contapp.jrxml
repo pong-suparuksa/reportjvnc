@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="proceed_rpt_acc_contapp" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="c0cd44ce-e107-48e0-956e-23103137e94d">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="538"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="451"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT  "MONTH", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+FROM (SELECT TO_CHAR(dt,'fmMonthfm YYYY') MONTH,TO_CHAR(dt+1,'iw') week,
+		MAX(DECODE(TO_CHAR(dt,'d'),'1',LPAD(TO_CHAR(dt,'fmdd'),2))) "Sun",
+		MAX(DECODE(TO_CHAR(dt,'d'),'2',LPAD(TO_CHAR(dt,'fmdd'),2))) "Mon",
+		MAX(DECODE(TO_CHAR(dt,'d'),'3',LPAD(TO_CHAR(dt,'fmdd'),2))) "Tue",
+		MAX(DECODE(TO_CHAR(dt,'d'),'4',LPAD(TO_CHAR(dt,'fmdd'),2))) "Wed",
+		MAX(DECODE(TO_CHAR(dt,'d'),'5',LPAD(TO_CHAR(dt,'fmdd'),2))) "Thu",
+		MAX(DECODE(TO_CHAR(dt,'d'),'6',LPAD(TO_CHAR(dt,'fmdd'),2))) "Fri",
+		MAX(DECODE(TO_CHAR(dt,'d'),'7',LPAD(TO_CHAR(dt,'fmdd'),2))) "Sat"
+		FROM (select to_date('01-04-2020','DD-MM-YYYY') + rownum -1 dt
+		            from all_objects
+		            where rownum <= to_date('30-04-2020','DD-MM-YYYY')-to_date('01-04-2020','DD-MM-YYYY')+1)
+		GROUP BY TO_CHAR(dt,'fmMonthfm YYYY'), TO_CHAR( dt+1, 'iw' ))
+ORDER BY TO_DATE( MONTH, 'Month YYYY' ), TO_NUMBER(week)]]>
+	</queryString>
+	<field name="MONTH" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="MONTH"/>
+	</field>
+	<field name="Sun" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="Sun"/>
+	</field>
+	<field name="Mon" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="Mon"/>
+	</field>
+	<field name="Tue" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="Tue"/>
+	</field>
+	<field name="Wed" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="Wed"/>
+	</field>
+	<field name="Thu" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="Thu"/>
+	</field>
+	<field name="Fri" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="Fri"/>
+	</field>
+	<field name="Sat" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="Sat"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="33" splitType="Stretch"/>
+	</title>
+	<columnHeader>
+		<band height="30" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="70" height="30" uuid="fef364f9-27f5-421d-873d-ca501bf60358">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="94dedee6-40ca-4161-9719-1a143ab1ca4d"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<text><![CDATA[อาทิตย์]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="140" y="0" width="70" height="30" uuid="344d6cab-dfff-4bdf-89ef-677744b516c7">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="c9ffd217-23a2-4110-8012-04785006577a"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<text><![CDATA[จันทร์]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="209" y="0" width="70" height="30" uuid="bc484f3f-e218-44aa-a2d1-ce8d91f0936a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3b5e5665-e400-4bf4-818d-5ff7cf404bd8"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<text><![CDATA[อังคาร]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="279" y="0" width="70" height="30" uuid="1f08920c-a09f-4b03-aecd-4b280e1c23a4">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="58559a33-4dbc-4339-ae08-6a29f558b70a"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<text><![CDATA[พุธ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="348" y="0" width="70" height="30" uuid="5c4302f7-398d-4f7f-817f-e3aa890d9cf0">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="857ab698-3ff0-432b-94cd-e996fb0f797e"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<text><![CDATA[พฤหัส]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="417" y="0" width="70" height="30" uuid="0ea4f011-75b0-4e23-a677-521878954e89">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="58bbfe12-b833-41b9-a60d-365e188a78e2"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<text><![CDATA[ศุกร์]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="486" y="0" width="70" height="30" uuid="35de7cb2-bbfc-4d93-ba2e-3eb264490e37">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="84c04810-edb6-4de5-a70f-0467770a249c"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<text><![CDATA[เสาร์]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="30" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="70" height="30" uuid="2f68b475-0320-4c0b-9923-d81d1d95d089">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="94dedee6-40ca-4161-9719-1a143ab1ca4d"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Sun}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="141" y="0" width="70" height="30" uuid="3b615949-9ea5-44e6-bf30-5f5e6b926ec6">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="c9ffd217-23a2-4110-8012-04785006577a"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Mon}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="210" y="0" width="70" height="30" uuid="ce7b4f09-1140-4841-a5fd-8206b4b0ff5b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3b5e5665-e400-4bf4-818d-5ff7cf404bd8"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Tue}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="279" y="0" width="70" height="30" uuid="30cd5759-2012-4cc1-8733-3b4fd4b11e1a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="58559a33-4dbc-4339-ae08-6a29f558b70a"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Wed}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="348" y="0" width="70" height="30" uuid="25bd5f97-ce5f-42bb-890a-aaa3ad8c9776">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="857ab698-3ff0-432b-94cd-e996fb0f797e"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Thu}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="417" y="0" width="70" height="30" uuid="6560f595-1a7d-40da-9595-5c6f277f29f6">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="58bbfe12-b833-41b9-a60d-365e188a78e2"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Fri}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="486" y="0" width="70" height="30" uuid="12afc09b-8093-430e-9b35-bb2409d32666">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="84c04810-edb6-4de5-a70f-0467770a249c"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Sat}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

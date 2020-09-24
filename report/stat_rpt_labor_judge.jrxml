@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="stat_rpt_labor_judge" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="9c3bcafd-b9d2-446f-8b96-47bdd8b8a131">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.137:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/stat_rpt_labor_judge_files/main_jrxml"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/stat_rpt_labor_judge"/>
+	<property name="com.jaspersoft.studio.report.description" value="28.รายงานผู้พิพากษาสมทบ(ศาลแรงงาน)"/>
+	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<subDataset name="DSET_ASSOJUDGE" uuid="0e00ae5e-6759-4d01-92d8-7b989db52eef">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+		<parameter name="SELMONTH" class="java.lang.String">
+			<defaultValueExpression><![CDATA["032020"]]></defaultValueExpression>
+		</parameter>
+		<queryString language="SQL">
+			<![CDATA[SELECT 
+	A.CASE_BLACK_NO,
+	A.CASE_RED_NO,
+	LISTAGG(A.JUDGE_EMPLOYER,'') WITHIN GROUP(ORDER BY A.JUDGE_EMPLOYER) JUDGE_EMPLOYER,
+	LISTAGG(A.JUDGE_EMPLOYEE,'') WITHIN GROUP(ORDER BY A.JUDGE_EMPLOYEE) JUDGE_EMPLOYEE
+FROM
+(SELECT pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR CASE_BLACK_NO,
+       pltc_r.TITLE_CASE_NAME||pj.RED_IDNUM||'/'||pj.RED_YEAR CASE_RED_NO,
+       CASE WHEN pljt.JUDGE_TYPE_CODE = '10' THEN plj.JUDGE_NAME ELSE ' ' END JUDGE_EMPLOYER,
+	   CASE WHEN pljt.JUDGE_TYPE_CODE = '11' THEN plj.JUDGE_NAME ELSE ' ' END JUDGE_EMPLOYEE
+FROM PC_CASE pc 
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
+--
+LEFT JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID = pc.CASE_ID AND pcj.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID AND plj.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+--
+WHERE pc.REMOVED_BY = 0
+AND TO_CHAR(pc.CASE_DATE,'MMYYYY')= $P{SELMONTH}
+AND pljt.JUDGE_TYPE_CODE IN ('10','11')) A
+GROUP BY A.CASE_BLACK_NO, A.CASE_RED_NO]]>
+		</queryString>
+		<field name="CASE_BLACK_NO" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_BLACK_NO"/>
+		</field>
+		<field name="CASE_RED_NO" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_RED_NO"/>
+		</field>
+		<field name="JUDGE_EMPLOYER" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="JUDGE_EMPLOYER"/>
+		</field>
+		<field name="JUDGE_EMPLOYEE" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="JUDGE_EMPLOYEE"/>
+		</field>
+	</subDataset>
+	<parameter name="SELMONTH" class="java.lang.String">
+		<defaultValueExpression><![CDATA["032020"]]></defaultValueExpression>
+	</parameter>
+	<queryString language="SQL">
+		<![CDATA[SELECT plc.COURT_NAME_TH,
+       DECODE(SUBSTR($P{SELMONTH},1,2), 
+       	                             '01', 'มกราคม', 
+                                     '02', 'กุมภาพันธ์', 
+                                     '03', 'มีนาคม', 
+                                     '04', 'เมษายน',
+                                     '05', 'พฤษภาคม',
+                                     '06', 'มิถุนายน',  
+                                     '07','กรกฎาคม',
+                                     '08', 'สิงหาคม',                                                               
+                                     '09', 'กันยายน', 
+                                     '10', 'ตุลาคม', 
+                                     '11', 'พฤศจิกายน',
+                                     '12', 'ธันวาคม', '-') SELECTED_MONTH, 
+       SUBSTR($P{SELMONTH} ,-4,4)+ 543             SELECTED_YEAR
+FROM PC_PARAM pp
+JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
+	</queryString>
+	<field name="COURT_NAME_TH" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
+	</field>
+	<field name="SELECTED_MONTH" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="SELECTED_MONTH"/>
+	</field>
+	<field name="SELECTED_YEAR" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="SELECTED_YEAR"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="55" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="555" height="25" uuid="dc97f212-a6db-4c1a-8175-0415e537b58d">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="30" width="555" height="25" uuid="af6c3caf-6865-4c48-9056-149db0f81a7d">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box leftPadding="3"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["สถิติการปฏิบัติหน้าที่ผู้พิพากษาสมทบ"+$F{COURT_NAME_TH}+" ประจำเดือน "+$F{SELECTED_MONTH} + " " + $F{SELECTED_YEAR}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<detail>
+		<band height="70" splitType="Stretch">
+			<componentElement>
+				<reportElement x="0" y="6" width="555" height="64" uuid="0fc94d9d-4b5b-4517-bb76-1cba7b04e7aa">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="DSET_ASSOJUDGE" uuid="aa156666-7823-41d8-bb94-a10f92d16786">
+						<datasetParameter name="SELMONTH">
+							<datasetParameterExpression><![CDATA[$P{SELMONTH}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:column width="38" uuid="e23472a7-ff8f-4611-90a5-5120699d5a67">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
+						<jr:columnHeader height="46" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="38" height="46" uuid="432f6e89-b382-40eb-9f16-d7f543084440"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<text><![CDATA[ลำดับที่]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="25">
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+							<textField>
+								<reportElement x="0" y="0" width="38" height="25" uuid="9aca8ca6-aaac-4f51-ae01-d9311aa9a6c2"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="128" uuid="7fb1f8ab-0581-4f83-b24e-1fd4fce24230">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
+						<jr:columnHeader height="46" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="128" height="46" uuid="a48044f1-1a27-4342-85df-387395e0f288"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<text><![CDATA[หมายเลขคดีดำที่]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="25">
+							<textField>
+								<reportElement x="0" y="0" width="128" height="25" uuid="6f58d70e-651d-4b9c-944f-4691c69f3b33"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}==null?" ":$F{CASE_BLACK_NO}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="130" uuid="4fe526f3-a5f8-49e3-8ded-9e0353d7aede">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
+						<jr:columnHeader height="46" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="130" height="46" uuid="405daacf-f5dd-413c-9d93-4e63c9403deb"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<text><![CDATA[หมายเลขคดีแดงที่]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="25">
+							<textField>
+								<reportElement x="0" y="0" width="130" height="25" uuid="73d0b99a-d60e-4ca6-9f6f-e6c3ebe3a347"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{CASE_RED_NO}==null?" ":$F{CASE_RED_NO}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="129" uuid="fc2601e6-fa78-40a4-b461-1bff5535e4d5">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column4"/>
+						<jr:columnHeader height="46" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="129" height="46" uuid="fb2b55f8-4dad-422e-95f7-9e626b54246a"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<text><![CDATA[ขื่อผู้พิพากษาสมทบ ฝ่ายนายจ้าง]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="25">
+							<textField>
+								<reportElement x="0" y="0" width="129" height="25" uuid="5bc80891-623f-4f74-bd11-96b70c27eaaf"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{JUDGE_EMPLOYER}==null?" ":$F{JUDGE_EMPLOYER}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="130" uuid="71ccc717-d088-4e0d-b4f5-3e53c2d5e36b">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
+						<jr:columnHeader height="46" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="130" height="46" uuid="d0c620f1-782b-48bc-8001-a2126b5002ff"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<text><![CDATA[ชื่อผู้พิพากษาสมทบ ฝ่ายลูกจ้าง]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="25">
+							<textField>
+								<reportElement x="0" y="0" width="130" height="25" uuid="5f8eb99a-4dbd-46e5-b64e-4303d5117373"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{JUDGE_EMPLOYEE}==null?" ":$F{JUDGE_EMPLOYEE}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+				</jr:table>
+			</componentElement>
+		</band>
+	</detail>
+</jasperReport>

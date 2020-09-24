@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="stat_rpt_continuous_judge" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a91f4aed-86f7-4f46-ae55-b68a65fa4cf1">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCoj160"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<style name="Crosstab_CH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Crosstab_CG" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Crosstab_CT" mode="Opaque" backcolor="#005FB3">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Crosstab_CD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<queryString>
+		<![CDATA[SELECT 
+	plj.JUDGE_NAME,
+  	NVL(ppa.ROOM_ID,0)            ROOM_ID,
+  	ppa.APPOINT_START_DATE, 
+  	ppa.APPOINT_END_DATE,
+  	NVL(ppa.JUDGE_ID,0)         JUDGE_ID,
+    CASE WHEN pc.BLACK_IDNUM IS NULL 
+         THEN ' ' ELSE 	pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR END CASE_BLACK_NO
+--
+FROM PC_LOOKUP_JUDGE plj 
+LEFT JOIN PC_PROCEED_APPOINT ppa ON ppa.JUDGE_ID = plj.JUDGE_ID 
+LEFT JOIN PC_CASE pc ON pc.CASE_ID = ppa.CASE_ID 
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID
+--
+WHERE plj.REMOVED_BY = 0
+]]>
+	</queryString>
+	<field name="JUDGE_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="JUDGE_NAME"/>
+	</field>
+	<field name="ROOM_ID" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="ROOM_ID"/>
+	</field>
+	<field name="APPOINT_START_DATE" class="java.util.Date">
+		<property name="com.jaspersoft.studio.field.label" value="APPOINT_START_DATE"/>
+	</field>
+	<field name="APPOINT_END_DATE" class="java.util.Date">
+		<property name="com.jaspersoft.studio.field.label" value="APPOINT_END_DATE"/>
+	</field>
+	<field name="JUDGE_ID" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="JUDGE_ID"/>
+	</field>
+	<field name="CASE_BLACK_NO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CASE_BLACK_NO"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<summary>
+		<band height="267" splitType="Stretch">
+			<crosstab>
+				<reportElement x="90" y="62" width="240" height="180" uuid="ce1d9097-d1d0-4b63-b2b1-603614238dc2">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+					<property name="com.jaspersoft.studio.crosstab.style.header" value="Crosstab_CH"/>
+					<property name="com.jaspersoft.studio.crosstab.style.group" value="Crosstab_CG"/>
+					<property name="com.jaspersoft.studio.crosstab.style.total" value="Crosstab_CT"/>
+					<property name="com.jaspersoft.studio.crosstab.style.detail" value="Crosstab_CD"/>
+				</reportElement>
+				<rowGroup name="JUDGE_NAME" width="60" totalPosition="End">
+					<bucket class="java.lang.String">
+						<bucketExpression><![CDATA[$F{JUDGE_NAME}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents mode="Opaque" style="Crosstab_CH">
+							<textField>
+								<reportElement x="0" y="0" width="60" height="20" uuid="40614a89-96d2-48e8-9946-9fe672fd8054"/>
+								<textFieldExpression><![CDATA[$V{JUDGE_NAME}]]></textFieldExpression>
+							</textField>
+						</cellContents>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents mode="Opaque" style="Crosstab_CT">
+							<staticText>
+								<reportElement x="0" y="0" width="60" height="20" forecolor="#FFFFFF" uuid="ed7ec9ed-902b-4d98-b127-057c31e9a88c"/>
+								<text><![CDATA[Total JUDGE_NAME]]></text>
+							</staticText>
+						</cellContents>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="APPOINT_START_DATE" height="20" totalPosition="End">
+					<bucket class="java.util.Date">
+						<bucketExpression><![CDATA[$F{APPOINT_START_DATE}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents mode="Opaque" style="Crosstab_CH">
+							<textField>
+								<reportElement x="0" y="0" width="120" height="20" uuid="bcf5f708-2006-4925-a6b7-211d32d70ce4"/>
+								<textFieldExpression><![CDATA[$V{APPOINT_START_DATE}]]></textFieldExpression>
+							</textField>
+						</cellContents>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents mode="Opaque" style="Crosstab_CT">
+							<staticText>
+								<reportElement x="0" y="0" width="60" height="40" forecolor="#FFFFFF" uuid="859dee1a-8796-4b99-86ff-058e7bc9ba0e"/>
+								<text><![CDATA[Total APPOINT_START_DATE]]></text>
+							</staticText>
+						</cellContents>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<columnGroup name="APPOINT_END_DATE" height="20" totalPosition="End">
+					<bucket class="java.util.Date">
+						<bucketExpression><![CDATA[$F{APPOINT_END_DATE}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents mode="Opaque" style="Crosstab_CH">
+							<textField>
+								<reportElement x="0" y="0" width="60" height="20" uuid="c8ceccd8-c699-4c77-b9e5-7a22b9f4e007"/>
+								<textFieldExpression><![CDATA[$V{APPOINT_END_DATE}]]></textFieldExpression>
+							</textField>
+						</cellContents>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents mode="Opaque" style="Crosstab_CG">
+							<staticText>
+								<reportElement x="0" y="0" width="60" height="20" uuid="70cd27da-3fa8-4626-b454-b7c668406904"/>
+								<text><![CDATA[Total APPOINT_END_DATE]]></text>
+							</staticText>
+						</cellContents>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="CASE_BLACK_NO_MEASURE" class="java.lang.Integer" calculation="Count">
+					<measureExpression><![CDATA[$F{CASE_BLACK_NO}]]></measureExpression>
+				</measure>
+				<crosstabCell width="60" height="20">
+					<cellContents mode="Opaque" style="Crosstab_CD">
+						<textField>
+							<reportElement x="0" y="0" width="60" height="20" uuid="d066ba5d-92f8-451a-9642-67db7bacc440"/>
+							<textFieldExpression><![CDATA[$V{CASE_BLACK_NO_MEASURE}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="60" height="20" columnTotalGroup="APPOINT_START_DATE">
+					<cellContents mode="Opaque" style="Crosstab_CT">
+						<textField>
+							<reportElement x="0" y="0" width="60" height="20" forecolor="#FFFFFF" uuid="52dbfd37-b576-4a5d-aafc-3afbd35e64cf"/>
+							<textFieldExpression><![CDATA[$V{CASE_BLACK_NO_MEASURE}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="60" height="20" columnTotalGroup="APPOINT_END_DATE">
+					<cellContents mode="Opaque" style="Crosstab_CG">
+						<textField>
+							<reportElement x="0" y="0" width="60" height="20" uuid="17c9d88b-8821-4e0d-b00d-8d33013fd468"/>
+							<textFieldExpression><![CDATA[$V{CASE_BLACK_NO_MEASURE}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="60" height="20" rowTotalGroup="JUDGE_NAME">
+					<cellContents mode="Opaque" style="Crosstab_CT">
+						<textField>
+							<reportElement x="0" y="0" width="60" height="20" forecolor="#FFFFFF" uuid="a66d0e26-dac4-48a1-8b20-64585c826b29"/>
+							<textFieldExpression><![CDATA[$V{CASE_BLACK_NO_MEASURE}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="60" height="20" rowTotalGroup="JUDGE_NAME" columnTotalGroup="APPOINT_START_DATE">
+					<cellContents mode="Opaque" style="Crosstab_CT">
+						<textField>
+							<reportElement x="0" y="0" width="60" height="20" forecolor="#FFFFFF" uuid="8cd8cbfb-e114-4581-81f6-9b134784e988"/>
+							<textFieldExpression><![CDATA[$V{CASE_BLACK_NO_MEASURE}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="60" height="20" rowTotalGroup="JUDGE_NAME" columnTotalGroup="APPOINT_END_DATE">
+					<cellContents mode="Opaque" style="Crosstab_CT">
+						<textField>
+							<reportElement x="0" y="0" width="60" height="20" forecolor="#FFFFFF" uuid="03dcdb6f-0a29-4fc0-b384-7e08fca13376"/>
+							<textFieldExpression><![CDATA[$V{CASE_BLACK_NO_MEASURE}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

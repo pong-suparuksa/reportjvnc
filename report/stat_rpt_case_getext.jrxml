@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="stat_rpt_case_sentext" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="6af8767e-c0ec-4b5f-a3f1-2b17bebbf871">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.193:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/stat_rpt_case_getext"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/stat_rpt_case_getext_files/main_jrxml"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+	<property name="com.jaspersoft.studio.report.description" value="12.การรับสำนวนประจำวัน(ภายนอก)"/>
+	<parameter name="START_DATE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["01/04/2020"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="END_DATE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["30/04/2020"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+  CASE WHEN pc.BLACK_IDNUM IS NULL THEN '-' ELSE  pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR END BLACK_CASE_NUM,
+  CASE WHEN pj.RED_IDNUM IS NULL THEN '-' ELSE pltc_r.TITLE_CASE_NAME||pj.RED_IDNUM||'/'||pj.RED_YEAR END RED_CASE_NUM,
+  NVL(pc.PROS_DESC,'-') PROS_DESC,
+  NVL(pc.ACCU_DESC,'-') ACCU_DESC,
+  --
+  pwdt.TITLE_DESC || pwdr.DOCUMENT_IDNUM ||'/'|| pwdr.DOCUMENT_YEAR DOCUMENT_NO,
+  pwdr.DOCUMENT_SUBJECT,
+  pwdr.DOCUMENT_DATE,
+  pwdr.SENDER_NAME,
+  --
+  NVL(plc.COURT_NAME_TH,'-')  COURT_NAME_TH,
+  NVL(PLCT.CASE_TYPE_NAME,'-') CASE_TYPE_NAME  
+FROM PC_WF_DOCUMENT_RECEIVE pwdr
+--
+LEFT JOIN PC_CASE pc ON pc.CASE_ID = pwdr.CASE_ID AND pc.REMOVED_BY = 0
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pwdr.CASE_ID AND pc.REMOVED_BY = 0
+--
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
+--
+LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pc.COURT_ID AND pc.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_CASE_TYPE plct ON plct.CASE_TYPE_ID = plcc.CASE_TYPE_ID AND plct.REMOVED_BY = 0
+--
+LEFT JOIN PC_WF_DOCUMENT_TITLE pwdt ON pwdt.WF_DOCUMENT_TITLE_ID = pwdr.DOCUMENT_TITLE_ID
+--
+WHERE pwdr.REMOVED_BY = 0
+AND pwdr.DOCUMENT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
+                                                         AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')]]>
+	</queryString>
+	<field name="BLACK_CASE_NUM" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="BLACK_CASE_NUM"/>
+	</field>
+	<field name="RED_CASE_NUM" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="RED_CASE_NUM"/>
+	</field>
+	<field name="PROS_DESC" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PROS_DESC"/>
+	</field>
+	<field name="ACCU_DESC" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="ACCU_DESC"/>
+	</field>
+	<field name="DOCUMENT_NO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DOCUMENT_NO"/>
+	</field>
+	<field name="DOCUMENT_SUBJECT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DOCUMENT_SUBJECT"/>
+	</field>
+	<field name="DOCUMENT_DATE" class="java.util.Date">
+		<property name="com.jaspersoft.studio.field.label" value="DOCUMENT_DATE"/>
+	</field>
+	<field name="SENDER_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="SENDER_NAME"/>
+	</field>
+	<field name="COURT_NAME_TH" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
+	</field>
+	<field name="CASE_TYPE_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CASE_TYPE_NAME"/>
+	</field>
+	<group name="GR_CASETYPE">
+		<groupExpression><![CDATA[$F{CASE_TYPE_NAME}]]></groupExpression>
+		<groupHeader>
+			<band height="30">
+				<textField>
+					<reportElement x="0" y="0" width="540" height="30" uuid="7b869f6f-cbcc-4094-b678-8c1e5dd3f84e">
+						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e5359e66-8e02-4106-9545-090de2e63de0"/>
+					</reportElement>
+					<box leftPadding="3" rightPadding="3">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="THSarabunNew" size="17" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{CASE_TYPE_NAME}]]></textFieldExpression>
+				</textField>
+				<textField evaluationTime="Group" evaluationGroup="GR_CASETYPE">
+					<reportElement x="540" y="0" width="261" height="30" uuid="29327ec4-82e5-47eb-8fad-ed0f71e7bd10">
+						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e5359e66-8e02-4106-9545-090de2e63de0"/>
+					</reportElement>
+					<box leftPadding="3" rightPadding="3">
+						<pen lineWidth="0.5"/>
+						<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+					<textElement textAlignment="Left" verticalAlignment="Middle">
+						<font fontName="THSarabunNew" size="17" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["          รวม           " + $V{GR_CASETYPE_COUNT} + "  คดี"]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="75" splitType="Stretch">
+			<staticText>
+				<reportElement x="311" y="1" width="180" height="30" uuid="3227dcd3-0331-43c9-970c-cbecf81787a8"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[การรับสำนวนประจำวันภายนอก]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="50" width="190" height="25" uuid="447b22d2-2102-4647-a253-8061df70098e">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA["วันที่พิมพ์ "+new java.text.SimpleDateFormat("dd/MM/YYYY hh:mm:ss",new Locale("th","TH")).format(new java.util.Date())]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="160" height="25" uuid="7401200e-7733-4c00-8a9b-1d501c487443">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="25" width="160" height="25" uuid="e19599ee-64a0-48c1-a12d-c321a16a8d75">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA["ผู้พิมพ์ ADMINISTRATOR"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="717" y="49" width="54" height="25" uuid="c48503cf-c990-432d-977a-71b4e48c1db8">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA["หน้า"+$V{PAGE_NUMBER} +"/"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="771" y="49" width="30" height="25" uuid="ed58413b-8757-4e2a-8922-2af24abba508">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="274" y="40" width="254" height="25" uuid="2d7c5ade-3895-4fbb-b7a8-414010c7d2de">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA["วันที่ "+$P{START_DATE}+" ถึง "+$P{END_DATE}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="30" splitType="Stretch">
+			<staticText>
+				<reportElement x="42" y="0" width="68" height="30" uuid="e7826aed-9eb5-481a-9aab-246db2097a70">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e5359e66-8e02-4106-9545-090de2e63de0"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17" isBold="true"/>
+				</textElement>
+				<text><![CDATA[เลขคดีดำ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="42" height="30" uuid="2f42a46f-ae70-4464-80b5-f761a92e84c4">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e5359e66-8e02-4106-9545-090de2e63de0"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ที่]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="110" y="0" width="68" height="30" uuid="6f91a71b-74bd-4591-acbe-12498d78cfdf">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e5359e66-8e02-4106-9545-090de2e63de0"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17" isBold="true"/>
+				</textElement>
+				<text><![CDATA[เลขคดีแดง]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="178" y="0" width="108" height="30" uuid="c91eed2f-c7c2-4ef9-8e8e-ce9c54f904d6">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e5359e66-8e02-4106-9545-090de2e63de0"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17" isBold="true"/>
+				</textElement>
+				<text><![CDATA[โจทก์/อื่น]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="286" y="0" width="108" height="30" uuid="b90edc09-4ff9-4d00-b60c-7302dfc577d0">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e5359e66-8e02-4106-9545-090de2e63de0"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17" isBold="true"/>
+				</textElement>
+				<text><![CDATA[จำเลย/อื่น]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="394" y="0" width="82" height="30" uuid="bee9ee3a-4876-4260-9f63-1add78b19bad">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e5359e66-8e02-4106-9545-090de2e63de0"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17" isBold="true"/>
+				</textElement>
+				<text><![CDATA[เลขที่หนังสือ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="476" y="0" width="161" height="30" uuid="c860bc22-076c-48b4-beb0-a4933632b6ed">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e5359e66-8e02-4106-9545-090de2e63de0"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17" isBold="true"/>
+				</textElement>
+				<text><![CDATA[เรื่อง]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="637" y="0" width="164" height="30" uuid="9b1561bb-a615-4462-813f-427787b522a0">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e5359e66-8e02-4106-9545-090de2e63de0"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ผู้ส่ง]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="30" splitType="Stretch">
+			<textField>
+				<reportElement stretchType="ContainerHeight" x="42" y="0" width="68" height="30" uuid="78054695-41cd-40bf-b30f-a14a31ab6b34">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e5359e66-8e02-4106-9545-090de2e63de0"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BLACK_CASE_NUM}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement stretchType="ContainerHeight" x="0" y="0" width="42" height="30" uuid="0579af5c-7c00-483f-94a0-996d59cd7943">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e5359e66-8e02-4106-9545-090de2e63de0"/>
+				</reportElement>
+				<box rightPadding="3">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement stretchType="ContainerHeight" x="110" y="0" width="68" height="30" uuid="a0b44ff8-14f6-4081-a135-b219f5a69813">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e5359e66-8e02-4106-9545-090de2e63de0"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{RED_CASE_NUM}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement stretchType="ContainerHeight" x="178" y="0" width="108" height="30" uuid="26c82a41-6e0c-4497-b705-8fefc875ebdd">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e5359e66-8e02-4106-9545-090de2e63de0"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PROS_DESC}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement stretchType="ContainerHeight" x="286" y="0" width="108" height="30" uuid="ab1a0e05-55ae-49a4-8ea2-9d188f77abf6">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e5359e66-8e02-4106-9545-090de2e63de0"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ACCU_DESC}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement stretchType="ContainerHeight" x="394" y="0" width="82" height="30" uuid="2f8d0a82-1053-4b35-bdef-ad4f1d07aecc">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e5359e66-8e02-4106-9545-090de2e63de0"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DOCUMENT_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="476" y="0" width="161" height="30" uuid="b036615d-d99b-4369-8f9b-e2dabac0a219">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e5359e66-8e02-4106-9545-090de2e63de0"/>
+				</reportElement>
+				<box leftPadding="3">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DOCUMENT_SUBJECT}==null?"-":$F{DOCUMENT_SUBJECT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="637" y="0" width="164" height="30" uuid="496fec24-0d47-4fce-922e-91f296bf8a0c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e5359e66-8e02-4106-9545-090de2e63de0"/>
+				</reportElement>
+				<box leftPadding="3">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SENDER_NAME}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

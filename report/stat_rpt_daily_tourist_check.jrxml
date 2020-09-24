@@ -1,0 +1,863 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="stat_rpt_daily_tourist_check" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="64139d5c-2d7b-4e68-b6f6-9b1ca0ff35e8">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCoj160"/>
+	<subDataset name="DS_CASE_LASTYEAR" uuid="029b7bd6-c09b-448c-83b3-c08f4a7ab567">
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+		<parameter name="LASTYEAR_FROMDATE" class="java.lang.String"/>
+		<parameter name="LASTYEAR_TODATE" class="java.lang.String"/>
+		<queryString>
+			<![CDATA[SELECT 'คดีค้างมาจากปีที่แล้ว'  CASE_ITEM,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CV_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CS_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ES_COUNT
+FROM PC_CASE pc
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
+JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+WHERE pc.CASE_DATE BETWEEN TO_DATE($P{LASTYEAR_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                              AND TO_DATE($P{LASTYEAR_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+AND pc.REMOVED_BY = 0
+AND pj.CASE_ID IS NULL
+UNION ALL
+SELECT 'คดีค้างมาเสร็จไป'  CASE_ITEM,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CV_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CS_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ES_COUNT
+FROM PC_CASE pc
+JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
+JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+WHERE pc.CASE_DATE BETWEEN TO_DATE($P{LASTYEAR_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                               AND TO_DATE($P{LASTYEAR_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+AND pc.REMOVED_BY = 0			
+AND pj.JUDGE_DATE BETWEEN TO_DATE($P{LASTYEAR_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                          AND TO_DATE($P{LASTYEAR_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+UNION ALL                       
+SELECT 'คดีเก่าคงค้าง'  CASE_ITEM,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CV_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CS_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ES_COUNT                       
+FROM PC_CASE pc
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
+JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+WHERE pc.CASE_DATE BETWEEN TO_DATE($P{LASTYEAR_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                              AND TO_DATE($P{LASTYEAR_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+AND pc.REMOVED_BY = 0
+AND pj.CASE_ID IS NULL
+AND pj.JUDGE_DATE BETWEEN TO_DATE($P{LASTYEAR_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                           AND TO_DATE($P{LASTYEAR_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')]]>
+		</queryString>
+		<field name="CASE_ITEM" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_ITEM"/>
+		</field>
+		<field name="CV_COUNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CV_COUNT"/>
+		</field>
+		<field name="CS_COUNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CS_COUNT"/>
+		</field>
+		<field name="ES_COUNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="ES_COUNT"/>
+		</field>
+	</subDataset>
+	<subDataset name="DS_CASE_THISYEAR" uuid="fa99d29b-4b7b-4032-9d31-b486c3e4b122">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+		<parameter name="INYEAR_FROMDATE" class="java.lang.String"/>
+		<parameter name="INYEAR_TODATE" class="java.lang.String"/>
+		<queryString language="SQL">
+			<![CDATA[SELECT 'คดีรับใหม่ปีนี้'  CASE_ITEM,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CV_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CS_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ES_COUNT
+FROM PC_CASE pc
+JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+WHERE pc.CASE_DATE BETWEEN TO_DATE($P{INYEAR_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                              AND TO_DATE($P{INYEAR_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+AND pc.REMOVED_BY = 0
+UNION ALL
+SELECT 'คดีรับใหม่ปีนี้เสร็จไป'  CASE_ITEM,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CV_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CS_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ES_COUNT
+FROM PC_CASE pc
+JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
+JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+WHERE pc.CASE_DATE BETWEEN TO_DATE($P{INYEAR_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                              AND TO_DATE($P{INYEAR_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+AND pc.REMOVED_BY = 0			
+AND pj.JUDGE_DATE BETWEEN TO_DATE($P{INYEAR_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                           AND TO_DATE($P{INYEAR_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+UNION ALL                       
+SELECT 'คดีรับใหม่ปีนี้คงค้าง'  CASE_ITEM,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CV_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CS_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ES_COUNT                       
+FROM PC_CASE pc
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
+JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+WHERE pc.CASE_DATE BETWEEN TO_DATE($P{INYEAR_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                               AND TO_DATE($P{INYEAR_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+AND pc.REMOVED_BY = 0
+AND pj.CASE_ID IS NULL]]>
+		</queryString>
+		<field name="CASE_ITEM" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_ITEM"/>
+		</field>
+		<field name="CV_COUNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CV_COUNT"/>
+		</field>
+		<field name="CS_COUNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CS_COUNT"/>
+		</field>
+		<field name="ES_COUNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="ES_COUNT"/>
+		</field>
+	</subDataset>
+	<subDataset name="DS_CASE_TOTAL" uuid="f1e466e2-aed7-4cfd-8451-a3cf71e8f5d4">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+		<parameter name="INYEAR_FROMDATE" class="java.lang.String"/>
+		<parameter name="INYEAR_TODATE" class="java.lang.String"/>
+		<queryString language="SQL">
+			<![CDATA[SELECT 'รวมคดีเสร็จไปทั้งสิ้น'  CASE_ITEM,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CV_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CS_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ES_COUNT
+FROM PC_CASE pc
+JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
+JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+WHERE pc.REMOVED_BY = 0
+AND pj.JUDGE_DATE BETWEEN TO_DATE($P{INYEAR_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                          AND TO_DATE($P{INYEAR_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+UNION ALL                      
+SELECT 'รวมคดีคงค้าง'  CASE_ITEM,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CV_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CS_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ES_COUNT
+FROM PC_CASE pc
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
+JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+WHERE pc.REMOVED_BY = 0
+AND pj.CASE_ID IS NULL]]>
+		</queryString>
+		<field name="CASE_ITEM" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_ITEM"/>
+		</field>
+		<field name="CV_COUNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CV_COUNT"/>
+		</field>
+		<field name="CS_COUNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CS_COUNT"/>
+		</field>
+		<field name="ES_COUNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="ES_COUNT"/>
+		</field>
+	</subDataset>
+	<subDataset name="DS_CASE_TODAY" uuid="c5ff58d4-ae6f-4c4a-a2e2-a4962bbe2dd8">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+		<parameter name="TODAY" class="java.lang.String"/>
+		<queryString language="SQL">
+			<![CDATA[SELECT 'คดีรับใหม่วันนี้'  CASE_ITEM,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CV_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CS_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ES_COUNT
+FROM PC_CASE pc
+JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+WHERE pc.REMOVED_BY = 0
+AND TO_CHAR(pc.CASE_DATE,'DD-MM-YYYY') = $P{TODAY}
+UNION ALL
+SELECT 'คดีเสร็จไปวันนี้'  CASE_ITEM,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CV_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CS_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ES_COUNT
+FROM PC_CASE pc
+JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
+JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+WHERE pc.REMOVED_BY = 0
+AND TO_CHAR(pj.JUDGE_DATE,'DD-MM-YYYY') = $P{TODAY}
+UNION ALL
+SELECT 'คดีรับใหม่เพิ่มขึ้น' CASE_ITEM,
+        CASE WHEN (A_CASE.CIV - A_JUDGE.CIV) < 0 THEN 0 
+             ELSE (A_CASE.CIV - A_JUDGE.CIV) END CV_COUNT,
+        CASE WHEN (A_CASE.CON - A_JUDGE.CON) < 0 THEN 0 
+             ELSE (A_CASE.CON - A_JUDGE.CON) END CS_COUNT,
+        CASE WHEN (A_CASE.ENV - A_JUDGE.ENV) < 0 THEN 0
+             ELSE (A_CASE.ENV - A_JUDGE.ENV) END EV_COUNT
+FROM DUAL
+CROSS JOIN (SELECT NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CIV,
+             	    NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CON,
+             	    NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ENV
+			 FROM PC_CASE pc
+			 JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+			 WHERE pc.REMOVED_BY = 0
+			 AND TO_CHAR(pc.CASE_DATE,'DD-MM-YYYY') = $P{TODAY}) A_CASE
+CROSS JOIN (SELECT 	NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CIV,
+       			    NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CON,
+       			    NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ENV
+			FROM PC_CASE pc
+			JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
+			JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+			WHERE pc.REMOVED_BY = 0
+			AND TO_CHAR(pj.JUDGE_DATE,'DD-MM-YYYY') = $P{TODAY}) A_JUDGE
+UNION ALL
+SELECT 'คดีรับใหม่ลดลง' CASE_ITEM,
+        CASE WHEN (A_CASE.CIV - A_JUDGE.CIV) > 0 THEN 0 
+             ELSE (A_CASE.CIV - A_JUDGE.CIV) END CV_COUNT,
+        CASE WHEN (A_CASE.CON - A_JUDGE.CON) > 0 THEN 0 
+             ELSE (A_CASE.CON - A_JUDGE.CON) END CS_COUNT,
+        CASE WHEN (A_CASE.ENV - A_JUDGE.ENV) > 0 THEN 0
+             ELSE (A_CASE.ENV - A_JUDGE.ENV) END EV_COUNT
+FROM DUAL
+CROSS JOIN (SELECT NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CIV,
+             	    NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CON,
+             	    NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ENV
+			 FROM PC_CASE pc
+			 JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+			 WHERE pc.REMOVED_BY = 0
+			 AND TO_CHAR(pc.CASE_DATE,'DD-MM-YYYY') = $P{TODAY}) A_CASE
+CROSS JOIN (SELECT 	NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CIV,
+       			    NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CON,
+       			    NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ENV
+			FROM PC_CASE pc
+			JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
+			JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+			WHERE pc.REMOVED_BY = 0
+			AND TO_CHAR(pj.JUDGE_DATE,'DD-MM-YYYY') = $P{TODAY}) A_JUDGE]]>
+		</queryString>
+		<field name="CASE_ITEM" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_ITEM"/>
+		</field>
+		<field name="CV_COUNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CV_COUNT"/>
+		</field>
+		<field name="CS_COUNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CS_COUNT"/>
+		</field>
+		<field name="ES_COUNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="ES_COUNT"/>
+		</field>
+	</subDataset>
+	<subDataset name="DS_APPEAL" uuid="e37a0031-e1ff-4fd7-82c0-a3a7b7c21918">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+		<queryString language="SQL">
+			<![CDATA[SELECT 'คดีระหว่างอุทธรณ์'  CASE_ITEM,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CV_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CS_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ES_COUNT
+FROM PC_CASE pc
+JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0				
+--
+JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+JOIN (SELECT pa.CASE_ID
+      FROM PC_APPEAL pa 
+      JOIN PC_APPEAL_LEVEL pal ON pal.APPEAL_LEVEL_ID = pa.APPEAL_LEVEL_ID 
+                              AND pal.REMOVED_BY = 0
+                              AND pal.APPEAL_LEVEL_CODE = '001') papal ON papal.CASE_ID = pc.CASE_ID
+--
+WHERE pc.REMOVED_BY = 0
+UNION ALL
+SELECT 'คดีระหว่างฎีกา'  CASE_ITEM,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CV_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CS_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ES_COUNT
+FROM PC_CASE pc
+JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0				
+--
+JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+JOIN (SELECT pa.CASE_ID
+      FROM PC_APPEAL pa 
+      JOIN PC_APPEAL_LEVEL pal ON pal.APPEAL_LEVEL_ID = pa.APPEAL_LEVEL_ID 
+                              AND pal.REMOVED_BY = 0
+                              AND pal.APPEAL_LEVEL_CODE = '002') papal ON papal.CASE_ID = pc.CASE_ID
+--
+WHERE pc.REMOVED_BY = 0]]>
+		</queryString>
+		<field name="CASE_ITEM" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_ITEM"/>
+		</field>
+		<field name="CV_COUNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CV_COUNT"/>
+		</field>
+		<field name="CS_COUNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CS_COUNT"/>
+		</field>
+		<field name="ES_COUNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="ES_COUNT"/>
+		</field>
+	</subDataset>
+	<subDataset name="DS_MEDIATE" uuid="cb279bdf-0b46-49bb-a57d-054fa7d0ee0d">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+		<parameter name="TODAY" class="java.lang.String"/>
+		<queryString language="SQL">
+			<![CDATA[SELECT 'คดีที่ศาลดำเนินการไกล่เกลี่ย'  CASE_ITEM,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CV_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CS_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ES_COUNT
+FROM PC_CASE pc
+JOIN PC_MEDIATION pm ON pm.CASE_ID = pc.CASE_ID AND pm.REMOVED_BY = 0	 			
+JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+WHERE pc.REMOVED_BY = 0   
+AND pm.MEDIATION_START_DATE = TO_TIMESTAMP($P{TODAY},'DD-MM-YYYY')
+UNION ALL
+SELECT 'คดีที่ศาลไกล่เกลี่ยสำเร็จ'  CASE_ITEM,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CV_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CS_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ES_COUNT
+FROM PC_CASE pc
+JOIN PC_MEDIATION pm ON pm.CASE_ID = pc.CASE_ID AND pm.REMOVED_BY = 0			
+JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+JOIN PC_MEDIATION_RESULT pmr ON pmr.MEDIATION_RESULT_ID = pm.MEDIATION_RESULT_ID 
+WHERE pc.REMOVED_BY = 0
+AND pm.MEDIATION_START_DATE = TO_TIMESTAMP($P{TODAY},'DD-MM-YYYY') 
+AND pmr.MEDIATION_RESULT_CODE = '01'
+UNION ALL
+SELECT 'คดียกเลิกการไกล่เกลี่ย'  CASE_ITEM,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CV_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CS_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ES_COUNT
+FROM PC_CASE pc
+JOIN PC_MEDIATION pm ON pm.CASE_ID = pc.CASE_ID AND pm.REMOVED_BY = 0	 			
+JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+WHERE pc.REMOVED_BY = 0
+AND pm.REMOVED_DATE = TO_TIMESTAMP($P{TODAY},'DD-MM-YYYY')]]>
+		</queryString>
+		<field name="CASE_ITEM" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_ITEM"/>
+		</field>
+		<field name="CV_COUNT" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CV_COUNT"/>
+		</field>
+		<field name="CS_COUNT" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CS_COUNT"/>
+		</field>
+		<field name="ES_COUNT" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="ES_COUNT"/>
+		</field>
+	</subDataset>
+	<subDataset name="DS3_JUDGE" uuid="0daa991c-69b3-4d6c-80ff-48b99545c353">
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="761"/>
+		<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="228"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+		<parameter name="FROM_DATE" class="java.lang.String"/>
+		<parameter name="TO_DATE" class="java.lang.String"/>
+		<queryString>
+			<![CDATA[SELECT plj.JUDGE_NAME,
+       NVL(pc1.CNT,0) CNT_OWNER,
+       NVL(pc2.CNT,0) CNT_JUDGE_VICTORY,
+       NVL(pc3.CNT,0) CNT_JUDGE_MEDIATE,
+       NVL(pc4.CNT,0) CNT_JUDGE_WITHDRAW,
+       NVL(pc5.CNT,0) CNT_TEMP_DISCHARGE,
+       NVL(pc6.CNT,0) CNT_OTHER_DISCHARGE,
+       NVL(pc7.CNT,0) CNT_OTHER_REASON
+FROM PC_LOOKUP_JUDGE plj
+--เจ้าของสำนวน
+LEFT JOIN (SELECT pcj.JUDGE_ID, COUNT(pc.CASE_ID) CNT
+			FROM PC_CASE pc 
+            JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID = pc.CASE_ID 
+            JOIN PC_LOOKUP_JUDGE_TYPE plj ON plj.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID
+            WHERE pc.CASE_DATE BETWEEN TO_DATE($P{FROM_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                                           AND TO_DATE($P{TO_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+            AND pc.REMOVED_BY = 0
+            AND plj.JUDGE_TYPE_CODE = '01'
+            GROUP BY pcj.JUDGE_ID) pc1 ON pc1.JUDGE_ID = plj.JUDGE_ID 
+--พิพากษาความเรียง
+LEFT JOIN (SELECT pcj.JUDGE_ID, pj.VICTORY, COUNT(pc.CASE_ID) CNT
+			FROM PC_CASE pc 
+			JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID 
+            JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID = pc.CASE_ID 
+            JOIN PC_LOOKUP_JUDGE_TYPE plj ON plj.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID
+            WHERE pc.REMOVED_BY = 0
+            AND pj.JUDGE_DATE BETWEEN TO_DATE($P{FROM_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                                       AND TO_DATE($P{TO_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+            AND NVL(pj.VICTORY,0) IN (1,2) 
+            GROUP BY pcj.JUDGE_ID, pj.VICTORY) pc2 ON pc2.JUDGE_ID = plj.JUDGE_ID 
+--ประนีประนอมพิพากษาตามยอม
+LEFT JOIN (SELECT pcj.JUDGE_ID, pj.VICTORY, COUNT(pc.CASE_ID) CNT
+			FROM PC_CASE pc 
+			JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID
+			JOIN PC_MEDIATION pm ON pm.CASE_ID = pc.CASE_ID 
+            JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID = pc.CASE_ID 
+            JOIN PC_LOOKUP_JUDGE_TYPE plj ON plj.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID
+            JOIN PC_MEDIATION_RESULT pmr ON pmr.MEDIATION_RESULT_ID = pm.MEDIATION_RESULT_ID
+            WHERE pc.REMOVED_BY = 0
+            AND pj.JUDGE_DATE BETWEEN TO_DATE($P{FROM_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                                       AND TO_DATE($P{TO_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS') 
+            AND pmr.MEDIATION_RESULT_CODE = '01'
+            GROUP BY pcj.JUDGE_ID, pj.VICTORY) pc3 ON pc3.JUDGE_ID = plj.JUDGE_ID
+--ถอนฟ้องถอนคำร้อง
+LEFT JOIN (SELECT pcj.JUDGE_ID, pj.VICTORY, COUNT(pc.CASE_ID) CNT
+			FROM PC_CASE pc 
+			JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID
+            JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID = pc.CASE_ID 
+            JOIN PC_LOOKUP_JUDGE_TYPE plj ON plj.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID
+            JOIN PC_LOOKUP_JUDGE_RESULT pljr ON pljr.JUDGE_RESULT_ID = pj.JUDGE_RESULT_ID
+            WHERE pc.REMOVED_BY = 0
+            AND pj.JUDGE_DATE BETWEEN TO_DATE($P{FROM_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                                       AND TO_DATE($P{TO_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')  
+            AND pljr.JUDGE_RESULT_CODE = '10'
+            GROUP BY pcj.JUDGE_ID, pj.VICTORY) pc4 ON pc4.JUDGE_ID = plj.JUDGE_ID
+--จำหน่ายคดีชั่วคราว
+LEFT JOIN (SELECT pcj.JUDGE_ID, pj.VICTORY, COUNT(pc.CASE_ID) CNT
+			FROM PC_CASE pc 
+			JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID
+            JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID = pc.CASE_ID 
+            JOIN PC_LOOKUP_JUDGE_TYPE plj ON plj.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID
+            JOIN PC_LOOKUP_JUDGE_RESULT pljr ON pljr.JUDGE_RESULT_ID = pj.JUDGE_RESULT_ID
+            WHERE pc.REMOVED_BY = 0
+            AND pj.JUDGE_DATE BETWEEN TO_DATE($P{FROM_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                                       AND TO_DATE($P{TO_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')  
+            AND pljr.JUDGE_RESULT_CODE = '07'
+            GROUP BY pcj.JUDGE_ID, pj.VICTORY) pc5 ON pc5.JUDGE_ID = plj.JUDGE_ID    
+--จำหน่ายคดีอื่น ๆ
+LEFT JOIN (SELECT pcj.JUDGE_ID, pj.VICTORY, COUNT(pc.CASE_ID) CNT
+			FROM PC_CASE pc 
+			JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID
+            JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID = pc.CASE_ID 
+            JOIN PC_LOOKUP_JUDGE_TYPE plj ON plj.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID
+            JOIN PC_LOOKUP_JUDGE_RESULT pljr ON pljr.JUDGE_RESULT_ID = pj.JUDGE_RESULT_ID
+            WHERE pc.REMOVED_BY = 0
+            AND pj.JUDGE_DATE BETWEEN TO_DATE($P{FROM_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                                       AND TO_DATE($P{TO_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')  
+            AND pljr.JUDGE_RESULT_CODE = '08'
+            GROUP BY pcj.JUDGE_ID, pj.VICTORY) pc6 ON pc6.JUDGE_ID = plj.JUDGE_ID 
+--โดยเหตุอื่น
+LEFT JOIN (SELECT pcj.JUDGE_ID, pj.VICTORY, COUNT(pc.CASE_ID) CNT
+			FROM PC_CASE pc 
+			JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID
+            JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID = pc.CASE_ID 
+            JOIN PC_LOOKUP_JUDGE_TYPE plj ON plj.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID
+            JOIN PC_LOOKUP_JUDGE_RESULT pljr ON pljr.JUDGE_RESULT_ID = pj.JUDGE_RESULT_ID
+            WHERE pc.REMOVED_BY = 0
+            AND pj.JUDGE_DATE BETWEEN TO_DATE($P{FROM_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                                       AND TO_DATE($P{TO_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')  
+            AND pljr.JUDGE_RESULT_CODE = '09'
+            GROUP BY pcj.JUDGE_ID, pj.VICTORY) pc7 ON pc7.JUDGE_ID = plj.JUDGE_ID 
+ORDER BY plj.SUPER_ID ASC]]>
+		</queryString>
+		<field name="JUDGE_NAME" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="JUDGE_NAME"/>
+		</field>
+		<field name="CNT_OWNER" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CNT_OWNER"/>
+		</field>
+		<field name="CNT_JUDGE_VICTORY" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CNT_JUDGE_VICTORY"/>
+		</field>
+		<field name="CNT_JUDGE_MEDIATE" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CNT_JUDGE_MEDIATE"/>
+		</field>
+		<field name="CNT_JUDGE_WITHDRAW" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CNT_JUDGE_WITHDRAW"/>
+		</field>
+		<field name="CNT_TEMP_DISCHARGE" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CNT_TEMP_DISCHARGE"/>
+		</field>
+		<field name="CNT_OTHER_DISCHARGE" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CNT_OTHER_DISCHARGE"/>
+		</field>
+		<field name="CNT_OTHER_REASON" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CNT_OTHER_REASON"/>
+		</field>
+		<variable name="ROW_TOTAL" class="java.lang.Long">
+			<variableExpression><![CDATA[$F{CNT_OWNER}+$F{CNT_JUDGE_VICTORY}+$F{CNT_JUDGE_MEDIATE}+$F{CNT_JUDGE_WITHDRAW}+$F{CNT_TEMP_DISCHARGE}+$F{CNT_OTHER_DISCHARGE}+$F{CNT_OTHER_REASON}]]></variableExpression>
+		</variable>
+	</subDataset>
+	<subDataset name="DS2_1INJUDGE" uuid="a4b66fd4-954e-4d7f-ac20-9224113a3994">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+		<queryString language="SQL">
+			<![CDATA[SELECT 'ค้างจ่าย' CASE_ITEM,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CV_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CS_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ES_COUNT
+FROM PC_CASE pc
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID 
+                         AND pj.REMOVED_BY = 0
+                         AND pj.JUDGE_DATE > TO_DATE('20-02-2020'||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+JOIN PC_CASE_JUDGE pcj ON pc.CASE_ID = pcj.CASE_ID AND pc.REMOVED_BY = 0
+JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0                             
+WHERE pc.REMOVED_BY = 0 
+AND pj.CASE_ID IS NULL
+AND pljt.JUDGE_TYPE_CODE = '01'
+UNION ALL
+SELECT 'อยู่ระหว่างไกล่เกลี่ย' CASE_ITEM,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CV_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CS_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ES_COUNT
+FROM PC_CASE pc
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID 
+                         AND pj.REMOVED_BY = 0
+                         AND pj.JUDGE_DATE > TO_DATE('20-02-2020'||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+JOIN PC_MEDIATION pm ON pm.CASE_ID = pc.CASE_ID 
+                    AND pm.REMOVED_BY = 0
+                    AND pm.MEDIATION_RESULT_ID IS NULL
+JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+WHERE pc.REMOVED_BY = 0 
+AND pj.CASE_ID IS NULL
+UNION ALL
+SELECT 'รอวันนัดพิจารณานัดแรก' CASE_ITEM,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CV_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CS_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ES_COUNT
+FROM PC_CASE pc
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID 
+                         AND pj.REMOVED_BY = 0
+                         AND pj.JUDGE_DATE > TO_DATE('20-02-2020'||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+LEFT JOIN PC_PROCEED_APPOINT ppa ON ppa.CASE_ID = pc.CASE_ID AND ppa.REMOVED_BY = 0
+JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+WHERE ppa.CASE_ID IS NULL
+AND pj.CASE_ID IS NULL]]>
+		</queryString>
+		<field name="CASE_ITEM" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_ITEM"/>
+		</field>
+		<field name="CV_COUNT" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CV_COUNT"/>
+		</field>
+		<field name="CS_COUNT" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CS_COUNT"/>
+		</field>
+		<field name="ES_COUNT" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="ES_COUNT"/>
+		</field>
+		<variable name="DS2_1SUMCV" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{CV_COUNT}]]></variableExpression>
+		</variable>
+		<variable name="DS2_1SUMCS" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{CS_COUNT}]]></variableExpression>
+		</variable>
+		<variable name="DS2_1SUMES" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{ES_COUNT}]]></variableExpression>
+		</variable>
+	</subDataset>
+	<subDataset name="DS2_2HOLDREASON" uuid="25af222f-5820-4c54-9306-98b9c0ddf17f">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+		<queryString language="SQL">
+			<![CDATA[SELECT pphr.HOLD_REASON CASE_ITEM, 
+       NVL(h1.CV_COUNT,0) CV_COUNT,
+       NVL(h2.CS_COUNT,0) CS_COUNT,
+       NVL(h3.ES_COUNT,0) ES_COUNT
+FROM PC_PROCEED_HOLD_REASON pphr 
+LEFT JOIN (SELECT pph.HOLD_REASON_ID, COUNT(pc.CASE_ID) CV_COUNT
+			FROM PC_CASE pc 
+			LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID 
+                         			  AND pj.REMOVED_BY = 0
+                         			  AND pj.JUDGE_DATE > TO_DATE('20-02-2020'||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+			JOIN PC_PROCEED_HOLD pph ON pph.CASE_ID = pc.CASE_ID 
+			JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID 
+                             			 AND plcc.REMOVED_BY = 0
+                             			 AND plcc.CASE_CATE_CODE = '201'
+			WHERE pc.REMOVED_BY = 0
+			AND pj.CASE_ID IS NULL 
+			GROUP BY pph.HOLD_REASON_ID) h1 ON h1.HOLD_REASON_ID = pphr.HOLD_REASON_ID
+LEFT JOIN (SELECT pph.HOLD_REASON_ID, COUNT(pc.CASE_ID) CS_COUNT
+			FROM PC_CASE pc 
+			LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID 
+                         			  AND pj.REMOVED_BY = 0
+                         			  AND pj.JUDGE_DATE > TO_DATE('20-02-2020'||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+			JOIN PC_PROCEED_HOLD pph ON pph.CASE_ID = pc.CASE_ID 
+			JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID 
+                             			 AND plcc.REMOVED_BY = 0
+                             			 AND plcc.CASE_CATE_CODE = '209'
+			WHERE pc.REMOVED_BY = 0
+			AND pj.CASE_ID IS NULL 
+			GROUP BY pph.HOLD_REASON_ID) h2 ON h2.HOLD_REASON_ID = pphr.HOLD_REASON_ID 
+LEFT JOIN (SELECT pph.HOLD_REASON_ID, COUNT(pc.CASE_ID) ES_COUNT
+			FROM PC_CASE pc 
+			LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID 
+                         			  AND pj.REMOVED_BY = 0
+                         			  AND pj.JUDGE_DATE > TO_DATE('20-02-2020'||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+			JOIN PC_PROCEED_HOLD pph ON pph.CASE_ID = pc.CASE_ID 
+			JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID 
+                             			 AND plcc.REMOVED_BY = 0
+                             			 AND plcc.CASE_CATE_CODE = '310'
+			WHERE pc.REMOVED_BY = 0
+			AND pj.CASE_ID IS NULL 
+			GROUP BY pph.HOLD_REASON_ID) h3 ON h3.HOLD_REASON_ID = pphr.HOLD_REASON_ID 
+ORDER BY pphr.HOLD_REASON_ID]]>
+		</queryString>
+		<field name="CASE_ITEM" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_ITEM"/>
+		</field>
+		<field name="CV_COUNT" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CV_COUNT"/>
+		</field>
+		<field name="CS_COUNT" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CS_COUNT"/>
+		</field>
+		<field name="ES_COUNT" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="ES_COUNT"/>
+		</field>
+	</subDataset>
+	<subDataset name="DS2_INJUDGE" uuid="05264b4f-9f67-4434-9622-d55a8fe3fe92">
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+		<parameter name="TODAY" class="java.lang.String"/>
+		<queryString>
+			<![CDATA[SELECT 'ค้างจ่าย' CASE_ITEM,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CV_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CS_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ES_COUNT
+FROM PC_CASE pc
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID 
+                         AND pj.REMOVED_BY = 0
+                         AND pj.JUDGE_DATE > TO_DATE($P{TODAY}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+JOIN PC_CASE_JUDGE pcj ON pc.CASE_ID = pcj.CASE_ID AND pc.REMOVED_BY = 0
+JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0                             
+WHERE pc.REMOVED_BY = 0 
+AND pj.CASE_ID IS NULL
+AND pljt.JUDGE_TYPE_CODE = '01'
+UNION ALL
+SELECT 'อยู่ระหว่างไกล่เกลี่ย' CASE_ITEM,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CV_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CS_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ES_COUNT
+FROM PC_CASE pc
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID 
+                         AND pj.REMOVED_BY = 0
+                         AND pj.JUDGE_DATE > TO_DATE($P{TODAY}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+JOIN PC_MEDIATION pm ON pm.CASE_ID = pc.CASE_ID 
+                    AND pm.REMOVED_BY = 0
+                    AND pm.MEDIATION_RESULT_ID IS NULL
+JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+WHERE pc.REMOVED_BY = 0 
+AND pj.CASE_ID IS NULL
+UNION ALL
+SELECT 'รอวันนัดพิจารณานัดแรก' CASE_ITEM,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CV_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CS_COUNT,
+       NVL(SUM(CASE WHEN plcc.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ES_COUNT
+FROM PC_CASE pc
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID 
+                         AND pj.REMOVED_BY = 0
+                         AND pj.JUDGE_DATE > TO_DATE($P{TODAY}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+LEFT JOIN PC_PROCEED_APPOINT ppa ON ppa.CASE_ID = pc.CASE_ID AND ppa.REMOVED_BY = 0
+JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+WHERE ppa.CASE_ID IS NULL
+AND pj.CASE_ID IS NULL
+UNION ALL
+SELECT 'ระหว่างสืบพยาน' CASE_ITEM, -1 CV_COUNT, -1 CS_COUNT, -1 ES_COUNT  FROM DUAL
+UNION ALL 
+SELECT *
+FROM 
+(SELECT pphr.HOLD_REASON CASE_ITEM, 
+       NVL(h1.CV_COUNT,0) CV_COUNT,
+       NVL(h2.CS_COUNT,0) CS_COUNT,
+       NVL(h3.ES_COUNT,0) ES_COUNT
+FROM PC_PROCEED_HOLD_REASON pphr 
+LEFT JOIN (SELECT pph.HOLD_REASON_ID, COUNT(pc.CASE_ID) CV_COUNT
+			FROM PC_CASE pc 
+			LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID 
+                         			  AND pj.REMOVED_BY = 0
+                         			  AND pj.JUDGE_DATE > TO_DATE($P{TODAY}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+			JOIN PC_PROCEED_HOLD pph ON pph.CASE_ID = pc.CASE_ID 
+			JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID 
+                             			 AND plcc.REMOVED_BY = 0
+                             			 AND plcc.CASE_CATE_CODE = '201'
+			WHERE pc.REMOVED_BY = 0
+			AND pj.CASE_ID IS NULL 
+			GROUP BY pph.HOLD_REASON_ID) h1 ON h1.HOLD_REASON_ID = pphr.HOLD_REASON_ID
+LEFT JOIN (SELECT pph.HOLD_REASON_ID, COUNT(pc.CASE_ID) CS_COUNT
+			FROM PC_CASE pc 
+			LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID 
+                         			  AND pj.REMOVED_BY = 0
+                         			  AND pj.JUDGE_DATE > TO_DATE($P{TODAY}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+			JOIN PC_PROCEED_HOLD pph ON pph.CASE_ID = pc.CASE_ID 
+			JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID 
+                             			 AND plcc.REMOVED_BY = 0
+                             			 AND plcc.CASE_CATE_CODE = '209'
+			WHERE pc.REMOVED_BY = 0
+			AND pj.CASE_ID IS NULL 
+			GROUP BY pph.HOLD_REASON_ID) h2 ON h2.HOLD_REASON_ID = pphr.HOLD_REASON_ID 
+LEFT JOIN (SELECT pph.HOLD_REASON_ID, COUNT(pc.CASE_ID) ES_COUNT
+			FROM PC_CASE pc 
+			LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID 
+                         			  AND pj.REMOVED_BY = 0
+                         			  AND pj.JUDGE_DATE > TO_DATE($P{TODAY}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+			JOIN PC_PROCEED_HOLD pph ON pph.CASE_ID = pc.CASE_ID 
+			JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID 
+                             			 AND plcc.REMOVED_BY = 0
+                             			 AND plcc.CASE_CATE_CODE = '310'
+			WHERE pc.REMOVED_BY = 0
+			AND pj.CASE_ID IS NULL 
+			GROUP BY pph.HOLD_REASON_ID) h3 ON h3.HOLD_REASON_ID = pphr.HOLD_REASON_ID 
+ORDER BY pphr.HOLD_REASON_ID) A]]>
+		</queryString>
+		<field name="CASE_ITEM" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_ITEM"/>
+		</field>
+		<field name="CV_COUNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CV_COUNT"/>
+		</field>
+		<field name="CS_COUNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CS_COUNT"/>
+		</field>
+		<field name="ES_COUNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="ES_COUNT"/>
+		</field>
+		<variable name="SUM_CV" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{CV_COUNT}==-1?0:$F{CV_COUNT}]]></variableExpression>
+		</variable>
+		<variable name="SUM_CS" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{CS_COUNT}==-1?0:$F{CS_COUNT}]]></variableExpression>
+		</variable>
+		<variable name="SUM_ES" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{ES_COUNT}==-1?0:$F{ES_COUNT}]]></variableExpression>
+		</variable>
+	</subDataset>
+	<subDataset name="DS_COURT_ABUSE" uuid="cfcbe7e2-9b6f-418b-be6c-1711ad6499f6">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+		<parameter name="TODAY" class="java.lang.String"/>
+		<queryString language="SQL">
+			<![CDATA[SELECT 'คดีละเมิดอำนาจศาลรับใหม่' CASE_ITEM,
+       NVL(SUM(CASE WHEN plcc_h.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CV_COUNT,
+       NVL(SUM(CASE WHEN plcc_h.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CS_COUNT,
+       NVL(SUM(CASE WHEN plcc_h.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ES_COUNT
+FROM PC_CASE_GROUP pcg 
+JOIN PC_CASE pc_c ON pc_c.CASE_ID = pcg.CASE_ID AND pc_c.REMOVED_BY = 0
+JOIN PC_CASE pc_h ON pc_h.CASE_ID = pcg.HEAD_GROUP_CASE_ID AND pc_h.REMOVED_BY = 0
+JOIN PC_LOOKUP_CASE_CATE plcc_c ON plcc_c.CASE_CATE_ID = pc_c.CASE_CATE_ID
+                             AND plcc_c.REMOVED_BY = 0
+                             AND plcc_c.CASE_CATE_CODE = '215'
+JOIN PC_LOOKUP_CASE_CATE plcc_h ON plcc_h.CASE_CATE_ID = pc_h.CASE_CATE_ID
+                             AND plcc_h.REMOVED_BY = 0
+WHERE pcg.REMOVED_BY = 0
+AND TO_CHAR(pc_c.CASE_DATE,'DD-MM-YYYY') = $P{TODAY}
+UNION
+SELECT 'คดีละเมิดอำนาจศาลเสร็จไป' CASE_ITEM,
+       NVL(SUM(CASE WHEN plcc_h.CASE_CATE_CODE = '201' THEN 1 ELSE 0 END),0) CV_COUNT,
+       NVL(SUM(CASE WHEN plcc_h.CASE_CATE_CODE = '209' THEN 1 ELSE 0 END),0) CS_COUNT,
+       NVL(SUM(CASE WHEN plcc_h.CASE_CATE_CODE = '310' THEN 1 ELSE 0 END),0) ES_COUNT
+FROM PC_CASE_GROUP pcg 
+JOIN PC_CASE pc_c ON pc_c.CASE_ID = pcg.CASE_ID AND pc_c.REMOVED_BY = 0
+JOIN PC_CASE pc_h ON pc_h.CASE_ID = pcg.HEAD_GROUP_CASE_ID AND pc_h.REMOVED_BY = 0
+JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc_c.CASE_ID AND pj.REMOVED_BY = 0
+JOIN PC_LOOKUP_CASE_CATE plcc_c ON plcc_c.CASE_CATE_ID = pc_c.CASE_CATE_ID
+                             AND plcc_c.REMOVED_BY = 0
+                             AND plcc_c.CASE_CATE_CODE = '215'
+JOIN PC_LOOKUP_CASE_CATE plcc_h ON plcc_h.CASE_CATE_ID = pc_h.CASE_CATE_ID
+                             AND plcc_h.REMOVED_BY = 0
+WHERE pcg.REMOVED_BY = 0
+AND TO_CHAR(pj.JUDGE_DATE,'DD-MM-YYYY') = $P{TODAY}]]>
+		</queryString>
+		<field name="CASE_ITEM" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_ITEM"/>
+		</field>
+		<field name="CV_COUNT" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CV_COUNT"/>
+		</field>
+		<field name="CS_COUNT" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CS_COUNT"/>
+		</field>
+		<field name="ES_COUNT" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="ES_COUNT"/>
+		</field>
+	</subDataset>
+	<parameter name="LASTYEAR_FROMDATE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["01-01-2019"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="LASTYEAR_TODATE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["31-12-2019"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="INYEAR_FROMDATE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["01-01-2020"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="INYEAR_TODATE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["31-12-2020"]]></defaultValueExpression>
+	</parameter>
+	<queryString language="SQL">
+		<![CDATA[SELECT plc.COURT_NAME_TH , 
+       THAILDATE(TO_TIMESTAMP($P{INYEAR_TODATE},'DD-MM-YYYY')) CASE_DATE 
+FROM PC_PARAM pp 
+LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_CODE = pp.PARAM_VALUE 
+WHERE pp.PARAM_NAME = 'COURT_CODE']]>
+	</queryString>
+	<field name="COURT_NAME_TH" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
+	</field>
+	<field name="CASE_DATE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CASE_DATE"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="31" width="204" height="25" uuid="1fcb7938-e328-4b4b-84f2-c6d892b42e91">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["วันที่ "+$F{CASE_DATE}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="0" width="150" height="25" uuid="c74a2d61-bc25-43c5-a862-154f44608abb">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17" isBold="true"/>
+				</textElement>
+				<text><![CDATA[รายงานความประจำวัน]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="348" y="12" width="204" height="25" uuid="f706d0a9-0d06-4ef4-923b-3fe890646041">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="35" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="61" splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="125" splitType="Stretch"/>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

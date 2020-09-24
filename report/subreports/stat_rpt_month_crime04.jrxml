@@ -1,0 +1,3006 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="stat_rpt_month_crime04" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="f591c4ed-e1b9-4eba-9778-a8008990b291">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="CojDB[193]"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.137:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/SubReports/stat_rpt_month_crime04"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="588"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="401"/>
+	<parameter name="SELMONTH" class="java.lang.String">
+		<defaultValueExpression><![CDATA["082020"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="START_DATE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["01-09-2020"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="END_DATE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["20-09-2020"]]></defaultValueExpression>
+	</parameter>
+	<queryString language="SQL">
+		<![CDATA[SELECT plj.JUDGE_NAME,
+       p.COURT_NAME_TH,
+       DECODE(SUBSTR($P{SELMONTH},1,2), '01', 'มกราคม', '02', 'กุมภาพันธ์', '03', 'มีนาคม', '04', 'เมษายน',
+                                     '05', 'พฤษภาคม','06', 'มิถุนายน',  '07','กรกฎาคม','08', 'สิงหาคม',
+                                     '09', 'กันยายน', '10', 'ตุลาคม', '11', 'พฤศจิกายน','12', 'ธันวาคม',
+                                     '-')               SELECTED_MONTH, 
+       SUBSTR($P{SELMONTH},-4,4)+ 543                  SELECTED_YEAR,  
+       --
+       NVL(a.CRIME,0)                  COUNT_INDICMENT_CRIME,
+       NVL(a.DRUG,0)                   COUNT_INDICMENT_DRUG,
+       NVL(b.CRIME,0)                  COUNT_PETITION_CRIME,
+       NVL(b.DRUG,0)                   COUNT_PETITION_DRUG,
+       NVL(c.CRIME,0)  				   COUNT_PRIOR_CASE_NOTEND_CRIME,
+       NVL(c.DRUG,0)                   COUNT_PRIOR_CASE_NOTEND_DRUG,       
+       NVL(d.CRIME,0)         		   COUNT_CASE_NEW_CRIME,
+	   NVL(d.DRUG,0)         		   COUNT_CASE_NEW_DRUG,
+       NVL(e.ALL_PAGE,0)               SUM_ALL_PAGE,
+       NVL(e.ALL_WITNESS,0)            SUM_ALL_WITNESS,
+       NVL(f.CRIME,0)                  RE_JUDGEMENT_CRIME,
+       NVL(f.DRUG,0)                   RE_JUDGEMENT_DRUG,       
+       NVL(g.CRIME,0)                  COUNT_CASEFINISH_NM_CRIME,
+       NVL(g.DRUG,0)                   COUNT_CASEFINISH_NM_DRUG,       
+       NVL(h.CRIME,0)     			   COUNT_CASEFINISH_WD_CRIME,
+	   NVL(h.DRUG,0)     			   COUNT_CASEFINISH_WD_DRUG,       
+       NVL(i.CRIME,0)        		   COUNT_CASEFINISH_CP_CRIME,
+       NVL(i.DRUG,0)        		   COUNT_CASEFINISH_CP_DRUG,       
+       NVL(j.CRIME,0)        		   COUNT_CASEFINISH_DC_CRIME,
+       NVL(j.DRUG,0)        		   COUNT_CASEFINISH_DC_DRUG, 
+       NVL(k.CRIME,0)    			   COUNT_CASEFINISH_DO_CRIME,
+       NVL(k.DRUG,0)    			   COUNT_CASEFINISH_DO_DRUG,       
+       NVL(kk.CRIME,0)     			   COUNT_CASEFINISH_OT_CRIME,
+       NVL(kk.DRUG,0)     			   COUNT_CASEFINISH_OT_DRUG, 
+       NVL(l.MONTH_L06_CRIME,0)        MONTH_L06_CRIME, 
+       NVL(l.MONTH_06T12_CRIME,0)      MONTH_06T12_CRIME,
+       NVL(l.MONTH_12T24_CRIME,0)      MONTH_12T24_CRIME,
+       NVL(l.MONTH_24T60_CRIME,0)      MONTH_24T60_CRIME,
+       NVL(l.MONTH_M60_CRIME,0)        MONTH_M60_CRIME,
+       NVL(l.MONTH_L06_DRUG,0)         MONTH_L06_DRUG, 
+       NVL(l.MONTH_06T12_DRUG,0)       MONTH_06T12_DRUG,
+       NVL(l.MONTH_12T24_DRUG,0)       MONTH_12T24_DRUG,
+       NVL(l.MONTH_24T60_DRUG,0)       MONTH_24T60_DRUG,
+       NVL(l.MONTH_M60_DRUG,0)         MONTH_M60_DRUG,       
+       NVL(m.CRIME,0)          		   COUNT_CASE_REFRENCE_CRIME,
+       NVL(m.DRUG,0)          		   COUNT_CASE_REFRENCE_DRUG,
+       NVL(n.CRIME,0) 				   COUNT_CASE_TOOTHERCOURT_CRIME,
+       NVL(n.DRUG,0) 				   COUNT_CASE_TOOTHERCOURT_DRUG
+--       
+FROM PC_LOOKUP_JUDGE plj 
+--ตรวจฟ้อง และคำร้องขอ > คำฟ้อง **
+LEFT JOIN(SELECT pcj.JUDGE_ID,
+			      COUNT(cri.CASE_CATE_CODE) CRIME,
+			      COUNT(drg.CASE_CATE_CODE) DRUG
+			FROM PC_CASE pc 
+			LEFT JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID = pc.CASE_ID 
+			LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pcj.REMOVED_BY = 0
+			--crime 
+			LEFT JOIN PC_LOOKUP_CASE_CATE cri ON cri.CASE_CATE_ID = pc.CASE_CATE_ID
+			                                  AND cri.CASE_CATE_CODE IN ('101','108','113','128')
+			                                  AND cri.REMOVED_BY  = 0
+			--drug 
+			LEFT JOIN PC_LOOKUP_CASE_CATE drg ON drg.CASE_CATE_ID = pc.CASE_CATE_ID
+			                                  AND drg.CASE_CATE_CODE = '110'
+			                                  AND drg.REMOVED_BY  = 0
+		    WHERE pc.REMOVED_BY  = 0 
+            AND pc.CASE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
+                                 AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
+		    AND pc.CASE_OR_REQ = 1
+            AND pljt.JUDGE_TYPE_CODE ='07'  --ผู้พิพากษารับฟ้อง           
+			GROUP BY pcj.JUDGE_ID) a ON a.JUDGE_ID = plj.JUDGE_ID
+--ตรวจฟ้อง และคำร้องขอ > คำร้อง **          
+LEFT JOIN(SELECT pcj.JUDGE_ID, 
+	              COUNT(cri.CASE_CATE_CODE) CRIME,
+			      COUNT(drg.CASE_CATE_CODE) DRUG                  
+           FROM PC_CASE pc 
+           LEFT JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID = pc.CASE_ID 
+           LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pcj.REMOVED_BY = 0
+		   --crime 
+		   LEFT JOIN PC_LOOKUP_CASE_CATE cri ON cri.CASE_CATE_ID = pc.CASE_CATE_ID
+		                                     AND cri.CASE_CATE_CODE IN ('101','108','113','128')
+		                                     AND cri.REMOVED_BY  = 0
+		   --drug 
+		   LEFT JOIN PC_LOOKUP_CASE_CATE drg ON drg.CASE_CATE_ID = pc.CASE_CATE_ID
+			                                 AND drg.CASE_CATE_CODE = '110'
+			                                 AND drg.REMOVED_BY  = 0
+		   WHERE pc.REMOVED_BY  = 0 
+           AND pc.CASE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
+                                 AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
+		   AND pc.CASE_OR_REQ = 2
+           AND pljt.JUDGE_TYPE_CODE ='07'  --ผู้พิพากษารับฟ้อง    
+           GROUP BY pcj.JUDGE_ID) b ON b.JUDGE_ID = plj.JUDGE_ID     
+--เจ้าของสำนวน > ค้างจากเดือนก่อน **
+LEFT JOIN(SELECT pcj.JUDGE_ID, 
+	              COUNT(cri.CASE_CATE_CODE) CRIME,
+			      COUNT(drg.CASE_CATE_CODE) DRUG 
+           FROM PC_CASE pc 
+           LEFT JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID  = pc.CASE_ID AND pcj.REMOVED_BY  = 0
+           LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pcj.REMOVED_BY = 0 
+           LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID  = pc.CASE_ID 
+		   --crime 
+		   LEFT JOIN PC_LOOKUP_CASE_CATE cri ON cri.CASE_CATE_ID = pc.CASE_CATE_ID
+		                                     AND cri.CASE_CATE_CODE IN ('101','108','113','128')
+		                                     AND cri.REMOVED_BY  = 0
+		   --drug 
+		   LEFT JOIN PC_LOOKUP_CASE_CATE drg ON drg.CASE_CATE_ID = pc.CASE_CATE_ID
+			                                 AND drg.CASE_CATE_CODE = '110'
+			                                 AND drg.REMOVED_BY  = 0
+		   WHERE pc.REMOVED_BY = 0
+           AND pljt.JUDGE_TYPE_CODE ='01'  --เจ้าของสำนวน
+           AND pc.CASE_DATE < TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS')
+           AND (pj.JUDGE_DATE IS NULL OR pj.JUDGE_DATE >= TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS')) --ค้างมาจากเดือนก่อน           
+           GROUP BY  pcj.JUDGE_ID) c ON c.JUDGE_ID = plj.JUDGE_ID 
+--เจ้าของสำนวน > รับใหม่เดือนนี้ **       
+LEFT JOIN (SELECT pcj.JUDGE_ID, 
+ 	               COUNT(cri.CASE_CATE_CODE) CRIME,
+			       COUNT(drg.CASE_CATE_CODE) DRUG 
+            FROM PC_CASE pc 
+            LEFT JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID  = pc.CASE_ID AND pcj.REMOVED_BY  = 0
+            LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pcj.REMOVED_BY = 0
+		    --crime 
+		    LEFT JOIN PC_LOOKUP_CASE_CATE cri ON cri.CASE_CATE_ID = pc.CASE_CATE_ID
+		                                      AND cri.CASE_CATE_CODE IN ('101','108','113','128')
+		                                      AND cri.REMOVED_BY  = 0
+		    --drug 
+		    LEFT JOIN PC_LOOKUP_CASE_CATE drg ON drg.CASE_CATE_ID = pc.CASE_CATE_ID
+			                                  AND drg.CASE_CATE_CODE = '110'
+			                                  AND drg.REMOVED_BY  = 0
+            WHERE pc.REMOVED_BY = 0
+            AND pc.CASE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
+                                          AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
+            AND pljt.JUDGE_TYPE_CODE = '01'  --เจ้าของสำนวน
+            GROUP BY pcj.JUDGE_ID) d ON d.JUDGE_ID = plj.JUDGE_ID 
+--สืบพยาน > จำนวนปาก, จำนวนหน้า***
+LEFT JOIN (SELECT pcj.JUDGE_ID, SUM(ALL_PAGE) ALL_PAGE, SUM(ALL_WITNESS) ALL_WITNESS 
+            FROM PC_CASE pc 
+            JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID  = pc.CASE_ID AND pcj.REMOVED_BY  = 0
+            JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID  AND pljt.JUDGE_TYPE_CODE ='01' AND pcj.REMOVED_BY = 0
+            JOIN (SELECT ppa.CASE_ID, 
+                          COUNT(ppaw.APP_WITNESS_ID) ALL_PAGE, 
+                          NVL(ppap.TOTAL_PAGE,0)     ALL_WITNESS
+                  FROM PC_PROCEED_APPOINT ppa 
+                  LEFT JOIN PC_PROCEED_APPOINT_WITNESS ppaw ON ppaw.APPOINT_ID = ppa.APPOINT_ID AND ppaw.REMOVED_BY = 0
+                  LEFT JOIN PC_PROCEED_APPOINT_PROCESS ppap ON ppap.APPOINT_ID = ppa.APPOINT_ID AND ppap.REMOVED_BY = 0
+                  WHERE ppa.REMOVED_BY = 0
+                  GROUP BY ppa.CASE_ID, ppap.TOTAL_PAGE ) gr_ppa ON gr_ppa.CASE_ID = pc.CASE_ID            
+            JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY  = 0
+            --
+            WHERE pc.REMOVED_BY = 0
+            AND pc.CASE_DATE IS NOT NULL
+            AND TO_CHAR(pc.CASE_DATE,'MMYYYY') = $P{SELMONTH}
+            AND plcc.CASE_CATE_CODE IN ('101','108','113','128')
+            GROUP BY pcj.JUDGE_ID)e ON e.JUDGE_ID = plj.JUDGE_ID         
+--คดีแดงที่นำมาพิจารณาใหม่ **        
+LEFT JOIN (SELECT pjsj.JUDGE_ID, 
+	              COUNT(cri.CASE_CATE_CODE) CRIME,
+			      COUNT(drg.CASE_CATE_CODE) DRUG 
+            FROM PC_JUDGEMENT_SENTENCE pjs
+            LEFT JOIN PC_JUDGEMENT_SENTENCE_JUDGE pjsj ON pjsj.SENTENCE_ID = pjs.SENTENCE_ID
+            LEFT JOIN PC_CASE pc ON pc.CASE_ID = pjs.CASE_ID AND pc.REMOVED_BY = 0
+            --crime 
+		    LEFT JOIN PC_LOOKUP_CASE_CATE cri ON cri.CASE_CATE_ID = pc.CASE_CATE_ID
+		                                      AND cri.CASE_CATE_CODE IN ('101','108','113','128')
+		                                      AND cri.REMOVED_BY  = 0
+		    --drug 
+		    LEFT JOIN PC_LOOKUP_CASE_CATE drg ON drg.CASE_CATE_ID = pc.CASE_CATE_ID
+			                                  AND drg.CASE_CATE_CODE = '110'
+			                                  AND drg.REMOVED_BY  = 0
+			LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pjsj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+            WHERE pjs.RE_JUDGE_STATUS = 1 
+            AND pjs.RE_JUDGE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
+                                      AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
+            AND pljt.JUDGE_TYPE_CODE = '01'
+            GROUP BY pjsj.JUDGE_ID) f ON f.JUDGE_ID = plj.JUDGE_ID 
+--คดีเสร็จไป > พิพากษาความเรียง **
+LEFT JOIN (SELECT pcj.JUDGE_ID, 
+	              COUNT(cri.CASE_CATE_CODE) CRIME,
+			      COUNT(drg.CASE_CATE_CODE) DRUG 
+            FROM PC_JUDGEMENT pj
+            LEFT JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID  = pj.CASE_ID AND pcj.REMOVED_BY = 0
+	        LEFT JOIN PC_CASE pc ON pc.CASE_ID = pj.CASE_ID AND pc.REMOVED_BY = 0
+            --crime 
+		    LEFT JOIN PC_LOOKUP_CASE_CATE cri ON cri.CASE_CATE_ID = pc.CASE_CATE_ID
+		                                      AND cri.CASE_CATE_CODE IN ('101','108','113','128')
+		                                      AND cri.REMOVED_BY  = 0
+		    --drug 
+		    LEFT JOIN PC_LOOKUP_CASE_CATE drg ON drg.CASE_CATE_ID = pc.CASE_CATE_ID
+			                                  AND drg.CASE_CATE_CODE = '110'
+			                                  AND drg.REMOVED_BY  = 0  
+			LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+            WHERE pj.REMOVED_BY = 0
+            AND pj.JUDGE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
+                                   AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
+            AND NVL(pj.VICTORY,0) IN (1,2)
+            AND pljt.JUDGE_TYPE_CODE = '04'        
+            GROUP BY pcj.JUDGE_ID) g ON g.JUDGE_ID = plj.JUDGE_ID
+--คดีเสร็จไป > ถอนฟ้อง **
+LEFT JOIN (SELECT pcj.JUDGE_ID, 
+	              COUNT(cri.CASE_CATE_CODE) CRIME,
+			      COUNT(drg.CASE_CATE_CODE) DRUG 
+            FROM PC_JUDGEMENT pj
+            LEFT JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID  = pj.CASE_ID AND pcj.REMOVED_BY = 0
+  			LEFT JOIN PC_CASE pc ON pc.CASE_ID = pj.CASE_ID AND pc.REMOVED_BY = 0
+            LEFT JOIN PC_LOOKUP_JUDGE_RESULT pljr ON pljr.JUDGE_RESULT_ID = pj.JUDGE_RESULT_ID 
+            --crime 
+		    LEFT JOIN PC_LOOKUP_CASE_CATE cri ON cri.CASE_CATE_ID = pc.CASE_CATE_ID
+		                                      AND cri.CASE_CATE_CODE IN ('101','108','113','128')
+		                                      AND cri.REMOVED_BY  = 0
+		    --drug 
+		    LEFT JOIN PC_LOOKUP_CASE_CATE drg ON drg.CASE_CATE_ID = pc.CASE_CATE_ID
+			                                  AND drg.CASE_CATE_CODE = '110'
+			                                  AND drg.REMOVED_BY  = 0  
+			LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+            WHERE pj.REMOVED_BY = 0         
+            AND pj.JUDGE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
+                                   AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
+            AND pljt.JUDGE_TYPE_CODE = '04'  
+            AND pljr.JUDGE_RESULT_CODE = '06'      
+            GROUP BY pcj.JUDGE_ID) h ON h.JUDGE_ID = plj.JUDGE_ID           
+--คดีเสร็จไป > ยอมความ **          
+LEFT JOIN (SELECT pcj.JUDGE_ID, 
+	              COUNT(cri.CASE_CATE_CODE) CRIME,
+			      COUNT(drg.CASE_CATE_CODE) DRUG 
+            FROM PC_JUDGEMENT pj
+            LEFT JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID  = pj.CASE_ID AND pcj.REMOVED_BY = 0 
+            LEFT JOIN PC_CASE pc ON pc.CASE_ID = pj.CASE_ID AND pc.REMOVED_BY = 0
+            LEFT JOIN PC_LOOKUP_JUDGE_RESULT pljr ON pljr.JUDGE_RESULT_ID = pj.JUDGE_RESULT_ID 
+            --crime 
+		    LEFT JOIN PC_LOOKUP_CASE_CATE cri ON cri.CASE_CATE_ID = pc.CASE_CATE_ID
+		                                      AND cri.CASE_CATE_CODE IN ('101','108','113','128')
+		                                      AND cri.REMOVED_BY  = 0
+		    --drug 
+		    LEFT JOIN PC_LOOKUP_CASE_CATE drg ON drg.CASE_CATE_ID = pc.CASE_CATE_ID
+			                                  AND drg.CASE_CATE_CODE = '110'
+			                                  AND drg.REMOVED_BY  = 0 
+			LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+            WHERE pj.REMOVED_BY = 0         
+            AND pj.JUDGE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
+                                   AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
+            AND pljt.JUDGE_TYPE_CODE = '04'  
+            AND pljr.JUDGE_RESULT_CODE = '05'
+            GROUP BY pcj.JUDGE_ID) i ON i.JUDGE_ID = plj.JUDGE_ID
+--คดีเสร็จไป > จำหน่ายคดีชั่วคราว **           
+LEFT JOIN (SELECT pcj.JUDGE_ID, 
+	              COUNT(cri.CASE_CATE_CODE) CRIME,
+			      COUNT(drg.CASE_CATE_CODE) DRUG 
+            FROM PC_JUDGEMENT pj
+            LEFT JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID  = pj.CASE_ID AND pcj.REMOVED_BY = 0
+            LEFT JOIN PC_CASE pc ON pc.CASE_ID = pj.CASE_ID AND pc.REMOVED_BY = 0
+            LEFT JOIN PC_LOOKUP_JUDGE_RESULT pljr ON pljr.JUDGE_RESULT_ID = pj.JUDGE_RESULT_ID 
+            --crime 
+		    LEFT JOIN PC_LOOKUP_CASE_CATE cri ON cri.CASE_CATE_ID = pc.CASE_CATE_ID
+		                                      AND cri.CASE_CATE_CODE IN ('101','108','113','128')
+		                                      AND cri.REMOVED_BY  = 0
+		    --drug 
+		    LEFT JOIN PC_LOOKUP_CASE_CATE drg ON drg.CASE_CATE_ID = pc.CASE_CATE_ID
+			                                  AND drg.CASE_CATE_CODE = '110'
+			                                  AND drg.REMOVED_BY  = 0
+			LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+            WHERE pj.REMOVED_BY = 0         
+            AND pj.JUDGE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
+                                   AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
+            AND pljt.JUDGE_TYPE_CODE = '04'  
+            AND pljr.JUDGE_RESULT_CODE = '07'
+            GROUP BY pcj.JUDGE_ID) j ON j.JUDGE_ID = plj.JUDGE_ID
+--คดีเสร็จไป > จำหน่ายคดีโดยเหตุอื่น ๆ **          
+LEFT JOIN (SELECT pcj.JUDGE_ID, 
+	              COUNT(cri.CASE_CATE_CODE) CRIME,
+			      COUNT(drg.CASE_CATE_CODE) DRUG 
+            FROM PC_JUDGEMENT pj
+            LEFT JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID  = pj.CASE_ID AND pcj.REMOVED_BY = 0 
+            LEFT JOIN PC_CASE pc ON pc.CASE_ID = pj.CASE_ID AND pc.REMOVED_BY = 0
+            LEFT JOIN PC_LOOKUP_JUDGE_RESULT pljr ON pljr.JUDGE_RESULT_ID = pj.JUDGE_RESULT_ID 
+            --crime 
+		    LEFT JOIN PC_LOOKUP_CASE_CATE cri ON cri.CASE_CATE_ID = pc.CASE_CATE_ID
+		                                      AND cri.CASE_CATE_CODE IN ('101','108','113','128')
+		                                      AND cri.REMOVED_BY  = 0
+		    --drug 
+		    LEFT JOIN PC_LOOKUP_CASE_CATE drg ON drg.CASE_CATE_ID = pc.CASE_CATE_ID
+			                                  AND drg.CASE_CATE_CODE = '110'
+			                                  AND drg.REMOVED_BY  = 0 
+		    LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+            WHERE pj.REMOVED_BY = 0         
+            AND pj.JUDGE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
+                                   AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
+            AND pljt.JUDGE_TYPE_CODE = '04'  
+            AND pljr.JUDGE_RESULT_CODE = '09'
+            GROUP BY pcj.JUDGE_ID) k ON k.JUDGE_ID = plj.JUDGE_ID 
+--คดีเสร็จไป > โดยเหตุอื่น ๆ **         
+LEFT JOIN (SELECT pcj.JUDGE_ID, 
+	              COUNT(cri.CASE_CATE_CODE) CRIME,
+			      COUNT(drg.CASE_CATE_CODE) DRUG 
+            FROM PC_JUDGEMENT pj
+            LEFT JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID  = pj.CASE_ID AND pcj.REMOVED_BY = 0 
+            LEFT JOIN PC_CASE pc ON pc.CASE_ID = pj.CASE_ID AND pc.REMOVED_BY = 0
+            LEFT JOIN PC_LOOKUP_JUDGE_RESULT pljr ON pljr.JUDGE_RESULT_ID = pj.JUDGE_RESULT_ID 
+            --crime 
+		    LEFT JOIN PC_LOOKUP_CASE_CATE cri ON cri.CASE_CATE_ID = pc.CASE_CATE_ID
+		                                      AND cri.CASE_CATE_CODE IN ('101','108','113','128')
+		                                      AND cri.REMOVED_BY  = 0
+		    --drug 
+		    LEFT JOIN PC_LOOKUP_CASE_CATE drg ON drg.CASE_CATE_ID = pc.CASE_CATE_ID
+			                                  AND drg.CASE_CATE_CODE = '110'
+			                                  AND drg.REMOVED_BY  = 0 
+			LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0                                  
+            WHERE pj.REMOVED_BY = 0         
+            AND pj.JUDGE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
+                                   AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
+            AND pljt.JUDGE_TYPE_CODE = '04'  
+            AND pljr.JUDGE_RESULT_CODE = '09'
+            GROUP BY pcj.JUDGE_ID) kk ON kk.JUDGE_ID = plj.JUDGE_ID             
+--อายุของคดีความในช่วงต่าง ๆ 
+LEFT JOIN (SELECT pcj.JUDGE_ID,
+                   --crime
+                   SUM(CASE WHEN plcc.CASE_CATE_CODE IN ('101','108','113','128') AND CASE_MONTHS <  6 THEN 1 ELSE 0 END)                      MONTH_L06_CRIME,
+                   SUM(CASE WHEN plcc.CASE_CATE_CODE IN ('101','108','113','128') AND CASE_MONTHS >  6 AND CASE_MONTHS < 12 THEN 1 ELSE 0 END) MONTH_06T12_CRIME,
+                   SUM(CASE WHEN plcc.CASE_CATE_CODE IN ('101','108','113','128') AND CASE_MONTHS > 12 AND CASE_MONTHS < 24 THEN 1 ELSE 0 END) MONTH_12T24_CRIME,      
+                   SUM(CASE WHEN plcc.CASE_CATE_CODE IN ('101','108','113','128') AND CASE_MONTHS > 24 AND CASE_MONTHS < 60 THEN 1 ELSE 0 END) MONTH_24T60_CRIME,
+                   SUM(CASE WHEN plcc.CASE_CATE_CODE IN ('101','108','113','128') AND CASE_MONTHS > 60 THEN 1 ELSE 0 END)                      MONTH_M60_CRIME,
+                   --drug
+                   SUM(CASE WHEN plcc.CASE_CATE_CODE = '110' AND CASE_MONTHS <  6 THEN 1 ELSE 0 END)                      MONTH_L06_DRUG,
+                   SUM(CASE WHEN plcc.CASE_CATE_CODE = '110' AND CASE_MONTHS >  6 AND CASE_MONTHS < 12 THEN 1 ELSE 0 END) MONTH_06T12_DRUG,
+                   SUM(CASE WHEN plcc.CASE_CATE_CODE = '110' AND CASE_MONTHS > 12 AND CASE_MONTHS < 24 THEN 1 ELSE 0 END) MONTH_12T24_DRUG,      
+                   SUM(CASE WHEN plcc.CASE_CATE_CODE = '110' AND CASE_MONTHS > 24 AND CASE_MONTHS < 60 THEN 1 ELSE 0 END) MONTH_24T60_DRUG,
+                   SUM(CASE WHEN plcc.CASE_CATE_CODE = '110' AND CASE_MONTHS > 60 THEN 1 ELSE 0 END)                      MONTH_M60_DRUG
+                   FROM (SELECT pc.CASE_ID,
+			 			        pc.CASE_CATE_ID,
+			                    NVL(MONTHS_BETWEEN(pc.CASE_DATE,TRUNC(TO_DATE($P{END_DATE},'DD-MM-YYYY') ,'YEAR')),0) CASE_MONTHS
+						FROM PC_CASE pc
+						LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
+						WHERE pc.REMOVED_BY = 0
+						AND pc.CASE_DATE <= TO_DATE($P{END_DATE},'DD-MM-YYYY') 
+						AND (pj.JUDGE_DATE IS NULL OR pj.JUDGE_DATE > TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS'))) pcpj 
+		           LEFT JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID  = pcpj.CASE_ID AND pcj.REMOVED_BY = 0
+		           LEFT JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pcpj.CASE_CATE_ID AND plcc.REMOVED_BY  = 0
+		           LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0             
+            GROUP BY pcj.JUDGE_ID) l ON l.JUDGE_ID = plj.JUDGE_ID
+--หมายเหตุจำนวนคดีที่ > รับโอนมา(คดี)           
+LEFT JOIN (SELECT pcj.JUDGE_ID, 
+	              COUNT(cri.CASE_CATE_CODE) CRIME,
+			      COUNT(drg.CASE_CATE_CODE) DRUG 
+           FROM PC_CASE_REFERENCE pcr 
+           LEFT JOIN PC_CASE pc ON pc.CASE_ID  = pcr.CASE_ID AND pc.REMOVED_BY = 0
+           LEFT JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID = pc.CASE_ID  AND pcj.REMOVED_BY  = 0
+           LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID  AND pljt.JUDGE_TYPE_CODE ='07' AND pcj.REMOVED_BY = 0 
+           --crime 
+		   LEFT JOIN PC_LOOKUP_CASE_CATE cri ON cri.CASE_CATE_ID = pc.CASE_CATE_ID
+		                                     AND cri.CASE_CATE_CODE IN ('101','108','113','128')
+		                                     AND cri.REMOVED_BY  = 0
+		   --drug 
+		   LEFT JOIN PC_LOOKUP_CASE_CATE drg ON drg.CASE_CATE_ID = pc.CASE_CATE_ID
+			                                 AND drg.CASE_CATE_CODE = '110'
+			                                 AND drg.REMOVED_BY  = 0 
+           WHERE pcr.REMOVED_BY  = 0
+           AND pcj.JUDGE_START_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
+                                        AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
+           AND pljt.JUDGE_TYPE_CODE = '01'
+           GROUP BY pcj.JUDGE_ID) m ON m.JUDGE_ID = plj.JUDGE_ID
+--หมายเหตุจำนวนคดีที่ > โอน(คดี)ไป
+LEFT JOIN (SELECT pcj.JUDGE_ID, 
+	               COUNT(cri.CASE_CATE_CODE) CRIME,
+			       COUNT(drg.CASE_CATE_CODE) DRUG 
+           FROM PC_SENDCASETOOTHERCOURT ps
+           LEFT JOIN PC_CASE pc ON pc.CASE_ID  = ps.DOCUMENT_CASE_ID AND pc.REMOVED_BY = 0
+           LEFT JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID = pc.CASE_ID AND pcj.REMOVED_BY  = 0
+           LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID  AND pljt.JUDGE_TYPE_CODE ='07' AND pcj.REMOVED_BY = 0 
+		   --crime 
+		   LEFT JOIN PC_LOOKUP_CASE_CATE cri ON cri.CASE_CATE_ID = pc.CASE_CATE_ID
+		                                     AND cri.CASE_CATE_CODE IN ('101','108','113','128')
+		                                     AND cri.REMOVED_BY  = 0
+		   --drug 
+		   LEFT JOIN PC_LOOKUP_CASE_CATE drg ON drg.CASE_CATE_ID = pc.CASE_CATE_ID
+			                                 AND drg.CASE_CATE_CODE = '110'
+			                                 AND drg.REMOVED_BY  = 0
+           WHERE ps.REMOVED_BY  = 0
+           AND ps.DATESENDCASE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
+                                        AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
+           AND pljt.JUDGE_TYPE_CODE = '01'
+           GROUP BY pcj.JUDGE_ID) n ON n.JUDGE_ID = plj.JUDGE_ID
+--ชื่อศาล            
+CROSS JOIN (SELECT plc.COURT_NAME_TH FROM PC_PARAM pp
+             JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+             WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) p
+WHERE plj.REMOVED_BY = 0
+AND plj.FLAG_JUDGE = 1
+--
+ORDER BY plj.SUPER_ID ASC]]>
+	</queryString>
+	<field name="JUDGE_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="JUDGE_NAME"/>
+	</field>
+	<field name="COURT_NAME_TH" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
+	</field>
+	<field name="SELECTED_MONTH" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="SELECTED_MONTH"/>
+	</field>
+	<field name="SELECTED_YEAR" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="SELECTED_YEAR"/>
+	</field>
+	<field name="COUNT_INDICMENT_CRIME" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_INDICMENT_CRIME"/>
+	</field>
+	<field name="COUNT_INDICMENT_DRUG" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_INDICMENT_DRUG"/>
+	</field>
+	<field name="COUNT_PETITION_CRIME" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_PETITION_CRIME"/>
+	</field>
+	<field name="COUNT_PETITION_DRUG" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_PETITION_DRUG"/>
+	</field>
+	<field name="COUNT_PRIOR_CASE_NOTEND_CRIME" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_PRIOR_CASE_NOTEND_CRIME"/>
+	</field>
+	<field name="COUNT_PRIOR_CASE_NOTEND_DRUG" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_PRIOR_CASE_NOTEND_DRUG"/>
+	</field>
+	<field name="COUNT_CASE_NEW_CRIME" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_CASE_NEW_CRIME"/>
+	</field>
+	<field name="COUNT_CASE_NEW_DRUG" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_CASE_NEW_DRUG"/>
+	</field>
+	<field name="SUM_ALL_PAGE" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="SUM_ALL_PAGE"/>
+	</field>
+	<field name="SUM_ALL_WITNESS" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="SUM_ALL_WITNESS"/>
+	</field>
+	<field name="RE_JUDGEMENT_CRIME" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="RE_JUDGEMENT_CRIME"/>
+	</field>
+	<field name="RE_JUDGEMENT_DRUG" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="RE_JUDGEMENT_DRUG"/>
+	</field>
+	<field name="COUNT_CASEFINISH_NM_CRIME" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_CASEFINISH_NM_CRIME"/>
+	</field>
+	<field name="COUNT_CASEFINISH_NM_DRUG" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_CASEFINISH_NM_DRUG"/>
+	</field>
+	<field name="COUNT_CASEFINISH_WD_CRIME" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_CASEFINISH_WD_CRIME"/>
+	</field>
+	<field name="COUNT_CASEFINISH_WD_DRUG" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_CASEFINISH_WD_DRUG"/>
+	</field>
+	<field name="COUNT_CASEFINISH_CP_CRIME" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_CASEFINISH_CP_CRIME"/>
+	</field>
+	<field name="COUNT_CASEFINISH_CP_DRUG" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_CASEFINISH_CP_DRUG"/>
+	</field>
+	<field name="COUNT_CASEFINISH_DC_CRIME" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_CASEFINISH_DC_CRIME"/>
+	</field>
+	<field name="COUNT_CASEFINISH_DC_DRUG" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_CASEFINISH_DC_DRUG"/>
+	</field>
+	<field name="COUNT_CASEFINISH_DO_CRIME" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_CASEFINISH_DO_CRIME"/>
+	</field>
+	<field name="COUNT_CASEFINISH_DO_DRUG" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_CASEFINISH_DO_DRUG"/>
+	</field>
+	<field name="COUNT_CASEFINISH_OT_CRIME" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_CASEFINISH_OT_CRIME"/>
+	</field>
+	<field name="COUNT_CASEFINISH_OT_DRUG" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_CASEFINISH_OT_DRUG"/>
+	</field>
+	<field name="MONTH_L06_CRIME" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="MONTH_L06_CRIME"/>
+	</field>
+	<field name="MONTH_06T12_CRIME" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="MONTH_06T12_CRIME"/>
+	</field>
+	<field name="MONTH_12T24_CRIME" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="MONTH_12T24_CRIME"/>
+	</field>
+	<field name="MONTH_24T60_CRIME" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="MONTH_24T60_CRIME"/>
+	</field>
+	<field name="MONTH_M60_CRIME" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="MONTH_M60_CRIME"/>
+	</field>
+	<field name="MONTH_L06_DRUG" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="MONTH_L06_DRUG"/>
+	</field>
+	<field name="MONTH_06T12_DRUG" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="MONTH_06T12_DRUG"/>
+	</field>
+	<field name="MONTH_12T24_DRUG" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="MONTH_12T24_DRUG"/>
+	</field>
+	<field name="MONTH_24T60_DRUG" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="MONTH_24T60_DRUG"/>
+	</field>
+	<field name="MONTH_M60_DRUG" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="MONTH_M60_DRUG"/>
+	</field>
+	<field name="COUNT_CASE_REFRENCE_CRIME" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_CASE_REFRENCE_CRIME"/>
+	</field>
+	<field name="COUNT_CASE_REFRENCE_DRUG" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_CASE_REFRENCE_DRUG"/>
+	</field>
+	<field name="COUNT_CASE_TOOTHERCOURT_CRIME" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_CASE_TOOTHERCOURT_CRIME"/>
+	</field>
+	<field name="COUNT_CASE_TOOTHERCOURT_DRUG" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_CASE_TOOTHERCOURT_DRUG"/>
+	</field>
+	<variable name="FINISH_ALL_CRIME" class="java.lang.Long">
+		<variableExpression><![CDATA[$F{COUNT_CASEFINISH_NM_CRIME}+$F{COUNT_CASEFINISH_WD_CRIME}+$F{COUNT_CASEFINISH_CP_CRIME}+$F{COUNT_CASEFINISH_DC_CRIME}+$F{COUNT_CASEFINISH_DO_CRIME}+$F{COUNT_CASEFINISH_OT_CRIME}]]></variableExpression>
+	</variable>
+	<variable name="FINISH_ALL_DRUG" class="java.lang.Long">
+		<variableExpression><![CDATA[$F{COUNT_CASEFINISH_NM_DRUG}+$F{COUNT_CASEFINISH_WD_DRUG}+$F{COUNT_CASEFINISH_CP_DRUG}+$F{COUNT_CASEFINISH_DC_DRUG}+$F{COUNT_CASEFINISH_DO_DRUG}+$F{COUNT_CASEFINISH_OT_DRUG}]]></variableExpression>
+	</variable>
+	<variable name="REMAIN_ALL_CRIME" class="java.lang.Long">
+		<variableExpression><![CDATA[$F{MONTH_L06_CRIME}+$F{MONTH_06T12_CRIME}+$F{MONTH_12T24_CRIME}+$F{MONTH_24T60_CRIME}+$F{MONTH_M60_CRIME}]]></variableExpression>
+	</variable>
+	<variable name="REMAIN_ALL_DRUG" class="java.lang.Long">
+		<variableExpression><![CDATA[$F{MONTH_L06_DRUG}+$F{MONTH_06T12_DRUG}+$F{MONTH_12T24_DRUG}+$F{MONTH_24T60_DRUG}+$F{MONTH_M60_DRUG}]]></variableExpression>
+	</variable>
+	<variable name="SUM_INDICMENT_CRIME" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_INDICMENT_CRIME}]]></variableExpression>
+	</variable>
+	<variable name="SUM_PETITION_CRIME" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_PETITION_CRIME}]]></variableExpression>
+	</variable>
+	<variable name="SUM_PRIOR_CASE_NOTEND_CRIME" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_PRIOR_CASE_NOTEND_CRIME}]]></variableExpression>
+	</variable>
+	<variable name="SUM_ALL_PAGES_CRIME" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM_ALL_PAGE}]]></variableExpression>
+	</variable>
+	<variable name="SUM_CASE_NEW_CRIME" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_CASE_NEW_CRIME}]]></variableExpression>
+	</variable>
+	<variable name="SUM_ALL_WITNESSES_CRIME" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM_ALL_WITNESS}]]></variableExpression>
+	</variable>
+	<variable name="SUM_REJUDGEMENT_CRIME" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{RE_JUDGEMENT_CRIME}]]></variableExpression>
+	</variable>
+	<variable name="SUM_CASEFINISH_NM_CRIME" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_CASEFINISH_NM_CRIME}]]></variableExpression>
+	</variable>
+	<variable name="SUM_CASEFINISH_CP_CRIME" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_CASEFINISH_CP_CRIME}]]></variableExpression>
+	</variable>
+	<variable name="SUM_CASEFINISH_WD_CRIME" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_CASEFINISH_WD_CRIME}]]></variableExpression>
+	</variable>
+	<variable name="SUM_CASEFINISH_DC_CRIME" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_CASEFINISH_DC_CRIME}]]></variableExpression>
+	</variable>
+	<variable name="SUM_CASEFINISH_DO_CRIME" class="java.lang.Long" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_CASEFINISH_DO_CRIME}]]></variableExpression>
+	</variable>
+	<variable name="SUM_CASEFINISH_OT_CRIME" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_CASEFINISH_OT_CRIME}]]></variableExpression>
+	</variable>
+	<variable name="SUM_MONTH_L06_CRIME" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{MONTH_L06_CRIME}]]></variableExpression>
+	</variable>
+	<variable name="SUM_MONTH_06T12_CRIME" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{MONTH_06T12_CRIME}]]></variableExpression>
+	</variable>
+	<variable name="SUM_MONTH_12T24_CRIME" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{MONTH_12T24_CRIME}]]></variableExpression>
+	</variable>
+	<variable name="SUM_MONTH_24T60_CRIME" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{MONTH_24T60_CRIME}]]></variableExpression>
+	</variable>
+	<variable name="SUM_MONTH_M60_CRIME" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{MONTH_M60_CRIME}]]></variableExpression>
+	</variable>
+	<variable name="SUM_CASE_NEXTMONTH_NOTEND_CRIME" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[0]]></variableExpression>
+	</variable>
+	<variable name="SUM_CASE_REFRENCE_CRIME" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_CASE_REFRENCE_CRIME}]]></variableExpression>
+	</variable>
+	<variable name="SUM_CASE_TOOTHERCOURT_CRIME" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_CASE_TOOTHERCOURT_CRIME}]]></variableExpression>
+	</variable>
+	<variable name="SUM_FINISH_ALL_CRIME" class="java.lang.Long" calculation="Sum">
+		<variableExpression><![CDATA[$V{FINISH_ALL_CRIME}]]></variableExpression>
+	</variable>
+	<variable name="SUM_INDICMENT_DRUG" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_INDICMENT_DRUG}]]></variableExpression>
+	</variable>
+	<variable name="SUM_PETITION_DRUG" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_PETITION_DRUG}]]></variableExpression>
+	</variable>
+	<variable name="SUM_PRIOR_CASE_NOTEND_DRUG" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_PRIOR_CASE_NOTEND_DRUG}]]></variableExpression>
+	</variable>
+	<variable name="SUM_ALL_PAGES_DRUG" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM_ALL_PAGE}]]></variableExpression>
+	</variable>
+	<variable name="SUM_CASE_NEW_DRUG" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_CASE_NEW_DRUG}]]></variableExpression>
+	</variable>
+	<variable name="SUM_ALL_WITNESSES_DRUG" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{SUM_ALL_WITNESS}]]></variableExpression>
+	</variable>
+	<variable name="SUM_REJUDGEMENT_DRUG" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{RE_JUDGEMENT_DRUG}]]></variableExpression>
+	</variable>
+	<variable name="SUM_CASEFINISH_NM_DRUG" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_CASEFINISH_NM_DRUG}]]></variableExpression>
+	</variable>
+	<variable name="SUM_CASEFINISH_CP_DRUG" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_CASEFINISH_CP_DRUG}]]></variableExpression>
+	</variable>
+	<variable name="SUM_CASEFINISH_WD_DRUG" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_CASEFINISH_WD_DRUG}]]></variableExpression>
+	</variable>
+	<variable name="SUM_CASEFINISH_DC_DRUG" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_CASEFINISH_DC_DRUG}]]></variableExpression>
+	</variable>
+	<variable name="SUM_CASEFINISH_DO_DRUG" class="java.lang.Long" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_CASEFINISH_DO_DRUG}]]></variableExpression>
+	</variable>
+	<variable name="SUM_CASEFINISH_OT_DRUG" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_CASEFINISH_OT_DRUG}]]></variableExpression>
+	</variable>
+	<variable name="SUM_MONTH_L06_DRUG" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{MONTH_L06_DRUG}]]></variableExpression>
+	</variable>
+	<variable name="SUM_MONTH_06T12_DRUG" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{MONTH_06T12_DRUG}]]></variableExpression>
+	</variable>
+	<variable name="SUM_MONTH_12T24_DRUG" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{MONTH_12T24_DRUG}]]></variableExpression>
+	</variable>
+	<variable name="SUM_MONTH_24T60_DRUG" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{MONTH_24T60_DRUG}]]></variableExpression>
+	</variable>
+	<variable name="SUM_MONTH_M60_DRUG" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{MONTH_M60_DRUG}]]></variableExpression>
+	</variable>
+	<variable name="SUM_CASE_NEXTMONTH_NOTEND_DRUG" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[0]]></variableExpression>
+	</variable>
+	<variable name="SUM_CASE_REFRENCE_DRUG" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_CASE_REFRENCE_DRUG}]]></variableExpression>
+	</variable>
+	<variable name="SUM_CASE_TOOTHERCOURT_DRUG" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_CASE_TOOTHERCOURT_DRUG}]]></variableExpression>
+	</variable>
+	<variable name="SUM_FINISH_ALL_DRUG" class="java.lang.Long" calculation="Sum">
+		<variableExpression><![CDATA[$V{FINISH_ALL_DRUG}]]></variableExpression>
+	</variable>
+	<variable name="SUM_REMAIN_ALL_CRIME" class="java.lang.Long" calculation="Sum">
+		<variableExpression><![CDATA[$V{REMAIN_ALL_CRIME}]]></variableExpression>
+	</variable>
+	<variable name="SUM_REMAIN_ALL_DRUG" class="java.lang.Long" calculation="Sum">
+		<variableExpression><![CDATA[$V{REMAIN_ALL_DRUG}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="50" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="662" height="25" uuid="ffa6f556-ed4a-41b9-88df-ddb13754196c">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="THSarabunNew" size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[บัญชีแสดงผลงานผู้พิพากษา]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="662" y="0" width="140" height="25" uuid="ffd11dbb-a394-4182-9407-1d55a7b227cd">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="THSarabunNew" size="18" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["ในส่วนอาญา"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="25" width="75" height="25" uuid="f579df40-e22c-45a6-bd2d-519643eae20f">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box leftPadding="5">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left">
+					<font fontName="THSarabunNew" size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ประจำเดือน :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="75" y="25" width="67" height="25" uuid="e367634d-c259-4631-9137-c11b7e87c94c">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left">
+					<font fontName="THSarabunNew" size="18" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SELECTED_MONTH}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="142" y="25" width="50" height="25" uuid="dd94f30c-64c9-432f-8c6a-80821ad3a23e">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="THSarabunNew" size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[พ.ศ.]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="192" y="25" width="160" height="25" uuid="b9a80266-eab2-435e-a32a-b29e8ce40ee6">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left">
+					<font fontName="THSarabunNew" size="18" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SELECTED_YEAR}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="352" y="25" width="450" height="25" uuid="05cbef93-b9dd-4d34-aecf-28f46aedde82">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box leftPadding="5">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left">
+					<font fontName="THSarabunNew" size="18" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="75" y="43" width="80" height="1" uuid="15c50236-4d23-4a4c-9dfc-67a9783129e4">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="183" y="43" width="120" height="1" uuid="87e28de1-1cf7-4206-b9bc-ab32e28bac8c">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="100" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<staticText>
+				<reportElement x="30" y="0" width="112" height="100" uuid="811b54b3-b87e-4705-9231-8430b8afffc7">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="eeb063aa-ab31-4f8c-a410-2aff5f2c8a68"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<text><![CDATA[ชื่อผู้พิพากษา ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="180" y="36" width="27" height="64" uuid="06ea43fd-d2b1-4fb0-b068-b8531c9a76b6">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="c8bf2ab3-72a0-4af2-877e-8a44b75148c8"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[คำฟ้อง]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="207" y="36" width="27" height="64" uuid="0eaaf306-2814-4449-8670-00401b6a39ac">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[คำร้อง]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="234" y="36" width="27" height="64" uuid="9f8860d1-2873-49f3-ab7b-8af90b488205">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="89b85034-bfc3-4d8c-a9f8-6ccfa50f5d75"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[ค้างจาก เดือนก่อน]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="261" y="36" width="27" height="64" uuid="c17d5a85-e112-403c-b00b-877a23cd8484">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="8cb24fcf-a070-4251-97d8-8634095f18cb"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[รับใหม่ เดือนนี้]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="288" y="36" width="27" height="64" uuid="1531a7dc-6331-4a88-af31-d238083586f6">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="abc0d724-d3f2-458a-a7b2-b9b54a6b9347"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[ประชุม ทางไกล ผ่านจอภาพ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="315" y="36" width="27" height="64" uuid="4b50cd38-4b8e-4815-9649-a82b096aafdf">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="0952c365-2b8f-41b3-a8c5-ce5a6d05a39f"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[จำนวน ปาก]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="369" y="0" width="27" height="100" uuid="d83c34f5-d497-4cb0-95c3-f55688307383">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="33c0c65b-4260-44cc-ab3c-42519a0a96c4"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[คดีแดง ที่นำมา พิจารณา ใหม่ อีกครั้ง]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="396" y="36" width="27" height="64" uuid="127ed487-9fd2-4c97-8f78-4f777c3f86f6">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6b886030-b350-44dc-a3ba-32186a32a176"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[พิพากษา ความเรียง]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="423" y="36" width="27" height="64" uuid="bde191d8-7c87-4de4-9ff1-e8d11cb08b53">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a0579ce1-9344-4ff3-899c-36b0eb58cff0"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[ประนี ประนอม พิพากษา ตามยอม]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="450" y="36" width="27" height="64" uuid="10c8bd1d-1380-4c34-bc35-3c7cf03e0a62">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="2971a412-8d14-490f-af79-a6963355b8ed"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[ถอนฟ้อง คำร้อง]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="477" y="60" width="27" height="40" uuid="f829cee2-83cc-4ff3-b6b6-8a56850268fb">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9d7628a6-aefc-4abb-928f-d698c7c21b6b"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[ชั่วคราว]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="531" y="36" width="27" height="64" uuid="a33ffc87-f4f1-4dee-a8a2-446d8151bf0d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d59de73c-5053-4022-92c6-f9459aa35594"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[โดย เหตุอื่น]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="585" y="36" width="27" height="64" uuid="4199b430-f38a-482f-842e-e1322cf8b9ba">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d468cfc1-9763-4a02-bb1e-fa4b80bc2bc9"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[ไม่เกิน 6 เดือน]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="612" y="36" width="27" height="64" uuid="f6521cf7-9e17-4171-b900-493c6c0e2a04">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="315aebf4-a9d4-4e90-8e1d-14a72251d7bc"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[เกิน 6 เดือน ไม่เกิน 1 ปี]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="639" y="36" width="27" height="64" uuid="813e68a5-220f-4f85-ac45-2d6b9730dc82">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4dba7dc9-373a-4a27-bfa6-c996a20e7bba"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[เกิน 1 ปี ไม่เกิน 2 ปี]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="666" y="36" width="27" height="64" uuid="cd19f085-30b6-4460-9d85-ce1e4ec80a75">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="dc483e6c-475d-42af-81aa-c033e0767e31"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[เกิน 2 ปี ไม่เกิน 5 ปี]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="693" y="36" width="27" height="64" uuid="bfc38a85-c7da-4646-958f-92e6513f0e02">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="73ac50ef-ecad-4ace-9320-4272c130cfe5"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[เกิน 5 ปี ขึ้นไป]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="747" y="36" width="27" height="64" uuid="8d83c17a-7f07-4d80-9382-e3c9a4a65d60">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="15bc6e84-0806-4602-a9bd-d8b1b3286273"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[รับ โอนมา (คดี)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="774" y="36" width="27" height="64" uuid="7f169cf4-80e0-46ef-9920-8e2ddc1577a7">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7a9bc65d-899d-45b5-bb06-aac9b3b409a8"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[โอน ไป (คดี)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="180" y="0" width="54" height="36" uuid="0310ba74-a6c5-4046-8648-71598c0f564e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<text><![CDATA[ตรวจฟ้องและ คำร้องขอ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="234" y="0" width="54" height="36" uuid="8aca925c-153e-4e26-a501-c7ffdad83c64">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="89b85034-bfc3-4d8c-a9f8-6ccfa50f5d75"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<text><![CDATA[เจ้าของสำนวน]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="288" y="0" width="81" height="36" uuid="cbc2916f-28bf-4ab1-971c-8ceb603dcb6f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="89b85034-bfc3-4d8c-a9f8-6ccfa50f5d75"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[สืบพยาน]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="396" y="0" width="189" height="36" uuid="292dbac0-ef40-4fce-89fd-8f62e47b710d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="33c0c65b-4260-44cc-ab3c-42519a0a96c4"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[คดีเสร็จไป]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="747" y="0" width="54" height="36" uuid="115d8e62-1f85-41aa-8121-6429b1bfc0cc">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="33c0c65b-4260-44cc-ab3c-42519a0a96c4"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[หมายเหตุ จำนวนคดี]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="558" y="36" width="27" height="64" uuid="5a2cfcaf-2a5e-4523-9b44-8c62be620a03">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d59de73c-5053-4022-92c6-f9459aa35594"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[รวม]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="720" y="36" width="27" height="64" uuid="bf633eeb-9acf-4175-9749-e7dbe5047b61">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d59de73c-5053-4022-92c6-f9459aa35594"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[รวม]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="30" height="100" uuid="b1f43a76-78ea-444c-8aa4-bb406722da94">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d59de73c-5053-4022-92c6-f9459aa35594"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<text><![CDATA[ที่]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="585" y="0" width="162" height="36" uuid="aefe03c8-3efb-4533-af26-5931afe73d83">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="33c0c65b-4260-44cc-ab3c-42519a0a96c4"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[คดีค้างไปเดือนหน้า]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="342" y="36" width="27" height="64" uuid="b9347369-e970-4ab4-a3ef-9bd576377035">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="0952c365-2b8f-41b3-a8c5-ce5a6d05a39f"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[จำนวน หน้า กระดาษ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="504" y="60" width="27" height="40" uuid="d7da57ef-7361-4828-8d8c-6cf68885135a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9d7628a6-aefc-4abb-928f-d698c7c21b6b"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[อื่นๆ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="477" y="36" width="54" height="24" uuid="51813adc-53af-493b-8bbd-c47749d3b9be">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9d7628a6-aefc-4abb-928f-d698c7c21b6b"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[จำหน่ายคดี]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="142" y="0" width="38" height="100" uuid="4e514e14-5a80-40ba-9bc6-849a8304c64c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d59de73c-5053-4022-92c6-f9459aa35594"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<text><![CDATA[ประเภท  คดี]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="50" splitType="Stretch">
+			<textField>
+				<reportElement x="30" y="0" width="112" height="50" uuid="bcbc5749-c206-427b-b812-28cb65b623f3">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="eeb063aa-ab31-4f8c-a410-2aff5f2c8a68"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box leftPadding="3">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{JUDGE_NAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="180" y="0" width="27" height="25" uuid="6eed3451-2751-4a33-94b7-6ed1bb2373f5">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="c8bf2ab3-72a0-4af2-877e-8a44b75148c8"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_INDICMENT_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="207" y="0" width="27" height="25" uuid="bc882e23-7da5-460b-8169-834b01a9231e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_PETITION_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="234" y="0" width="27" height="25" uuid="c8a78e1f-9b33-4259-bc57-0354358927d0">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="89b85034-bfc3-4d8c-a9f8-6ccfa50f5d75"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_PRIOR_CASE_NOTEND_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="261" y="0" width="27" height="25" uuid="9f36a0cb-3ec9-447c-8fc0-6b3e880c6bcd">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="8cb24fcf-a070-4251-97d8-8634095f18cb"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CASE_NEW_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="315" y="0" width="27" height="25" uuid="755b5b34-e9ab-4b45-b286-a00027eb6d50">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="abc0d724-d3f2-458a-a7b2-b9b54a6b9347"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_ALL_PAGE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="342" y="0" width="27" height="25" uuid="100db0df-3d47-42e4-97b6-a30b5fd603b1">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="0952c365-2b8f-41b3-a8c5-ce5a6d05a39f"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_ALL_WITNESS}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="369" y="0" width="27" height="25" uuid="bf69778d-2324-4265-a776-f4e30b28dbd5">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="33c0c65b-4260-44cc-ab3c-42519a0a96c4"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{RE_JUDGEMENT_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="396" y="0" width="27" height="25" uuid="76b8cc4c-2956-41ba-8f4e-5611c42ab64e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6b886030-b350-44dc-a3ba-32186a32a176"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CASEFINISH_NM_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="450" y="0" width="27" height="25" uuid="3c3af7fd-1ecc-439d-be9d-cfdaaf2153a6">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a0579ce1-9344-4ff3-899c-36b0eb58cff0"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CASEFINISH_WD_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="423" y="0" width="27" height="25" uuid="d7eea01a-e2e0-441e-9a13-ca7fbf96d237">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="2971a412-8d14-490f-af79-a6963355b8ed"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CASEFINISH_CP_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="477" y="0" width="27" height="25" uuid="1e6f8906-9601-4d88-8b50-8170a405a777">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9d7628a6-aefc-4abb-928f-d698c7c21b6b"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CASEFINISH_DC_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="531" y="0" width="27" height="25" uuid="818d2f6b-fe2b-4256-b5dd-632b4d0cb417">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d59de73c-5053-4022-92c6-f9459aa35594"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CASEFINISH_OT_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="585" y="0" width="27" height="25" uuid="63bc9537-63e5-4d7e-8eed-e1fba7c2ef3e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d468cfc1-9763-4a02-bb1e-fa4b80bc2bc9"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MONTH_L06_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="612" y="0" width="27" height="25" uuid="cce65f08-f45a-4d7f-9712-9b0ca7b7a944">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="315aebf4-a9d4-4e90-8e1d-14a72251d7bc"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MONTH_06T12_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="639" y="0" width="27" height="25" uuid="bae20839-746c-46ef-bbd4-256dd804bf7a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4dba7dc9-373a-4a27-bfa6-c996a20e7bba"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MONTH_12T24_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="666" y="0" width="27" height="25" uuid="9317d364-43f8-464f-b4b6-0de790b111a1">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="dc483e6c-475d-42af-81aa-c033e0767e31"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MONTH_24T60_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="693" y="0" width="27" height="25" uuid="edddc3ae-784c-4c7c-8ce2-30fbd2d71a4e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="73ac50ef-ecad-4ace-9320-4272c130cfe5"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MONTH_M60_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="747" y="0" width="27" height="25" uuid="a165a49a-7cec-43fd-8e56-1e421e5e196c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="15bc6e84-0806-4602-a9bd-d8b1b3286273"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CASE_REFRENCE_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="774" y="0" width="27" height="25" uuid="181fec71-fb62-49a3-882d-11b75bb33d8e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7a9bc65d-899d-45b5-bb06-aac9b3b409a8"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CASE_TOOTHERCOURT_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="558" y="0" width="27" height="25" uuid="6f6aa6e3-4c65-4e8f-8c0d-d00840e24cce">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d59de73c-5053-4022-92c6-f9459aa35594"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{FINISH_ALL_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="720" y="0" width="27" height="25" uuid="09336e52-c7e2-4a85-8eaf-14a20c437941">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="15bc6e84-0806-4602-a9bd-d8b1b3286273"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{REMAIN_ALL_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="30" height="50" uuid="d27b1d84-a2d6-4f9c-bbe0-8be5d8d96a9c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d59de73c-5053-4022-92c6-f9459aa35594"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="288" y="0" width="27" height="25" uuid="75d63295-8e25-4522-b120-d16d96a571f8">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="8cb24fcf-a070-4251-97d8-8634095f18cb"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="504" y="0" width="27" height="25" uuid="71691016-23cd-4b92-af96-c9210f8a1c8d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9d7628a6-aefc-4abb-928f-d698c7c21b6b"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CASEFINISH_DO_CRIME}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="142" y="0" width="38" height="25" uuid="72933fb4-35e9-4203-a07a-0b05ac2cd9e3">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="c8bf2ab3-72a0-4af2-877e-8a44b75148c8"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box leftPadding="3">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[คดีอาญา]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="261" y="25" width="27" height="25" uuid="7d849cd4-c489-49b7-ab31-b9a76ad89bab">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="8cb24fcf-a070-4251-97d8-8634095f18cb"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CASE_NEW_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="747" y="25" width="27" height="25" uuid="3604b378-7baa-45b8-9995-4d62e23519ee">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="15bc6e84-0806-4602-a9bd-d8b1b3286273"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CASE_REFRENCE_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="612" y="25" width="27" height="25" uuid="50acc227-614f-49ff-a966-846bc1346f79">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="315aebf4-a9d4-4e90-8e1d-14a72251d7bc"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MONTH_06T12_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="234" y="25" width="27" height="25" uuid="f179c423-57f6-478b-899c-e4639cd8749d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="89b85034-bfc3-4d8c-a9f8-6ccfa50f5d75"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_PRIOR_CASE_NOTEND_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="666" y="25" width="27" height="25" uuid="2d04c5c1-386e-40b0-8308-b1a84c858252">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="dc483e6c-475d-42af-81aa-c033e0767e31"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MONTH_24T60_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="423" y="25" width="27" height="25" uuid="7882c840-2acc-4bb1-b22e-4398fb6d6922">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="2971a412-8d14-490f-af79-a6963355b8ed"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CASEFINISH_CP_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="477" y="25" width="27" height="25" uuid="55a2938f-287b-4055-98e4-80298441960b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9d7628a6-aefc-4abb-928f-d698c7c21b6b"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CASEFINISH_DC_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="720" y="25" width="27" height="25" uuid="87b7d7ac-36b4-47ae-aa20-8030b5ea8514">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="15bc6e84-0806-4602-a9bd-d8b1b3286273"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{REMAIN_ALL_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="342" y="25" width="27" height="25" uuid="58b64ec9-8cab-49b0-9872-9cf0697f10ac">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="0952c365-2b8f-41b3-a8c5-ce5a6d05a39f"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_ALL_PAGE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="450" y="25" width="27" height="25" uuid="b5e5167e-b99a-4070-9ff1-4d49eb9193df">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a0579ce1-9344-4ff3-899c-36b0eb58cff0"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CASEFINISH_WD_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="504" y="25" width="27" height="25" uuid="06f7509e-cf21-4bd3-ac89-155563cb7f0d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9d7628a6-aefc-4abb-928f-d698c7c21b6b"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CASEFINISH_DO_DRUG}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="142" y="25" width="38" height="25" uuid="d5259d3e-2086-41fd-b6d8-81b02cc42d7c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="c8bf2ab3-72a0-4af2-877e-8a44b75148c8"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box leftPadding="3">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[คดียาเสพติด]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="774" y="25" width="27" height="25" uuid="1cb57986-641f-424d-ba98-855687c9c4cd">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7a9bc65d-899d-45b5-bb06-aac9b3b409a8"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CASE_TOOTHERCOURT_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="396" y="25" width="27" height="25" uuid="49a13b31-ab1b-4af5-858b-dae65261b3df">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6b886030-b350-44dc-a3ba-32186a32a176"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CASEFINISH_NM_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="693" y="25" width="27" height="25" uuid="044458c7-4ce1-42d7-96b3-2b33450cfd6a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="73ac50ef-ecad-4ace-9320-4272c130cfe5"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MONTH_M60_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="531" y="25" width="27" height="25" uuid="ce24562c-0b08-4c20-b9e7-abb71a378cb5">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d59de73c-5053-4022-92c6-f9459aa35594"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CASEFINISH_OT_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="369" y="25" width="27" height="25" uuid="1eb6c1da-5a56-4b96-ac8e-36df431a470d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="33c0c65b-4260-44cc-ab3c-42519a0a96c4"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{RE_JUDGEMENT_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="315" y="25" width="27" height="25" uuid="241c8647-2ad2-466e-a5b5-09469f50aac9">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="abc0d724-d3f2-458a-a7b2-b9b54a6b9347"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_ALL_WITNESS}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="288" y="25" width="27" height="25" uuid="06fb9a89-7352-4f40-b5cd-ab6f09038d99">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="8cb24fcf-a070-4251-97d8-8634095f18cb"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="207" y="25" width="27" height="25" uuid="63345228-6348-4dfb-9c2a-dcd83198c382">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_PETITION_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="639" y="25" width="27" height="25" uuid="e37f3ca3-a211-4c6e-adee-1a44986e0a32">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4dba7dc9-373a-4a27-bfa6-c996a20e7bba"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MONTH_12T24_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="585" y="25" width="27" height="25" uuid="73e9273b-30fa-49a9-8518-bdc0a83bbe18">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d468cfc1-9763-4a02-bb1e-fa4b80bc2bc9"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MONTH_L06_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="558" y="25" width="27" height="25" uuid="0d775e1d-146c-47db-932d-18abf1d96819">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d59de73c-5053-4022-92c6-f9459aa35594"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{FINISH_ALL_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="180" y="25" width="27" height="25" uuid="09e0e928-76b7-4a11-80b3-4a2301058fd0">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="c8bf2ab3-72a0-4af2-877e-8a44b75148c8"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_INDICMENT_DRUG}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<lastPageFooter>
+		<band height="93">
+			<staticText>
+				<reportElement x="272" y="5" width="230" height="25" uuid="f5e18bd1-0f20-47cd-86e1-25b50e0971b1">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<text><![CDATA[ลงนามผู้จัดทำ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="272" y="30" width="230" height="56" uuid="e474f75c-79b7-4b09-9b11-bc0fc227c1ca">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<text><![CDATA[(นางสาวจุติมา  สระเกตุ)]]></text>
+			</staticText>
+			<line>
+				<reportElement x="296" y="60" width="180" height="1" uuid="78d38738-a895-4391-973a-177b6d030c1b">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+			</line>
+			<staticText>
+				<reportElement x="502" y="30" width="230" height="56" uuid="89908439-015b-4e78-8d04-2ea171a02766">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<text><![CDATA[(นายพีระพงศ์  ศรีโชติ)]]></text>
+			</staticText>
+			<line>
+				<reportElement x="526" y="60" width="180" height="1" uuid="669e13f4-1396-4e61-adb6-3ba8d543ad84">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+			</line>
+			<staticText>
+				<reportElement x="502" y="5" width="230" height="25" uuid="27897be6-c6bc-4a7c-89d5-368798686769">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<text><![CDATA[ลงนามผู้อำนวยการ]]></text>
+			</staticText>
+		</band>
+	</lastPageFooter>
+	<summary>
+		<band height="88" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<staticText>
+				<reportElement x="0" y="0" width="142" height="75" uuid="c836e09e-a6a1-419a-baf8-c14cb80b8b67">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d59de73c-5053-4022-92c6-f9459aa35594"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[รวมทั้งสิ้น]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="180" y="0" width="27" height="25" uuid="a5e7c159-6011-4c2f-8dd8-b6b1c7630a62">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="c8bf2ab3-72a0-4af2-877e-8a44b75148c8"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_INDICMENT_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="207" y="0" width="27" height="25" uuid="86ef9c88-5766-4d4a-8290-1370c370d8e2">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_PETITION_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="234" y="0" width="27" height="25" uuid="77d25237-1e46-4b34-befb-2acbfa4c0891">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_PRIOR_CASE_NOTEND_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="261" y="0" width="27" height="25" uuid="0db4b6bc-2c93-48cb-9403-662f0de8d0ad">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASE_NEW_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="315" y="0" width="27" height="25" uuid="ed5edd2a-7141-4eef-b0e6-2631176f66dc">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_ALL_WITNESSES_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="342" y="0" width="27" height="25" uuid="995aab76-f89b-496a-9e57-a21ed38a8c45">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_ALL_PAGES_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="369" y="0" width="27" height="25" uuid="7e57253e-7f0b-40e1-8c48-c8c6c0f66153">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_REJUDGEMENT_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="396" y="0" width="27" height="25" uuid="871dae4c-4e2c-469b-b8bb-ea35d9f0f4d5">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASEFINISH_NM_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="423" y="0" width="27" height="25" uuid="8e6217dd-6aa9-44eb-8524-01256319a5ed">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASEFINISH_CP_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="477" y="0" width="27" height="25" uuid="f66ae779-4038-4cf8-94ea-0736385281fb">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASEFINISH_DC_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="504" y="0" width="27" height="25" uuid="3fa98dd8-bb90-4381-b8d1-f3e4766ae19c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASEFINISH_DO_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="531" y="0" width="27" height="25" uuid="ce646294-3126-464e-bd7d-7c84cf11bb3d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASEFINISH_OT_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="585" y="0" width="27" height="25" uuid="d099427e-8e84-43c1-ae84-5a2397818eed">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d468cfc1-9763-4a02-bb1e-fa4b80bc2bc9"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_MONTH_L06_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="612" y="0" width="27" height="25" uuid="ad531cbd-2cd4-4ca1-bbae-6f8c3a995043">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="315aebf4-a9d4-4e90-8e1d-14a72251d7bc"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_MONTH_06T12_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="639" y="0" width="27" height="25" uuid="3c6b9a85-0fbd-41b7-90f7-1731a9970f1b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4dba7dc9-373a-4a27-bfa6-c996a20e7bba"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_MONTH_12T24_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="666" y="0" width="27" height="25" uuid="fe6df35a-8c84-4274-8216-e3420dfec194">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="dc483e6c-475d-42af-81aa-c033e0767e31"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_MONTH_24T60_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="693" y="0" width="27" height="25" uuid="67ffbc8c-8089-4cab-bf5f-b756a4e96e4d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="73ac50ef-ecad-4ace-9320-4272c130cfe5"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_MONTH_M60_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="720" y="0" width="27" height="25" uuid="e5afd229-5495-4137-8905-4a6a94ae99a7">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="15bc6e84-0806-4602-a9bd-d8b1b3286273"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASE_NEXTMONTH_NOTEND_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="747" y="0" width="27" height="25" uuid="496df75f-a4bd-4178-8554-81b17f99fd24">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="15bc6e84-0806-4602-a9bd-d8b1b3286273"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASE_REFRENCE_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="774" y="0" width="27" height="25" uuid="de32a0a5-e4d2-42a3-a9ba-08e80da10855">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7a9bc65d-899d-45b5-bb06-aac9b3b409a8"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_REMAIN_ALL_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="558" y="0" width="27" height="25" uuid="cf2a5a35-1358-443b-91bc-b9ed9436c090">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d59de73c-5053-4022-92c6-f9459aa35594"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_FINISH_ALL_CRIME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="288" y="0" width="27" height="25" uuid="8b779e96-aa35-4769-9126-bab09e8b924d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="450" y="0" width="27" height="25" uuid="420c969b-1ca1-49f2-9e2d-bfc5388790c9">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASEFINISH_WD_CRIME}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="142" y="0" width="38" height="25" uuid="8831fba7-9eb2-447a-bd4b-27a4f6d04a1b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="c8bf2ab3-72a0-4af2-877e-8a44b75148c8"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box leftPadding="3">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[คดีอาญา]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="423" y="25" width="27" height="25" uuid="9d7b785e-71de-4587-86f7-a14f4ca2a226">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASEFINISH_CP_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="180" y="25" width="27" height="25" uuid="b5007023-d6fd-40ee-bf20-290bba885b5e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="c8bf2ab3-72a0-4af2-877e-8a44b75148c8"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_INDICMENT_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="234" y="25" width="27" height="25" uuid="8cc1eb12-d2a0-4d07-ba5b-b9946494a7cb">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_PRIOR_CASE_NOTEND_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="396" y="25" width="27" height="25" uuid="cf6f1ae3-ba02-49a8-914b-879d6fe755ec">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASEFINISH_NM_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="747" y="25" width="27" height="25" uuid="8b978859-96a7-4719-8078-72ad2aa6326f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="15bc6e84-0806-4602-a9bd-d8b1b3286273"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASE_REFRENCE_DRUG}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="142" y="25" width="38" height="25" uuid="a3210b6a-b041-4174-a554-0e14015399af">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="c8bf2ab3-72a0-4af2-877e-8a44b75148c8"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box leftPadding="3">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[คดีอาญา]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="612" y="25" width="27" height="25" uuid="5ce7fc9a-ec9b-4926-8aa6-3ce47a67dba7">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="315aebf4-a9d4-4e90-8e1d-14a72251d7bc"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_MONTH_06T12_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="693" y="25" width="27" height="25" uuid="06725957-6271-42de-9acc-1c6813e163a9">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="73ac50ef-ecad-4ace-9320-4272c130cfe5"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_MONTH_M60_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="207" y="25" width="27" height="25" uuid="2cd3efb0-1ffb-4b4e-97b2-ca5b58f3ae10">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_PETITION_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="477" y="25" width="27" height="25" uuid="3e76abb3-a59b-4db6-87cb-244133d12bf6">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASEFINISH_DC_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="666" y="25" width="27" height="25" uuid="e28ec8d9-c7ed-40ac-a40b-bb1aff8a38c6">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="dc483e6c-475d-42af-81aa-c033e0767e31"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_MONTH_24T60_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="639" y="25" width="27" height="25" uuid="41b83c32-7f10-4396-91c6-1f0af1995f55">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4dba7dc9-373a-4a27-bfa6-c996a20e7bba"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_MONTH_12T24_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="531" y="25" width="27" height="25" uuid="9a30ab14-e260-4a8c-b3c4-f6f26eec96e5">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASEFINISH_OT_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="315" y="25" width="27" height="25" uuid="71a0b9dc-8e82-4b39-acba-c5d0bf149531">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_ALL_WITNESSES_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="504" y="25" width="27" height="25" uuid="9e596546-fcff-412a-9919-2d981c784625">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASEFINISH_DO_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="450" y="25" width="27" height="25" uuid="c5945de2-b525-473a-9039-0e25e47bf5ef">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASEFINISH_WD_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="558" y="25" width="27" height="25" uuid="61bae3ee-8713-47e6-b6e7-329c970236ef">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d59de73c-5053-4022-92c6-f9459aa35594"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_FINISH_ALL_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="342" y="25" width="27" height="25" uuid="58dc70de-41a9-4027-9203-aeabbd3b0d31">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_ALL_PAGES_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="774" y="25" width="27" height="25" uuid="48e19023-2634-4f6c-9dd1-1fde033d4442">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7a9bc65d-899d-45b5-bb06-aac9b3b409a8"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_REMAIN_ALL_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="585" y="25" width="27" height="25" uuid="137df680-0941-413f-b849-21a281875556">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d468cfc1-9763-4a02-bb1e-fa4b80bc2bc9"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_MONTH_L06_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="288" y="25" width="27" height="25" uuid="cee3cafc-1f3e-4da7-97e3-9fdd5186e266">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="720" y="25" width="27" height="25" uuid="b2ac84b7-2ea7-46b9-af6d-4d5894e4b51b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="15bc6e84-0806-4602-a9bd-d8b1b3286273"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASE_NEXTMONTH_NOTEND_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="261" y="25" width="27" height="25" uuid="8167d714-a69f-4e23-bf16-2df28b3bba97">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASE_NEW_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="369" y="25" width="27" height="25" uuid="f60f0fc5-0276-46bd-bdba-931ea9c515e0">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_REJUDGEMENT_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="423" y="50" width="27" height="25" uuid="439f3bcf-56dc-4f48-b784-fe639fb8a0c0">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASEFINISH_CP_CRIME}+$V{SUM_CASEFINISH_CP_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="180" y="50" width="27" height="25" uuid="32eb0e88-e7a6-4f38-861a-7da038e4c6af">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="c8bf2ab3-72a0-4af2-877e-8a44b75148c8"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_INDICMENT_CRIME} + $V{SUM_INDICMENT_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="234" y="50" width="27" height="25" uuid="6f2f1caf-b912-4d6a-bf97-5b272bd33f2f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_PRIOR_CASE_NOTEND_CRIME}+$V{SUM_PRIOR_CASE_NOTEND_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="396" y="50" width="27" height="25" uuid="41596de3-b38d-4dad-8a49-26fb4f2e97f3">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASEFINISH_NM_CRIME}+$V{SUM_CASEFINISH_NM_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="747" y="50" width="27" height="25" uuid="bdc41b70-9410-4b89-b7ac-08be3d1e73a3">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="15bc6e84-0806-4602-a9bd-d8b1b3286273"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASE_REFRENCE_CRIME}+$V{SUM_CASE_REFRENCE_DRUG}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="142" y="50" width="38" height="25" uuid="3f3aa7fa-7e93-4265-936a-87ec953a4272">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="c8bf2ab3-72a0-4af2-877e-8a44b75148c8"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box leftPadding="3">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[รวม]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="612" y="50" width="27" height="25" uuid="94dd290f-903c-41f7-8848-596a83950359">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="315aebf4-a9d4-4e90-8e1d-14a72251d7bc"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_MONTH_06T12_CRIME}+$V{SUM_MONTH_06T12_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="693" y="50" width="27" height="25" uuid="1068a343-0b6a-4bce-9276-d1d30d00462c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="73ac50ef-ecad-4ace-9320-4272c130cfe5"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_MONTH_M60_CRIME}+$V{SUM_MONTH_M60_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="207" y="50" width="27" height="25" uuid="f3385d71-584d-4649-8755-a7c5300ee12d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_PETITION_CRIME}+$V{SUM_PETITION_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="477" y="50" width="27" height="25" uuid="a9f8653c-dc1c-43ac-bfc6-4d51067a0e64">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASEFINISH_DC_CRIME}+$V{SUM_CASEFINISH_DC_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="666" y="50" width="27" height="25" uuid="530a5d91-f745-4167-a5fa-a9487521644e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="dc483e6c-475d-42af-81aa-c033e0767e31"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_MONTH_24T60_CRIME}+$V{SUM_MONTH_24T60_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="639" y="50" width="27" height="25" uuid="3a6a0fba-fe39-41aa-b2c6-6e3e04bc66a6">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4dba7dc9-373a-4a27-bfa6-c996a20e7bba"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_MONTH_12T24_CRIME}+$V{SUM_MONTH_12T24_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="531" y="50" width="27" height="25" uuid="a16f07b7-d65a-4488-be2d-d9ccf3a53697">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASEFINISH_OT_CRIME}+$V{SUM_CASEFINISH_OT_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="315" y="50" width="27" height="25" uuid="84d3d78d-39b2-4f8d-bd24-309c3e28929b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_ALL_WITNESSES_CRIME}+$V{SUM_ALL_WITNESSES_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="504" y="50" width="27" height="25" uuid="0c49b036-3b88-4771-a9f8-6d6859f8a697">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASEFINISH_DO_CRIME}+$V{SUM_CASEFINISH_DO_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="450" y="50" width="27" height="25" uuid="b53acdcf-4a9f-4baa-81c6-6ec738cf7bd6">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASEFINISH_WD_CRIME}+$V{SUM_CASEFINISH_WD_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="558" y="50" width="27" height="25" uuid="53646a10-9756-47da-9d0d-d079b51ed9e3">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d59de73c-5053-4022-92c6-f9459aa35594"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_FINISH_ALL_CRIME}+$V{SUM_FINISH_ALL_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="342" y="50" width="27" height="25" uuid="bdf482f2-a8bd-4ad1-81c7-a376aaf4fa24">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_ALL_PAGES_CRIME}+$V{SUM_ALL_PAGES_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="774" y="50" width="27" height="25" uuid="0387e8d0-6dcd-4a35-9bb0-3257ec913afb">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7a9bc65d-899d-45b5-bb06-aac9b3b409a8"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_REMAIN_ALL_CRIME}+$V{SUM_REMAIN_ALL_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="585" y="50" width="27" height="25" uuid="d3d117a3-b259-4367-968b-6d5243d57fe5">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d468cfc1-9763-4a02-bb1e-fa4b80bc2bc9"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_MONTH_L06_CRIME}+$V{SUM_MONTH_L06_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="288" y="50" width="27" height="25" uuid="9712e219-81cf-4bbe-8442-5e0db328af20">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="720" y="50" width="27" height="25" uuid="b734b023-3d00-4b19-88d2-eb6402e06aae">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="15bc6e84-0806-4602-a9bd-d8b1b3286273"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASE_NEXTMONTH_NOTEND_CRIME}+$V{SUM_CASE_NEXTMONTH_NOTEND_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="261" y="50" width="27" height="25" uuid="e569f071-4656-46da-bb5c-0e46973ade5e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_CASE_NEW_CRIME}+$V{SUM_CASE_NEW_DRUG}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="369" y="50" width="27" height="25" uuid="efb98d15-0cb7-42a1-9cfc-b9f67076edd4">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e37be158-95ea-40e5-aa7f-369016859756"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_REJUDGEMENT_CRIME}+$V{SUM_REJUDGEMENT_DRUG}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

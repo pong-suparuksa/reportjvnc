@@ -1,0 +1,423 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="bail_rpt_bailman_breach" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="21e58027-36f9-4d26-bcd5-4608c14b782d">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.137:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/bail_rpt_bailman_breach"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojStage2"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="169"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="826"/>
+	<property name="com.jaspersoft.studio.report.description" value="44.รายงานผิดสัญญาประกัน"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/bail_rpt_bailman_breach_files/main_jrxml"/>
+	<parameter name="START_DATE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["01/01/2020"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="END_DATE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["28/04/2020"]]></defaultValueExpression>
+	</parameter>
+	<queryString language="SQL">
+		<![CDATA[SELECT pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR  BLACK_CASE_NO,
+plt.TITLE_NAME || pbb.NAME || ' ' || pbb.LASTNAME BAILMAN_FULL_NAME,
+--
+     CASE WHEN pbsa.SEC_ID > 0 THEN 'สมุดเงินฝาก' ELSE ' ' END BAIL_ACCOUNT,
+     CASE WHEN pbsl.SEC_ID > 0 THEN 'ที่ดิน' ELSE ' ' END BAIL_LAND,
+     CASE 
+	      WHEN pbsb.SEC_ID > 0 AND pbsb.BOND_TYPE_ID = 1 THEN 'พันธบัตร'
+          WHEN pbsb.SEC_ID > 0 AND pbsb.BOND_TYPE_ID = 2 THEN 'สลากออมทรัพย์'
+          ElSE ' '
+     END BAIL_BOND,
+     CASE WHEN pbsbgt.SEC_ID > 0 THEN  'หลักทรัพย์หนังสือรับรองของธนาคาร' ELSE ' ' END BAIL_BANKGUARANTEE,
+     CASE WHEN pbsi.SEC_ID > 0 THEN 'กรมธรรม์' ELSE ' ' END BAIL_INSURANCE,
+     CASE WHEN pbscd.SEC_ID > 0 THEN 'ห้องชุด' ELSE ' ' END BAIL_CONDO,
+     CASE WHEN pbsp.SEC_ID > 0 THEN 'ตำแหน่ง' ELSE ' ' END BAIL_POSITION,
+     CASE WHEN pspc.SEC_ID > 0 THEN 'เงินสด' ELSE ' ' END BAIL_CASH,
+--
+THAISDATE(pbbb.BREACH_START_DATE) BREACH_START_DATE,
+pbbb.AMOUNT AMOUNT,
+pbbb.BREACH_DESCRIPTION BREACH_DESCRIPTION
+FROM PC_BAIL_BAILSMAN_BREACH pbbb
+--
+LEFT JOIN PC_BAIL pb ON pb.BAIL_ID = pbbb.BAIL_ID AND pb.REMOVED_BY = 0
+LEFT JOIN PC_BAIL_BAILSMAN pbb ON pbb.BAILSMAN_ID = pbbb.BAILSMAN_ID AND pbb.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE plt ON plt.TITLE_ID = pbb.NAME_TITLE_ID AND plt.REMOVED_BY = 0
+--
+LEFT JOIN PC_CASE pc ON pc.CASE_ID = pb.CASE_ID AND pc.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc.REMOVED_BY = 0
+--
+LEFT JOIN PC_BAIL_SEC_ACCOUNT pbsa ON pbsa.SEC_ID = pbbb.SEC_ID AND pbsa.REMOVED_BY = 0
+LEFT JOIN PC_BAIL_SEC_LAND pbsl ON pbsl.SEC_ID = pbbb.SEC_ID AND pbsl.REMOVED_BY = 0
+LEFT JOIN PC_BAIL_SEC_BOND pbsb ON pbsb.SEC_ID = pbbb.SEC_ID AND pbsb.REMOVED_BY = 0
+LEFT JOIN PC_BAIL_SEC_BANKGUARANTEE pbsbgt ON pbsbgt.SEC_ID = pbbb.SEC_ID AND pbsbgt.REMOVED_BY = 0
+LEFT JOIN PC_BAIL_SEC_INSURANCE pbsi ON pbsi.SEC_ID = pbbb.SEC_ID AND pbsi.REMOVED_BY = 0
+LEFT JOIN PC_BAIL_SEC_CONDO pbscd ON pbscd.SEC_ID = pbbb.SEC_ID AND pbscd.REMOVED_BY = 0
+LEFT JOIN PC_BAIL_SEC_POSITION pbsp ON pbsp.SEC_ID = pbbb.SEC_ID AND pbsp.REMOVED_BY = 0
+LEFT JOIN PC_BAIL_SEC_CASH pspc ON pspc.SEC_ID = pbbb.SEC_ID AND pspc.REMOVED_BY = 0
+--
+WHERE pbbb.BREACH_FINISH_DATE IS NULL
+AND pbbb.BREACH_START_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                               AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')]]>
+	</queryString>
+	<field name="BLACK_CASE_NO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="BLACK_CASE_NO"/>
+	</field>
+	<field name="BAILMAN_FULL_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="BAILMAN_FULL_NAME"/>
+	</field>
+	<field name="BAIL_ACCOUNT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="BAIL_ACCOUNT"/>
+	</field>
+	<field name="BAIL_LAND" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="BAIL_LAND"/>
+	</field>
+	<field name="BAIL_BOND" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="BAIL_BOND"/>
+	</field>
+	<field name="BAIL_BANKGUARANTEE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="BAIL_BANKGUARANTEE"/>
+	</field>
+	<field name="BAIL_INSURANCE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="BAIL_INSURANCE"/>
+	</field>
+	<field name="BAIL_CONDO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="BAIL_CONDO"/>
+	</field>
+	<field name="BAIL_POSITION" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="BAIL_POSITION"/>
+	</field>
+	<field name="BAIL_CASH" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="BAIL_CASH"/>
+	</field>
+	<field name="BREACH_START_DATE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="BREACH_START_DATE"/>
+	</field>
+	<field name="AMOUNT" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.label" value="AMOUNT"/>
+	</field>
+	<field name="BREACH_DESCRIPTION" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="BREACH_DESCRIPTION"/>
+	</field>
+	<variable name="VAR_CNTCASE" class="java.lang.Long" incrementType="Report" calculation="Count"/>
+	<variable name="SUM_AMOUNT" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{AMOUNT}]]></variableExpression>
+	</variable>
+	<group name="GRP_ALLOWS">
+		<groupFooter>
+			<band height="35">
+				<textField>
+					<reportElement x="490" y="0" width="100" height="30" printWhenGroupChanges="GRP_ALLOWS" uuid="fc643781-3ce2-4ff8-a49b-d02f5124d03c">
+						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					</reportElement>
+					<box padding="0">
+						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="TH Sarabun New" size="14"/>
+					</textElement>
+					<textFieldExpression><![CDATA["รวม "]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement stretchType="ContainerHeight" x="690" y="0" width="111" height="30" uuid="86ff95e4-3ab6-456a-b194-ea6ec34a3cce">
+						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					</reportElement>
+					<box>
+						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="TH Sarabun New" size="14"/>
+					</textElement>
+					<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement stretchType="ContainerHeight" x="590" y="0" width="100" height="30" uuid="14f7034b-de0e-4839-9788-51a08a892509">
+						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					</reportElement>
+					<box>
+						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="TH Sarabun New" size="14"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{SUM_AMOUNT}==null?"0":new java.text.DecimalFormat("#,##0.##").format($V{SUM_AMOUNT})]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="0" width="490" height="30" printWhenGroupChanges="GRP_ALLOWS" uuid="9eeafe93-63c5-4145-aaab-8c00d5915f1d">
+						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
+						<property name="com.jaspersoft.studio.unit.x" value="px"/>
+						<property name="com.jaspersoft.studio.unit.height" value="px"/>
+						<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					</reportElement>
+					<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="0">
+						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+						<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font fontName="TH Sarabun New" size="14"/>
+					</textElement>
+					<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="65" splitType="Stretch">
+			<textField>
+				<reportElement x="180" y="0" width="400" height="25" uuid="3eb5cb52-88d0-4d5a-a66e-b936442ba1d9">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="16" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["บัญชีนายประกันค้างชำระค่าปรับ"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="730" y="30" width="70" height="25" uuid="1e7fc211-95b6-4a07-8b14-e284f28345ea">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA["แผ่นที่ "+$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="80" y="25" width="600" height="25" uuid="9f5b695c-51a9-4a74-9a37-1d10ce45fdcf">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="16" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["ระหว่างวันที่ " + new java.text.SimpleDateFormat("d MMM yy", new Locale("TH","th")).format(DATE(Integer.valueOf($P{START_DATE}.substring(6,10)),Integer.valueOf($P{START_DATE}.substring(3,5)),Integer.valueOf($P{START_DATE}.substring(0,2))))  + " ถึงวันที่ " + new java.text.SimpleDateFormat("d MMM yy", new Locale("TH","th")).format(DATE(Integer.valueOf($P{END_DATE}.substring(6,10)),Integer.valueOf($P{END_DATE}.substring(3,5)),Integer.valueOf($P{END_DATE}.substring(0,2))))]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="30" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="90" height="30" uuid="9728c828-4b89-4b13-a3e5-5742e3a09c8d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14"/>
+				</textElement>
+				<text><![CDATA[หมายเลขดำที่]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="90" y="0" width="100" height="30" uuid="a225e0ba-24f9-4c5b-924e-59f16c9cbcc3">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14"/>
+				</textElement>
+				<text><![CDATA[วันที่ศาลสั่งปรับ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="190" y="0" width="220" height="30" uuid="e2bc0900-4379-45bf-8d91-ea52b73f9677">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14"/>
+				</textElement>
+				<text><![CDATA[ชื่อ และ นามสกุล นายประกัน]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="410" y="0" width="180" height="30" uuid="e1862af0-d0bc-4337-9501-034211db1b82">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14"/>
+				</textElement>
+				<text><![CDATA[ประเภททรัพย์]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="590" y="0" width="100" height="30" uuid="15b2fccb-13fc-496e-a419-69fc7e2c12de">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14"/>
+				</textElement>
+				<text><![CDATA[จำนวนเงิน]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="690" y="0" width="111" height="30" uuid="9b0b19c6-3237-44b8-9d13-9ee6f0685dbe">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14"/>
+				</textElement>
+				<text><![CDATA[หมายเหตุ]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="30" splitType="Stretch">
+			<textField>
+				<reportElement stretchType="ContainerHeight" x="0" y="0" width="90" height="30" uuid="d2d8253c-2a3d-4946-b7f0-ed2197962418">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BLACK_CASE_NO} == null ?  "-"  : $F{BLACK_CASE_NO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement stretchType="ContainerHeight" x="90" y="0" width="100" height="30" uuid="6546f098-3328-4487-a02a-b528a9fd75e6">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BREACH_START_DATE}== null ?  "-"  :  $F{BREACH_START_DATE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement stretchType="ContainerHeight" x="190" y="0" width="220" height="30" uuid="57235835-5b6f-4420-9069-0e1f3a6c8e8a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BAILMAN_FULL_NAME} == null ?  "-"  :  $F{BAILMAN_FULL_NAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement stretchType="ContainerHeight" x="410" y="0" width="180" height="30" uuid="f9b0e44d-d0e8-49f2-b72e-e9c919fc0040">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + ($F{BAIL_ACCOUNT} +$F{BAIL_LAND} + $F{BAIL_BOND} + $F{BAIL_BANKGUARANTEE} 
++ $F{BAIL_INSURANCE} + $F{BAIL_CONDO}+ $F{BAIL_POSITION}+ $F{BAIL_CASH}).replace(" ","")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement stretchType="ContainerHeight" x="590" y="0" width="100" height="30" uuid="47c8eb35-8a66-4392-ad23-2e4d280bd699">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.##").format($F{AMOUNT})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement stretchType="ContainerHeight" x="690" y="0" width="111" height="30" uuid="2fbabfe3-0407-4f3e-97ca-7d30dd44c2b8">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{BREACH_DESCRIPTION}==null ? " " : $F{BREACH_DESCRIPTION}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="27" splitType="Stretch"/>
+	</columnFooter>
+</jasperReport>

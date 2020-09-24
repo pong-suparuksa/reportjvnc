@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="proceed_rpt_witness_appoint" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="ee14e092-911e-4d67-9916-1041eded2ee5">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+	<parameter name="SELMONTH" class="java.lang.String">
+		<defaultValueExpression><![CDATA["052020"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT cou.COURT_NAME_TH,
+       ppcw.TO_WHO, 
+       CASE WHEN ppcw.ADDRESS_NO IS NOT NULL THEN ppcw.ADDRESS_NO ELSE ' ' END           WITNESS_ADDRESSNO,
+       CASE WHEN ppcw.ADDRESS_MOO IS NOT NULL THEN 'หมู่ '||ppcw.ADDRESS_MOO ELSE ' ' END  WITNESS_MOO,
+       CASE WHEN ppcw.ADDRESS_SOI IS NOT NULL THEN 'ซ.'||ppcw.ADDRESS_SOI ELSE ' ' END   WITNESS_SOI,
+       CASE WHEN ppcw.ADDRESS_ROAD IS NOT NULL THEN 'ถ.'||ppcw.ADDRESS_ROAD ELSE ' ' END WITNESS_ROAD, 
+       CASE WHEN pls.SUBDISTRICT_NAME IS NOT NULL
+            THEN CASE WHEN plp.PROVINCE_CODE = '0010' THEN 'แขวง' ELSE 'ต.' END|| NVL(pls.SUBDISTRICT_NAME,' ') 
+            ELSE ' ' END WITNESS_SUBDISTRICT,
+       CASE WHEN plp.PROVINCE_NAME IS NOT NULL 
+            THEN CASE WHEN plp.PROVINCE_CODE = '0010' THEN ' ' ELSE 'อ.' END|| NVL(pld.DISTRICT_NAME,' ')
+            ELSE ' ' END WITNESS_DISTRICT,
+       NVL(plp.PROVINCE_NAME,' ') WITNESS_PROVINCE,
+       --
+       ppcw.FULL_P_CASE,
+       ppcw.DEFENDANT_NAME,
+       pla.ALLEGATION_NAME,
+       THAISDATE(ppcw.COURT_WITNESS_DATE) COURT_WITNESS_DATE_TEXT,
+       ppcw.COURT_WITNESS_TIME
+--
+FROM PC_PROCEED_COURT_WITNESS ppcw 
+LEFT JOIN PC_LOOKUP_SUBDISTRICT pls ON pls.SUBDISTRICT_ID = ppcw.ADDRESS_SUB_DISTRICT
+                                    AND pls.DISTRICT_ID = ppcw.ADDRESS_DISTRICT
+                                    AND pls.PROVINCE_ID = ppcw.ADDRESS_PROVINCE
+                                    AND pls.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_DISTRICT pld ON pld.DISTRICT_ID = ppcw.ADDRESS_DISTRICT
+                                 AND pld.PROVINCE_ID = ppcw.ADDRESS_PROVINCE
+                                 AND pld.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_PROVINCE plp ON plp.PROVINCE_ID = ppcw.ADDRESS_PROVINCE 
+                                 AND plp.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_ALLEGATION pla ON pla.ALLEGATION_ID = ppcw.ALLEGATION_ID 
+--
+CROSS JOIN (SELECT plc.COURT_NAME_TH 
+			 FROM PC_PARAM pp
+             JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+             WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou 
+--
+WHERE ppcw.REMOVED_BY = 0
+AND TO_CHAR(ppcw.COURT_WITNESS_DATE,'MMYYYY') = $P{SELMONTH} 
+UNION ALL
+SELECT cou.COURT_NAME_TH,
+       ppaw.TO_WHO,
+       CASE WHEN ppaw.ADDRESS_NO IS NOT NULL THEN ppaw.ADDRESS_NO ELSE ' ' END           WITNESS_ADDRESSNO,
+       CASE WHEN ppaw.ADDRESS_MOO IS NOT NULL THEN 'หมู่ '||ppaw.ADDRESS_MOO ELSE ' ' END  WITNESS_MOO,
+       CASE WHEN ppaw.ADDRESS_SOI IS NOT NULL THEN 'ซ.'||ppaw.ADDRESS_SOI ELSE ' ' END   WITNESS_SOI,
+       CASE WHEN ppaw.ADDRESS_ROAD IS NOT NULL THEN 'ถ.'||ppaw.ADDRESS_ROAD ELSE ' ' END WITNESS_ROAD, 
+       CASE WHEN pls.SUBDISTRICT_NAME IS NOT NULL
+            THEN CASE WHEN plp.PROVINCE_CODE = '0010' THEN 'แขวง' ELSE 'ต.' END|| NVL(pls.SUBDISTRICT_NAME,' ') 
+            ELSE ' ' END WITNESS_SUBDISTRICT,
+       CASE WHEN plp.PROVINCE_NAME IS NOT NULL 
+            THEN CASE WHEN plp.PROVINCE_CODE = '0010' THEN ' ' ELSE 'อ.' END|| NVL(pld.DISTRICT_NAME,' ')
+            ELSE ' ' END WITNESS_DISTRICT,
+       NVL(plp.PROVINCE_NAME,' ') WITNESS_PROVINCE,
+       ppaw.FULL_P_CASE,
+       ppaw.DEFENDANT_NAME,
+       pla.ALLEGATION_NAME,
+       THAISDATE(ppaw.ALERT_WITNESS_DATE) COURT_WITNESS_DATE_TEXT,
+       ppaw.ALERT_WITNESS_TIME 
+FROM PC_PROCEED_ALERT_WITNESS ppaw 
+LEFT JOIN PC_LOOKUP_SUBDISTRICT pls ON pls.SUBDISTRICT_ID = ppaw.ADDRESS_SUB_DISTRICT
+                                    AND pls.DISTRICT_ID = ppaw.ADDRESS_DISTRICT
+                                    AND pls.PROVINCE_ID = ppaw.ADDRESS_PROVINCE
+                                    AND pls.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_DISTRICT pld ON pld.DISTRICT_ID = ppaw.ADDRESS_DISTRICT
+                                 AND pld.PROVINCE_ID = ppaw.ADDRESS_PROVINCE
+                                 AND pld.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_PROVINCE plp ON plp.PROVINCE_ID = ppaw.ADDRESS_PROVINCE 
+                                 AND plp.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_ALLEGATION pla ON pla.ALLEGATION_ID = ppaw.ALLEGATION_ID 
+--
+CROSS JOIN (SELECT plc.COURT_NAME_TH 
+			 FROM PC_PARAM pp
+             JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+             WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou 
+--
+WHERE ppaw.REMOVED_BY = 0
+AND TO_CHAR(ppaw.ALERT_WITNESS_DATE,'MMYYYY') = $P{SELMONTH}]]>
+	</queryString>
+	<field name="COURT_NAME_TH" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
+	</field>
+	<field name="TO_WHO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TO_WHO"/>
+	</field>
+	<field name="WITNESS_ADDRESSNO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="WITNESS_ADDRESSNO"/>
+	</field>
+	<field name="WITNESS_MOO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="WITNESS_MOO"/>
+	</field>
+	<field name="WITNESS_SOI" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="WITNESS_SOI"/>
+	</field>
+	<field name="WITNESS_ROAD" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="WITNESS_ROAD"/>
+	</field>
+	<field name="WITNESS_SUBDISTRICT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="WITNESS_SUBDISTRICT"/>
+	</field>
+	<field name="WITNESS_DISTRICT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="WITNESS_DISTRICT"/>
+	</field>
+	<field name="WITNESS_PROVINCE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="WITNESS_PROVINCE"/>
+	</field>
+	<field name="FULL_P_CASE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="FULL_P_CASE"/>
+	</field>
+	<field name="DEFENDANT_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DEFENDANT_NAME"/>
+	</field>
+	<field name="ALLEGATION_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="ALLEGATION_NAME"/>
+	</field>
+	<field name="COURT_WITNESS_DATE_TEXT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="COURT_WITNESS_DATE_TEXT"/>
+	</field>
+	<field name="COURT_WITNESS_TIME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="COURT_WITNESS_TIME"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch">
+			<textField>
+				<reportElement x="246" y="0" width="311" height="30" uuid="72a83dae-9603-4c9d-bbdf-0e97a8e8c45d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="246" y="40" width="311" height="30" uuid="949e0a1a-4f46-4b62-9f41-814050889c38"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="35" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="61" splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="125" splitType="Stretch"/>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

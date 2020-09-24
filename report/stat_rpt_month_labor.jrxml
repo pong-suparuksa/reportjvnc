@@ -1,0 +1,2904 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="stat_rpt_month_labor" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e75a4970-6a1e-4981-923f-8555495c456a">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+	<subDataset name="DSETCASE_INYEAR" uuid="c9b8d986-c0bc-4c19-9f2c-c14cbc939ca7">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+		<parameter name="LAST_FROMDATE" class="java.lang.String"/>
+		<parameter name="LAST_TODATE" class="java.lang.String"/>
+		<parameter name="THIS_FROMDATE" class="java.lang.String"/>
+		<parameter name="THIS_TODATE" class="java.lang.String"/>
+		<queryString language="SQL">
+			<![CDATA[SELECT plcc.CASE_CATE_NAME CASE_TYPE,
+       NVL(pc1.CNT,0)CASE_PREVYEAR_REMAIN,
+       NVL(pc2.CNT,0)CASE_CURRYEAR_RECV,
+       NVL(pc3.CNT,0)CASE_CURRYEAR_FINISH,
+       NVL(pc1.CNT,0)+NVL(pc2.CNT,0)-NVL(pc3.CNT,0)CASE_CURRYEAR_REMAIN
+FROM PC_LOOKUP_CASE_CATE plcc
+--คดีค้างมาจากปีที่แล้ว
+LEFT JOIN (SELECT pc.CASE_CATE_ID, COUNT(pc.CASE_ID) CNT
+			FROM PC_CASE pc
+            LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
+            WHERE pc.CASE_DATE BETWEEN TO_DATE($P{LAST_FROMDATE} ||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                                          AND TO_DATE($P{LAST_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+            AND pj.CASE_ID IS NULL                                   
+            GROUP BY pc.CASE_CATE_ID) pc1 ON pc1.CASE_CATE_ID = plcc.CASE_CATE_ID
+--คดีรับใหม่ในปีนี้
+LEFT JOIN (SELECT pc.CASE_CATE_ID, COUNT(pc.CASE_ID) CNT
+		    FROM PC_CASE pc
+            WHERE pc.CASE_DATE BETWEEN TO_DATE($P{THIS_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                                          AND TO_DATE($P{THIS_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')                                   
+            GROUP BY pc.CASE_CATE_ID) pc2 ON pc2.CASE_CATE_ID = plcc.CASE_CATE_ID 
+--คดีเสร็จไปในปีนี้            
+LEFT JOIN (SELECT pc.CASE_CATE_ID, COUNT(pc.CASE_ID) CNT
+			FROM PC_CASE pc  
+			JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID 
+			WHERE pj.JUDGE_DATE BETWEEN TO_DATE($P{THIS_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                                           AND TO_DATE($P{THIS_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+			GROUP BY pc.CASE_CATE_ID) pc3 ON pc3.CASE_CATE_ID = plcc.CASE_CATE_ID
+--			
+WHERE plcc.CASE_CATE_CODE = '306'
+AND plcc.REMOVED_BY = 0]]>
+		</queryString>
+		<field name="CASE_TYPE" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_TYPE"/>
+		</field>
+		<field name="CASE_PREVYEAR_REMAIN" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_PREVYEAR_REMAIN"/>
+		</field>
+		<field name="CASE_CURRYEAR_RECV" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_CURRYEAR_RECV"/>
+		</field>
+		<field name="CASE_CURRYEAR_FINISH" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_CURRYEAR_FINISH"/>
+		</field>
+		<field name="CASE_CURRYEAR_REMAIN" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_CURRYEAR_REMAIN"/>
+		</field>
+		<variable name="SUM_PREVYEAR_REMAIN" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{CASE_PREVYEAR_REMAIN}]]></variableExpression>
+		</variable>
+		<variable name="SUM_CURRYEAR_RECV" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{CASE_CURRYEAR_RECV}]]></variableExpression>
+		</variable>
+		<variable name="SUM_CURRYEAR_FINISH" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{CASE_CURRYEAR_FINISH}]]></variableExpression>
+		</variable>
+		<variable name="SUM_CURRYEAR_REMAIN" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{CASE_CURRYEAR_REMAIN}]]></variableExpression>
+		</variable>
+	</subDataset>
+	<subDataset name="DSETCASE_INMONTH" uuid="edcaef73-99c7-408a-90f3-fe03c7e11ca3">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCoj160"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+		<parameter name="LAST_FROMDATE" class="java.lang.String"/>
+		<parameter name="LAST_TODATE" class="java.lang.String"/>
+		<parameter name="THIS_FROMDATE" class="java.lang.String"/>
+		<parameter name="THIS_TODATE" class="java.lang.String"/>
+		<queryString language="SQL">
+			<![CDATA[SELECT CASE_CATE_NAME CASE_TYPE, 
+       NVL(c1.CNT,0) CASE_PREVMONTH_REMAIN,
+       NVL(c2.CNT,0) CASE_CURRMONTH_RECV,
+       NVL(c3.CNT,0) CASE_CURRMONTH_FINISH,
+       NVL(c1.CNT,0)+NVL(c2.CNT,0)-NVL(c3.CNT,0) CASE_CURRMONTH_REMAIN
+FROM PC_LOOKUP_CASE_CATE plcc 
+--คดีค้างมาจากเดือนที่แล้ว
+LEFT JOIN (SELECT plcc.CASE_CATE_CODE, COUNT(pc.CASE_ID) CNT
+	        FROM PC_CASE pc 
+	        LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
+	  	 	JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+	  		WHERE pc.CASE_DATE BETWEEN TO_DATE($P{LAST_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+            		                                      AND TO_DATE($P{LAST_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+			AND pc.REMOVED_BY = 0       
+			AND pj.CASE_ID IS NULL 
+      		GROUP BY plcc.CASE_CATE_CODE)c1 ON c1.CASE_CATE_CODE = plcc.CASE_CATE_CODE       		
+--คดีรับใหม่ในเดือนนี้
+LEFT JOIN (SELECT plcc.CASE_CATE_CODE, COUNT(pc.CASE_ID) CNT
+	        FROM PC_CASE pc 
+	  	 	JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+	  		WHERE pc.CASE_DATE BETWEEN TO_DATE($P{THIS_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+            		                                      AND TO_DATE($P{THIS_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+			AND pc.REMOVED_BY = 0        
+      		GROUP BY plcc.CASE_CATE_CODE)c2 ON c2.CASE_CATE_CODE = plcc.CASE_CATE_CODE      		
+--คดีที่เสร็จไปในเดือนนี้
+LEFT JOIN (SELECT plcc.CASE_CATE_CODE, COUNT(pc.CASE_ID) CNT
+	        FROM PC_CASE pc 
+	        JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID
+	  	 	JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+	  		WHERE pj.JUDGE_DATE BETWEEN TO_DATE($P{THIS_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+            		                                       AND TO_DATE($P{THIS_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+			AND pc.REMOVED_BY = 0        
+      		GROUP BY plcc.CASE_CATE_CODE)c3 ON c3.CASE_CATE_CODE = plcc.CASE_CATE_CODE 
+--
+WHERE plcc.CASE_CATE_CODE = '306'
+AND plcc.REMOVED_BY = 0]]>
+		</queryString>
+		<field name="CASE_TYPE" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_TYPE"/>
+		</field>
+		<field name="CASE_PREVMONTH_REMAIN" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_PREVMONTH_REMAIN"/>
+		</field>
+		<field name="CASE_CURRMONTH_RECV" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_CURRMONTH_RECV"/>
+		</field>
+		<field name="CASE_CURRMONTH_FINISH" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_CURRMONTH_FINISH"/>
+		</field>
+		<field name="CASE_CURRMONTH_REMAIN" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_CURRMONTH_REMAIN"/>
+		</field>
+		<variable name="SUM_PREVMONTH_REMAIN" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{CASE_PREVMONTH_REMAIN}]]></variableExpression>
+		</variable>
+		<variable name="SUM_CURRMONTH_RECV" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{CASE_CURRMONTH_RECV}]]></variableExpression>
+		</variable>
+		<variable name="SUM_CURRMONTH_FINISH" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{CASE_CURRMONTH_FINISH}]]></variableExpression>
+		</variable>
+		<variable name="SUM_CURRMONTH_REMAIN" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{CASE_CURRMONTH_REMAIN}]]></variableExpression>
+		</variable>
+	</subDataset>
+	<subDataset name="DSETJUDGE_PERIOD" uuid="3e55f0c1-eb29-4305-ac44-6562f211cf00">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCoj160"/>
+		<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="448"/>
+		<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="542"/>
+		<queryString language="SQL">
+			<![CDATA[SELECT plcc.CASE_CATE_NAME CASE_TYPE, 
+       NVL(SUM(CASE WHEN MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) < 1 THEN 1 ELSE 0 END),0) JUDGE_PERIOD_LESS1MNT,
+       NVL(SUM(CASE WHEN (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) >= 1) AND
+                          (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) < 3)
+                     THEN 1 ELSE 0 END),0) JUDGE_PERIOD_1TO3MNT,
+       NVL(SUM(CASE WHEN (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) >= 3) AND
+                          (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) < 6)
+                     THEN 1 ELSE 0 END),0) JUDGE_PERIOD_3TO6MNT,
+       NVL(SUM(CASE WHEN (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) >= 6) AND
+                          (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) < 12)
+                     THEN 1 ELSE 0 END),0) JUDGE_PERIOD_6MNTO1YR,
+       NVL(SUM(CASE WHEN (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) >= 12) AND
+                          (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) < 24)
+                     THEN 1 ELSE 0 END),0) JUDGE_PERIOD_1YRTO2YR,
+		NVL(SUM(CASE WHEN (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) >= 24) AND
+                          (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) < 36)
+                     THEN 1 ELSE 0 END),0) JUDGE_PERIOD_2YRTO3YR,
+        NVL(SUM(CASE WHEN (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) >= 36) AND
+                          (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) < 48)
+                     THEN 1 ELSE 0 END),0) JUDGE_PERIOD_3YRTO4YR,
+		NVL(SUM(CASE WHEN (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) >= 48) AND
+                          (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) < 60)
+                     THEN 1 ELSE 0 END),0) JUDGE_PERIOD_4YRTO5YR,
+        NVL(SUM(CASE WHEN (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) >= 60) THEN 1 ELSE 0 END),0) JUDGE_PERIOD_MORE5YEAR,
+        COUNT(*) JUDGE_PERIOD_TOTAL 
+--                     
+FROM PC_LOOKUP_CASE_CATE plcc
+LEFT JOIN PC_CASE pc ON pc.CASE_CATE_ID = plcc.CASE_CATE_ID AND pc.REMOVED_BY = 0
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
+WHERE plcc.CASE_CATE_CODE = '306'
+GROUP BY plcc.CASE_CATE_NAME]]>
+		</queryString>
+		<field name="CASE_TYPE" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_TYPE"/>
+		</field>
+		<field name="JUDGE_PERIOD_LESS1MNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="JUDGE_PERIOD_LESS1MNT"/>
+		</field>
+		<field name="JUDGE_PERIOD_1TO3MNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="JUDGE_PERIOD_1TO3MNT"/>
+		</field>
+		<field name="JUDGE_PERIOD_3TO6MNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="JUDGE_PERIOD_3TO6MNT"/>
+		</field>
+		<field name="JUDGE_PERIOD_6MNTO1YR" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="JUDGE_PERIOD_6MNTO1YR"/>
+		</field>
+		<field name="JUDGE_PERIOD_1YRTO2YR" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="JUDGE_PERIOD_1YRTO2YR"/>
+		</field>
+		<field name="JUDGE_PERIOD_2YRTO3YR" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="JUDGE_PERIOD_2YRTO3YR"/>
+		</field>
+		<field name="JUDGE_PERIOD_3YRTO4YR" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="JUDGE_PERIOD_3YRTO4YR"/>
+		</field>
+		<field name="JUDGE_PERIOD_4YRTO5YR" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="JUDGE_PERIOD_4YRTO5YR"/>
+		</field>
+		<field name="JUDGE_PERIOD_MORE5YEAR" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="JUDGE_PERIOD_MORE5YEAR"/>
+		</field>
+		<field name="JUDGE_PERIOD_TOTAL" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="JUDGE_PERIOD_TOTAL"/>
+		</field>
+		<variable name="SUM_LESS1MNT" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{JUDGE_PERIOD_LESS1MNT}]]></variableExpression>
+		</variable>
+		<variable name="SUM_1TO3MNT" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{JUDGE_PERIOD_1TO3MNT}]]></variableExpression>
+		</variable>
+		<variable name="SUM_3TO6MNT" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{JUDGE_PERIOD_3TO6MNT}]]></variableExpression>
+		</variable>
+		<variable name="SUM_6MNTO1YR" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{JUDGE_PERIOD_6MNTO1YR}]]></variableExpression>
+		</variable>
+		<variable name="SUM_1YRTO2YR" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{JUDGE_PERIOD_1YRTO2YR}]]></variableExpression>
+		</variable>
+		<variable name="SUM_2YRTO3YR" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{JUDGE_PERIOD_2YRTO3YR}]]></variableExpression>
+		</variable>
+		<variable name="SUM_3YRTO4YR" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{JUDGE_PERIOD_3YRTO4YR}]]></variableExpression>
+		</variable>
+		<variable name="SUM_4YRTO5YR" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{JUDGE_PERIOD_4YRTO5YR}]]></variableExpression>
+		</variable>
+		<variable name="SUM_MORE5YEAR" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{JUDGE_PERIOD_MORE5YEAR}]]></variableExpression>
+		</variable>
+		<variable name="SUM_TOTAL" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$V{TOTAL}]]></variableExpression>
+		</variable>
+		<variable name="TOTAL" class="java.lang.Long">
+			<variableExpression><![CDATA[$F{JUDGE_PERIOD_LESS1MNT} + $F{JUDGE_PERIOD_1TO3MNT} + $F{JUDGE_PERIOD_3TO6MNT} + $F{JUDGE_PERIOD_6MNTO1YR} + $F{JUDGE_PERIOD_1YRTO2YR} + $F{JUDGE_PERIOD_2YRTO3YR} + $F{JUDGE_PERIOD_3YRTO4YR} + $F{JUDGE_PERIOD_4YRTO5YR} + $F{JUDGE_PERIOD_MORE5YEAR}]]></variableExpression>
+		</variable>
+	</subDataset>
+	<subDataset name="DSETCASE_TOAPPEAL" uuid="a7adde8c-904e-4ce7-9d11-98403c1eff1c">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+		<parameter name="LAST_FROMDATE" class="java.lang.String">
+			<defaultValueExpression><![CDATA["01/01/2019"]]></defaultValueExpression>
+		</parameter>
+		<parameter name="LAST_TODATE" class="java.lang.String">
+			<defaultValueExpression><![CDATA["31/01/2019"]]></defaultValueExpression>
+		</parameter>
+		<parameter name="THIS_FROMDATE" class="java.lang.String">
+			<defaultValueExpression><![CDATA["01/01/2020"]]></defaultValueExpression>
+		</parameter>
+		<parameter name="THIS_TODATE" class="java.lang.String">
+			<defaultValueExpression><![CDATA["31/12/2020"]]></defaultValueExpression>
+		</parameter>
+		<queryString language="SQL">
+			<![CDATA[SELECT pal.APPEAL_LEVEL_CODE,
+       NVL(c1.CNT,0) APPEAL_APPLIED_MREMAIN,
+       NVL(c2.CNT,0) APPEAL_APPLIED,
+       NVL(c3.CNT,0) APPEAL_NOT_ALLOW,
+       NVL(c4.CNT,0) APPEAL_SENT,
+       NVL(c5.CNT,0) APPEAL_SENT_MREMAIN
+       
+FROM PC_APPEAL_LEVEL pal 
+--คดีที่ยื่นศาลชั้นอุทธรณ์ค้างส่งจากเดือนก่อน
+LEFT JOIN(SELECT pal.APPEAL_LEVEL_CODE, COUNT(pc.CASE_ID) CNT 
+		   FROM PC_CASE pc 
+		   JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+		   JOIN PC_APPEAL pa ON pa.CASE_ID = pc.CASE_ID AND pa.REMOVED_BY = 0
+		   JOIN PC_APPEAL_LEVEL pal ON pal.APPEAL_LEVEL_ID = pa.APPEAL_LEVEL_ID AND pal.REMOVED_BY = 0
+		   LEFT JOIN PC_APPEAL_SUBMIT pas ON pas.APPEAL_ID = pa.CASE_ID AND pas.REMOVED_BY = 0
+		   WHERE pa.SEND_DATE IS NULL
+		   AND pas.APPEAL_ID IS NULL
+		   AND pa.DUE_SEND_DATE BETWEEN TO_DATE($P{LAST_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                    AND TO_DATE($P{LAST_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+		   GROUP BY pal.APPEAL_LEVEL_CODE)c1 ON c1.APPEAL_LEVEL_CODE = pal.APPEAL_LEVEL_CODE 
+--คดีที่ยื่นศาลชั้นอุทธรณ์
+LEFT JOIN (SELECT pal.APPEAL_LEVEL_CODE, COUNT(pc.CASE_ID) CNT 
+		   FROM PC_CASE pc 
+		   JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+		   JOIN PC_APPEAL pa ON pa.CASE_ID = pc.CASE_ID AND pa.REMOVED_BY = 0
+		   JOIN PC_APPEAL_LEVEL pal ON pal.APPEAL_LEVEL_ID = pa.APPEAL_LEVEL_ID AND pal.REMOVED_BY = 0
+		   JOIN PC_APPEAL_SUBMIT pas ON pas.APPEAL_ID = pa.CASE_ID AND pas.REMOVED_BY = 0
+		   WHERE pas.SUBMIT_DATE BETWEEN TO_DATE($P{THIS_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                   AND TO_DATE($P{THIS_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+		   GROUP BY pal.APPEAL_LEVEL_CODE)c2 ON c2.APPEAL_LEVEL_CODE = pal.APPEAL_LEVEL_CODE 
+--คดีที่ไม่อนุญาตให้ยื่นศาลชั้นอุทธรณ์
+LEFT JOIN (SELECT pal.APPEAL_LEVEL_CODE, COUNT(pc.CASE_ID) CNT 
+		   FROM PC_CASE pc 
+		   JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+		   JOIN PC_APPEAL pa ON pa.CASE_ID = pc.CASE_ID AND pa.REMOVED_BY = 0
+		   JOIN PC_APPEAL_LEVEL pal ON pal.APPEAL_LEVEL_ID = pa.APPEAL_LEVEL_ID AND pal.REMOVED_BY = 0
+		   JOIN PC_APPEAL_SUBMIT pas ON pas.APPEAL_ID = pa.CASE_ID AND pas.REMOVED_BY = 0
+		   JOIN PC_APPEAL_SUBMIT_RESULT pasr ON pasr.APPEAL_SUBMIT_RESULT_ID = pas.APPEAL_SUBMIT_RESULT_ID AND pasr.REMOVED_BY = 0
+		   WHERE pal.APPEAL_LEVEL_CODE = '001'
+		   AND pas.SUBMIT_DATE BETWEEN TO_DATE($P{THIS_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                   AND TO_DATE($P{THIS_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+           AND pasr.APPEAL_SUBMIT_RESULT_CODE = '002'
+		   GROUP BY pal.APPEAL_LEVEL_CODE)c3 ON c3.APPEAL_LEVEL_CODE = pal.APPEAL_LEVEL_CODE  
+--คดีที่ส่งไปยังศาลชั้นอุทธรณ์
+LEFT JOIN (SELECT pal.APPEAL_LEVEL_CODE, COUNT(pc.CASE_ID) CNT 
+		   FROM PC_CASE pc 
+		   JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+		   JOIN PC_APPEAL pa ON pa.CASE_ID = pc.CASE_ID AND pa.REMOVED_BY = 0
+		   JOIN PC_APPEAL_LEVEL pal ON pal.APPEAL_LEVEL_ID = pa.APPEAL_LEVEL_ID AND pal.REMOVED_BY = 0
+		   JOIN PC_APPEAL_SUBMIT pas ON pas.APPEAL_ID = pa.CASE_ID AND pas.REMOVED_BY = 0
+		   JOIN PC_APPEAL_SUBMIT_RESULT pasr ON pasr.APPEAL_SUBMIT_RESULT_ID = pas.APPEAL_SUBMIT_RESULT_ID AND pasr.REMOVED_BY = 0
+		   WHERE pal.APPEAL_LEVEL_CODE = '001'
+		   AND pa.SEND_DATE BETWEEN TO_DATE($P{THIS_FROMDATE} ||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                AND TO_DATE($P{THIS_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+		   GROUP BY pal.APPEAL_LEVEL_CODE)c4 ON c4.APPEAL_LEVEL_CODE = pal.APPEAL_LEVEL_CODE
+--คดีค้างส่งไปยังศาลชั้นอุทธรณ์ในเดือนนี้
+LEFT JOIN (SELECT pal.APPEAL_LEVEL_CODE, COUNT(pc.CASE_ID) CNT 
+		   FROM PC_CASE pc 
+		   JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+		   JOIN PC_APPEAL pa ON pa.CASE_ID = pc.CASE_ID AND pa.REMOVED_BY = 0
+		   JOIN PC_APPEAL_LEVEL pal ON pal.APPEAL_LEVEL_ID = pa.APPEAL_LEVEL_ID AND pal.REMOVED_BY = 0
+		   JOIN PC_APPEAL_SUBMIT pas ON pas.APPEAL_ID = pa.CASE_ID AND pas.REMOVED_BY = 0
+		   WHERE pa.SEND_DATE IS NULL
+		   AND pas.SUBMIT_DATE BETWEEN TO_DATE($P{LAST_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                                   AND TO_DATE($P{LAST_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+		   GROUP BY pal.APPEAL_LEVEL_CODE)c5 ON c5.APPEAL_LEVEL_CODE = pal.APPEAL_LEVEL_CODE 
+ORDER BY pal.APPEAL_LEVEL_CODE]]>
+		</queryString>
+		<field name="APPEAL_LEVEL_CODE" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="APPEAL_LEVEL_CODE"/>
+		</field>
+		<field name="APPEAL_APPLIED_MREMAIN" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="APPEAL_APPLIED_MREMAIN"/>
+		</field>
+		<field name="APPEAL_APPLIED" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="APPEAL_APPLIED"/>
+		</field>
+		<field name="APPEAL_NOT_ALLOW" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="APPEAL_NOT_ALLOW"/>
+		</field>
+		<field name="APPEAL_SENT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="APPEAL_SENT"/>
+		</field>
+		<field name="APPEAL_SENT_MREMAIN" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="APPEAL_SENT_MREMAIN"/>
+		</field>
+		<variable name="SUM_APPLIED_MREMAIN" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{APPEAL_APPLIED_MREMAIN}]]></variableExpression>
+		</variable>
+		<variable name="SUM_APPLIED" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{APPEAL_APPLIED}]]></variableExpression>
+		</variable>
+		<variable name="SUM_NOT_ALLOW" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{APPEAL_NOT_ALLOW}]]></variableExpression>
+		</variable>
+		<variable name="SUM_SENT" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{APPEAL_SENT}]]></variableExpression>
+		</variable>
+		<variable name="SUM_SENT_MREMAIN" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{APPEAL_SENT_MREMAIN}]]></variableExpression>
+		</variable>
+		<variable name="APPEAL_SENT_REMAIN" class="java.lang.Long">
+			<variableExpression><![CDATA[$F{APPEAL_APPLIED_MREMAIN}+$F{APPEAL_APPLIED}-$F{APPEAL_NOT_ALLOW}-$F{APPEAL_SENT}]]></variableExpression>
+		</variable>
+	</subDataset>
+	<subDataset name="DSETCASE_ABUSECOURT" uuid="2b6564b3-6b35-47d7-8aec-aad11a57c524">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+		<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="542"/>
+		<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="448"/>
+		<parameter name="THIS_FROMDATE" class="java.lang.String">
+			<defaultValueExpression><![CDATA["01/06/2020"]]></defaultValueExpression>
+		</parameter>
+		<parameter name="THIS_TODATE" class="java.lang.String">
+			<defaultValueExpression><![CDATA["30/06/2020"]]></defaultValueExpression>
+		</parameter>
+		<queryString language="SQL">
+			<![CDATA[SELECT 'คดีละเมิดอำนาจศาลที่รับมาใหม่' CASE_TYPE, A.CNT
+FROM DUAL
+CROSS JOIN (SELECT COUNT(pc.CASE_ID) CNT 
+            FROM PC_CASE pc 
+			JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+			LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
+			WHERE pc.REMOVED_BY = 0
+			AND plcc.CASE_CATE_CODE = '415'
+			AND pc.CASE_DATE BETWEEN TO_DATE($P{THIS_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+						         AND TO_DATE($P{THIS_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+			AND pj.CASE_ID IS NULL) A
+UNION ALL
+SELECT 'คดีละเมิดอำนาจศาลเสร็จไป' CASE_TYPE, B.CNT
+FROM DUAL
+CROSS JOIN (SELECT COUNT(pc.CASE_ID) CNT 
+            FROM PC_CASE pc 
+			JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+			LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
+			WHERE pc.REMOVED_BY = 0
+			AND plcc.CASE_CATE_CODE = '415'
+			AND pc.CASE_DATE BETWEEN TO_DATE($P{THIS_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+						         AND TO_DATE($P{THIS_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+			AND pj.CASE_ID IS NOT NULL) B]]>
+		</queryString>
+		<field name="CASE_TYPE" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_TYPE"/>
+		</field>
+		<field name="CNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CNT"/>
+		</field>
+		<variable name="SUM_CNT" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{CNT}]]></variableExpression>
+		</variable>
+	</subDataset>
+	<subDataset name="DSETCASE_MEDIATE" uuid="99b6091f-ecc4-4bd8-b4cb-f866e91ae923">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+		<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="542"/>
+		<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="448"/>
+		<parameter name="THIS_FROMDATE" class="java.lang.String">
+			<defaultValueExpression><![CDATA["01/06/2020"]]></defaultValueExpression>
+		</parameter>
+		<parameter name="THIS_TODATE" class="java.lang.String">
+			<defaultValueExpression><![CDATA["30/06/2020"]]></defaultValueExpression>
+		</parameter>
+		<queryString language="SQL">
+			<![CDATA[SELECT 'จำนวนคดีที่เข้าสู่ระบบไกล่เกลี่ย' CASE_TYPE, A.CNT
+FROM DUAL 
+CROSS JOIN (SELECT COUNT(pc.CASE_ID) CNT 
+			FROM PC_CASE pc 
+			JOIN PC_MEDIATION pm ON pm.CASE_ID = pc.CASE_ID AND pm.REMOVED_BY = 0
+			WHERE pc.REMOVED_BY = 0
+			AND pm.MEDIATION_START_DATE BETWEEN TO_DATE($P{THIS_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+			                                AND TO_DATE($P{THIS_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')  
+			AND pm.MEDIATION_END_DATE IS NULL 
+			AND pm.MEDIATOR_COMPLETE_FLAG IS NULL) A
+UNION ALL
+SELECT 'จำนวนคดีที่ไกล่เกลี่ยสำเร็จ' CASE_TYPE, B.CNT
+FROM DUAL 
+CROSS JOIN (SELECT COUNT(pc.CASE_ID) CNT
+			FROM PC_CASE pc 
+			JOIN PC_MEDIATION pm ON pm.CASE_ID = pc.CASE_ID AND pm.REMOVED_BY = 0
+			WHERE pc.REMOVED_BY = 0
+			AND pm.MEDIATION_START_DATE BETWEEN TO_DATE($P{THIS_FROMDATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+			                                AND TO_DATE($P{THIS_TODATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')  
+			AND pm.MEDIATION_END_DATE IS NOT NULL 
+			AND pm.MEDIATOR_COMPLETE_FLAG IS NOT NULL) B]]>
+		</queryString>
+		<field name="CASE_TYPE" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_TYPE"/>
+		</field>
+		<field name="CNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CNT"/>
+		</field>
+		<variable name="SUM_CNT" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{CNT}]]></variableExpression>
+		</variable>
+	</subDataset>
+	<subDataset name="DSETJUDGE_REMAIN_PERIOD" uuid="d5ea3f21-1cc0-4722-bc01-fe9a7b430625">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCoj160"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+		<queryString language="SQL">
+			<![CDATA[SELECT plcc.CASE_CATE_NAME CASE_TYPE, 
+       NVL(SUM(CASE WHEN MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) < 1 THEN 1 ELSE 0 END),0) JUDGE_REMAIN_LESS1MNT,
+       NVL(SUM(CASE WHEN (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) >= 1) AND
+                          (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) < 3)
+                     THEN 1 ELSE 0 END),0) JUDGE_REMAIN_1TO3MNT,
+       NVL(SUM(CASE WHEN (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) >= 3) AND
+                          (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) < 6)
+                     THEN 1 ELSE 0 END),0) JUDGE_REMAIN_3TO6MNT,
+       NVL(SUM(CASE WHEN (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) >= 6) AND
+                          (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) < 12)
+                     THEN 1 ELSE 0 END),0) JUDGE_REMAIN_6MNTO1YR,
+       NVL(SUM(CASE WHEN (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) >= 12) AND
+                          (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) < 24)
+                     THEN 1 ELSE 0 END),0) JUDGE_REMAIN_1YRTO2YR,
+		NVL(SUM(CASE WHEN (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) >= 24) AND
+                          (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) < 36)
+                     THEN 1 ELSE 0 END),0) JUDGE_REMAIN_2YRTO3YR,
+        NVL(SUM(CASE WHEN (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) >= 36) AND
+                          (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) < 48)
+                     THEN 1 ELSE 0 END),0) JUDGE_REMAIN_3YRTO4YR,
+		NVL(SUM(CASE WHEN (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) >= 48) AND
+                          (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) < 60)
+                     THEN 1 ELSE 0 END),0) JUDGE_REMAIN_4YRTO5YR,
+        NVL(SUM(CASE WHEN (MONTHS_BETWEEN(pj.JUDGE_DATE,pc.CASE_DATE) >= 60) THEN 1 ELSE 0 END),0) JUDGE_REMAIN_MORE5YEAR,
+        COUNT(*) JUDGE_REMAIN_TOTAL 
+--                     
+FROM PC_LOOKUP_CASE_CATE plcc
+LEFT JOIN PC_CASE pc ON pc.CASE_CATE_ID = plcc.CASE_CATE_ID AND pc.REMOVED_BY = 0
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
+WHERE plcc.CASE_CATE_CODE = '306'
+AND pj.CASE_ID IS NULL
+GROUP BY plcc.CASE_CATE_NAME]]>
+		</queryString>
+		<field name="CASE_TYPE" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_TYPE"/>
+		</field>
+		<field name="JUDGE_REMAIN_LESS1MNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="JUDGE_REMAIN_LESS1MNT"/>
+		</field>
+		<field name="JUDGE_REMAIN_1TO3MNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="JUDGE_REMAIN_1TO3MNT"/>
+		</field>
+		<field name="JUDGE_REMAIN_3TO6MNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="JUDGE_REMAIN_3TO6MNT"/>
+		</field>
+		<field name="JUDGE_REMAIN_6MNTO1YR" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="JUDGE_REMAIN_6MNTO1YR"/>
+		</field>
+		<field name="JUDGE_REMAIN_1YRTO2YR" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="JUDGE_REMAIN_1YRTO2YR"/>
+		</field>
+		<field name="JUDGE_REMAIN_2YRTO3YR" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="JUDGE_REMAIN_2YRTO3YR"/>
+		</field>
+		<field name="JUDGE_REMAIN_3YRTO4YR" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="JUDGE_REMAIN_3YRTO4YR"/>
+		</field>
+		<field name="JUDGE_REMAIN_4YRTO5YR" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="JUDGE_REMAIN_4YRTO5YR"/>
+		</field>
+		<field name="JUDGE_REMAIN_MORE5YEAR" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="JUDGE_REMAIN_MORE5YEAR"/>
+		</field>
+		<field name="JUDGE_REMAIN_TOTAL" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="JUDGE_REMAIN_TOTAL"/>
+		</field>
+		<variable name="SUM_JUDGEREMAIN_LESS1MNT" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{JUDGE_REMAIN_LESS1MNT}]]></variableExpression>
+		</variable>
+		<variable name="SUM_JUDGEREMAIN_1TO3MNT" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{JUDGE_REMAIN_1TO3MNT}]]></variableExpression>
+		</variable>
+		<variable name="SUM_JUDGEREMAIN_3TO6MNT" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{JUDGE_REMAIN_3TO6MNT}]]></variableExpression>
+		</variable>
+		<variable name="SUM_JUDGEREMAIN_6MNTO1YR" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{JUDGE_REMAIN_6MNTO1YR}]]></variableExpression>
+		</variable>
+		<variable name="SUM_JUDGEREMAIN_1YRTO2YR" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{JUDGE_REMAIN_1YRTO2YR}]]></variableExpression>
+		</variable>
+		<variable name="SUM_JUDGEREMAIN_2YRTO3YR" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{JUDGE_REMAIN_2YRTO3YR}]]></variableExpression>
+		</variable>
+		<variable name="SUM_JUDGEREMAIN_3YRTO4YR" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{JUDGE_REMAIN_3YRTO4YR}]]></variableExpression>
+		</variable>
+		<variable name="SUM_JUDGEREMAIN_4YRTO5YR" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{JUDGE_REMAIN_4YRTO5YR}]]></variableExpression>
+		</variable>
+		<variable name="SUM_JUDGEREMAIN_MORE5YEAR" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{JUDGE_REMAIN_MORE5YEAR}]]></variableExpression>
+		</variable>
+		<variable name="SUM_JUDGEREMAIN_TOTAL" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$V{JUDGEREMAIN_TOTAL}]]></variableExpression>
+		</variable>
+		<variable name="JUDGEREMAIN_TOTAL" class="java.lang.Long">
+			<variableExpression><![CDATA[$F{JUDGE_REMAIN_LESS1MNT}+$F{JUDGE_REMAIN_1TO3MNT}+$F{JUDGE_REMAIN_3TO6MNT}+$F{JUDGE_REMAIN_6MNTO1YR}+$F{JUDGE_REMAIN_1YRTO2YR}+$F{JUDGE_REMAIN_2YRTO3YR}+$F{JUDGE_REMAIN_3YRTO4YR}+$F{JUDGE_REMAIN_4YRTO5YR}+$F{JUDGE_REMAIN_MORE5YEAR}]]></variableExpression>
+		</variable>
+	</subDataset>
+	<subDataset name="DSETJUDGE_REMAIN_STEP" uuid="8e0c11c2-155a-4ccb-b35f-04f52b08d048">
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+		<parameter name="FROM_DATE" class="java.lang.String">
+			<defaultValueExpression><![CDATA["01/06/2020"]]></defaultValueExpression>
+		</parameter>
+		<parameter name="TO_DATE" class="java.lang.String">
+			<defaultValueExpression><![CDATA["30/06/2020"]]></defaultValueExpression>
+		</parameter>
+		<queryString>
+			<![CDATA[SELECT pphr.HOLD_REASON CASE_ITEM,
+       NVL(h.CNT,0) CASE_COUNT
+FROM PC_PROCEED_HOLD_REASON pphr 
+LEFT JOIN (SELECT pph.HOLD_REASON_ID,
+			       NVL(SUM(CASE WHEN (plcc.CASE_CATE_CODE = '306') THEN 1 ELSE 0 END),0) CNT
+			FROM PC_PROCEED_HOLD pph 
+			LEFT JOIN PC_CASE pc ON pc.CASE_ID = pph.CASE_ID AND pc.REMOVED_BY = 0
+			LEFT JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+			LEFT JOIN PC_LOOKUP_CASE_TYPE plct ON plct.CASE_TYPE_ID = plcc.CASE_TYPE_ID AND plcc.REMOVED_BY = 0
+			WHERE pph.REMOVED_BY = 0
+			AND pph.CREATED_DATE BETWEEN TO_DATE($P{FROM_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+			                          AND TO_DATE($P{TO_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+			GROUP BY pph.HOLD_REASON_ID) h ON h.HOLD_REASON_ID = pphr.HOLD_REASON_ID 
+WHERE pphr.REMOVED_BY = 0
+AND pphr.HOLD_REASON_ID <> 16]]>
+		</queryString>
+		<field name="CASE_ITEM" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_ITEM"/>
+		</field>
+		<field name="CASE_COUNT" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_COUNT"/>
+		</field>
+		<variable name="SUM_COUNT" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{CASE_COUNT}]]></variableExpression>
+		</variable>
+	</subDataset>
+	<subDataset name="DSETCASE_BYCATEGORY" uuid="7e0c43c3-59bf-4f14-9079-7fafb0b9c8d7">
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+		<queryString>
+			<![CDATA[]]>
+		</queryString>
+	</subDataset>
+	<subDataset name="DSETCASE_NEWINPLACE" uuid="03fca03b-ae14-428f-a9cc-1f46a15292d3">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="dataadapter\RemoteCojTest.xml"/>
+		<queryString language="SQL">
+			<![CDATA[SELECT '1. จังหวัดสระบุรี' PLACE, 0 NEWCASE FROM DUAL
+UNION ALL
+SELECT '2. จังหวัดชัยนาท' PLACE, 0 NEWCASE FROM DUAL
+UNION ALL
+SELECT '3. จังหวัดพระนครศรีอยุธยา' PLACE, 0 NEWCASE FROM DUAL
+UNION ALL
+SELECT '4. จังหวัดสิงห์บุรี' PLACE, 0 NEWCASE FROM DUAL
+UNION ALL
+SELECT '5. จังหวัดอ่างทอง' PLACE, 0 NEWCASE FROM DUAL
+UNION ALL
+SELECT '6. จังหวัดสระบุรี' PLACE, 0 NEWCASE FROM DUAL
+UNION ALL
+SELECT '7. จังหวัดสมุทรปราการ' PLACE, 0 NEWCASE FROM DUAL
+UNION ALL
+SELECT '8. จังหวัดนนทบุรี' PLACE, 0 NEWCASE FROM DUAL
+UNION ALL
+SELECT '9. จังหวัดปทุมธานี' PLACE, 0 NEWCASE FROM DUAL]]>
+		</queryString>
+		<field name="PLACE" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="PLACE"/>
+		</field>
+		<field name="NEWCASE" class="java.lang.Long">
+			<property name="com.jaspersoft.studio.field.label" value="NEWCASE"/>
+		</field>
+		<variable name="SUM_NEWCASE" class="java.lang.Long" calculation="Sum">
+			<variableExpression><![CDATA[$F{NEWCASE}]]></variableExpression>
+		</variable>
+	</subDataset>
+	<parameter name="LASTYEAR_FROMDATE" class="java.lang.String">
+		<parameterDescription><![CDATA[]]></parameterDescription>
+		<defaultValueExpression><![CDATA["01-01-2019"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="LASTYEAR_TODATE" class="java.lang.String">
+		<parameterDescription><![CDATA[]]></parameterDescription>
+		<defaultValueExpression><![CDATA["31-01-2019"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="THISYEAR_FROMDATE" class="java.lang.String">
+		<parameterDescription><![CDATA[]]></parameterDescription>
+		<defaultValueExpression><![CDATA["01-01-2020"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="THISYEAR_TODATE" class="java.lang.String">
+		<parameterDescription><![CDATA[]]></parameterDescription>
+		<defaultValueExpression><![CDATA["31-01-2020"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="LASTMONTH_FROMDATE" class="java.lang.String">
+		<parameterDescription><![CDATA[]]></parameterDescription>
+		<defaultValueExpression><![CDATA["01-01-2020"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="LASTMONTH_TODATE" class="java.lang.String">
+		<parameterDescription><![CDATA[]]></parameterDescription>
+		<defaultValueExpression><![CDATA["31-01-2020"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="THISMONTH_FROMDATE" class="java.lang.String">
+		<parameterDescription><![CDATA[]]></parameterDescription>
+		<defaultValueExpression><![CDATA["01-02-2020"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="THISMONTH_TODATE" class="java.lang.String">
+		<parameterDescription><![CDATA[]]></parameterDescription>
+		<defaultValueExpression><![CDATA["29-02-2020"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="CURRENTDATE" class="java.lang.String">
+		<parameterDescription><![CDATA[]]></parameterDescription>
+		<defaultValueExpression><![CDATA["01-02-2020"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SELMONTH" class="java.lang.String">
+		<defaultValueExpression><![CDATA["052020"]]></defaultValueExpression>
+	</parameter>
+	<queryString language="SQL">
+		<![CDATA[SELECT plc.COURT_NAME_TH,
+       DECODE(EXTRACT(MONTH FROM TO_DATE('31-05-2020','DD-MM-YYYY')), 
+       	       1, 'มกราคม', 2, 'กุมภาพันธ์', 3, 'มีนาคม', 4, 'เมษายน',
+               5, 'พฤษภาคม', 6, 'มิถุนายน', 7,'กรกฎาคม', 8, 'สิงหาคม',                                                               
+               9, 'กันยายน', 10, 'ตุลาคม', 11, 'พฤศจิกายน', 12, 'ธันวาคม', '-') SELECTED_MONTH, 
+       EXTRACT(YEAR FROM TO_DATE('31-05-2020','DD-MM-YYYY'))+ 543          SELECTED_YEAR
+FROM PC_PARAM pp
+JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
+	</queryString>
+	<field name="COURT_NAME_TH" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
+	</field>
+	<field name="SELECTED_MONTH" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="SELECTED_MONTH"/>
+	</field>
+	<field name="SELECTED_YEAR" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.label" value="SELECTED_YEAR"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="60" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="555" height="25" uuid="8f344fe7-e315-4a4a-b9e2-c0d93ab15e70">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="18" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["แบบรายงานสถิติประจำเดือน"+$F{COURT_NAME_TH}+"(รวม)"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="32" width="555" height="25" uuid="f57eb705-e1d8-4b52-8a15-40a46f22548c">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box leftPadding="3">
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="18" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["ประจำเดือน"+$F{SELECTED_MONTH}+" พ.ศ. "+$F{SELECTED_YEAR}+"      "+$F{COURT_NAME_TH}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="16" splitType="Stretch"/>
+	</pageHeader>
+	<detail>
+		<band height="81" splitType="Stretch">
+			<componentElement>
+				<reportElement mode="Transparent" x="0" y="0" width="409" height="71" uuid="42502b02-2788-4d48-a09a-3e6ed6820a1e">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="DSETCASE_INYEAR" uuid="301b6ec8-16c0-4ac6-80b8-2e084d96eb9f">
+						<datasetParameter name="LAST_FROMDATE">
+							<datasetParameterExpression><![CDATA[$P{LASTYEAR_FROMDATE}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="LAST_TODATE">
+							<datasetParameterExpression><![CDATA[$P{LASTYEAR_TODATE}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="THIS_FROMDATE">
+							<datasetParameterExpression><![CDATA[$P{THISYEAR_FROMDATE}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="THIS_TODATE">
+							<datasetParameterExpression><![CDATA[$P{THISYEAR_TODATE}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:columnGroup width="409" uuid="70518c1a-0711-4729-8148-6fe6bd6536f4">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Columns [4]"/>
+						<jr:columnHeader height="25" rowSpan="1">
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+							<staticText>
+								<reportElement x="0" y="0" width="409" height="25" uuid="0461d9cc-7e7b-448d-a7ec-ed6bdeed0d47"/>
+								<box leftPadding="5">
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17" isBold="true"/>
+								</textElement>
+								<text><![CDATA[1. คดีแรงงานในรอบปี :]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:column width="103" uuid="c6be272a-e552-4a42-9ce0-42a388ce38ef">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
+							<jr:columnHeader height="23" rowSpan="1">
+								<staticText>
+									<reportElement x="0" y="0" width="103" height="23" uuid="e56c6ce4-4111-4645-a2aa-a7dc13bd81d1"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14" isBold="true"/>
+									</textElement>
+									<text><![CDATA[คดีค้างมาจากปีที่แล้ว]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="103" height="23" uuid="f2910a1b-4cba-4e3e-b330-102d24980bec"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{CASE_PREVYEAR_REMAIN}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="103" uuid="4425223e-76d7-4095-bba3-137dbecf2349">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
+							<jr:columnHeader height="23" rowSpan="1">
+								<staticText>
+									<reportElement x="0" y="0" width="103" height="23" uuid="91a5dcb1-5223-4c65-ac2d-e77c463ad70f"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14" isBold="true"/>
+									</textElement>
+									<text><![CDATA[คดีรับใหม่ในปีนี้]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="103" height="23" uuid="e149a206-aaa0-4b92-a178-195f7b84121b"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{CASE_CURRYEAR_RECV}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="101" uuid="9c397baa-e75d-4c94-a816-c339b35529f9">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
+							<jr:columnHeader height="23" rowSpan="1">
+								<staticText>
+									<reportElement x="0" y="0" width="101" height="23" uuid="ba91c757-4ceb-4e9d-9df4-9ec5b62a1a47"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14" isBold="true"/>
+									</textElement>
+									<text><![CDATA[คดีเสร็จไปในปีนี้]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="101" height="23" uuid="3fb8db86-ac4b-47ef-9bed-07aaf0dd872d"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{CASE_CURRYEAR_FINISH}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="102" uuid="e47023a3-dd01-484d-a01c-b2366312ea91">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column4"/>
+							<jr:columnHeader height="23" rowSpan="1">
+								<staticText>
+									<reportElement x="0" y="0" width="102" height="23" uuid="1998dcc5-1e96-48a5-bbfa-5f43c05ebcf1"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14" isBold="true"/>
+									</textElement>
+									<text><![CDATA[คดีคงค้าง]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="102" height="23" uuid="b7704617-f9a8-4450-8777-04c09878c6e1"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{CASE_CURRYEAR_REMAIN}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+					</jr:columnGroup>
+				</jr:table>
+			</componentElement>
+		</band>
+		<band height="81">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<componentElement>
+				<reportElement x="0" y="0" width="409" height="71" uuid="dace74dd-f5c1-41ef-a05d-6f628205a23e">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="DSETCASE_INMONTH" uuid="b8f40276-f9d7-439d-92cc-05ff3a7be569">
+						<datasetParameter name="LAST_FROMDATE">
+							<datasetParameterExpression><![CDATA[$P{LASTMONTH_FROMDATE}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="LAST_TODATE">
+							<datasetParameterExpression><![CDATA[$P{LASTMONTH_TODATE}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="THIS_FROMDATE">
+							<datasetParameterExpression><![CDATA[$P{THISMONTH_FROMDATE}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="THIS_TODATE">
+							<datasetParameterExpression><![CDATA[$P{THISMONTH_TODATE}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:columnGroup width="409" uuid="8725ad54-e7c0-46a8-8244-b1b36fce5f3a">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Columns [4]"/>
+						<jr:columnHeader height="25" rowSpan="1">
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+							<staticText>
+								<reportElement x="0" y="0" width="409" height="25" uuid="ebe25efc-83d4-4d00-9c1c-6e614b55f388"/>
+								<box leftPadding="5">
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17" isBold="true"/>
+								</textElement>
+								<text><![CDATA[2. คดีแรงงานเดือนนี้ :]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:column width="102" uuid="018b8399-8b91-4024-a3cd-733ff4869161">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
+							<jr:columnHeader height="23" rowSpan="1">
+								<staticText>
+									<reportElement x="0" y="0" width="102" height="23" uuid="fb5b4a11-8ce8-48ba-8de1-4ce81a9e3837"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14" isBold="true"/>
+									</textElement>
+									<text><![CDATA[คดีค้างมาจากเดือนที่แล้ว]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="102" height="23" uuid="540b7892-a9e9-4182-b293-e727bdc5b1b8"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{CASE_PREVMONTH_REMAIN}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="102" uuid="f4279c70-6dcb-4ae3-942f-263a0695aecf">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
+							<jr:columnHeader height="23" rowSpan="1">
+								<staticText>
+									<reportElement x="0" y="0" width="102" height="23" uuid="a195302a-4cc9-4e12-93db-672aec88b5e5"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14" isBold="true"/>
+									</textElement>
+									<text><![CDATA[คดีรับใหม่ในเดือนนี้]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="102" height="23" uuid="416dd0ab-e44d-4625-9ef7-4cd6c8f847ec"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{CASE_CURRMONTH_RECV}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="104" uuid="e3b4667f-77ac-47d4-9863-6d7320585ea1">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
+							<jr:columnHeader height="23" rowSpan="1">
+								<staticText>
+									<reportElement x="0" y="0" width="104" height="23" uuid="9b0536a7-358c-474e-9c29-db63b4f8099f"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14" isBold="true"/>
+									</textElement>
+									<text><![CDATA[คดีเสร็จไปในเดือนนี้]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="104" height="23" uuid="a94516c2-32ae-487f-b9cd-7e0db892abc3"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{CASE_CURRMONTH_FINISH}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="101" uuid="5e00db6c-712b-4cb7-a8da-1d06cbca0c7d">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column4"/>
+							<jr:columnHeader height="23" rowSpan="1">
+								<staticText>
+									<reportElement x="0" y="0" width="101" height="23" uuid="5f287296-ce57-4963-8f14-6e505ff0068f"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14" isBold="true"/>
+									</textElement>
+									<text><![CDATA[คดีค้างไปเดือนหน้า]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="101" height="23" uuid="464ccaba-86d3-4076-b54e-b25b63ae3adf"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{CASE_CURRMONTH_REMAIN}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+					</jr:columnGroup>
+				</jr:table>
+			</componentElement>
+		</band>
+		<band height="101">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<componentElement>
+				<reportElement x="0" y="1" width="555" height="90" uuid="8777b465-f264-4df0-a07d-73cff7cf79b3">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="DSETJUDGE_PERIOD" uuid="a1738ebc-887c-4b41-93bb-ca2683dafe5e">
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:columnGroup width="555" uuid="93d64107-c6e1-4c24-a143-e583878341a7">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Columns [10]"/>
+						<jr:columnHeader height="23" rowSpan="1">
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+							<staticText>
+								<reportElement x="0" y="0" width="555" height="23" uuid="df2e1ed6-19a4-49d3-a805-a960abb7163a"/>
+								<box leftPadding="5">
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="17" isBold="true"/>
+								</textElement>
+								<text><![CDATA[3. ระยะเวลาในการพิจารณาคดี (นับตั้งแต่วันฟ้อง จนคดีเสร็จสิ้น)]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:column width="57" uuid="819775a6-882a-48d4-8b8f-a56b62f9906a">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
+							<jr:columnHeader height="46" rowSpan="1">
+								<property name="com.jaspersoft.studio.unit.height" value="px"/>
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="57" height="46" uuid="74aea8dc-b288-4eb1-8bb5-c06c58b95c2f"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14" isBold="true"/>
+									</textElement>
+									<text><![CDATA[ไม่เกิน 1 เดือน]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="57" height="23" uuid="8752a407-09b5-4487-9d5c-9a2d8e30cc90"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{JUDGE_PERIOD_LESS1MNT}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="57" uuid="f3c2a33f-b065-48c2-9aa8-42c3ad1925b7">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
+							<jr:columnHeader height="46" rowSpan="1">
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="57" height="46" uuid="d0fe9f9c-f3fd-4a76-845d-69d508733725"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14" isBold="true"/>
+									</textElement>
+									<text><![CDATA[เกิน 1 เดือน ไม่เกิน 3 เดือน]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="57" height="23" uuid="37c1e30b-e7b4-4a6e-8166-bc96814b8776"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{JUDGE_PERIOD_1TO3MNT}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="57" uuid="5d2326e8-c791-4c71-9b44-2b93a584dcf0">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
+							<jr:columnHeader height="46" rowSpan="1">
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="57" height="46" uuid="cd97046f-0e27-4baa-bc18-f267c6b9b237"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14" isBold="true"/>
+									</textElement>
+									<text><![CDATA[เกิน 3 เดือน ไม่เกิน 6 เดือน]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="57" height="23" uuid="8339db2a-77dd-440e-9d76-5f778269eb3b"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{JUDGE_PERIOD_3TO6MNT}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="56" uuid="cec320a6-03b8-4747-bd30-4efba6b1e58c">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column4"/>
+							<jr:columnHeader height="46" rowSpan="1">
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="56" height="46" uuid="16c2264d-c032-4cf0-86f8-ff6e89daccaa"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14" isBold="true"/>
+									</textElement>
+									<text><![CDATA[เกิน 6 เดือน ไม่เกิน 1 ปี]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="56" height="23" uuid="8a89e772-d494-4641-a812-f84d9e13ccc9"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{JUDGE_PERIOD_6MNTO1YR}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="56" uuid="c8cdcbcc-0bf2-4b3f-af43-defc02d0ff90">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
+							<jr:columnHeader height="46" rowSpan="1">
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="56" height="46" uuid="c271cbe3-1a65-4723-be90-057b9d73a360"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14" isBold="true"/>
+									</textElement>
+									<text><![CDATA[เกิน 1 ปี   ไม่เกิน 2 ปี]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="56" height="23" uuid="5428c76a-b3b7-4c38-99c2-801397c13051"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{JUDGE_PERIOD_1YRTO2YR}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="56" uuid="c6cdc8ce-f192-4325-a9a4-890a4a6c3613">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
+							<jr:columnHeader height="46" rowSpan="1">
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="56" height="46" uuid="956bc3ee-b621-45eb-9098-6057decb7b84"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14" isBold="true"/>
+									</textElement>
+									<text><![CDATA[เกิน 2 ปี   ไม่เกิน 3 ปี]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="56" height="23" uuid="583f03aa-0497-4f63-99d2-00a73113aec4"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{JUDGE_PERIOD_2YRTO3YR}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="56" uuid="e030260c-789d-48d3-8c3b-b4dc0f7e94b3">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column7"/>
+							<jr:columnHeader height="46" rowSpan="1">
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="56" height="46" uuid="7ace0543-56a3-4a04-a647-e9ecf4e7eaca"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14" isBold="true"/>
+									</textElement>
+									<text><![CDATA[เกิน 3 ปี   ไม่เกิน 4 ปี]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="56" height="23" uuid="c5a61566-531a-42f2-a8d0-dcb2ee582863"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{JUDGE_PERIOD_3YRTO4YR}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="54" uuid="dce9fa9c-a509-4915-863d-6027166ac571">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column8"/>
+							<jr:columnHeader height="46" rowSpan="1">
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="54" height="46" uuid="513b87a7-d3b7-4562-a662-a9590ef07ada"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14" isBold="true"/>
+									</textElement>
+									<text><![CDATA[เกิน 4 ปี   ไม่เกิน 5 ปี]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="54" height="23" uuid="5ba46d43-c068-4b0c-b8cd-7368bc00d09e"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{JUDGE_PERIOD_4YRTO5YR}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="56" uuid="5d869349-df30-4370-9249-41a58e2e8133">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column9"/>
+							<jr:columnHeader height="46" rowSpan="1">
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="56" height="46" uuid="050d250e-c004-4a99-aa6f-5475c1e6e9c9"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14" isBold="true"/>
+									</textElement>
+									<text><![CDATA[เกิน 5 ปี    ขึ้นไป]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="56" height="23" uuid="d460e1e8-8540-49da-beac-b710d6ed98c6"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{JUDGE_PERIOD_MORE5YEAR}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="50" uuid="4c4caa84-2c3e-483f-b843-412c55abc345">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column10"/>
+							<jr:columnHeader height="46" rowSpan="1">
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="50" height="46" uuid="3f8e8565-c36c-4a6a-ae01-f226a96f7b8c"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<text><![CDATA[รวม]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="50" height="23" uuid="d11551fa-5311-41f8-b607-8413fa5bf70c"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{TOTAL}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+					</jr:columnGroup>
+				</jr:table>
+			</componentElement>
+		</band>
+		<band height="140">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<componentElement>
+				<reportElement x="0" y="0" width="555" height="130" uuid="37fb52cb-a84f-4422-9cc9-ab9ff5aeb81a">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="DSETCASE_TOAPPEAL" uuid="787d7ccb-f1c7-476b-bfda-a9b351f1a30a">
+						<datasetParameter name="LAST_FROMDATE">
+							<datasetParameterExpression><![CDATA[$P{LASTMONTH_FROMDATE}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="LAST_TODATE">
+							<datasetParameterExpression><![CDATA[$P{LASTMONTH_TODATE}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="THIS_FROMDATE">
+							<datasetParameterExpression><![CDATA[$P{THISYEAR_FROMDATE}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="THIS_TODATE">
+							<datasetParameterExpression><![CDATA[$P{THISYEAR_TODATE}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:columnGroup width="555" uuid="f5fcd1f3-c785-44a5-8853-8359fae0910a">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Columns [6]"/>
+						<jr:columnHeader height="23" rowSpan="1">
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+							<staticText>
+								<reportElement x="0" y="0" width="555" height="23" uuid="2198ea2d-be9e-4977-b7ac-96315d5079e1"/>
+								<box leftPadding="5">
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement>
+									<font fontName="THSarabunNew" size="17" isBold="true"/>
+								</textElement>
+								<text><![CDATA[4.  การอุทธรณ์ต่อศาลอุทธรณ์ หรือ ฎีกา]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:column width="146" uuid="f9b16d19-bec0-4c0f-a735-e184041d3aaa">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
+							<jr:columnHeader height="60" rowSpan="1">
+								<property name="com.jaspersoft.studio.unit.width" value="px"/>
+								<property name="com.jaspersoft.studio.unit.height" value="px"/>
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="146" height="60" uuid="075c3e3c-fff3-4ac4-86fa-e7392b62da95"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17" isBold="true"/>
+									</textElement>
+									<text><![CDATA[ประเภทคดี]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:columnFooter height="23" rowSpan="1">
+								<property name="com.jaspersoft.studio.unit.height" value="px"/>
+								<staticText>
+									<reportElement x="0" y="0" width="146" height="23" uuid="40a6b17d-2b57-40f5-a0af-5fd3f1b6fc6c"/>
+									<box rightPadding="5">
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<text><![CDATA[รวม]]></text>
+								</staticText>
+							</jr:columnFooter>
+							<jr:detailCell height="23">
+								<property name="com.jaspersoft.studio.unit.height" value="px"/>
+								<textField>
+									<reportElement x="0" y="0" width="146" height="23" uuid="9f273381-d991-4c84-8b03-1c44ee60b6a9"/>
+									<box leftPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{APPEAL_LEVEL_CODE}.equals("001" )?"ยื่นต่อศาลอุทธรณ์ชำนาญพิเศษ"
+:$F{APPEAL_LEVEL_CODE}.equals("002" )?"อุทธรณ์ต่อศาลฎีกา":" "]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="82" uuid="df5b2f4b-14aa-4f26-b032-a35d90d01db3">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
+							<jr:columnHeader height="60" rowSpan="1">
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="82" height="60" uuid="ecdb775f-171e-4ca5-a20b-9436f4828920"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14" isBold="true"/>
+									</textElement>
+									<text><![CDATA[คดีที่ยื่น ศาลชั้นอุทธรณ์/ฎีกา ค้างส่งจากเดือนก่อน]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:columnFooter height="23" rowSpan="1">
+								<textField>
+									<reportElement x="0" y="0" width="82" height="23" uuid="13e15616-7eda-4048-b779-14eac9759cfd"/>
+									<box rightPadding="5">
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{SUM_APPLIED_MREMAIN}]]></textFieldExpression>
+								</textField>
+							</jr:columnFooter>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="82" height="23" uuid="2fcf00cb-a47a-4425-a756-0b82a465bb76"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{APPEAL_APPLIED_MREMAIN}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="82" uuid="39a6f75f-2840-4b17-9183-5088525780d7">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
+							<jr:columnHeader height="60" rowSpan="1">
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="82" height="60" uuid="30c3e255-875f-4c16-b8e0-b461072f3879"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14" isBold="true"/>
+									</textElement>
+									<text><![CDATA[คดีที่ยื่น ศาลชั้นอุทธรณ์/ฎีกา]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:columnFooter height="23" rowSpan="1">
+								<textField>
+									<reportElement x="0" y="0" width="82" height="23" uuid="8cfc6ef7-8ffd-4c17-bc0e-0644919e9b7a"/>
+									<box rightPadding="5">
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{SUM_APPLIED}]]></textFieldExpression>
+								</textField>
+							</jr:columnFooter>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="82" height="23" uuid="6e85338c-3961-4214-84a8-1fa0a4d9c045"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{APPEAL_APPLIED}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="82" uuid="0b04b9bf-4724-4ce8-a462-66cc07425c0e">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column4"/>
+							<jr:columnHeader height="60" rowSpan="1">
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="82" height="60" uuid="a62b0e38-ef00-4bc4-85f6-ac8c353f2668"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14" isBold="true"/>
+									</textElement>
+									<text><![CDATA[คดีที่ไม่อนุญาตให้ยื่น ศาลชั้นอุทรณ์/ฎีกา]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:columnFooter height="23" rowSpan="1">
+								<textField>
+									<reportElement x="0" y="0" width="82" height="23" uuid="3c08c352-7a43-4225-b9e4-ad2534168e8d"/>
+									<box rightPadding="5">
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{SUM_NOT_ALLOW}]]></textFieldExpression>
+								</textField>
+							</jr:columnFooter>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="82" height="23" uuid="eeee93d6-d565-4c6d-9abf-3aaceca6e175"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{APPEAL_NOT_ALLOW}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="81" uuid="d19ba5d7-fa89-4ca5-a41c-4147d779fde9">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
+							<jr:columnHeader height="60" rowSpan="1">
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="81" height="60" uuid="e2434530-b395-4071-9378-3b1eb8e02005"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="13" isBold="true"/>
+									</textElement>
+									<text><![CDATA[คดีที่ส่งไปยัง ศาลชั้นอุทธรณ์/ฎีกา]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:columnFooter height="23" rowSpan="1">
+								<textField>
+									<reportElement x="0" y="0" width="81" height="23" uuid="4734336f-6764-46bf-aa8e-61a9f3a34d7f"/>
+									<box rightPadding="5">
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{SUM_SENT}]]></textFieldExpression>
+								</textField>
+							</jr:columnFooter>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="81" height="23" uuid="543f3260-0507-46f1-87f6-d822b860feaa"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{APPEAL_SENT}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="82" uuid="f3560a42-6791-4326-8501-e0c63a11534a">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
+							<jr:columnHeader height="60" rowSpan="1">
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="82" height="60" uuid="1aa47f0c-57d2-42b7-a6a6-2058ef0a3c0c"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14" isBold="true"/>
+									</textElement>
+									<text><![CDATA[คดีที่ค้างส่งไปยัง ศาลชั้นอุทธรณ์/ฎีกา ในเดือนนี้]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:columnFooter height="23" rowSpan="1">
+								<textField>
+									<reportElement x="0" y="0" width="82" height="23" uuid="8df2f7bd-faab-4d12-874c-69faf68991d0"/>
+									<box rightPadding="5">
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{SUM_SENT_MREMAIN}]]></textFieldExpression>
+								</textField>
+							</jr:columnFooter>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="82" height="23" uuid="5340682e-da7f-47e7-bb4b-dc9183bc6ebf"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{APPEAL_SENT_REMAIN}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+					</jr:columnGroup>
+				</jr:table>
+			</componentElement>
+		</band>
+		<band height="102">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<componentElement>
+				<reportElement x="0" y="0" width="349" height="92" uuid="b3545260-66aa-4eac-85ae-f7b8b2361294">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="DSETCASE_ABUSECOURT" uuid="76942777-d323-4cbe-a03c-cee7b1daa63b">
+						<datasetParameter name="THIS_FROMDATE">
+							<datasetParameterExpression><![CDATA[$P{THISMONTH_FROMDATE}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="THIS_TODATE">
+							<datasetParameterExpression><![CDATA[$P{THISMONTH_TODATE}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:columnGroup width="350" uuid="233f3c62-356b-4926-a22e-93dc384bf613">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Columns [2]"/>
+						<jr:columnHeader height="23" rowSpan="1">
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+							<staticText>
+								<reportElement x="0" y="0" width="350" height="23" uuid="0606420c-3316-4ffd-9b30-5ba9aafd2413"/>
+								<box leftPadding="5">
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement>
+									<font fontName="THSarabunNew" size="17" isBold="true"/>
+								</textElement>
+								<text><![CDATA[5.  คดีละเมิดอำนาจศาล ]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:column width="250" uuid="cc320492-8765-4086-8490-7fb5c5081f44">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
+							<jr:columnHeader height="23" rowSpan="1">
+								<property name="com.jaspersoft.studio.unit.width" value="px"/>
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="250" height="23" uuid="339c6df3-449d-46a5-a5f7-1425f3848a6f"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17" isBold="true"/>
+									</textElement>
+									<text><![CDATA[ประเภทคดี]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:columnFooter height="23" rowSpan="1">
+								<property name="com.jaspersoft.studio.unit.height" value="px"/>
+								<staticText>
+									<reportElement x="0" y="0" width="250" height="23" uuid="a7fb639b-a1fc-41ca-929f-4e2d55f1948f"/>
+									<box rightPadding="5">
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<text><![CDATA[รวม]]></text>
+								</staticText>
+							</jr:columnFooter>
+							<jr:detailCell height="23">
+								<property name="com.jaspersoft.studio.unit.height" value="px"/>
+								<textField isStretchWithOverflow="true">
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="250" height="23" uuid="12339a4e-7e1c-481c-b7f9-7ff4abe152e8"/>
+									<box leftPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{CASE_TYPE}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="100" uuid="040f127d-74ad-4588-b357-75ae716969a8">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
+							<jr:columnHeader height="23" rowSpan="1">
+								<property name="com.jaspersoft.studio.unit.width" value="px"/>
+								<staticText>
+									<reportElement x="0" y="0" width="100" height="23" uuid="8603e010-fd75-4a9c-8dec-02d29348992b"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="12" isBold="true"/>
+									</textElement>
+									<text><![CDATA[จำนวนคดี]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:columnFooter height="23" rowSpan="1">
+								<textField>
+									<reportElement x="0" y="0" width="100" height="23" uuid="b69ec6bb-e2bd-4df0-9f81-777a528b8208"/>
+									<box rightPadding="5">
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Bottom">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{SUM_CNT}]]></textFieldExpression>
+								</textField>
+							</jr:columnFooter>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="100" height="23" uuid="bd1a2d3d-c5c8-460d-9a25-f261666b2218"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{CNT}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+					</jr:columnGroup>
+				</jr:table>
+			</componentElement>
+		</band>
+		<band height="102">
+			<componentElement>
+				<reportElement x="0" y="0" width="349" height="92" uuid="ac850ee5-782b-44ae-b3ed-fe409207a5d9">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="DSETCASE_MEDIATE" uuid="56a44c73-5777-47a6-97bc-84c27f8aea97">
+						<datasetParameter name="THIS_FROMDATE">
+							<datasetParameterExpression><![CDATA[$P{THISMONTH_FROMDATE}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="THIS_TODATE">
+							<datasetParameterExpression><![CDATA[$P{THISMONTH_TODATE}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:columnGroup width="350" uuid="5dc58a9c-a249-45a6-8635-6abf260e1c4e">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Columns [2]"/>
+						<jr:columnHeader height="23" rowSpan="1">
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+							<staticText>
+								<reportElement x="0" y="0" width="350" height="23" uuid="f4c848be-97a3-4759-8182-bcb1665d63ef"/>
+								<box leftPadding="5">
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement>
+									<font fontName="THSarabunNew" size="17" isBold="true"/>
+								</textElement>
+								<text><![CDATA[6.  การไกล่เกลี่ย ประนอมข้อพิพาท :]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:column width="250" uuid="caf34703-2637-43bc-83c2-370957265159">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
+							<jr:columnHeader height="23" rowSpan="1">
+								<property name="com.jaspersoft.studio.unit.width" value="px"/>
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="250" height="23" uuid="d6c163bd-dadb-4b79-a960-1350ab0fe5e7"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17" isBold="true"/>
+									</textElement>
+									<text><![CDATA[ประเภทคดี]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:columnFooter height="23" rowSpan="1">
+								<property name="com.jaspersoft.studio.unit.height" value="px"/>
+								<staticText>
+									<reportElement x="0" y="0" width="250" height="23" uuid="14517828-c70c-42e1-bb02-10fd97b29428"/>
+									<box rightPadding="5">
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<text><![CDATA[รวม]]></text>
+								</staticText>
+							</jr:columnFooter>
+							<jr:detailCell height="23">
+								<property name="com.jaspersoft.studio.unit.height" value="px"/>
+								<textField isStretchWithOverflow="true">
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="250" height="23" uuid="825ac868-3759-4bee-bcac-afad5510f733"/>
+									<box leftPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{CASE_TYPE}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="100" uuid="b53dc816-f3a0-494e-9af4-d741a41d3041">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
+							<jr:columnHeader height="23" rowSpan="1">
+								<property name="com.jaspersoft.studio.unit.width" value="px"/>
+								<staticText>
+									<reportElement x="0" y="0" width="100" height="23" uuid="60dc82fb-7c1d-403c-9256-79e0f7472de7"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="12" isBold="true"/>
+									</textElement>
+									<text><![CDATA[จำนวนคดี]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:columnFooter height="23" rowSpan="1">
+								<textField>
+									<reportElement x="0" y="0" width="100" height="23" uuid="60b54ce5-10b3-4e0a-9311-689266c2ad80"/>
+									<box rightPadding="5">
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Bottom">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{SUM_CNT}]]></textFieldExpression>
+								</textField>
+							</jr:columnFooter>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="100" height="23" uuid="91b8632e-3119-458a-b59b-1e3f668ec1b4"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{CNT}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+					</jr:columnGroup>
+				</jr:table>
+			</componentElement>
+		</band>
+		<band height="102">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<componentElement>
+				<reportElement x="0" y="0" width="555" height="92" uuid="c062e95a-28a4-48fb-992c-057fe9b9a0ff">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="DSETJUDGE_REMAIN_PERIOD" uuid="a59f796d-95e1-4b74-bf21-23de93f8c918">
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:columnGroup width="555" uuid="4b63cc00-419b-44f1-b214-c04f67fc0281">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Columns [11]"/>
+						<jr:columnHeader height="23" rowSpan="1">
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+							<staticText>
+								<reportElement x="0" y="0" width="555" height="23" uuid="03f9bbdf-5deb-4cbd-992c-0c9a11488a94"/>
+								<box leftPadding="5">
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement>
+									<font fontName="THSarabunNew" size="17" isBold="true"/>
+								</textElement>
+								<text><![CDATA[7.  ระยะเวลาค้างในการพิจารณาคดี :]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:column width="136" uuid="a9f2b9f6-395c-4f1e-9327-2169aec5f8c9">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
+							<jr:tableFooter height="23" rowSpan="1">
+								<property name="com.jaspersoft.studio.unit.height" value="px"/>
+								<staticText>
+									<reportElement x="0" y="0" width="136" height="23" uuid="bb01aaec-1589-4b95-9e36-2b20a8bcb062"/>
+									<box rightPadding="5">
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<text><![CDATA[รวม]]></text>
+								</staticText>
+							</jr:tableFooter>
+							<jr:columnHeader height="46" rowSpan="1">
+								<property name="com.jaspersoft.studio.unit.width" value="px"/>
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="136" height="46" uuid="7bc8f99a-68b5-46f3-86a2-4e88b07852dd"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17" isBold="true"/>
+									</textElement>
+									<text><![CDATA[ประเภทคดี]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<property name="com.jaspersoft.studio.unit.height" value="px"/>
+								<textField>
+									<reportElement x="0" y="0" width="136" height="23" uuid="bdd0e3b2-3da9-4829-a92e-fa6756888480"/>
+									<box leftPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{CASE_TYPE}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="41" uuid="6284fbc4-24a3-400a-88bf-a534111b2ff1">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
+							<jr:tableFooter height="23" rowSpan="1">
+								<textField>
+									<reportElement x="0" y="0" width="41" height="23" uuid="ce1ed3ef-64de-4290-90e9-ee2e0f204faa"/>
+									<box rightPadding="5">
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{SUM_JUDGEREMAIN_LESS1MNT}]]></textFieldExpression>
+								</textField>
+							</jr:tableFooter>
+							<jr:columnHeader height="46" rowSpan="1">
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="41" height="46" uuid="e5c619d4-7ab1-490f-96d9-31fb72ee0b14"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="12" isBold="true"/>
+									</textElement>
+									<text><![CDATA[ไม่เกิน 1 เดือน]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="41" height="23" uuid="610b4125-72d7-44b2-87f6-10b4dd107a25"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{JUDGE_REMAIN_LESS1MNT}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="43" uuid="07062918-3e02-42e4-8cc8-0745079612cb">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
+							<jr:tableFooter height="23" rowSpan="1">
+								<textField>
+									<reportElement x="0" y="0" width="43" height="23" uuid="c1bdf0d9-580b-4bc1-8ddc-944d45a4fd61"/>
+									<box rightPadding="5">
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{SUM_JUDGEREMAIN_1TO3MNT}]]></textFieldExpression>
+								</textField>
+							</jr:tableFooter>
+							<jr:columnHeader height="46" rowSpan="1">
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="43" height="46" uuid="b18f61f1-d453-4e61-bf99-7f8ca77d2b04"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="12" isBold="true"/>
+									</textElement>
+									<text><![CDATA[เกิน 1 เดือน ไม่เกิน 3 เดือน]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="43" height="23" uuid="640fb896-430c-4296-b5dd-c230aaad4cc8"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{JUDGE_REMAIN_1TO3MNT}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="43" uuid="4f7f8871-6012-41bc-a757-d1b153284665">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column4"/>
+							<jr:tableFooter height="23" rowSpan="1">
+								<textField>
+									<reportElement x="0" y="0" width="43" height="23" uuid="678c94a6-86bf-4914-96aa-c39c7d6ffd05"/>
+									<box rightPadding="5">
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{SUM_JUDGEREMAIN_3TO6MNT}]]></textFieldExpression>
+								</textField>
+							</jr:tableFooter>
+							<jr:columnHeader height="46" rowSpan="1">
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="43" height="46" uuid="ad716c3b-7ffc-4b62-8bfd-46edd822c490"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="12" isBold="true"/>
+									</textElement>
+									<text><![CDATA[เกิน 3 เดือน ไม่เกิน 6 เดือน]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="43" height="23" uuid="d60389d0-4b13-491a-830f-8107c168c546"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{JUDGE_REMAIN_3TO6MNT}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="41" uuid="cc26ca8a-76df-46f4-bcfa-8c5ac8247b60">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
+							<jr:tableFooter height="23" rowSpan="1">
+								<textField>
+									<reportElement x="0" y="0" width="41" height="23" uuid="6ed5f27c-94e3-4690-96d5-2ec42e8cff0b"/>
+									<box rightPadding="5">
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{SUM_JUDGEREMAIN_6MNTO1YR}]]></textFieldExpression>
+								</textField>
+							</jr:tableFooter>
+							<jr:columnHeader height="46" rowSpan="1">
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="41" height="46" uuid="53814f5a-2031-4955-8dc9-72debd2cd07f"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="12" isBold="true"/>
+									</textElement>
+									<text><![CDATA[เกิน 6 เดือน ไม่เกิน 1 ปี]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="41" height="23" uuid="57a29d7e-2a23-4384-83cc-1725d04dccc6"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{JUDGE_REMAIN_6MNTO1YR}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="41" uuid="dc830d47-caf8-4e9c-adf7-0d5cfeea38d7">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
+							<jr:tableFooter height="23" rowSpan="1">
+								<textField>
+									<reportElement x="0" y="0" width="41" height="23" uuid="ad6be555-5c65-4503-b0e4-564ab2835962"/>
+									<box rightPadding="5">
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{SUM_JUDGEREMAIN_1YRTO2YR}]]></textFieldExpression>
+								</textField>
+							</jr:tableFooter>
+							<jr:columnHeader height="46" rowSpan="1">
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="41" height="46" uuid="32575b6e-d830-4b92-8c97-c517a5ab50f8"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="12" isBold="true"/>
+									</textElement>
+									<text><![CDATA[เกิน 1 ปี ไม่เกิน 2 ปี]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="41" height="23" uuid="bc8b6127-b0d4-4520-adf3-c8c9ff7b12f7"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{JUDGE_REMAIN_1YRTO2YR}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="41" uuid="2658fd83-85a0-403e-b1fa-58b9a7b0f4e4">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column7"/>
+							<jr:tableFooter height="23" rowSpan="1">
+								<textField>
+									<reportElement x="0" y="0" width="41" height="23" uuid="16f5ceef-c33c-4127-9751-908e000a4444"/>
+									<box rightPadding="5">
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{SUM_JUDGEREMAIN_2YRTO3YR}]]></textFieldExpression>
+								</textField>
+							</jr:tableFooter>
+							<jr:columnHeader height="46" rowSpan="1">
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="41" height="46" uuid="3af92a82-fb46-4e50-a42c-e1904b29d297"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="12" isBold="true"/>
+									</textElement>
+									<text><![CDATA[เกิน 2 ปี ไม่เกิน 3 ปี]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="41" height="23" uuid="e5c0f30b-f044-419a-ae5f-db130370432d"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{JUDGE_REMAIN_2YRTO3YR}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="41" uuid="3c52dcf0-2f4d-4fbe-a123-d2eefe43551b">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column8"/>
+							<jr:tableFooter height="23" rowSpan="1">
+								<textField>
+									<reportElement x="0" y="0" width="41" height="23" uuid="b3437080-f256-4544-8b34-cdea61e9d436"/>
+									<box rightPadding="5">
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{SUM_JUDGEREMAIN_3YRTO4YR}]]></textFieldExpression>
+								</textField>
+							</jr:tableFooter>
+							<jr:columnHeader height="46" rowSpan="1">
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="41" height="46" uuid="4f88c78e-b7c1-4e3b-9bb2-fc59fff96dca"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="12" isBold="true"/>
+									</textElement>
+									<text><![CDATA[เกิน 3 ปี ไม่เกิน 4 ปี]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="41" height="23" uuid="70a83232-155c-42b0-8b73-2370331d9869"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{JUDGE_REMAIN_3YRTO4YR}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="43" uuid="7b8d5024-a2c9-43ae-bf0a-3bb13590febf">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column9"/>
+							<jr:tableFooter height="23" rowSpan="1">
+								<textField>
+									<reportElement x="0" y="0" width="43" height="23" uuid="83ea97f0-d71b-49cf-b4d2-eabd6c3fd278"/>
+									<box rightPadding="5">
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{SUM_JUDGEREMAIN_4YRTO5YR}]]></textFieldExpression>
+								</textField>
+							</jr:tableFooter>
+							<jr:columnHeader height="46" rowSpan="1">
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="43" height="46" uuid="fb92742f-aec5-441f-9c29-96a42c55a077"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="12" isBold="true"/>
+									</textElement>
+									<text><![CDATA[เกิน 4 ปี ไม่เกิน 5 ปี]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="43" height="23" uuid="80c7d414-8e77-4492-958e-4343247a6b7a"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{JUDGE_REMAIN_4YRTO5YR}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="43" uuid="3a2ab729-598b-407d-81b4-68a9f10aa814">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column10"/>
+							<jr:tableFooter height="23" rowSpan="1">
+								<textField>
+									<reportElement x="0" y="0" width="43" height="23" uuid="9905babe-8098-47f7-9c75-242d65722bef"/>
+									<box rightPadding="5">
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{SUM_JUDGEREMAIN_MORE5YEAR}]]></textFieldExpression>
+								</textField>
+							</jr:tableFooter>
+							<jr:columnHeader height="46" rowSpan="1">
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="43" height="46" uuid="a288db05-2134-48da-aff5-dae4a8cdcfda"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="12" isBold="true"/>
+									</textElement>
+									<text><![CDATA[เกิน 5 ปีขึ้นไป]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="43" height="23" uuid="ddd26ded-0b19-4010-b55e-36e0b6c57799"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{JUDGE_REMAIN_MORE5YEAR}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="42" uuid="a7dcc06e-56f3-4dca-b41a-bda83fcaafdd">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column11"/>
+							<jr:tableFooter height="23" rowSpan="1">
+								<textField>
+									<reportElement x="0" y="0" width="42" height="23" uuid="447ec82c-e7ca-4d7a-b55d-69433b69bbb2"/>
+									<box rightPadding="5">
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{SUM_JUDGEREMAIN_TOTAL}==null?0:$V{SUM_JUDGEREMAIN_TOTAL}]]></textFieldExpression>
+								</textField>
+							</jr:tableFooter>
+							<jr:columnHeader height="46" rowSpan="1">
+								<staticText>
+									<reportElement stretchType="ContainerHeight" x="0" y="0" width="42" height="46" uuid="67cfea87-2769-4fdf-8726-6b3f937845dd"/>
+									<box>
+										<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17" isBold="true"/>
+									</textElement>
+									<text><![CDATA[รวม]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="42" height="23" uuid="d4687264-4944-4d17-bd8b-3b93bf12ba62"/>
+									<box rightPadding="5">
+										<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+										<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+										<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									</box>
+									<textElement textAlignment="Right" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="17"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{JUDGEREMAIN_TOTAL}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+					</jr:columnGroup>
+				</jr:table>
+			</componentElement>
+		</band>
+		<band height="83">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<componentElement>
+				<reportElement x="0" y="0" width="287" height="73" uuid="84711281-8c4e-433d-8d4a-1c6bf5e7cb0a">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="DSETJUDGE_REMAIN_STEP" uuid="f04b79f8-28ed-4b69-b0ce-90923462fa48">
+						<datasetParameter name="FROM_DATE">
+							<datasetParameterExpression><![CDATA[$P{THISMONTH_FROMDATE}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="TO_DATE">
+							<datasetParameterExpression><![CDATA[$P{THISMONTH_TODATE}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:columnGroup width="288" uuid="6faa243f-2b7a-410e-abbf-b267fd9aaae7">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Columns [0]"/>
+						<jr:columnHeader height="23" rowSpan="1">
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+							<staticText>
+								<reportElement x="0" y="0" width="288" height="23" uuid="a954eaf8-0518-42f8-a849-69be81470cc8"/>
+								<box leftPadding="5">
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement>
+									<font fontName="THSarabunNew" size="17" isBold="true"/>
+								</textElement>
+								<text><![CDATA[8.  ขั้นตอนที่คดีค้าง :]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:column width="233" uuid="0a290a2a-697a-49e7-ae0e-300ad9f7db09">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
+							<jr:columnHeader height="25" rowSpan="1">
+								<property name="com.jaspersoft.studio.unit.height" value="px"/>
+								<property name="com.jaspersoft.studio.unit.width" value="px"/>
+								<staticText>
+									<reportElement x="0" y="0" width="233" height="25" uuid="f174e66b-cf61-4320-9df2-ac7f48c08ecf"/>
+									<box leftPadding="3">
+										<pen lineWidth="0.5"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="16"/>
+									</textElement>
+									<text><![CDATA[ขั้นตอนคดีที่ค้าง]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:columnFooter height="25" rowSpan="1">
+								<staticText>
+									<reportElement x="0" y="0" width="233" height="25" uuid="2ba8ab5f-e574-44a0-8447-eaef711f599c"/>
+									<box leftPadding="3">
+										<pen lineWidth="1.0"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="16" isBold="true"/>
+									</textElement>
+									<text><![CDATA[รวม :]]></text>
+								</staticText>
+							</jr:columnFooter>
+							<jr:detailCell height="23">
+								<property name="com.jaspersoft.studio.unit.height" value="px"/>
+								<property name="com.jaspersoft.studio.unit.width" value="px"/>
+								<textField>
+									<reportElement x="0" y="0" width="233" height="23" uuid="9933c957-2d24-4ac1-8386-f80ef19a2890"/>
+									<box leftPadding="2">
+										<pen lineWidth="0.5"/>
+									</box>
+									<textElement verticalAlignment="Bottom">
+										<font fontName="THSarabunNew" size="16"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{CASE_ITEM}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="55" uuid="f2fa2452-ed0f-4f57-b07f-c82b4c535f34">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
+							<jr:columnHeader height="25" rowSpan="1">
+								<staticText>
+									<reportElement x="0" y="0" width="55" height="25" uuid="e458598c-6333-48a8-87eb-9bf7602875f9"/>
+									<box leftPadding="3">
+										<pen lineWidth="0.5"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="16"/>
+									</textElement>
+									<text><![CDATA[จำนวนคดี]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:columnFooter height="25" rowSpan="1">
+								<textField>
+									<reportElement x="0" y="0" width="55" height="25" uuid="15ba5e2e-7555-45bc-a2f0-ba634ed48137"/>
+									<box bottomPadding="0">
+										<pen lineWidth="1.0"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Bottom">
+										<font fontName="THSarabunNew" size="16"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{SUM_COUNT}]]></textFieldExpression>
+								</textField>
+							</jr:columnFooter>
+							<jr:detailCell height="23">
+								<textField>
+									<reportElement x="0" y="0" width="55" height="23" uuid="9af0e4ae-7a03-4d12-bb2a-56b5de9a665c"/>
+									<box bottomPadding="0">
+										<pen lineWidth="0.5"/>
+									</box>
+									<textElement textAlignment="Center" verticalAlignment="Bottom">
+										<font fontName="THSarabunNew" size="16"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{CASE_COUNT}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+					</jr:columnGroup>
+				</jr:table>
+			</componentElement>
+		</band>
+		<band height="165">
+			<staticText>
+				<reportElement x="0" y="12" width="555" height="25" uuid="0d40a025-5c50-4238-a24f-0246e71cd903">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[แบบรายงานปริมาณคดีของศาลแรงงานจำแนกตามท้องที่]]></text>
+			</staticText>
+			<break>
+				<reportElement x="0" y="1" width="561" height="1" uuid="f6911867-1904-4197-9656-b336e5d7eee0"/>
+			</break>
+			<textField>
+				<reportElement x="0" y="49" width="400" height="25" uuid="ea0a92ce-84b8-4351-90df-e684716bb9f8">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box leftPadding="3">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="18" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["ประจำเดือน"+$F{SELECTED_MONTH}+" พ.ศ. "+$F{SELECTED_YEAR}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="400" y="49" width="155" height="25" uuid="cb1e96b7-7c81-4345-a2a7-81b18079ed4f">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box leftPadding="3">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="18" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["ศาลแรงงานภาค 1"]]></textFieldExpression>
+			</textField>
+			<componentElement>
+				<reportElement x="0" y="92" width="400" height="73" uuid="0009d084-947e-45ec-b485-e119ac84e53c">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="DSETCASE_NEWINPLACE" uuid="db9fa393-f9c6-4e31-af34-1f1cea4f62f6">
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:column width="200" uuid="af550fb5-7824-42a6-beb2-096934d0a968">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
+						<jr:columnHeader height="25" rowSpan="1">
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<staticText>
+								<reportElement x="0" y="0" width="200" height="25" uuid="e78d2b5d-ec4c-4bd5-8beb-7962b7688d36"/>
+								<box leftPadding="3">
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="16"/>
+								</textElement>
+								<text><![CDATA[ท้องที่]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:columnFooter height="25" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="200" height="25" uuid="0be506a7-4b4a-4859-be7a-b26b584a6a1c"/>
+								<box leftPadding="3">
+									<pen lineWidth="1.0"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="16" isBold="true"/>
+								</textElement>
+								<text><![CDATA[รวม]]></text>
+							</staticText>
+						</jr:columnFooter>
+						<jr:detailCell height="23">
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<textField>
+								<reportElement x="0" y="0" width="200" height="23" uuid="e63d834f-940d-4e4c-9357-f37cf71007c0"/>
+								<box leftPadding="2">
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement verticalAlignment="Bottom">
+									<font fontName="THSarabunNew" size="16"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{PLACE}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="200" uuid="769f5a77-d99b-4e1e-a02d-197c38def855">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
+						<jr:columnHeader height="25" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="200" height="25" uuid="b46865df-e754-4790-bb7f-638efdf1a380"/>
+								<box leftPadding="3">
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="16"/>
+								</textElement>
+								<text><![CDATA[รับใหม่(แพ่ง)]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:columnFooter height="25" rowSpan="1">
+							<textField>
+								<reportElement x="0" y="0" width="200" height="25" uuid="ea8b395d-4ebb-4fb5-874d-5c69ff08d0c3"/>
+								<box bottomPadding="0">
+									<pen lineWidth="1.0"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Bottom">
+									<font fontName="THSarabunNew" size="16"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{SUM_NEWCASE}]]></textFieldExpression>
+							</textField>
+						</jr:columnFooter>
+						<jr:detailCell height="23">
+							<textField>
+								<reportElement x="0" y="0" width="200" height="23" uuid="265c2563-e33e-4adf-b391-abfda09acf26"/>
+								<box bottomPadding="0">
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center" verticalAlignment="Bottom">
+									<font fontName="THSarabunNew" size="16"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{NEWCASE}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+				</jr:table>
+			</componentElement>
+		</band>
+	</detail>
+</jasperReport>
