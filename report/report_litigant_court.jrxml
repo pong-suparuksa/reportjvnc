@@ -2,7 +2,6 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="writ_rpt_acc_allsender" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="940a4a7f-af98-463d-b114-9127f0ae2dbc">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojStage2"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -14,16 +13,17 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.193:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.140/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
-	<property name="ireport.jasperserver.reportUnit" value="/reports/writ_rpt_acc_allsender"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/ReportFeature/report_litigant_court"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/ReportFeature/report_litigant_court_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/02/2020"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="END_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/02/2020"]]></defaultValueExpression>
 	</parameter>
-	<parameter name="JUDGE_NAME" class="java.lang.String"/>
 	<queryString language="SQL">
 		<![CDATA[SELECT DISTINCT
        pn.NOTICE_DATE,
@@ -85,7 +85,6 @@ WHERE  pn.NOTICE_DATE BETWEEN TO_DATE( $P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"
 --
 AND pn.SEND_METHOD = 2
 AND pn.REMOVED_BY = 0
-AND plj.JUDGE_ID IN $P!{JUDGE_NAME}
 --
 ORDER BY NOTICEE]]>
 	</queryString>
@@ -190,7 +189,7 @@ ORDER BY NOTICEE]]>
 				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}==null?" ":$F{COURT_NAME_TH}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="0" y="12" width="260" height="25" uuid="f33bb2d3-d296-47ef-8760-964e815172b9">
+				<reportElement x="0" y="12" width="350" height="25" uuid="f33bb2d3-d296-47ef-8760-964e815172b9">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Left">
@@ -504,7 +503,9 @@ ORDER BY NOTICEE]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format($F{SEND_FEE})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{SEND_FEE} != null 
+? new java.text.DecimalFormat("#,##0").format($F{SEND_FEE})
+:""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="720" y="0" width="80" height="25" uuid="1e7e9c05-20ec-4640-b048-e499f0e96a52">
