@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.11.0.final using JasperReports Library version 6.11.0-0c4056ccaa4d25a5a8c45672d2f764ea3498bebb  -->
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="proceed_rpt_appoint_offer" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="21e58027-36f9-4d26-bcd5-4608c14b782d">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -42,7 +42,7 @@
     TO_CHAR(ppj.NOTES) NOTES,
     ppacon.CHOICE_TIME APPOINT_TIME,
     THAISDATE(ppacon.START_DATE) APPOINT_DATE,
-    LISTAGG(plj.JUDGE_NAME, ', ') WITHIN GROUP (ORDER BY plj.JUDGE_NAME) "JUDGE_NAME",
+    rtrim(xmlagg(XMLELEMENT(e,plj.JUDGE_NAME,',').EXTRACT('//text()') ).GetClobVal(),',') "JUDGE_NAME",
     A.SELECTDATE
 FROM PC_PROCEED_APPOINT ppa
 --
