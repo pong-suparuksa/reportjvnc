@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="consult_rpt_offenses" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="96376f95-31bf-4f02-8b15-cd3d7ecb6a45">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/consulting/consult_rpt_offenses_files/main_jrxml"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/consulting/consult_rpt_offenses"/>
+	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_CH" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table 1_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table 1_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table 1_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<subDataset name="getPolice" uuid="fa26332d-1c67-4fda-af52-8b2424938a78">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="322"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="671"/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+		<parameter name="start_date" class="java.lang.String"/>
+		<parameter name="end_date" class="java.lang.String"/>
+		<parameter name="first_name" class="java.lang.String"/>
+		<parameter name="last_name" class="java.lang.String"/>
+		<parameter name="police_code" class="java.lang.String"/>
+		<parameter name="case_id" class="java.lang.Integer"/>
+		<parameter name="case_year" class="java.lang.Integer"/>
+		<parameter name="case_type" class="java.lang.String"/>
+		<parameter name="province_code" class="java.lang.String"/>
+		<parameter name="district_code" class="java.lang.String"/>
+		<queryString language="SQL">
+			<![CDATA[SELECT ROW_NUMBER() OVER (ORDER BY pa.POLICE_CODE  desc) as row_num,
+	pa.POLICE_DISTRICT_NAME ,
+	pa.POLICE_PROVINCE_NAME ,
+	pa.POLICE_NAME ,
+	pa.POLICE_CODE,
+	count(*) as count
+FROM
+	PC_ADVICE pa
+WHERE
+	(( $P{case_type}  IS NULL
+	OR $P{case_type} = 1
+	AND  $P{case_id}  IS NULL
+	OR pa.CASE_ID = $P{case_id} 
+	AND  $P{case_year}  IS NULL
+	OR pa.CASE_YEAR = $P{case_year} )
+	OR ( $P{case_type}  IS NULL
+	OR  $P{case_type}  = 2
+	AND $P{case_id} IS NULL
+	OR pa.SP_CASE_ID = $P{case_id}
+	AND $P{case_year} IS NULL
+	OR pa.SP_CASE_YEAR = $P{case_year}))
+	AND (  $P{province_code}  IS NULL
+	OR pa.POLICE_PROVINCE_CODE = $P{province_code} )
+	AND (  $P{district_code}   IS NULL
+	OR pa.POLICE_DISTRICT_CODE = $P{district_code})
+	AND ( $P{police_code}   IS NULL
+	OR pa.POLICE_CODE = $P{police_code})
+	AND ( $P{end_date} IS NULL
+	OR pa.CREATED_DATE <= to_date($P{end_date} , 'DD/MM/YYYY HH24:MI:SS', 'nls_calendar=''Thai Buddha'' nls_date_language = Thai') )
+	AND ( $P{start_date}  IS NULL
+	OR pa.CREATED_DATE >= to_date($P{start_date}, 'DD/MM/YYYY HH24:MI:SS', 'nls_calendar=''Thai Buddha'' nls_date_language = Thai') )
+	AND pa.REMOVED_BY = 0
+GROUP BY
+	pa.POLICE_DISTRICT_NAME ,
+	pa.POLICE_PROVINCE_NAME ,
+	pa.POLICE_NAME ,
+	pa.POLICE_CODE,
+	pa.CREATED_BY]]>
+		</queryString>
+		<field name="ROW_NUM" class="java.lang.String"/>
+		<field name="POLICE_DISTRICT_NAME" class="java.lang.String"/>
+		<field name="POLICE_PROVINCE_NAME" class="java.lang.String"/>
+		<field name="POLICE_NAME" class="java.lang.String"/>
+		<field name="POLICE_CODE" class="java.lang.String"/>
+		<field name="COUNT" class="java.lang.Integer"/>
+		<variable name="sumChild" class="java.lang.String" calculation="Sum">
+			<variableExpression><![CDATA[$F{COUNT}]]></variableExpression>
+		</variable>
+	</subDataset>
+	<subDataset name="getList" uuid="f187730b-1330-4941-9666-c3bd5991aea1">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+		<parameter name="police_code" class="java.lang.String"/>
+		<queryString language="SQL">
+			<![CDATA[SELECT * FROM PC_ADVICE pa 
+WHERE pa.POLICE_CODE =  $P{police_code} 
+AND pa.REMOVED_BY = 0]]>
+		</queryString>
+		<field name="CASE_ID" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_ID"/>
+		</field>
+		<field name="CASE_YEAR" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_YEAR"/>
+		</field>
+		<field name="CHILD_FIRSTNAME" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CHILD_FIRSTNAME"/>
+		</field>
+		<field name="CHILD_LASTNAME" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CHILD_LASTNAME"/>
+		</field>
+		<field name="CHILD_PREFIX" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CHILD_PREFIX"/>
+		</field>
+		<field name="SP_CASE_ID" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="SP_CASE_ID"/>
+		</field>
+		<field name="SP_CASE_YEAR" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="SP_CASE_YEAR"/>
+		</field>
+	</subDataset>
+	<parameter name="start_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA["01/12/2563"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="end_date" class="java.lang.String">
+		<defaultValueExpression><![CDATA["28/02/2564"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="police_code" class="java.lang.String"/>
+	<parameter name="case_id" class="java.lang.Integer"/>
+	<parameter name="case_year" class="java.lang.Integer"/>
+	<parameter name="case_type" class="java.lang.String"/>
+	<parameter name="province_code" class="java.lang.String"/>
+	<parameter name="district_code" class="java.lang.String"/>
+	<queryString language="SQL">
+		<![CDATA[select * from DUAL]]>
+	</queryString>
+	<variable name="Variable_1" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="40" splitType="Stretch">
+			<staticText>
+				<reportElement x="80" y="0" width="600" height="40" uuid="04809ea7-5edc-4eaa-bc34-97b8fad1790f"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[รายงานข้อมูลเด็กและเยาวชนที่กระทำความผิดคดีอาญาแยกตามพื่นที่]]></text>
+			</staticText>
+		</band>
+	</title>
+	<detail>
+		<band height="60" splitType="Stretch">
+			<componentElement>
+				<reportElement x="10" y="0" width="770" height="60" backcolor="#FFFFFF" uuid="7a9e2965-49a5-430f-842b-1c7a99907972">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+					<property name="com.jaspersoft.studio.table.style.table_header" value="Table_TH"/>
+					<property name="com.jaspersoft.studio.table.style.column_header" value="Table_CH"/>
+					<property name="com.jaspersoft.studio.table.style.detail" value="Table_TD"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="getPolice" uuid="be9f7385-31a1-4ba9-bdfa-eda4211e5483">
+						<datasetParameter name="case_id">
+							<datasetParameterExpression><![CDATA[$P{case_id}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="case_year">
+							<datasetParameterExpression><![CDATA[$P{case_year}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="case_type">
+							<datasetParameterExpression><![CDATA[$P{case_type}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="police_code">
+							<datasetParameterExpression><![CDATA[$P{police_code}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="district_code">
+							<datasetParameterExpression><![CDATA[$P{district_code}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="province_code">
+							<datasetParameterExpression><![CDATA[$P{province_code}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="start_date">
+							<datasetParameterExpression><![CDATA[$P{start_date}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="end_date">
+							<datasetParameterExpression><![CDATA[$P{end_date}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:column width="40" uuid="ad482038-4cbf-4800-b2da-c2a0235b725b">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
+						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="40" height="30" uuid="d90eaa68-8248-4f89-bbb9-3fd2642737fc"/>
+								<box leftPadding="10"/>
+								<textElement textAlignment="Left" verticalAlignment="Middle">
+									<font fontName="TH Sarabun New" size="14"/>
+								</textElement>
+								<text><![CDATA[ลำดับ]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField>
+								<reportElement x="0" y="0" width="40" height="30" backcolor="#FF0400" uuid="82d67a2a-4efc-4c25-8908-75922141d876"/>
+								<box leftPadding="10"/>
+								<textElement textAlignment="Left" verticalAlignment="Middle">
+									<font fontName="TH Sarabun New" size="14"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{ROW_NUM}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="70" uuid="44b21b00-b97a-4ced-8b07-22b3cd561499">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
+						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="70" height="30" uuid="3c6839bb-ab1c-4c75-80c9-9de1b9b534e6"/>
+								<box leftPadding="10"/>
+								<textElement textAlignment="Left" verticalAlignment="Middle">
+									<font fontName="TH Sarabun New" size="14"/>
+								</textElement>
+								<text><![CDATA[เขต/อำเภอ]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField>
+								<reportElement x="0" y="0" width="70" height="30" uuid="1d8c6ad3-be56-42ed-803c-ec14d9e9e9b4"/>
+								<box leftPadding="10"/>
+								<textElement textAlignment="Left" verticalAlignment="Middle">
+									<font fontName="TH Sarabun New" size="14"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{POLICE_DISTRICT_NAME} ]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="90" uuid="b7a227e8-849b-4bf3-8680-a2ab854480f7">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
+						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="90" height="30" uuid="e0267c97-b625-414e-942e-3482ff296398"/>
+								<box leftPadding="10"/>
+								<textElement textAlignment="Left" verticalAlignment="Middle">
+									<font fontName="TH Sarabun New" size="14"/>
+								</textElement>
+								<text><![CDATA[จังหวัด]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField>
+								<reportElement x="0" y="0" width="90" height="30" uuid="31c9ab4c-68b3-4925-9f0e-42558d750bf5"/>
+								<box leftPadding="10"/>
+								<textElement textAlignment="Left" verticalAlignment="Middle">
+									<font fontName="TH Sarabun New" size="14"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{POLICE_PROVINCE_NAME}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="130" uuid="05f34623-fafc-49ab-be5a-99c15682e77a">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column4"/>
+						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="130" height="30" uuid="ad53970e-317e-41be-b58c-486c57489c76"/>
+								<box leftPadding="10">
+									<pen lineColor="#FFFFFF"/>
+								</box>
+								<textElement textAlignment="Left" verticalAlignment="Middle">
+									<font fontName="TH Sarabun New" size="14"/>
+								</textElement>
+								<text><![CDATA[สน.ที่ยื่นฟ้อง]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField>
+								<reportElement x="0" y="0" width="130" height="30" uuid="1b3d2c4e-0753-4b1e-8b85-37b88fc2c422"/>
+								<box leftPadding="10"/>
+								<textElement textAlignment="Left" verticalAlignment="Middle">
+									<font fontName="TH Sarabun New" size="14"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{POLICE_NAME}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="70" uuid="94b5bcb0-a6af-448d-942c-6ffc40b97db9">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
+						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="70" height="30" uuid="363f3d79-80ff-4d5d-b152-42650cb6f93d"/>
+								<box leftPadding="10"/>
+								<textElement textAlignment="Left" verticalAlignment="Middle">
+									<font fontName="TH Sarabun New" size="14"/>
+								</textElement>
+								<text><![CDATA[จำนวนเด็ก(คน)]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table_TD" height="30">
+							<textField>
+								<reportElement x="0" y="0" width="70" height="30" uuid="48773271-d38c-48de-9561-342a5e4998bd"/>
+								<box leftPadding="10"/>
+								<textElement textAlignment="Left" verticalAlignment="Middle">
+									<font fontName="TH Sarabun New" size="14"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{COUNT}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="370" uuid="8fe170c1-da9a-449f-8141-52821274ccb5">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
+						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+							<staticText>
+								<reportElement x="0" y="0" width="370" height="30" uuid="e0d30db6-ef2d-4d43-b590-20fc7484b2a6"/>
+								<box leftPadding="10"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="TH Sarabun New" size="14"/>
+								</textElement>
+								<text><![CDATA[ข้อมูลคดีเยาวชน]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell style="Table_TD" height="30">
+							<componentElement>
+								<reportElement x="0" y="0" width="370" height="30" uuid="6566f556-0053-4926-9c3f-12c8c60b396f">
+									<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+									<property name="com.jaspersoft.studio.table.style.table_header" value="Table 1_TH"/>
+									<property name="com.jaspersoft.studio.table.style.column_header" value="Table 1_CH"/>
+									<property name="com.jaspersoft.studio.table.style.detail" value="Table 1_TD"/>
+									<property name="com.jaspersoft.studio.components.autoresize.next" value="true"/>
+								</reportElement>
+								<jr:table>
+									<datasetRun subDataset="getList" uuid="c4e5a0a5-0f8a-45db-9691-ea95b8d2ad91">
+										<datasetParameter name="police_code">
+											<datasetParameterExpression><![CDATA[$F{POLICE_CODE}]]></datasetParameterExpression>
+										</datasetParameter>
+										<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+									</datasetRun>
+									<jr:column width="78" uuid="bf8303db-9206-4232-a0cf-9fa636b83c5e">
+										<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
+										<jr:detailCell style="Table 1_TD" height="30">
+											<textField>
+												<reportElement x="0" y="0" width="78" height="30" uuid="ea1c20ae-2b28-4bd5-918b-168e9d3c9751"/>
+												<box leftPadding="10"/>
+												<textElement textAlignment="Left" verticalAlignment="Middle">
+													<font fontName="TH Sarabun New" size="14"/>
+												</textElement>
+												<textFieldExpression><![CDATA["ตจ. " + $F{CASE_ID} + "/" + $F{CASE_YEAR}]]></textFieldExpression>
+											</textField>
+										</jr:detailCell>
+									</jr:column>
+									<jr:column width="82" uuid="72fa8c5b-b3a4-410b-9fb4-cd7c3027b643">
+										<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
+										<jr:detailCell style="Table 1_TD" height="30">
+											<textField>
+												<reportElement x="0" y="0" width="82" height="30" uuid="dd5e2596-78ae-4ad7-bab7-7b486f0734e0"/>
+												<box leftPadding="10"/>
+												<textElement textAlignment="Left" verticalAlignment="Middle">
+													<font fontName="TH Sarabun New" size="14"/>
+												</textElement>
+												<textFieldExpression><![CDATA["ศป. " + $F{SP_CASE_ID} + "/" + $F{SP_CASE_YEAR}]]></textFieldExpression>
+											</textField>
+										</jr:detailCell>
+									</jr:column>
+									<jr:column width="209" uuid="5ed7c58d-b558-4ab9-9629-3c010fc31a16">
+										<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
+										<jr:detailCell style="Table 1_TD" height="30">
+											<textField>
+												<reportElement x="0" y="0" width="209" height="30" uuid="9663f415-98ee-482f-9c50-cfbbda7aadde"/>
+												<box leftPadding="10"/>
+												<textElement textAlignment="Left" verticalAlignment="Middle">
+													<font fontName="TH Sarabun New" size="14"/>
+												</textElement>
+												<textFieldExpression><![CDATA[$F{CHILD_PREFIX} + " " + $F{CHILD_FIRSTNAME} + " " + $F{CHILD_LASTNAME}]]></textFieldExpression>
+											</textField>
+										</jr:detailCell>
+									</jr:column>
+								</jr:table>
+							</componentElement>
+						</jr:detailCell>
+					</jr:column>
+				</jr:table>
+			</componentElement>
+		</band>
+	</detail>
+</jasperReport>
