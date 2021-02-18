@@ -5,8 +5,8 @@
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/consulting/consulting_rpt_information_files/main_jrxml"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/consulting/consulting_rpt_information"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/consulting/consulting_rpt_information_files/main_jrxml"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#737373">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
@@ -37,38 +37,14 @@
 	<subDataset name="Dataset1" uuid="86cc6a70-bc86-4bff-923f-cc8e4976f24a">
 		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
-		<parameter name="CASEs_ID" class="java.lang.String">
-			<defaultValueExpression><![CDATA[11]]></defaultValueExpression>
+		<parameter name="CASE_ID" class="java.lang.String">
+			<defaultValueExpression><![CDATA[16]]></defaultValueExpression>
 		</parameter>
-		<parameter name="CASEs_YEAR" class="java.lang.String">
+		<parameter name="CASE_YEAR" class="java.lang.String">
 			<defaultValueExpression><![CDATA[2564]]></defaultValueExpression>
 		</parameter>
 		<queryString language="SQL">
 			<![CDATA[SELECT
-	pae.EVALUATION_COUNT ,
-	pae.EVALUATION_DATE  ,
-	pae.EVALUATION_TIME ,
-	pae.TOPIC ,
-	pae.CONSULTANT_NAME ,
-	pae.ADVISOR_NAME ,
-	pae.EVALUATION_RESULT ,
-	pae.EVALUATION_REMARK ,
-	listagg(paea.FILE_NAME, ', ') WITHIN GROUP (
-	ORDER BY paea.FILE_NAME DESC) "file_list"
-FROM
-	PC_ADVICE_EXT pa
-JOIN PC_ADVICE_EXT_EVAL pae ON
-	pae.ADVICE_EXT_ID = pa.ADVICE_EXT_ID
-LEFT JOIN PC_ADVICE_EXT_EVAL_ATTACHMENT paea ON
-	paea.EXT_EVAL_ID = pae.EXT_EVAL_ID
-WHERE
-	pa.CASE_ID =  $P{CASEs_ID} 
-	AND pa.CASE_YEAR =  $P{CASEs_YEAR} 
-	AND paea.REMOVED_BY = 0
-	AND pae.REMOVED_BY = 0
-GROUP BY
-	pa.CASE_ID,
-	pa.CASE_YEAR ,
 	pae.EVALUATION_COUNT ,
 	pae.EVALUATION_DATE ,
 	pae.EVALUATION_TIME ,
@@ -76,9 +52,28 @@ GROUP BY
 	pae.CONSULTANT_NAME ,
 	pae.ADVISOR_NAME ,
 	pae.EVALUATION_RESULT ,
-	pae.EVALUATION_REMARK 
-
-]]>
+	pae.EVALUATION_REMARK ,
+	FILE_NAME
+	--NVL(paeaa.FILE_NAME, ',') AS FILE_NAME
+FROM
+	PC_ADVICE_EXT pa
+JOIN PC_ADVICE_EXT_EVAL pae ON
+	pae.ADVICE_EXT_ID = pa.ADVICE_EXT_ID
+	AND pae.REMOVED_BY = 0
+LEFT JOIN (
+	SELECT
+		EXT_EVAL_ID ,
+		LISTAGG(FILE_NAME, ', ') WITHIN GROUP (
+		ORDER BY FILE_NAME) FILE_NAME
+	FROM
+		PC_ADVICE_EXT_EVAL_ATTACHMENT
+	GROUP BY
+		EXT_EVAL_ID ) paeaa ON
+	paeaa.EXT_EVAL_ID = pae.EXT_EVAL_ID
+WHERE
+	pa.CASE_ID = $P{CASE_ID}
+	AND pa.CASE_YEAR = $P{CASE_YEAR}
+ORDER BY pae.EVALUATION_DATE DESC ]]>
 		</queryString>
 		<field name="EVALUATION_COUNT" class="java.lang.String">
 			<property name="com.jaspersoft.studio.field.label" value="EVALUATION_COUNT"/>
@@ -104,78 +99,31 @@ GROUP BY
 		<field name="EVALUATION_REMARK" class="java.lang.String">
 			<property name="com.jaspersoft.studio.field.label" value="EVALUATION_REMARK"/>
 		</field>
-		<field name="file_list" class="java.lang.String">
+		<field name="FILE_NAME" class="java.lang.String">
 			<property name="com.jaspersoft.studio.field.label" value="file_list"/>
 		</field>
 	</subDataset>
-	<parameter name="CASEs_ID" class="java.lang.String">
+	<parameter name="CASE_ID" class="java.lang.String">
 		<defaultValueExpression><![CDATA[11]]></defaultValueExpression>
 	</parameter>
-	<parameter name="CASEs_YEAR" class="java.lang.String">
+	<parameter name="CASE_YEAR" class="java.lang.String">
 		<defaultValueExpression><![CDATA[2564]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT
-	pae.CONSULTANT_NAME ,
-	pae.CONSULTANT_AGE,
-	pae.ADVISOR_NAME 
-FROM
-	PC_ADVICE_EXT pa
-JOIN PC_ADVICE_EXT_EVAL pae ON
-	pae.ADVICE_EXT_ID = pa.ADVICE_EXT_ID
-WHERE
-	pa.CASE_ID =  $P{CASEs_ID} 
-	AND pa.CASE_YEAR =  $P{CASEs_YEAR} 
-	AND pae.REMOVED_BY = 0
-GROUP BY
-	pae.CONSULTANT_NAME ,
-	pae.ADVISOR_NAME ,
-	pae.CONSULTANT_AGE
-]]>
+		<![CDATA[select * from DUAL]]>
 	</queryString>
-	<field name="CONSULTANT_NAME" class="java.lang.String"/>
-	<field name="CONSULTANT_AGE" class="java.lang.String"/>
-	<field name="ADVISOR_NAME" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
 	<title>
 		<band height="80" splitType="Stretch">
 			<staticText>
-				<reportElement x="311" y="0" width="182" height="30" uuid="fa23a88c-3301-4ba7-9fa0-dabbd342ec54"/>
+				<reportElement x="80" y="25" width="700" height="30" uuid="fa23a88c-3301-4ba7-9fa0-dabbd342ec54"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="19" isBold="true"/>
+					<font fontName="TH Sarabun New" size="19" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ประวัติการให้คำปรึกษา]]></text>
 			</staticText>
-			<staticText>
-				<reportElement x="60" y="40" width="60" height="20" uuid="d6aa6fb4-49dc-4fe9-b092-ee0f83ff522c"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
-				</textElement>
-				<text><![CDATA[ผู้รับคำปรึกษา]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="60" y="60" width="60" height="20" uuid="5cf9ddaf-5ecf-411e-aa53-d26d3b648507"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
-				</textElement>
-				<text><![CDATA[ผู้ให้คำปรึกษา]]></text>
-			</staticText>
-			<textField>
-				<reportElement x="120" y="40" width="346" height="20" uuid="b838ca6a-312f-4a8b-9ba2-2fa40044a8f2"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{CONSULTANT_NAME}  + "      อายุ " + $F{CONSULTANT_AGE}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="120" y="60" width="346" height="20" uuid="8ed120b6-f3c4-4aa0-9549-d037bf3955f4"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{ADVISOR_NAME}]]></textFieldExpression>
-			</textField>
 		</band>
 	</title>
 	<detail>
@@ -188,12 +136,12 @@ GROUP BY
 					<property name="com.jaspersoft.studio.table.style.detail" value="Table_TD"/>
 				</reportElement>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
-					<datasetRun subDataset="Dataset1" uuid="8c93e0e7-1aec-426f-b24c-1d9db538a9df">
-						<datasetParameter name="CASEs_ID">
-							<datasetParameterExpression><![CDATA[$P{CASEs_ID}]]></datasetParameterExpression>
+					<datasetRun subDataset="Dataset1" uuid="929de416-54dd-4d25-9aea-8916d4056683">
+						<datasetParameter name="CASE_ID">
+							<datasetParameterExpression><![CDATA[$P{CASE_ID}]]></datasetParameterExpression>
 						</datasetParameter>
-						<datasetParameter name="CASEs_YEAR">
-							<datasetParameterExpression><![CDATA[$P{CASEs_YEAR}]]></datasetParameterExpression>
+						<datasetParameter name="CASE_YEAR">
+							<datasetParameterExpression><![CDATA[$P{CASE_YEAR}]]></datasetParameterExpression>
 						</datasetParameter>
 						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 					</datasetRun>
@@ -204,9 +152,9 @@ GROUP BY
 								<reportElement x="0" y="0" width="793" height="30" uuid="185cd3d0-61f0-46da-be5b-923bffef3cf0"/>
 								<box leftPadding="5"/>
 								<textElement verticalAlignment="Middle">
-									<font fontName="THSarabunNew" size="14" isBold="true"/>
+									<font fontName="TH Sarabun New" size="14" isBold="true"/>
 								</textElement>
-								<textFieldExpression><![CDATA["ประวัติการประเมินเลขที่ ศป " + $P{CASEs_ID}+"/"+$P{CASEs_YEAR}]]></textFieldExpression>
+								<textFieldExpression><![CDATA["ประวัติการประเมินเลขที่ ศป " + $P{CASE_ID}+"/"+$P{CASE_YEAR}]]></textFieldExpression>
 							</textField>
 						</jr:tableHeader>
 						<jr:column width="60" uuid="a7c5bb58-1992-46b4-889a-e7524f75950e">
@@ -215,7 +163,7 @@ GROUP BY
 								<staticText>
 									<reportElement x="0" y="0" width="60" height="30" uuid="c8152682-43a7-4c5c-9725-f17890fa3388"/>
 									<textElement textAlignment="Center" verticalAlignment="Middle">
-										<font fontName="THSarabunNew" size="14"/>
+										<font fontName="TH Sarabun New" size="14"/>
 									</textElement>
 									<text><![CDATA[ครั้งที่ประเมิน]]></text>
 								</staticText>
@@ -223,9 +171,9 @@ GROUP BY
 							<jr:detailCell style="Table_TD" height="30">
 								<textField>
 									<reportElement x="0" y="0" width="60" height="30" uuid="5143ae62-b48d-424b-98bf-6d0ae7b52997"/>
-									<box leftPadding="5"/>
+									<box leftPadding="0"/>
 									<textElement textAlignment="Center" verticalAlignment="Middle">
-										<font fontName="THSarabunNew" size="14"/>
+										<font fontName="TH Sarabun New" size="14"/>
 									</textElement>
 									<textFieldExpression><![CDATA[$F{EVALUATION_COUNT}]]></textFieldExpression>
 								</textField>
@@ -237,7 +185,7 @@ GROUP BY
 								<staticText>
 									<reportElement x="0" y="0" width="70" height="30" uuid="4c21fffa-db62-4718-b8d4-67cbe9d5cfff"/>
 									<textElement textAlignment="Center" verticalAlignment="Middle">
-										<font fontName="THSarabunNew" size="14"/>
+										<font fontName="TH Sarabun New" size="14"/>
 									</textElement>
 									<text><![CDATA[วันที่ให้คพปรึกษา]]></text>
 								</staticText>
@@ -245,9 +193,9 @@ GROUP BY
 							<jr:detailCell style="Table_TD" height="30">
 								<textField>
 									<reportElement x="0" y="0" width="70" height="30" uuid="0a7c7b82-2a7e-480f-9a4a-0a604ee4904b"/>
-									<box leftPadding="5"/>
+									<box leftPadding="10"/>
 									<textElement textAlignment="Justified" verticalAlignment="Middle">
-										<font fontName="THSarabunNew" size="14"/>
+										<font fontName="TH Sarabun New" size="14"/>
 									</textElement>
 									<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 									<patternExpression><![CDATA[new java.text.SimpleDateFormat("dd/MM/yyyy", new Locale("TH","th")).format( $F{EVALUATION_DATE} )]]></patternExpression>
@@ -260,7 +208,7 @@ GROUP BY
 								<staticText>
 									<reportElement x="0" y="0" width="43" height="30" uuid="15a62193-daa1-431d-bcd5-20ed5121d20b"/>
 									<textElement textAlignment="Center" verticalAlignment="Middle">
-										<font fontName="THSarabunNew" size="14"/>
+										<font fontName="TH Sarabun New" size="14"/>
 									</textElement>
 									<text><![CDATA[เวลา]]></text>
 								</staticText>
@@ -268,9 +216,9 @@ GROUP BY
 							<jr:detailCell style="Table_TD" height="30">
 								<textField>
 									<reportElement x="0" y="0" width="43" height="30" uuid="393cabea-1d8a-46a1-8399-2def65734949"/>
-									<box leftPadding="5"/>
+									<box leftPadding="0"/>
 									<textElement textAlignment="Center" verticalAlignment="Middle">
-										<font fontName="THSarabunNew" size="14"/>
+										<font fontName="TH Sarabun New" size="14"/>
 									</textElement>
 									<textFieldExpression><![CDATA[$F{EVALUATION_TIME}]]></textFieldExpression>
 								</textField>
@@ -282,7 +230,7 @@ GROUP BY
 								<staticText>
 									<reportElement x="0" y="0" width="165" height="30" uuid="81612c62-1206-4fad-8539-8a1e01fcabb4"/>
 									<textElement textAlignment="Center" verticalAlignment="Middle">
-										<font fontName="THSarabunNew" size="14"/>
+										<font fontName="TH Sarabun New" size="14"/>
 									</textElement>
 									<text><![CDATA[เรื่อง]]></text>
 								</staticText>
@@ -291,9 +239,9 @@ GROUP BY
 								<property name="com.jaspersoft.studio.unit.width" value="px"/>
 								<textField>
 									<reportElement x="0" y="0" width="165" height="30" uuid="9c1fa3a4-d7be-4ff9-9f7e-e285f48cf7fa"/>
-									<box leftPadding="5"/>
-									<textElement textAlignment="Justified" verticalAlignment="Middle">
-										<font fontName="THSarabunNew" size="14"/>
+									<box leftPadding="10" rightPadding="10"/>
+									<textElement textAlignment="Left" verticalAlignment="Middle">
+										<font fontName="TH Sarabun New" size="14"/>
 									</textElement>
 									<textFieldExpression><![CDATA[$F{TOPIC}]]></textFieldExpression>
 								</textField>
@@ -306,18 +254,18 @@ GROUP BY
 								<staticText>
 									<reportElement x="0" y="0" width="90" height="30" uuid="c2ca982a-8c36-49f6-802a-a8faaa258b22"/>
 									<textElement textAlignment="Center" verticalAlignment="Middle">
-										<font fontName="THSarabunNew" size="14"/>
+										<font fontName="TH Sarabun New" size="14"/>
 									</textElement>
 									<text><![CDATA[ชื่อ - นามสกุล ผู้รับคำปรึกษา]]></text>
 								</staticText>
 							</jr:columnHeader>
 							<jr:detailCell style="Table_TD" height="30">
 								<property name="com.jaspersoft.studio.unit.width" value="px"/>
-								<textField>
+								<textField isStretchWithOverflow="true">
 									<reportElement x="0" y="0" width="90" height="30" uuid="99d9fd47-b29a-4524-8847-01ebd4f5d8ac"/>
-									<box leftPadding="5"/>
-									<textElement textAlignment="Justified" verticalAlignment="Middle">
-										<font fontName="THSarabunNew" size="14"/>
+									<box topPadding="5" leftPadding="10" bottomPadding="5" rightPadding="10"/>
+									<textElement textAlignment="Left" verticalAlignment="Middle">
+										<font fontName="TH Sarabun New" size="14"/>
 									</textElement>
 									<textFieldExpression><![CDATA[$F{CONSULTANT_NAME}]]></textFieldExpression>
 								</textField>
@@ -330,18 +278,18 @@ GROUP BY
 								<staticText>
 									<reportElement x="0" y="0" width="90" height="30" uuid="2acb00a3-b428-4aed-a53e-bea71ad967e4"/>
 									<textElement textAlignment="Center" verticalAlignment="Middle">
-										<font fontName="THSarabunNew" size="14"/>
+										<font fontName="TH Sarabun New" size="14"/>
 									</textElement>
 									<text><![CDATA[ชื่อ - นามสกุล ผู้ให้คำปรึกษา]]></text>
 								</staticText>
 							</jr:columnHeader>
 							<jr:detailCell style="Table_TD" height="30">
 								<property name="com.jaspersoft.studio.unit.width" value="px"/>
-								<textField>
+								<textField isStretchWithOverflow="true">
 									<reportElement x="0" y="0" width="90" height="30" uuid="eda1e93c-68c9-4a5b-b578-c26422388a3a"/>
-									<box leftPadding="5"/>
-									<textElement textAlignment="Justified" verticalAlignment="Middle">
-										<font fontName="THSarabunNew" size="14"/>
+									<box topPadding="5" leftPadding="10" bottomPadding="5" rightPadding="10"/>
+									<textElement textAlignment="Left" verticalAlignment="Middle">
+										<font fontName="TH Sarabun New" size="14"/>
 									</textElement>
 									<textFieldExpression><![CDATA[$F{ADVISOR_NAME}]]></textFieldExpression>
 								</textField>
@@ -354,19 +302,19 @@ GROUP BY
 								<staticText>
 									<reportElement x="0" y="0" width="90" height="30" uuid="9188e3be-ac8e-46bf-abe2-cfd9871fd7ad"/>
 									<textElement textAlignment="Center" verticalAlignment="Middle">
-										<font fontName="THSarabunNew" size="14"/>
+										<font fontName="TH Sarabun New" size="14"/>
 									</textElement>
 									<text><![CDATA[เอกสารประกอบ]]></text>
 								</staticText>
 							</jr:columnHeader>
 							<jr:detailCell style="Table_TD" height="30">
-								<textField>
+								<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 									<reportElement x="0" y="0" width="90" height="30" uuid="f3a0d54b-8983-4eca-b10c-1622ee5b4586"/>
-									<box leftPadding="5"/>
-									<textElement textAlignment="Justified" verticalAlignment="Middle">
-										<font fontName="THSarabunNew" size="14"/>
+									<box topPadding="5" leftPadding="10" bottomPadding="5" rightPadding="10"/>
+									<textElement textAlignment="Left" verticalAlignment="Middle">
+										<font fontName="TH Sarabun New" size="14"/>
 									</textElement>
-									<textFieldExpression><![CDATA[$F{file_list}]]></textFieldExpression>
+									<textFieldExpression><![CDATA[$F{FILE_NAME}]]></textFieldExpression>
 								</textField>
 							</jr:detailCell>
 						</jr:column>
@@ -376,17 +324,17 @@ GROUP BY
 								<staticText>
 									<reportElement x="0" y="0" width="95" height="30" uuid="47bc74e6-b695-45ef-b6ac-5bbf1296e484"/>
 									<textElement textAlignment="Center" verticalAlignment="Middle">
-										<font fontName="THSarabunNew" size="14"/>
+										<font fontName="TH Sarabun New" size="14"/>
 									</textElement>
 									<text><![CDATA[รายละเอียดให้คำปรึกษา]]></text>
 								</staticText>
 							</jr:columnHeader>
 							<jr:detailCell style="Table_TD" height="30">
-								<textField>
+								<textField isStretchWithOverflow="true">
 									<reportElement x="0" y="0" width="95" height="30" uuid="d8a5bcfb-de97-4ab5-ab4c-3c84c879165f"/>
-									<box leftPadding="5"/>
-									<textElement textAlignment="Justified" verticalAlignment="Middle">
-										<font fontName="THSarabunNew" size="14"/>
+									<box topPadding="5" leftPadding="10" bottomPadding="5" rightPadding="10"/>
+									<textElement textAlignment="Left" verticalAlignment="Middle">
+										<font fontName="TH Sarabun New" size="14"/>
 									</textElement>
 									<textFieldExpression><![CDATA[$F{EVALUATION_RESULT}]]></textFieldExpression>
 								</textField>
@@ -399,17 +347,17 @@ GROUP BY
 								<staticText>
 									<reportElement x="0" y="0" width="90" height="30" uuid="f14f707b-7fad-426a-a05d-0788ab5a66fe"/>
 									<textElement textAlignment="Center" verticalAlignment="Middle">
-										<font fontName="THSarabunNew" size="14"/>
+										<font fontName="TH Sarabun New" size="14"/>
 									</textElement>
 									<text><![CDATA[หมายเหตุ]]></text>
 								</staticText>
 							</jr:columnHeader>
 							<jr:detailCell style="Table_TD" height="30">
-								<textField>
+								<textField isStretchWithOverflow="true">
 									<reportElement x="0" y="0" width="90" height="30" uuid="365651af-66a9-4790-9153-9c14e9dfe2e0"/>
-									<box leftPadding="5"/>
-									<textElement textAlignment="Justified" verticalAlignment="Middle">
-										<font fontName="THSarabunNew" size="14"/>
+									<box topPadding="5" leftPadding="10" bottomPadding="5" rightPadding="10"/>
+									<textElement textAlignment="Left" verticalAlignment="Middle">
+										<font fontName="TH Sarabun New" size="14"/>
 									</textElement>
 									<textFieldExpression><![CDATA[$F{EVALUATION_REMARK}]]></textFieldExpression>
 								</textField>
