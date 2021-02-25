@@ -17,6 +17,7 @@
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_alert_witness"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="315"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="680"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_alert_witness_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/02/2021"]]></defaultValueExpression>
 	</parameter>
@@ -47,8 +48,8 @@
         NVL(ppcor.COUNT_OFFICER_REPORT,'0') AS COUNT_OFFICER_REPORT,
         (to_date(TO_CHAR(ppac.START_DATE, 'YYYY-MM-DD' ), 'YYYY-MM-DD')-to_date(TO_CHAR( SYSDATE, 'YYYY-MM-DD' ), 'YYYY-MM-DD')) AS DIFFERENCE_DATE
 FROM PC_PROCEED_APPOINT ppa
-JOIN PC_PROCEED_APPOINT_CONTINUE ppac ON ppac.APPOINT_ID = ppa.APPOINT_ID 
-JOIN (SELECT ppac.APPOINT_ID, MIN(ppac.APPOINT_CON_ID) APPOINT_CON_ID 
+JOIN PC_PROCEED_APPOINT_CONTINUE ppac ON ppac.APPOINT_ID = ppa.APPOINT_ID  AND ppac.REMOVED_BY = 0
+LEFT JOIN (SELECT ppac.APPOINT_ID, MIN(ppac.APPOINT_CON_ID) APPOINT_CON_ID 
 	  FROM PC_PROCEED_APPOINT_CONTINUE ppac 	  
 	  GROUP BY ppac.APPOINT_ID) fapp ON fapp.APPOINT_CON_ID = ppac.APPOINT_CON_ID	  
 LEFT JOIN ( SELECT APPOINT_CON_ID, COUNT(APPOINT_CON_ID) AS COUNT_ALERT_WITNESS
@@ -78,9 +79,10 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
 			JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
 			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
 --
-WHERE ppac.START_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS')
+WHERE ppa.REMOVED_BY = 0 AND ppac.START_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS')
                            AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
-                            AND ($P{APPOINT_TABLE_CODE} IS NULL OR ppac.APPOINT_TABLE_CODE = $P{APPOINT_TABLE_CODE} )]]>
+                            AND ($P{APPOINT_TABLE_CODE} IS NULL OR ppac.APPOINT_TABLE_CODE = $P{APPOINT_TABLE_CODE} )
+ORDER BY ppac.START_DATE]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
@@ -346,8 +348,7 @@ WHERE ppac.START_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new SimpleDateFormat("dd/MM/yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("yyyy-MM-dd").parse( $F{START_DATE}))
-]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("dd/MM/yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("yyyy-MM-dd").parse( $F{START_DATE}))]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="262" y="0" width="90" height="25" uuid="cd61bb0f-9c34-4b0e-8e8b-9174098e8790">
