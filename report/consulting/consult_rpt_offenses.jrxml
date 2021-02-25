@@ -3,9 +3,8 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="consult_rpt_offenses" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="96376f95-31bf-4f02-8b15-cd3d7ecb6a45">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/consulting/consult_rpt_offenses_files/main_jrxml"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/consulting/consult_rpt_offenses"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
 		<box>
@@ -63,8 +62,8 @@
 	</style>
 	<subDataset name="getPolice" uuid="fa26332d-1c67-4fda-af52-8b2424938a78">
 		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="322"/>
-		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="671"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="297"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="697"/>
 		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
 		<parameter name="start_date" class="java.lang.String"/>
 		<parameter name="end_date" class="java.lang.String"/>
@@ -109,6 +108,7 @@ WHERE
 	AND ( $P{start_date}  IS NULL
 	OR pa.CREATED_DATE >= to_date($P{start_date}, 'DD/MM/YYYY HH24:MI:SS', 'nls_calendar=''Thai Buddha'' nls_date_language = Thai') )
 	AND pa.REMOVED_BY = 0
+	AND pa.POLICE_CODE IS NOT NULL 
 GROUP BY
 	pa.POLICE_DISTRICT_NAME ,
 	pa.POLICE_PROVINCE_NAME ,
@@ -266,7 +266,7 @@ AND pa.REMOVED_BY = 0]]>
 								<textElement textAlignment="Left" verticalAlignment="Middle">
 									<font fontName="TH Sarabun New" size="14"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{POLICE_DISTRICT_NAME} ]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{POLICE_DISTRICT_NAME}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
