@@ -24,8 +24,12 @@
 	<parameter name="END_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["28/02/2564"]]></defaultValueExpression>
 	</parameter>
-	<parameter name="JUDGE_ID" class="java.lang.String"/>
-	<parameter name="MORNING" class="java.lang.String"/>
+	<parameter name="JUDGE_ID" class="java.lang.String">
+		<defaultValueExpression><![CDATA[5]]></defaultValueExpression>
+	</parameter>
+	<parameter name="MORNING" class="java.lang.String">
+		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+	</parameter>
 	<parameter name="AFTERNOON" class="java.lang.String"/>
 	<parameter name="EVENING" class="java.lang.String"/>
 	<parameter name="LEVEL_ROOM_ID" class="java.lang.String"/>
@@ -122,8 +126,7 @@ AND (
      (($P{AFTERNOON} IS NULL) OR (ppac.CHOICE =2)AND(1 = $P{AFTERNOON})) OR 
      (($P{EVENING} IS NULL) OR (ppac.CHOICE =3)AND(1 = $P{EVENING})))
 AND ($P{LEVEL_ROOM_ID} IS NULL OR pllr.LEVEL_ROOM_ID = $P{LEVEL_ROOM_ID} OR 0 = $P{LEVEL_ROOM_ID})
-ORDER BY row_num
-]]>
+ORDER BY row_num]]>
 	</queryString>
 	<field name="ROW_NUM" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="ROW_NUM"/>
@@ -181,20 +184,13 @@ ORDER BY row_num
 	</field>
 	<group name="Group1"/>
 	<title>
-		<band height="120" splitType="Stretch">
+		<band height="100" splitType="Stretch">
 			<textField>
 				<reportElement x="280" y="30" width="300" height="30" uuid="bf5c355f-9ec4-4505-8212-03703cf0b4b9"/>
 				<textElement textAlignment="Center">
 					<font fontName="THSarabunNew" size="16" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{COURT_NAME_TH} ]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="173" y="60" width="524" height="30" uuid="13515d75-a740-4ab9-bfc7-881cf3ca0e68"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="16" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[new SimpleDateFormat("วันนัดพิจารณา : d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse( $P{START_DATE} )) + new SimpleDateFormat(" ถึงวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse( $P{END_DATE} )) ]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="380" y="0" width="100" height="30" uuid="e2c04854-7fd2-4683-baad-3817db5aa832"/>
@@ -203,6 +199,36 @@ ORDER BY row_num
 				</textElement>
 				<text><![CDATA[บัญชีนัดความศาล]]></text>
 			</staticText>
+			<staticText>
+				<reportElement x="270" y="70" width="79" height="30" uuid="d03a356f-a49c-4bc6-9547-fb8899617993"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[วันนัดพิจารณา :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="351" y="70" width="99" height="30" uuid="dc88aa22-91e3-43b3-9da3-abb3932aa6c0"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="16" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+				<patternExpression><![CDATA[new java.text.SimpleDateFormat("d MMMM y", new Locale("TH","th")).format(new SimpleDateFormat("dd/MM/yyyy", new Locale("TH","th")).parse($P{START_DATE} ))]]></patternExpression>
+			</textField>
+			<staticText>
+				<reportElement x="450" y="70" width="50" height="30" uuid="97b72bb5-d38f-4e26-b852-daeed47fb9b6"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ ถึงวันที่]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="500" y="70" width="100" height="30" uuid="6c0e4591-79e9-48ec-8bc0-7f97700343b4"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="16" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+				<patternExpression><![CDATA[new java.text.SimpleDateFormat("d MMMM y", new Locale("TH","th")).format(new SimpleDateFormat("dd/MM/yyyy", new Locale("TH","th")).parse( $P{END_DATE} ))]]></patternExpression>
+			</textField>
 		</band>
 	</title>
 	<pageHeader>
