@@ -2,16 +2,15 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="finance_frm_payorder_fine" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="454" leftMargin="85" rightMargin="56" topMargin="49" bottomMargin="56" uuid="7ea5f4e4-e512-4ffb-9bf7-cf2fd2c37890">
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="CojDB[193]"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-229"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.193:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_frm_payorder_fine"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="462"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="532"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/finance_frm_payorder_fine_files/main_jrxml"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
@@ -41,7 +40,7 @@
 	</style>
 	<subDataset name="DS_PAYMENT_DETAIL" uuid="f39303ac-fa73-4c74-b4b3-11f2b506a37d">
 		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-229"/>
 		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 		<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="557"/>
@@ -55,7 +54,8 @@
        pfr.RECEIVED_DATE,
        THAISDATE(pfr.RECEIVED_DATE) RECEIVED_DATE_TEXT,
        NVL(pfp.CASH_AMOUNT,0)+NVL(pfp.CHEQUE_AMOUNT,0)+NVL(pfp.TRANSFER_AMOUNT,0) AMOUNT,
-       plrst.RECEIPT_SUB_TYPE_NAME,
+       plrt.RECEIPT_TYPE_NAME,
+       plrst.RECEIPT_SUB_TYPE_NAME,      
        THAILDATE(pfp.PAYMENT_DATE) PAYMENT_DATE_TEXT 
 FROM PC_FIN_PAYMENT_DETAIL pfpd
 LEFT JOIN PC_FIN_PAYMENT pfp ON pfp.PAYMENT_ID = pfpd.PAYMENT_ID AND pfp.REMOVED_BY = 0
@@ -64,6 +64,7 @@ LEFT JOIN PC_FIN_RECEIPT_DETAIL pfrd ON pfrd.DETAIL_ID = pfrbh.RECEIPT_DETAIL_ID
 LEFT JOIN PC_FIN_RECEIPT pfr ON pfr.RECEIPT_ID = pfpd.RECEIPT_ID AND pfr.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_RECEIPT_SUB_TYPE plrst ON plrst.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE 
                                      AND plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE AND plrst.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE  AND plrst.REMOVED_BY = 0
 WHERE pfpd.PAYMENT_ID = $P{TABLE_PAYID}]]>
 		</queryString>
 		<field name="ROW_ORDER" class="java.lang.String">
@@ -86,6 +87,9 @@ WHERE pfpd.PAYMENT_ID = $P{TABLE_PAYID}]]>
 		</field>
 		<field name="AMOUNT" class="java.lang.Double">
 			<property name="com.jaspersoft.studio.field.label" value="AMOUNT"/>
+		</field>
+		<field name="RECEIPT_TYPE_NAME" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="RECEIPT_TYPE_NAME"/>
 		</field>
 		<field name="RECEIPT_SUB_TYPE_NAME" class="java.lang.String">
 			<property name="com.jaspersoft.studio.field.label" value="RECEIPT_SUB_TYPE_NAME"/>
@@ -608,8 +612,9 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 								<textElement verticalAlignment="Middle">
 									<font fontName="THSarabunNew" size="17"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{RECEIPT_SUB_TYPE_NAME}==null?"ค่าปรับ":
-$F{RECEIPT_SUB_TYPE_NAME}+ ($F{RECEIVED_DATE}==null?" ":"  วันที่วางเงิน " +$F{RECEIVED_DATE_TEXT})]]></textFieldExpression>
+								<textFieldExpression><![CDATA[($F{RECEIPT_TYPE_NAME}==null?" ":
+$F{RECEIPT_TYPE_NAME}+" ")+($F{RECEIPT_SUB_TYPE_NAME}==null?"ค่าปรับ":
+$F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่วางเงิน " +$F{RECEIVED_DATE_TEXT})]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>

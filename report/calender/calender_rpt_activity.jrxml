@@ -3,12 +3,11 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Blank_A4" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryNewPage="true" uuid="bd2ae578-08c8-407f-9389-67fed578791e">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
-	<property name="ireport.jasperserver.reportUnit" value="/reports/calendar/calendar_rpt_activity"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/Calender/calender_rpt_activity"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="349"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="644"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/calendar/calendar_rpt_activity_files/main_jrxml"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#5E5E5E">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
@@ -116,8 +115,6 @@ GROUP BY ( pa.ACTIVITY_ID ,
 	<parameter name="SP_Case_Year" class="java.lang.Integer"/>
 	<queryString language="SQL">
 		<![CDATA[SELECT 
-	pa.CASE_ID ,
-	pa.CASE_YEAR ,
 	pa.CHILD_PREFIX ,
 	pa.CHILD_FIRSTNAME ,
 	pa.CHILD_LASTNAME ,
@@ -148,8 +145,6 @@ WHERE
 	AND ( $P{activityDateTo}  is null or pa.CREATED_DATE <= to_date($P{activityDateTo},  'DD/MM/YYYY HH24:MI:SS', 'nls_calendar=''Thai Buddha'' nls_date_language = Thai') )
 	AND ( $P{activityDateFrom}  is null or pa.CREATED_DATE >= to_date($P{activityDateFrom},  'DD/MM/YYYY HH24:MI:SS', 'nls_calendar=''Thai Buddha'' nls_date_language = Thai') )]]>
 	</queryString>
-	<field name="CASE_ID" class="java.lang.String"/>
-	<field name="CASE_YEAR" class="java.lang.String"/>
 	<field name="CHILD_HOME_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="CHILD_HOME_NO"/>
 	</field>
@@ -229,11 +224,11 @@ WHERE
 	<title>
 		<band height="230" splitType="Stretch">
 			<staticText>
-				<reportElement x="165" y="30" width="230" height="30" uuid="13b1a011-3f3b-4596-9974-afd56e1126de"/>
+				<reportElement x="180" y="30" width="200" height="30" uuid="13b1a011-3f3b-4596-9974-afd56e1126de"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="22" isBold="true"/>
+					<font fontName="TH Sarabun New" size="16" isBold="true"/>
 				</textElement>
-				<text><![CDATA[ประวัติรายงานการเข้ากิจกรรม]]></text>
+				<text><![CDATA[รายงานการเข้ากิจกรรม]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="180" y="60" width="200" height="30" uuid="a210bfae-af89-491a-8723-2ec1754febc7"/>
@@ -247,7 +242,7 @@ WHERE
 				<textElement>
 					<font fontName="TH Sarabun New" size="16" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["เลขคดี ตจ " + $F{CASE_ID} + "/" + $F{CASE_YEAR}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["เลขคดี ตจ " + $P{SP_Case_Num} + "/" + $P{SP_Case_Year}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="420" y="22" width="130" height="22" uuid="3194105d-d91f-48c4-8508-5fe8a5b145c0"/>
@@ -344,7 +339,7 @@ WHERE
 									<textElement textAlignment="Center" verticalAlignment="Middle">
 										<font fontName="TH Sarabun New"/>
 									</textElement>
-									<text><![CDATA[ลำดับ]]></text>
+									<text><![CDATA[ลำกับ]]></text>
 								</staticText>
 							</jr:columnHeader>
 							<jr:detailCell style="Table_TD" height="30">
