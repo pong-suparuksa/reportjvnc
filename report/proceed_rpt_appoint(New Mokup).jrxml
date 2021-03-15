@@ -48,7 +48,7 @@
     pc.ALLE_DESC ,
 	plar.APPOINT_REASON_NAME  ,
 	pllr.LEVEL_ROOM_DESC ,
-	plj.JUDGE_NAME  ,
+	idiom_owner.JUDGE_NAME,
  	(select plj1.judge_first_name || ' ' || plj1.judge_last_name 
         from PC_CASE_JUDGE pcj1, PC_LOOKUP_JUDGE plj1, PC_LOOKUP_JUDGE_TYPE pjt1 
         where pcj1.CASE_ID = ppa.CASE_ID AND pcj1.REMOVED_BY = 0 AND plj1.JUDGE_ID = pcj1.JUDGE_ID
@@ -88,9 +88,16 @@ LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON
 	pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0	
 ---
 LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pc.COURT_ID AND plc.REMOVED_BY = 0	
--- เอาอันนี้
-LEFT JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID = ppa.CASE_ID AND pcj.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID AND plj.REMOVED_BY = 0
+-- JUDGE
+LEFT JOIN 
+    (
+	    SELECT plj.JUDGE_ID ,pcj.CASE_ID ,pljt.JUDGE_TYPE_NAME,plj.JUDGE_NAME ,pljt.JUDGE_TYPE_CODE
+		FROM PC_CASE_JUDGE pcj  
+		LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID
+		LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID 
+		WHERE pcj.REMOVED_BY = 0
+		GROUP BY plj.JUDGE_ID , pcj.CASE_ID ,pljt.JUDGE_TYPE_NAME,plj.JUDGE_NAME ,pljt.JUDGE_TYPE_CODE
+	) idiom_owner ON idiom_owner.CASE_ID = pc.CASE_ID AND idiom_owner.JUDGE_TYPE_CODE ='01' -- เจ้าของสำนวน
 --เอาอันนี้
 LEFT JOIN (SELECT DISTINCT pcl.CASE_ID, plas.ACCU_STATUS_NAME
            FROM PC_CASE_LIT pcl
@@ -106,8 +113,7 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
              WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
 --             
 WHERE ppa.REMOVED_BY = 0 
-AND EXISTS(select * from PC_CASE_JUDGE jud where jud.CASE_ID = ppa.CASE_ID 
-AND jud.REMOVED_BY = 0 AND (jud.judge_id = $P{JUDGE_ID} OR $P{JUDGE_ID} IS NULL ) )
+AND (idiom_owner.JUDGE_ID = $P{JUDGE_ID} OR $P{JUDGE_ID} IS NULL)
 AND ppac.START_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS')
                            AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 AND (
@@ -187,7 +193,7 @@ ORDER BY row_num]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="16" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["วันนัดพิจรณา : " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))]]></textFieldExpression>
+				<textFieldExpression><![CDATA["วันนัดพิจารณา : " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))]]></textFieldExpression>
 				<patternExpression><![CDATA[new java.text.SimpleDateFormat("d MMMM y", new Locale("TH","th")).format(new SimpleDateFormat("dd/MM/yyyy", new Locale("TH","th")).parse($P{START_DATE} ))]]></patternExpression>
 			</textField>
 		</band>
