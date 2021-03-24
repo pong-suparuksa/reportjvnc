@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="litigant_rpt_writres_sender" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2f34df85-7e84-4640-bc76-e0dbed12167f">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-229"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -12,21 +11,20 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.193:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_writres_sender"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="717"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="272"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_writres_sender_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/05/2020"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="END_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["31/05/2020"]]></defaultValueExpression>
-	</parameter>
-	<parameter name="SENDER" class="java.lang.String">
-		<defaultValueExpression><![CDATA[-1]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["31/05/2021"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[SELECT 
@@ -62,13 +60,6 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
 --
 WHERE pnsr.REMOVED_BY = 0
 AND pnsr.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS')  AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
-AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
-						   FROM(SELECT NVL(pn.SEND_BY,0) SEND_BY, -1 SENDER 
-		     	 	     		 FROM PC_NOTICE pn 
-			                     UNION 
-			                     SELECT NVL(pn.SEND_BY,0) SEND_BY, NVL(pn.SEND_BY,0) SENDER
-			                     FROM PC_NOTICE pn) A 
-		                   WHERE A.SENDER IN ($P!{SENDER}))
 ORDER BY pnsr.CREATED_DATE]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
@@ -119,25 +110,8 @@ ORDER BY pnsr.CREATED_DATE]]>
 				<textElement verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
-				<text><![CDATA[บัญชีรายงานผลหมาย ตามชื่อผู้ส่ง]]></text>
+				<text><![CDATA[บัญชีรายงานผลหมาย]]></text>
 			</staticText>
-			<textField>
-				<reportElement x="692" y="30" width="110" height="30" uuid="8fd4cce9-0e13-4d34-b316-9edbe8fd12a5">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9c8967e8-3ec3-47f6-b1f8-73399fb65791"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<box leftPadding="3">
-					<pen lineWidth="0.5"/>
-					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="18" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{SENDER}==null?" ":$F{SENDER}]]></textFieldExpression>
-			</textField>
 			<textField>
 				<reportElement x="230" y="37" width="342" height="25" uuid="5c896844-d692-4b7e-b405-608ec80e92b8">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -150,7 +124,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 		</band>
 	</pageHeader>
 	<columnHeader>
-		<band height="25" splitType="Stretch">
+		<band height="30" splitType="Stretch">
 			<staticText>
 				<reportElement x="40" y="0" width="70" height="25" uuid="45cf3754-107c-4c52-958d-8d4299a12e75">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e9edaf2-10e0-4218-afbf-20e85ac4711c"/>
@@ -180,7 +154,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 				<text><![CDATA[เลขดำที่]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="180" y="0" width="70" height="25" uuid="1af7f772-1dea-4d68-8a4b-fb136dfb6cb5">
+				<reportElement x="180" y="0" width="60" height="25" uuid="1af7f772-1dea-4d68-8a4b-fb136dfb6cb5">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="159e45cd-fc70-464b-bd09-becf96878484"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -194,7 +168,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 				<text><![CDATA[เลขแดงที่]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="250" y="0" width="178" height="25" uuid="47ffbfb0-31df-4549-8f29-0358e816bf79">
+				<reportElement x="240" y="0" width="120" height="25" uuid="47ffbfb0-31df-4549-8f29-0358e816bf79">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="95f19c7c-e373-48df-9fda-6aa82a04a551"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -207,7 +181,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 				<text><![CDATA[ส่งหมายให้ใคร]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="428" y="0" width="70" height="25" uuid="f11240ab-78d5-4af3-a70c-3062eeba007a">
+				<reportElement x="360" y="0" width="70" height="25" uuid="f11240ab-78d5-4af3-a70c-3062eeba007a">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6f23f229-c6e1-4962-b900-471fd0626741"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -221,7 +195,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 				<text><![CDATA[วันที่ส่งหมาย]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="498" y="0" width="132" height="25" uuid="7261fc4a-5f7f-4bd0-a137-950499ad88ab">
+				<reportElement x="430" y="0" width="112" height="25" uuid="7261fc4a-5f7f-4bd0-a137-950499ad88ab">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="af57a209-ffa7-4d46-a893-cb60b37f87dc"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -234,7 +208,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 				<text><![CDATA[ผลการส่งหมาย]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="630" y="0" width="60" height="25" uuid="29c86b98-81a9-41c2-baf9-c6b83706540d">
+				<reportElement x="542" y="0" width="60" height="25" uuid="29c86b98-81a9-41c2-baf9-c6b83706540d">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="05350697-e4aa-4dc6-9f6d-e22a5492ba77"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -247,7 +221,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 				<text><![CDATA[ราคาหมาย]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="690" y="0" width="112" height="25" uuid="7326bef8-de53-4011-8caf-2724bb37e7e0">
+				<reportElement x="700" y="0" width="102" height="25" uuid="7326bef8-de53-4011-8caf-2724bb37e7e0">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="edaca40f-8733-4c95-bf41-7272618028ab"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -273,6 +247,19 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<text><![CDATA[ที่]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="602" y="0" width="98" height="25" uuid="0372c696-d5d0-45a6-9d61-ef2702bb6efc">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="05350697-e4aa-4dc6-9f6d-e22a5492ba77"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<text><![CDATA[ผู้ส่งหมาย]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
@@ -307,7 +294,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}==null?" ":$F{CASE_BLACK_NO}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="180" y="0" width="70" height="25" uuid="a5c859f4-f206-478e-81ab-9db9d20178db">
+				<reportElement x="180" y="0" width="60" height="25" uuid="a5c859f4-f206-478e-81ab-9db9d20178db">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="159e45cd-fc70-464b-bd09-becf96878484"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -321,7 +308,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 				<textFieldExpression><![CDATA[$F{CASE_RED_NO}==null?" ":$F{CASE_RED_NO}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="250" y="0" width="178" height="25" uuid="5ab743e0-01a5-481b-899c-6e1e3a3231d1">
+				<reportElement x="240" y="0" width="120" height="25" uuid="5ab743e0-01a5-481b-899c-6e1e3a3231d1">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="95f19c7c-e373-48df-9fda-6aa82a04a551"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -334,7 +321,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 				<textFieldExpression><![CDATA[$F{TO_NAME}==null?" ":$F{TO_NAME}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="428" y="0" width="70" height="25" uuid="2a831ad4-5bbe-41c9-8e23-07c81e7f92a3">
+				<reportElement x="360" y="0" width="70" height="25" uuid="2a831ad4-5bbe-41c9-8e23-07c81e7f92a3">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6f23f229-c6e1-4962-b900-471fd0626741"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -348,7 +335,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 				<textFieldExpression><![CDATA[$F{SEND_NOTICE_DATE}==null?" ":new SimpleDateFormat("d MMM yyyy", new Locale("th", "TH")).format($F{SEND_NOTICE_DATE})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="498" y="0" width="132" height="25" uuid="98440980-09a3-4357-bfb9-efdf29d8bd11">
+				<reportElement x="430" y="0" width="112" height="25" uuid="98440980-09a3-4357-bfb9-efdf29d8bd11">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="af57a209-ffa7-4d46-a893-cb60b37f87dc"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -361,7 +348,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 				<textFieldExpression><![CDATA[$F{NOTICE_SEND_RESULT_NAME}==null?" ":$F{NOTICE_SEND_RESULT_NAME}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="630" y="0" width="60" height="25" uuid="663ed596-4a96-419c-b40d-91f123ee1a76">
+				<reportElement x="542" y="0" width="60" height="25" uuid="663ed596-4a96-419c-b40d-91f123ee1a76">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="05350697-e4aa-4dc6-9f6d-e22a5492ba77"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -374,7 +361,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 				<textFieldExpression><![CDATA[$F{SEND_FEE}==null?" ":new java.text.DecimalFormat("#,##0").format($F{SEND_FEE})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="690" y="0" width="112" height="25" uuid="73df1564-57e2-43cf-a2fa-9c4bd9b409c1">
+				<reportElement x="700" y="0" width="102" height="25" uuid="73df1564-57e2-43cf-a2fa-9c4bd9b409c1">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="edaca40f-8733-4c95-bf41-7272618028ab"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -400,6 +387,19 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="602" y="0" width="98" height="25" uuid="8b5198c4-f0c1-4e0d-85c5-9cb43c0e5230">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="05350697-e4aa-4dc6-9f6d-e22a5492ba77"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box rightPadding="3">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SENDER}==null?" ":$F{SENDER}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
