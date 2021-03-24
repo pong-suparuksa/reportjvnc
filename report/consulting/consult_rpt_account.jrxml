@@ -10,11 +10,10 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[210]"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/consulting/consult_rpt_account"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/consulting/consult_rpt_account_files/main_jrxml"/>
 	<style name="Table 1_TH" mode="Opaque" backcolor="#FFFFFF">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
@@ -43,10 +42,14 @@
 		</box>
 	</style>
 	<subDataset name="consulting_account" uuid="de2ef580-4c6e-43d0-9cd3-715680cddb7f">
-		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[210]"/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
 		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-		<parameter name="start_date" class="java.lang.String"/>
-		<parameter name="end_date" class="java.lang.String"/>
+		<parameter name="start_date" class="java.lang.String">
+			<defaultValueExpression><![CDATA["01/12/2563"]]></defaultValueExpression>
+		</parameter>
+		<parameter name="end_date" class="java.lang.String">
+			<defaultValueExpression><![CDATA["15/12/2564"]]></defaultValueExpression>
+		</parameter>
 		<queryString>
 			<![CDATA[SELECT
 	ROW_NUMBER() OVER (
@@ -68,8 +71,8 @@ FROM
 JOIN PC_ADVICE_PARENT pap ON
 	pa.ADVICE_ID = pap.ADVICE_ID
 WHERE
-	pa.CREATED_DATE >= to_date( $P{start_date} , 'DD/MM/YYYY HH24:MI:SS', 'nls_calendar=''Thai Buddha'' nls_date_language = Thai')
-	AND	pa.CREATED_DATE <= to_date( $P{end_date} , 'DD/MM/YYYY HH24:MI:SS', 'nls_calendar=''Thai Buddha'' nls_date_language = Thai')
+	pa.CREATED_DATE <= to_date( $P{end_date} , 'DD/MM/YYYY HH24:MI:SS', 'nls_calendar=''Thai Buddha'' nls_date_language = Thai')
+	AND pa.CREATED_DATE >= to_date( $P{start_date} , 'DD/MM/YYYY HH24:MI:SS', 'nls_calendar=''Thai Buddha'' nls_date_language = Thai')
 	AND pa.REMOVED_BY = 0
  	AND pap.REMOVED_BY = 0]]>
 		</queryString>
@@ -88,10 +91,10 @@ WHERE
 		<field name="PARENT_RELATION" class="java.lang.String"/>
 	</subDataset>
 	<parameter name="start_date" class="java.lang.String">
-		<defaultValueExpression><![CDATA["19/02/2564 00:00:00"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["01/10/2563"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="end_date" class="java.lang.String">
-		<defaultValueExpression><![CDATA["19/02/2564 23:59:59"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["15/02/2564"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="login_name" class="java.lang.String">
 		<defaultValueExpression><![CDATA["nitinai poonsuk"]]></defaultValueExpression>
@@ -126,7 +129,7 @@ WHERE
 				<text><![CDATA[ตั้งแต่วันที่]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="327" y="100" width="88" height="30" uuid="54354af5-1a76-457a-9122-f53fcb300c96"/>
+				<reportElement x="327" y="100" width="103" height="30" uuid="54354af5-1a76-457a-9122-f53fcb300c96"/>
 				<textElement>
 					<font fontName="TH Sarabun New" size="16" isBold="true"/>
 				</textElement>
@@ -134,14 +137,14 @@ WHERE
 				<patternExpression><![CDATA[new java.text.SimpleDateFormat("d MMMM y", new Locale("TH","th")).format(new SimpleDateFormat("dd/MM/yyyy", new Locale("TH","th")).parse($P{start_date}))]]></patternExpression>
 			</textField>
 			<staticText>
-				<reportElement x="420" y="100" width="22" height="30" uuid="d8891a16-747a-4fc9-af27-98e38433ac5c"/>
+				<reportElement x="430" y="100" width="22" height="30" uuid="d8891a16-747a-4fc9-af27-98e38433ac5c"/>
 				<textElement>
 					<font fontName="TH Sarabun New" size="16" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ถึง]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="442" y="100" width="100" height="30" uuid="969373b7-9e0f-4c51-9417-c79ae5cdce48"/>
+				<reportElement x="452" y="100" width="108" height="30" uuid="969373b7-9e0f-4c51-9417-c79ae5cdce48"/>
 				<textElement>
 					<font fontName="TH Sarabun New" size="16" isBold="true"/>
 				</textElement>
@@ -163,7 +166,7 @@ WHERE
 					<property name="com.jaspersoft.studio.components.autoresize.proportional" value="true"/>
 				</reportElement>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
-					<datasetRun subDataset="consulting_account" uuid="5f466081-6a7b-4f3a-8159-d0fe1889287e">
+					<datasetRun subDataset="consulting_account" uuid="b522e9a1-850c-4c3e-84a5-9bf9cec31b90">
 						<datasetParameter name="start_date">
 							<datasetParameterExpression><![CDATA[$P{start_date}]]></datasetParameterExpression>
 						</datasetParameter>
@@ -264,7 +267,7 @@ WHERE
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font fontName="TH Sarabun New" size="14" isBold="true"/>
 								</textElement>
-								<text><![CDATA[ชื่อผู้ปกครลอง]]></text>
+								<text><![CDATA[ชื่อผู้ปกครอง]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table 1_TD" height="30">

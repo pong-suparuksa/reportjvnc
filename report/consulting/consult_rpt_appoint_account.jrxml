@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="consult_rpt_appoint_account" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="beef715e-ef4f-4f72-9e92-17f2da6339ac">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[210]"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/consulting/consult_rpt_appoint_account"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/consulting/consult_rpt_appoint_account_files/main_jrxml"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#FFFFFF">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
@@ -34,12 +33,16 @@
 		</box>
 	</style>
 	<subDataset name="appoint_account" uuid="2df9eadf-16f8-4b39-8e7e-22b318007480">
-		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[210]"/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
 		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="394"/>
 		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="599"/>
-		<parameter name="start_date" class="java.lang.String"/>
-		<parameter name="end_date" class="java.lang.String"/>
+		<parameter name="start_date" class="java.lang.String">
+			<defaultValueExpression><![CDATA["01/12/2563"]]></defaultValueExpression>
+		</parameter>
+		<parameter name="end_date" class="java.lang.String">
+			<defaultValueExpression><![CDATA["15/12/2564"]]></defaultValueExpression>
+		</parameter>
 		<queryString>
 			<![CDATA[SELECT
 	ROW_NUMBER() OVER (
@@ -52,7 +55,6 @@
 	pa.CHILD_PREFIX ,
 	pa.CHILD_FIRSTNAME ,
 	pa.CHILD_LASTNAME,
-	pa.CREATED_DATE ,
 	MIN(paa.APPOINT_REASON) AS APPOINT_REASON,
 	MIN(paa.APPOINT_DESC) AS APPOINT_DESC
 FROM
@@ -60,8 +62,8 @@ FROM
 JOIN PC_ADVICE_APPOINT paa ON
 	pa.ADVICE_ID = paa.ADVICE_ID
 WHERE
-	pa.CREATED_DATE >= to_date($P{start_date},  'DD/MM/YYYY HH24:MI:SS', 'nls_calendar=''Thai Buddha'' nls_date_language = Thai')
-	AND pa.CREATED_DATE <= to_date( $P{end_date} , 'DD/MM/YYYY HH24:MI:SS', 'nls_calendar=''Thai Buddha'' nls_date_language = Thai')	
+	pa.CREATED_DATE <= to_date( $P{end_date} , 'DD/MM/YYYY HH24:MI:SS', 'nls_calendar=''Thai Buddha'' nls_date_language = Thai')
+	AND pa.CREATED_DATE >= to_date($P{start_date},  'DD/MM/YYYY HH24:MI:SS', 'nls_calendar=''Thai Buddha'' nls_date_language = Thai')
 	AND pa.REMOVED_BY = 0 
 GROUP BY 
 	pa.ADVICE_ID,
@@ -71,8 +73,7 @@ GROUP BY
 	pa.CASE_YEAR ,
 	pa.CHILD_PREFIX ,
 	pa.CHILD_FIRSTNAME ,
-	pa.CHILD_LASTNAME,
-	pa.CREATED_DATE]]>
+	pa.CHILD_LASTNAME]]>
 		</queryString>
 		<field name="ROW_NUM" class="java.lang.String"/>
 		<field name="ADVICE_ID" class="java.lang.String"/>
@@ -87,10 +88,10 @@ GROUP BY
 		<field name="APPOINT_DESC" class="java.lang.String"/>
 	</subDataset>
 	<parameter name="start_date" class="java.lang.String">
-		<defaultValueExpression><![CDATA["19/02/2564 00:00:00"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["01/12/2563"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="end_date" class="java.lang.String">
-		<defaultValueExpression><![CDATA["19/02/2564 23:59:59"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["15/12/2564"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="login_name " class="java.lang.String">
 		<defaultValueExpression><![CDATA["nitinai poonsuk"]]></defaultValueExpression>
@@ -125,7 +126,7 @@ GROUP BY
 				<text><![CDATA[ตั้งแต่วันที่]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="327" y="100" width="88" height="30" uuid="97adf34b-d72d-4acd-91f3-82cc09a6f4b3"/>
+				<reportElement x="327" y="100" width="108" height="30" uuid="97adf34b-d72d-4acd-91f3-82cc09a6f4b3"/>
 				<textElement>
 					<font fontName="TH Sarabun New" size="16" isBold="true"/>
 				</textElement>
@@ -133,14 +134,14 @@ GROUP BY
 				<patternExpression><![CDATA[new java.text.SimpleDateFormat("d MMMM y", new Locale("TH","th")).format(new SimpleDateFormat("dd/MM/yyyy", new Locale("TH","th")).parse($P{start_date}))]]></patternExpression>
 			</textField>
 			<staticText>
-				<reportElement x="420" y="100" width="22" height="30" uuid="4afb6c03-dd5d-4c1f-86cb-343bd110feb8"/>
+				<reportElement x="435" y="100" width="22" height="30" uuid="4afb6c03-dd5d-4c1f-86cb-343bd110feb8"/>
 				<textElement>
 					<font fontName="TH Sarabun New" size="16" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ถึง]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="442" y="100" width="100" height="30" uuid="70bdd8cf-3d04-42fc-89f2-0e00ed95f21b"/>
+				<reportElement x="457" y="100" width="123" height="30" uuid="70bdd8cf-3d04-42fc-89f2-0e00ed95f21b"/>
 				<textElement>
 					<font fontName="TH Sarabun New" size="16" isBold="true"/>
 				</textElement>
@@ -159,13 +160,7 @@ GROUP BY
 					<property name="com.jaspersoft.studio.table.style.detail" value="Table_TD"/>
 				</reportElement>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
-					<datasetRun subDataset="appoint_account" uuid="a376e71b-2a88-4997-b071-f01f75031714">
-						<datasetParameter name="start_date">
-							<datasetParameterExpression><![CDATA[$P{start_date}]]></datasetParameterExpression>
-						</datasetParameter>
-						<datasetParameter name="end_date">
-							<datasetParameterExpression><![CDATA[$P{end_date}]]></datasetParameterExpression>
-						</datasetParameter>
+					<datasetRun subDataset="appoint_account" uuid="28532ca2-61b1-474b-9fc1-2a96f6e78177">
 						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 					</datasetRun>
 					<jr:column width="70" uuid="0110cbac-eab1-459a-b921-35c108cd1eda">
@@ -180,7 +175,7 @@ GROUP BY
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField isBlankWhenNull="true">
+							<textField>
 								<reportElement x="0" y="0" width="70" height="30" uuid="96f71b00-aa69-4b64-8815-ca1b27aa0237"/>
 								<box leftPadding="5"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -202,7 +197,7 @@ GROUP BY
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField isBlankWhenNull="true">
+							<textField>
 								<reportElement x="0" y="0" width="80" height="30" uuid="1b1fce05-9150-44a9-bb12-a138a45a9080"/>
 								<box leftPadding="5"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -224,7 +219,7 @@ GROUP BY
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField isBlankWhenNull="true">
+							<textField>
 								<reportElement x="0" y="0" width="90" height="30" uuid="be3f4cb9-3071-4e22-82dd-ceba0790e4f3"/>
 								<box leftPadding="5"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -246,13 +241,13 @@ GROUP BY
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField isBlankWhenNull="true">
+							<textField>
 								<reportElement x="0" y="0" width="120" height="30" uuid="8d077f40-e297-40e5-a58d-58095d791037"/>
 								<box leftPadding="5"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font fontName="TH Sarabun New" size="14"/>
 								</textElement>
-								<textFieldExpression><![CDATA[(($F{CHILD_PREFIX} != null) ? $F{CHILD_PREFIX} : "")  + (($F{CHILD_FIRSTNAME} != null ) ? $F{CHILD_FIRSTNAME} : "") + (($F{CHILD_LASTNAME} != null) ? $F{CHILD_LASTNAME} : "")]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{CHILD_PREFIX}  + $F{CHILD_FIRSTNAME} + $F{CHILD_LASTNAME}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -268,7 +263,7 @@ GROUP BY
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField isBlankWhenNull="true">
+							<textField>
 								<reportElement x="0" y="0" width="160" height="30" uuid="1140b607-422c-47be-b25d-3848d9ac8ca4"/>
 								<box leftPadding="10"/>
 								<textElement verticalAlignment="Middle">
@@ -286,11 +281,11 @@ GROUP BY
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font fontName="TH Sarabun New" size="14" isBold="true"/>
 								</textElement>
-								<text><![CDATA[เกี่ยวข้องเป็น]]></text>
+								<text><![CDATA[หมายเหตุ]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
-							<textField isBlankWhenNull="true">
+							<textField>
 								<reportElement x="0" y="0" width="99" height="30" uuid="781c4e08-7b62-4ed4-aa73-6fcdfd9c2046"/>
 								<box leftPadding="10"/>
 								<textElement verticalAlignment="Middle">

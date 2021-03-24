@@ -5,8 +5,8 @@
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/consulting/consulting_rpt_information_files/main_jrxml"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/consulting/consulting_rpt_information"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/consulting/consulting_rpt_information_files/main_jrxml"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#737373">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
@@ -37,11 +37,11 @@
 	<subDataset name="Dataset1" uuid="86cc6a70-bc86-4bff-923f-cc8e4976f24a">
 		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
-		<parameter name="CASEs_ID" class="java.lang.String">
-			<defaultValueExpression><![CDATA[11]]></defaultValueExpression>
+		<parameter name="CASE_ID" class="java.lang.String">
+			<defaultValueExpression><![CDATA["11"]]></defaultValueExpression>
 		</parameter>
-		<parameter name="CASEs_YEAR" class="java.lang.String">
-			<defaultValueExpression><![CDATA[2564]]></defaultValueExpression>
+		<parameter name="CASE_YEAR" class="java.lang.String">
+			<defaultValueExpression><![CDATA["2564"]]></defaultValueExpression>
 		</parameter>
 		<queryString language="SQL">
 			<![CDATA[SELECT
@@ -62,8 +62,8 @@ JOIN PC_ADVICE_EXT_EVAL pae ON
 LEFT JOIN PC_ADVICE_EXT_EVAL_ATTACHMENT paea ON
 	paea.EXT_EVAL_ID = pae.EXT_EVAL_ID
 WHERE
-	pa.CASE_ID =  $P{CASEs_ID} 
-	AND pa.CASE_YEAR =  $P{CASEs_YEAR} 
+	pa.CASE_ID =  $P{CASE_ID} 
+	AND pa.CASE_YEAR =  $P{CASE_YEAR} 
 	AND paea.REMOVED_BY = 0
 	AND pae.REMOVED_BY = 0
 GROUP BY
@@ -106,11 +106,11 @@ GROUP BY
 			<property name="com.jaspersoft.studio.field.label" value="file_list"/>
 		</field>
 	</subDataset>
-	<parameter name="CASEs_ID" class="java.lang.String">
-		<defaultValueExpression><![CDATA[11]]></defaultValueExpression>
+	<parameter name="CASE_ID" class="java.lang.String">
+		<defaultValueExpression><![CDATA["11"]]></defaultValueExpression>
 	</parameter>
-	<parameter name="CASEs_YEAR" class="java.lang.String">
-		<defaultValueExpression><![CDATA[2564]]></defaultValueExpression>
+	<parameter name="CASE_YEAR" class="java.lang.String">
+		<defaultValueExpression><![CDATA["2564"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[SELECT
@@ -122,8 +122,8 @@ FROM
 JOIN PC_ADVICE_EXT_EVAL pae ON
 	pae.ADVICE_EXT_ID = pa.ADVICE_EXT_ID
 WHERE
-	pa.CASE_ID =  $P{CASEs_ID} 
-	AND pa.CASE_YEAR =  $P{CASEs_YEAR} 
+	pa.CASE_ID =  $P{CASE_ID} 
+	AND pa.CASE_YEAR =  $P{CASE_YEAR} 
 	AND pae.REMOVED_BY = 0
 GROUP BY
 	pae.CONSULTANT_NAME ,
@@ -185,12 +185,12 @@ GROUP BY
 					<property name="com.jaspersoft.studio.table.style.detail" value="Table_TD"/>
 				</reportElement>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
-					<datasetRun subDataset="Dataset1" uuid="8c93e0e7-1aec-426f-b24c-1d9db538a9df">
-						<datasetParameter name="CASEs_ID">
-							<datasetParameterExpression><![CDATA[$P{CASEs_ID}]]></datasetParameterExpression>
+					<datasetRun subDataset="Dataset1" uuid="26e79a8a-6f8d-4656-8dc3-66d071bd23c8">
+						<datasetParameter name="CASE_ID">
+							<datasetParameterExpression><![CDATA[$P{CASE_ID}]]></datasetParameterExpression>
 						</datasetParameter>
-						<datasetParameter name="CASEs_YEAR">
-							<datasetParameterExpression><![CDATA[$P{CASEs_YEAR}]]></datasetParameterExpression>
+						<datasetParameter name="CASE_YEAR">
+							<datasetParameterExpression><![CDATA[$P{CASE_YEAR}]]></datasetParameterExpression>
 						</datasetParameter>
 						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 					</datasetRun>
@@ -203,7 +203,7 @@ GROUP BY
 								<textElement verticalAlignment="Middle">
 									<font fontName="THSarabunNew" size="14" isBold="true"/>
 								</textElement>
-								<textFieldExpression><![CDATA["ประวัติการประเมินเลขที่ ศป " + $P{CASEs_ID}+"/"+$P{CASEs_YEAR}]]></textFieldExpression>
+								<textFieldExpression><![CDATA["ประวัติการประเมินเลขที่ ศป " + $P{CASE_ID}+"/"+$P{CASE_YEAR}]]></textFieldExpression>
 							</textField>
 						</jr:tableHeader>
 						<jr:column width="60" uuid="a7c5bb58-1992-46b4-889a-e7524f75950e">
