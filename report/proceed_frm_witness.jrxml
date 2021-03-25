@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="proceed_frm_witness" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="474" leftMargin="65" rightMargin="56" topMargin="70" bottomMargin="45" uuid="7ea5f4e4-e512-4ffb-9bf7-cf2fd2c37890">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvncdb"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
@@ -16,8 +16,8 @@
 	<parameter name="CASE_ID" class="java.lang.Integer">
 		<defaultValueExpression><![CDATA[103]]></defaultValueExpression>
 	</parameter>
-	<parameter name="USER_NAME" class="java.lang.String">
-		<defaultValueExpression><![CDATA["Test Test"]]></defaultValueExpression>
+	<parameter name="USER_LOGIN_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[SELECT 
@@ -33,10 +33,10 @@
   THAINUMSTR(NVL(pc.PROS_DESC,' '))									          	CLAIMANT, 
   THAINUMSTR(NVL(pc.ACCU_DESC,' '))										        DEFENDANT,     
   --
-  NVL(pplw.WITNESS_NAME,' ')                                                      		REQUESTOR,  
+  (SELECT pup.USER_PROFILE_FULL_NAME FROM PC_USER_PROFILE pup WHERE pup.USER_ID = $P{USER_LOGIN_ID})   REQUESTOR,  
   --
   THAINUM(TO_CHAR(EXTRACT(DAY FROM SYSDATE)))							CASE_DAY,
- THAINUM(TO_CHAR(EXTRACT(MONTH FROM SYSDATE)))							CASE_MONTH,
+  THAINUM(TO_CHAR(EXTRACT(MONTH FROM SYSDATE)))							CASE_MONTH,
   THAINUM(TO_CHAR(EXTRACT(YEAR FROM SYSDATE)+543))							CASE_YEAR,
   --  
   pplw.WITNESS_NAME,
@@ -65,6 +65,7 @@ LEFT JOIN PC_LOOKUP_PROVINCE plp ON plp.PROVINCE_ID = pplw.ADDRESS_PROVINCE AND 
 LEFT JOIN PC_LOOKUP_DISTRICT pld ON pld.DISTRICT_ID = pplw.ADDRESS_DISTRICT AND pld.PROVINCE_ID = plp.PROVINCE_ID AND pld.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_SUBDISTRICT pls ON pls.SUBDISTRICT_ID = pplw.ADDRESS_SUB_DISTRICT AND pls.DISTRICT_ID = pld.DISTRICT_ID AND pls.PROVINCE_ID = plp.PROVINCE_ID AND pls.REMOVED_BY = 0
 --
+
 WHERE NVL(pplw.REMOVED_BY,0) = 0
 AND pplw.CASE_ID = $P{CASE_ID}
 AND pplw.ADDRESS_PROVINCE > 0]]>
@@ -451,7 +452,7 @@ AND pplw.ADDRESS_PROVINCE > 0]]>
 				<textElement>
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA["ข้าพเจ้า " + ( $P{USER_NAME} ==null?" ": $P{USER_NAME} )]]></textFieldExpression>
+				<textFieldExpression><![CDATA["ข้าพเจ้า " + $F{REQUESTOR}]]></textFieldExpression>
 			</textField>
 			<line>
 				<reportElement x="68" y="256" width="360" height="1" uuid="71def452-e461-436a-a608-6d9a7133a14d">
