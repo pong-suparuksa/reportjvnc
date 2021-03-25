@@ -25,7 +25,7 @@
 		<defaultValueExpression><![CDATA["14/07/2021"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="SEND_METHOD_ID" class="java.lang.Integer">
-		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA[2]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[SELECT 
@@ -45,8 +45,8 @@
             --
             NVL(pls.SUBDISTRICT_NAME,' ')														 	   SUBDISTRICT_NAME,
             NVL(pld.DISTRICT_NAME,' ')																   DISTRICT_NAME,
-            pn.SEND_FEE,																																	   
-		    NVL(pup.USER_PROFILE_FULL_NAME,' ')														   USER_PROFILE_FULL_NAME,
+            NVL( pn.SEND_FEE, 0)																	   SEND_FEE,									   
+		    NVL(pn.SEND_METHOD_BY_NAME,' ')														   USER_PROFILE_FULL_NAME,  
             NVL(plc1.COURT_NAME_TH,' ')                                                                 OTHER_COURT,
             pfr.RECEIPT_BOOK_NO || '/' || pfr.RECEIPT_NO                                                       RECEIPT_REF,
             THAISDATE(NVL(pnsr.CREATED_DATE,TO_TIMESTAMP('01/01/1900','DD/MM/YYYY')))                        RESULT_CREATE_DATE,
