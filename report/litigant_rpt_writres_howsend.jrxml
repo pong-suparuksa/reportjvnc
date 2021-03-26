@@ -11,17 +11,21 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.193:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_writres_howsend"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-229"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_writres_howsend_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/07/2020"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="END_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["14/07/2020"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["14/07/2021"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SEND_METHOD_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[2]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[SELECT 
@@ -29,26 +33,27 @@
 			THAILDATE(NVL(pni.SEND_NOTICE_DATE,CURRENT_DATE))                                                SEND_NOTICE_DATE_TEXT,
 			THAISDATE(NVL(pnsr.CREATED_DATE,TO_TIMESTAMP('01/01/1900','DD/MM/YYYY')))                        SEND_NOTICE_SDATE,
             --
-            NVL(plc.COURT_NAME_TH, ' ') 	     													       COURT_NAME_TH,                        
+            NVL(plc.COURT_NAME_TH, ' ') 	     													       COURT_NAME_TH,
+            NVL(plsm.SEND_METHOD_NAME, ' ')																   SEND_METHOD_NAME,
             NVL(pltc_b.TITLE_CASE_CODE,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR)     CASE_BLACK_NO,    
             NVL(pltc_r.TITLE_CASE_CODE,' ')  || TO_CHAR(pj.RED_IDNUM) || '/' || TO_CHAR(pj.RED_YEAR)  		   CASE_RED_NO,
             NVL(pc.PROS_DESC,' ')	      													       CLAIMANT, 
             NVL(pc.ACCU_DESC,' ')		   												  		   DEFENDANT,
-            NVL(pfr.PAYER_NAME,' ')																	   PAYER_NAME,
-  		    pnld.TO_NAME,
+            NVL(pfr.PAYER_NAME,' ')																	   PAYER_NAME,            
+            NVL(pn.LITIGANT_NAME, ' ' )																   TO_NAME,
             NVL(plnt.NOTICE_TYPE_NAME,' ')															   NOTICE_TYPE_NAME,            
             --
             NVL(pls.SUBDISTRICT_NAME,' ')														 	   SUBDISTRICT_NAME,
             NVL(pld.DISTRICT_NAME,' ')																   DISTRICT_NAME,
-            pn.SEND_FEE,																																	   
-		    NVL(pup.USER_PROFILE_FULL_NAME,' ')														   USER_PROFILE_FULL_NAME,
+            NVL( pn.SEND_FEE, 0)																	   SEND_FEE,									   
+		    NVL(pn.SEND_METHOD_BY_NAME,' ')														   USER_PROFILE_FULL_NAME,  
             NVL(plc1.COURT_NAME_TH,' ')                                                                 OTHER_COURT,
             pfr.RECEIPT_BOOK_NO || '/' || pfr.RECEIPT_NO                                                       RECEIPT_REF,
             THAISDATE(NVL(pnsr.CREATED_DATE,TO_TIMESTAMP('01/01/1900','DD/MM/YYYY')))                        RESULT_CREATE_DATE,
             NVL(pnsr.RESULT_DETAIL,' ')                                                                 RESULT_DETAIL
-FROM PC_NOTICE_LIT_DETAIL  pnld
-LEFT JOIN PC_NOTICE pn ON pn.NOTICE_ID = pnld.NOTICE_ID
-LEFT JOIN PC_NOTICE_SEND_RESULT pnsr ON pnsr.NOTICE_ID = pnld.NOTICE_ID 
+
+FROM PC_NOTICE pn 
+LEFT JOIN PC_NOTICE_SEND_RESULT pnsr ON pnsr.NOTICE_ID = pn.NOTICE_ID 
 --
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID
 LEFT JOIN PC_NOTICE_ISSUED pni ON pni.NOTICE_ID = pn.NOTICE_ID
@@ -67,10 +72,13 @@ LEFT JOIN PC_LOOKUP_NOTICE_TYPE plnt ON plnt.NOTICE_TYPE_ID = pn.NOTICE_TYPE_ID 
 --
 LEFT JOIN PC_LOOKUP_DISTRICT pld ON pld.DISTRICT_ID =  pn.CURRENT_DISTRICT_ID AND pld.PROVINCE_ID = pn.CURRENT_PROVINCE_ID 
 LEFT JOIN PC_LOOKUP_SUBDISTRICT pls ON pls.SUBDISTRICT_ID = pn.CURRENT_SUBDISTRICT_ID AND  pls.DISTRICT_ID =  pn.CURRENT_DISTRICT_ID AND pls.PROVINCE_ID = pn.CURRENT_PROVINCE_ID
+--
+JOIN PC_LOOKUP_SEND_METHOD plsm ON plsm.SEND_METHOD_ID = pn.SEND_METHOD
 
-WHERE pn.SEND_METHOD = 2
+WHERE pn.SEND_METHOD =   $P{SEND_METHOD_ID} 
 AND NVL(pni.HAS_MONEY,1) = 1
 AND pn.IS_COURT_AREA = 0
+AND pn.REMOVED_BY = 0
 AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
                               AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')]]>
 	</queryString>
@@ -101,9 +109,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 	<field name="PAYER_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="PAYER_NAME"/>
 	</field>
-	<field name="TO_NAME" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="TO_NAME"/>
-	</field>
+	<field name="TO_NAME" class="java.lang.String"/>
 	<field name="NOTICE_TYPE_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="NOTICE_TYPE_NAME"/>
 	</field>
@@ -131,6 +137,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 	<field name="RESULT_DETAIL" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="RESULT_DETAIL"/>
 	</field>
+	<field name="SEND_METHOD_NAME" class="java.lang.String"/>
 	<variable name="TOTAL" class="java.math.BigDecimal" calculation="Sum">
 		<variableExpression><![CDATA[$F{SEND_FEE}]]></variableExpression>
 	</variable>
@@ -138,21 +145,21 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 		<band splitType="Stretch"/>
 	</background>
 	<pageHeader>
-		<band height="70" splitType="Stretch">
+		<band height="71" splitType="Stretch">
 			<textField>
-				<reportElement x="291" y="0" width="220" height="30" uuid="1f35dd4b-0652-418f-b53f-610e8cc42925"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="18"/>
+				<reportElement x="180" y="0" width="400" height="30" uuid="1f35dd4b-0652-418f-b53f-610e8cc42925"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}==null?" ":$F{COURT_NAME_TH}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="0" y="30" width="250" height="30" uuid="a5e8e65b-3887-4ab8-b52d-a3552931ae0d"/>
+				<reportElement x="0" y="30" width="130" height="30" uuid="a5e8e65b-3887-4ab8-b52d-a3552931ae0d"/>
 				<box leftPadding="3"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="18" isBold="true"/>
 				</textElement>
-				<text><![CDATA[บัญชีรายงานผลหมาย ตามประเภทการส่ง]]></text>
+				<text><![CDATA[บัญชีรายงานผลหมาย]]></text>
 			</staticText>
 			<textField>
 				<reportElement x="204" y="40" width="394" height="30" uuid="9eeb3e7b-d927-471d-b8bc-01042b2a17f0"/>
@@ -162,12 +169,19 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				</textElement>
 				<textFieldExpression><![CDATA[new SimpleDateFormat("ตั้งแต่วันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{START_DATE})) + new SimpleDateFormat(" ถึงวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
+			<textField>
+				<reportElement x="130" y="30" width="120" height="30" uuid="7bcd4b40-c020-4376-95d3-9516fcc4229a"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SEND_METHOD_NAME}==null?" ": "ส่งโดย" + $F{SEND_METHOD_NAME}]]></textFieldExpression>
+			</textField>
 		</band>
 	</pageHeader>
 	<columnHeader>
 		<band height="25" splitType="Stretch">
 			<staticText>
-				<reportElement x="40" y="0" width="70" height="25" uuid="45cf3754-107c-4c52-958d-8d4299a12e75">
+				<reportElement x="40" y="0" width="80" height="25" uuid="45cf3754-107c-4c52-958d-8d4299a12e75">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e9edaf2-10e0-4218-afbf-20e85ac4711c"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -181,7 +195,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[วันที่รายงาน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="110" y="0" width="70" height="25" uuid="df2325a7-209b-407e-ba24-1e4852e78157">
+				<reportElement x="120" y="0" width="70" height="25" uuid="df2325a7-209b-407e-ba24-1e4852e78157">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="291abfc0-527b-48ec-91a8-7383610d36fc"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -195,7 +209,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[เลขดำที่]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="180" y="0" width="70" height="25" uuid="1af7f772-1dea-4d68-8a4b-fb136dfb6cb5">
+				<reportElement x="190" y="0" width="70" height="25" uuid="1af7f772-1dea-4d68-8a4b-fb136dfb6cb5">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="159e45cd-fc70-464b-bd09-becf96878484"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -209,7 +223,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[เลขแดงที่]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="250" y="0" width="118" height="25" uuid="47ffbfb0-31df-4549-8f29-0358e816bf79">
+				<reportElement x="260" y="0" width="148" height="25" uuid="47ffbfb0-31df-4549-8f29-0358e816bf79">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="95f19c7c-e373-48df-9fda-6aa82a04a551"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -222,7 +236,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[ส่งหมายให้ใคร]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="368" y="0" width="70" height="25" uuid="f11240ab-78d5-4af3-a70c-3062eeba007a">
+				<reportElement x="408" y="0" width="90" height="25" uuid="f11240ab-78d5-4af3-a70c-3062eeba007a">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6f23f229-c6e1-4962-b900-471fd0626741"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -236,7 +250,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[วันที่ส่งหมาย]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="438" y="0" width="120" height="25" uuid="7261fc4a-5f7f-4bd0-a137-950499ad88ab">
+				<reportElement x="498" y="0" width="120" height="25" uuid="7261fc4a-5f7f-4bd0-a137-950499ad88ab">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="af57a209-ffa7-4d46-a893-cb60b37f87dc"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -249,7 +263,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[ผลการส่งหมาย]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="558" y="0" width="60" height="25" uuid="29c86b98-81a9-41c2-baf9-c6b83706540d">
+				<reportElement x="618" y="0" width="80" height="25" uuid="29c86b98-81a9-41c2-baf9-c6b83706540d">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="05350697-e4aa-4dc6-9f6d-e22a5492ba77"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -262,21 +276,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[ราคาหมาย]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="618" y="0" width="95" height="25" uuid="7326bef8-de53-4011-8caf-2724bb37e7e0">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="edaca40f-8733-4c95-bf41-7272618028ab"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<box>
-					<pen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
-				</textElement>
-				<text><![CDATA[ดำเนินการต่ออย่างไร]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="713" y="0" width="89" height="25" uuid="71ba1c16-550c-4a95-bb60-ff21f5b637d9">
+				<reportElement x="698" y="0" width="104" height="25" uuid="71ba1c16-550c-4a95-bb60-ff21f5b637d9">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9c8967e8-3ec3-47f6-b1f8-73399fb65791"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -307,7 +307,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 	<detail>
 		<band height="25" splitType="Stretch">
 			<textField>
-				<reportElement x="40" y="0" width="70" height="25" uuid="6a2488f3-b4ee-45a6-bbd3-e99d55f40e6b">
+				<reportElement x="40" y="0" width="80" height="25" uuid="6a2488f3-b4ee-45a6-bbd3-e99d55f40e6b">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e9edaf2-10e0-4218-afbf-20e85ac4711c"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -321,7 +321,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<textFieldExpression><![CDATA[$F{RESULT_CREATE_DATE}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="110" y="0" width="70" height="25" uuid="8ae2f465-399f-45a1-9a91-578b5cf30aa4">
+				<reportElement x="120" y="0" width="70" height="25" uuid="8ae2f465-399f-45a1-9a91-578b5cf30aa4">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="291abfc0-527b-48ec-91a8-7383610d36fc"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -335,7 +335,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="180" y="0" width="70" height="25" uuid="a5c859f4-f206-478e-81ab-9db9d20178db">
+				<reportElement x="190" y="0" width="70" height="25" uuid="a5c859f4-f206-478e-81ab-9db9d20178db">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="159e45cd-fc70-464b-bd09-becf96878484"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -349,20 +349,20 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<textFieldExpression><![CDATA[$F{CASE_RED_NO}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="250" y="0" width="118" height="25" uuid="5ab743e0-01a5-481b-899c-6e1e3a3231d1">
+				<reportElement x="260" y="0" width="148" height="25" uuid="5ab743e0-01a5-481b-899c-6e1e3a3231d1">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="95f19c7c-e373-48df-9fda-6aa82a04a551"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{TO_NAME}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="368" y="0" width="70" height="25" uuid="2a831ad4-5bbe-41c9-8e23-07c81e7f92a3">
+				<reportElement x="408" y="0" width="90" height="25" uuid="2a831ad4-5bbe-41c9-8e23-07c81e7f92a3">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6f23f229-c6e1-4962-b900-471fd0626741"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -376,54 +376,40 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<textFieldExpression><![CDATA[$F{SEND_NOTICE_SDATE}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="438" y="0" width="120" height="25" uuid="98440980-09a3-4357-bfb9-efdf29d8bd11">
+				<reportElement x="498" y="0" width="120" height="25" uuid="98440980-09a3-4357-bfb9-efdf29d8bd11">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="af57a209-ffa7-4d46-a893-cb60b37f87dc"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RESULT_DETAIL}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="558" y="0" width="60" height="25" uuid="663ed596-4a96-419c-b40d-91f123ee1a76">
+				<reportElement x="618" y="0" width="80" height="25" uuid="663ed596-4a96-419c-b40d-91f123ee1a76">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="05350697-e4aa-4dc6-9f6d-e22a5492ba77"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<box rightPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Right" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format($F{SEND_FEE})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="618" y="0" width="95" height="25" uuid="73df1564-57e2-43cf-a2fa-9c4bd9b409c1">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="edaca40f-8733-4c95-bf41-7272618028ab"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<box leftPadding="3">
-					<pen lineWidth="0.5"/>
-				</box>
-				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
-				</textElement>
-				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="713" y="0" width="89" height="25" uuid="8fd4cce9-0e13-4d34-b316-9edbe8fd12a5">
+				<reportElement x="698" y="0" width="104" height="25" uuid="8fd4cce9-0e13-4d34-b316-9edbe8fd12a5">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9c8967e8-3ec3-47f6-b1f8-73399fb65791"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{USER_PROFILE_FULL_NAME}]]></textFieldExpression>
