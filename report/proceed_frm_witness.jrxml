@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="proceed_frm_witness" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="474" leftMargin="65" rightMargin="56" topMargin="70" bottomMargin="45" uuid="7ea5f4e4-e512-4ffb-9bf7-cf2fd2c37890">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-229"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_frm_witness"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="621"/>
@@ -22,21 +22,23 @@
 	<queryString>
 		<![CDATA[SELECT 
   THAINUM(ROW_NUMBER() OVER (ORDER BY pplw.CASE_ID)) RNUM,
-  pplw.CASE_ID, 
-  
+  pplw.CASE_ID,   
   NVL(pltc_b.TITLE_CASE_NAME,' ') ||  THAINUM(TO_CHAR(pc.BLACK_IDNUM)) || '/' || THAINUM(TO_CHAR(pc.BLACK_YEAR))  CASE_BLACK_NO,    
   CASE WHEN pj.RED_IDNUM IS NULL THEN ' '
        ELSE NVL(pltc_r.TITLE_CASE_NAME,' ')  || THAINUM(TO_CHAR(pj.RED_IDNUM)) || '/' || THAINUM(TO_CHAR(pj.RED_YEAR))  END	CASE_RED_NO,
   NVL(plc.COURT_NAME_TH,' ')															    COURT_NAME_TH,
-  NVL(plct.CASE_TYPE_NAME,' ')                                                           CASE_TYPE_NAME,
-  --  
+  NVL(plct.CASE_TYPE_NAME,' ')                                                          CASE_TYPE_NAME,  --  
   THAINUMSTR(NVL(pc.PROS_DESC,' '))									          	CLAIMANT, 
   THAINUMSTR(NVL(pc.ACCU_DESC,' '))										        DEFENDANT,     
   --
   (SELECT pup.USER_PROFILE_FULL_NAME FROM PC_USER_PROFILE pup WHERE pup.USER_ID = $P{USER_LOGIN_ID})   REQUESTOR,  
   --
-  THAINUM(TO_CHAR(EXTRACT(DAY FROM SYSDATE)))							CASE_DAY,
-  THAINUM(TO_CHAR(EXTRACT(MONTH FROM SYSDATE)))							CASE_MONTH,
+  THAINUM(TO_CHAR(EXTRACT(DAY FROM SYSDATE)))							CASE_DAY,  					
+   DECODE(SUBSTR(TO_CHAR(EXTRACT(MONTH FROM SYSDATE)),1,2), 
+       	       '1', 'มกราคม', '2', 'กุมภาพันธ์', '3', 'มีนาคม', 
+               '4', 'เมษายน', '5', 'พฤษภาคม', '6', 'มิถุนายน',  
+               '7','กรกฎาคม', '8', 'สิงหาคม',  '9', 'กันยายน', 
+               '10', 'ตุลาคม',  '11', 'พฤศจิกายน','12', 'ธันวาคม', '-')            CASE_MONTH,
   THAINUM(TO_CHAR(EXTRACT(YEAR FROM SYSDATE)+543))							CASE_YEAR,
   --  
   pplw.WITNESS_NAME,
@@ -47,8 +49,7 @@
   THAINUMSTR(NVL(pls.SUBDISTRICT_NAME,' '))										 			SUBDISTRICT_NAME,
   THAiNUMSTR(NVL(pld.DISTRICT_NAME,' '))													    DISTRICT_NAME,
   THAINUMSTR(NVL(plp.PROVINCE_NAME,' '))													PROVINCE_NAME,
-  THAINUMSTR(NVL(pplw.ADDRESS_POST_CODE,' '))											ADDRESS_POST_CODE
-  
+  THAINUMSTR(NVL(pplw.ADDRESS_POST_CODE,' '))											ADDRESS_POST_CODE  
 FROM PC_PROCEED_LOG_WITNESS pplw 
 --
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pplw.CASE_ID AND pc.REMOVED_BY = 0
@@ -65,7 +66,6 @@ LEFT JOIN PC_LOOKUP_PROVINCE plp ON plp.PROVINCE_ID = pplw.ADDRESS_PROVINCE AND 
 LEFT JOIN PC_LOOKUP_DISTRICT pld ON pld.DISTRICT_ID = pplw.ADDRESS_DISTRICT AND pld.PROVINCE_ID = plp.PROVINCE_ID AND pld.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_SUBDISTRICT pls ON pls.SUBDISTRICT_ID = pplw.ADDRESS_SUB_DISTRICT AND pls.DISTRICT_ID = pld.DISTRICT_ID AND pls.PROVINCE_ID = plp.PROVINCE_ID AND pls.REMOVED_BY = 0
 --
-
 WHERE NVL(pplw.REMOVED_BY,0) = 0
 AND pplw.CASE_ID = $P{CASE_ID}
 AND pplw.ADDRESS_PROVINCE > 0]]>
@@ -153,7 +153,7 @@ AND pplw.ADDRESS_PROVINCE > 0]]>
 				<reportElement x="342" y="108" width="43" height="25" uuid="3a0c9cbc-f3ee-4ba9-8cd9-a3ed0df4f8a5">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
-				<textElement>
+				<textElement textAlignment="Center">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_YEAR}==null?" ":$F{CASE_YEAR}]]></textFieldExpression>
@@ -270,11 +270,11 @@ AND pplw.ADDRESS_PROVINCE > 0]]>
 				<textFieldExpression><![CDATA[$F{CLAIMANT}==null?" ":$F{CLAIMANT}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="219" y="108" width="20" height="25" uuid="3ffa8083-34d0-47dc-b220-029edc2b4fc5">
+				<reportElement x="210" y="108" width="29" height="25" uuid="3ffa8083-34d0-47dc-b220-029edc2b4fc5">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
-				<textElement>
+				<textElement textAlignment="Center">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_DAY}==null?" ":$F{CASE_DAY}]]></textFieldExpression>
@@ -284,7 +284,7 @@ AND pplw.ADDRESS_PROVINCE > 0]]>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
-				<textElement>
+				<textElement textAlignment="Center">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_MONTH}==null?" ":$F{CASE_MONTH}]]></textFieldExpression>
@@ -341,14 +341,6 @@ AND pplw.ADDRESS_PROVINCE > 0]]>
 				<reportElement x="59" y="183" width="50" height="50" uuid="37f7c55b-35de-4a96-964c-36f26086d8c2"/>
 				<imageExpression><![CDATA["/images/peakka.jpg"]]></imageExpression>
 			</image>
-			<line>
-				<reportElement x="250" y="160" width="61" height="2" uuid="53d3af01-2dcc-4900-896f-3add6a1d58be">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<graphicElement>
-					<pen lineStyle="Dotted"/>
-				</graphicElement>
-			</line>
 			<line>
 				<reportElement x="255" y="99" width="200" height="1" uuid="3e5d0b5c-b556-4a54-8569-09f971d61534">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -438,7 +430,7 @@ AND pplw.ADDRESS_PROVINCE > 0]]>
 				<text><![CDATA[พ.ศ. ]]></text>
 			</staticText>
 			<line>
-				<reportElement x="216" y="125" width="20" height="1" uuid="5e0d9319-b645-4648-b779-2bc81399518e"/>
+				<reportElement x="214" y="125" width="20" height="1" uuid="5e0d9319-b645-4648-b779-2bc81399518e"/>
 				<graphicElement>
 					<pen lineStyle="Dotted"/>
 				</graphicElement>

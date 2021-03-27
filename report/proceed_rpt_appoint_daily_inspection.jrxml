@@ -18,6 +18,7 @@
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="315"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="680"/>
 	<property name="com.jaspersoft.studio.report.description" value=""/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_daily_inspection_files/main_jrxml"/>
 	<parameter name="SELECT_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["03/03/2021"]]></defaultValueExpression>
 	</parameter>
@@ -90,12 +91,12 @@
 	LEFT JOIN PC_LOOKUP_LEVEL_ROOM pllr ON pllr.LEVEL_ROOM_ID = PCPAC.LEVEL_ROOM_CODE AND pllr.REMOVED_BY = 0
 	--
 	LEFT JOIN (
-	  SELECT PCPACN.APPOINT_ID ,PCPACN.START_DATE AS  APPOINT_NEXT_DATE, PCLARN.APPOINT_REASON_NAME AS  APPOINT_NEXT_REASON 
+	  SELECT PCPACN.APPOINT_ID ,PCPACN.START_DATE AS  APPOINT_NEXT_DATE, PCLARN.APPOINT_REASON_NAME AS  APPOINT_NEXT_REASON ,ROW_NUMBER() OVER (PARTITION BY PCPACN.APPOINT_ID ORDER BY PCPACN.START_DATE DESC) AS rn
 	  FROM PC_PROCEED_APPOINT_CONTINUE PCPACN 	
 	  LEFT JOIN PC_LOOKUP_APPOINT_REASON PCLARN ON PCPACN.REASON_APPOINT_ID = PCLARN.APPOINT_REASON_ID
-	  WHERE PCPACN.START_DATE > TO_DATE('3/03/2021'||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS') AND PCPACN.REMOVED_BY = 0 
-	  FETCH FIRST 1 ROWS ONLY	  
-	  ) PCPACNT ON PCPACNT.APPOINT_ID = PCPA.APPOINT_ID 
+	  WHERE PCPACN.START_DATE > TO_DATE($P{SELECT_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS') AND PCPACN.REMOVED_BY = 0 
+	  --FETCH FIRST 1 ROWS ONLY	  
+	  ) PCPACNT ON PCPACNT.APPOINT_ID = PCPA.APPOINT_ID AND PCPACNT.rn = 1
 	  --
 	WHERE PCPA.REMOVED_BY = 0 AND PCC.CASE_ID IS NOT NULL 
 	AND PCPAC.START_DATE = TO_DATE($P{SELECT_DATE} ||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS')
@@ -393,7 +394,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="13"/>
 				</textElement>
-				<text><![CDATA[นัดครั้งต่อไป(ท่ามี)]]></text>
+				<text><![CDATA[นัดครั้งต่อไป(ถ้ามี)]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="640" y="25" width="30" height="15" uuid="16e19e8e-ad79-42f0-9d99-2eebf82d7f4a">
@@ -423,8 +424,7 @@
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="30" splitType="Stretch">
-			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+		<band height="25" splitType="Stretch">
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="20" y="0" width="40" height="25" uuid="55947d8f-bccd-4fee-b2b7-080276e39e3a">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="0df4c989-280c-45b6-be6c-8352e41243bd"/>
