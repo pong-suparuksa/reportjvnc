@@ -11,7 +11,7 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_writres_howsend"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -31,7 +31,7 @@
 		<![CDATA[SELECT 
 			pni.SEND_NOTICE_DATE,
 			THAILDATE(NVL(pni.SEND_NOTICE_DATE,CURRENT_DATE))                                                SEND_NOTICE_DATE_TEXT,
-			THAISDATE(NVL(pnsr.CREATED_DATE,TO_TIMESTAMP('01/01/1900','DD/MM/YYYY')))                        SEND_NOTICE_SDATE,
+			THAISDATE(NVL(pnsr.SEND_NOTICE_DATE,TO_TIMESTAMP('01/01/1900','DD/MM/YYYY')))                        SEND_NOTICE_SDATE,
             --
             NVL(plc.COURT_NAME_TH, ' ') 	     													       COURT_NAME_TH,
             NVL(plsm.SEND_METHOD_NAME, ' ')																   SEND_METHOD_NAME,
@@ -50,7 +50,9 @@
             NVL(plc1.COURT_NAME_TH,' ')                                                                 OTHER_COURT,
             pfr.RECEIPT_BOOK_NO || '/' || pfr.RECEIPT_NO                                                       RECEIPT_REF,
             THAISDATE(NVL(pnsr.CREATED_DATE,TO_TIMESTAMP('01/01/1900','DD/MM/YYYY')))                        RESULT_CREATE_DATE,
-            NVL(pnsr.RESULT_DETAIL,' ')                                                                 RESULT_DETAIL
+            NVL(pnsr.RESULT_DETAIL,' ')                                                                 RESULT_DETAIL,
+            NVL(plnsr.NOTICE_SEND_RESULT_NAME, ' ')														NOTICE_SEND_RESULT_NAME,
+            NVL(pn.UNSEND_DETAIL, ' ')																	UNSEND_DETAIL
 
 FROM PC_NOTICE pn 
 LEFT JOIN PC_NOTICE_SEND_RESULT pnsr ON pnsr.NOTICE_ID = pn.NOTICE_ID 
@@ -73,7 +75,8 @@ LEFT JOIN PC_LOOKUP_NOTICE_TYPE plnt ON plnt.NOTICE_TYPE_ID = pn.NOTICE_TYPE_ID 
 LEFT JOIN PC_LOOKUP_DISTRICT pld ON pld.DISTRICT_ID =  pn.CURRENT_DISTRICT_ID AND pld.PROVINCE_ID = pn.CURRENT_PROVINCE_ID 
 LEFT JOIN PC_LOOKUP_SUBDISTRICT pls ON pls.SUBDISTRICT_ID = pn.CURRENT_SUBDISTRICT_ID AND  pls.DISTRICT_ID =  pn.CURRENT_DISTRICT_ID AND pls.PROVINCE_ID = pn.CURRENT_PROVINCE_ID
 --
-JOIN PC_LOOKUP_SEND_METHOD plsm ON plsm.SEND_METHOD_ID = pn.SEND_METHOD
+LEFT JOIN PC_LOOKUP_SEND_METHOD plsm ON plsm.SEND_METHOD_ID = pn.SEND_METHOD
+LEFT JOIN PC_LOOKUP_NOTICE_SEND_RESULT plnsr ON plnsr.NOTICE_SEND_RESULT_ID = pnsr.POST_SEND_RESULT
 
 WHERE pn.SEND_METHOD =   $P{SEND_METHOD_ID} 
 AND NVL(pni.HAS_MONEY,1) = 1
@@ -138,6 +141,8 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 		<property name="com.jaspersoft.studio.field.label" value="RESULT_DETAIL"/>
 	</field>
 	<field name="SEND_METHOD_NAME" class="java.lang.String"/>
+	<field name="NOTICE_SEND_RESULT_NAME" class="java.lang.String"/>
+	<field name="UNSEND_DETAIL" class="java.lang.String"/>
 	<variable name="TOTAL" class="java.math.BigDecimal" calculation="Sum">
 		<variableExpression><![CDATA[$F{SEND_FEE}]]></variableExpression>
 	</variable>
@@ -386,7 +391,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{RESULT_DETAIL}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{NOTICE_SEND_RESULT_NAME}  + " " + $F{UNSEND_DETAIL}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="618" y="0" width="80" height="25" uuid="663ed596-4a96-419c-b40d-91f123ee1a76">

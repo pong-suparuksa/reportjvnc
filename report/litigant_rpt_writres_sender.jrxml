@@ -11,7 +11,7 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_writres_sender"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -37,7 +37,8 @@
        pnsr.SEND_NOTICE_DATE,
        plnsr.NOTICE_SEND_RESULT_NAME,
        pn.SEND_FEE,
-       NVL(pup.USER_PROFILE_FULL_NAME,' ')	SENDER
+       NVL(pn.SEND_METHOD_BY_NAME,' ')	SENDER,
+       NVL(pn.UNSEND_DETAIL, ' ')		UNSEND_DETAIL
 	   
 FROM PC_NOTICE_SEND_RESULT pnsr
 LEFT JOIN PC_NOTICE pn ON pn.NOTICE_ID = pnsr.NOTICE_ID AND pn.REMOVED_BY = 0
@@ -89,6 +90,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 	<field name="SENDER" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="SENDER"/>
 	</field>
+	<field name="UNSEND_DETAIL" class="java.lang.String"/>
 	<variable name="TOTAL" class="java.math.BigDecimal" calculation="Sum">
 		<variableExpression><![CDATA[$F{SEND_FEE}]]></variableExpression>
 	</variable>
@@ -345,7 +347,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 				<textElement verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{NOTICE_SEND_RESULT_NAME}==null?" ":$F{NOTICE_SEND_RESULT_NAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{NOTICE_SEND_RESULT_NAME}==null?" ":$F{NOTICE_SEND_RESULT_NAME} + $F{UNSEND_DETAIL}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="542" y="0" width="60" height="25" uuid="663ed596-4a96-419c-b40d-91f123ee1a76">
