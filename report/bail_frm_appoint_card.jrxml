@@ -2,13 +2,13 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="bail_frm_appoint_card" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="248696da-e316-4045-b151-e000833ed836">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.193:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/bail_frm_appoint_card"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="CojDB[193]"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="249"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="746"/>
 	<property name="com.jaspersoft.studio.report.description" value="32.บัตรนัดประกัน"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/bail_frm_appoint_card_files/main_jrxml"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
 		<box>
@@ -62,57 +62,42 @@
 			<groupExpression><![CDATA[$F{APPOINT_REASON}]]></groupExpression>
 		</group>
 	</subDataset>
-	<parameter name="BAIL_ID" class="java.lang.Integer">
-		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+	<parameter name="CASE_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[81]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT DISTINCT
-THAILDATE(pb.BAIL_DATE), dbms_lob.substr( pb.BAIL_NOTES, 4000, 1) BAIL_NOTES,
-pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR  BLACK_CASE_NO,
-pltc_red.TITLE_CASE_NAME || pj.RED_IDNUM || '/' || pj.RED_YEAR  RED_CASE_NO,
-plgt.GUAR_TITLE_NAME || pb.BAIL_CODE_NO || '/' || pb.BAIL_CODE_YEAR BAIL_CASE_NO,
-plt.TITLE_NAME || pbb.NAME || ' ' || pbb.LASTNAME BAILMAN_NAME,
-plc.COURT_NAME_TH, pc.PROS_DESC, pc.ACCU_DESC, pc.ALLE_DESC
+		<![CDATA[SELECT
+	NVL(cou.COURT_NAME_TH, '') COURT_NAME_TH, 
+	NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR)  BLACK_CASE_NO ,
+	NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || CASE WHEN pj.RED_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pj.RED_YEAR)     RED_CASE_NO ,
+	pc.PROS_DESC ,
+    pc.ACCU_DESC ,
+    pc.ALLE_DESC 
+FROM PC_CASE pc 
 
-FROM PC_BAIL_SEC pbs
---
-LEFT JOIN PC_BAIL_SEC_TYPE pbst ON pbst.SEC_TYPE_ID = pbs.SEC_TYPE_ID AND pbst.REMOVED_BY = 0
-LEFT JOIN PC_BAIL pb ON pb.BAIL_ID = pbs.BAIL_ID AND pb.REMOVED_BY = 0
-LEFT JOIN PC_BAIL_DETAIL pbd ON pbd.BAIL_ID = pb.BAIL_ID AND pbd.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_GUAR_TITLE plgt ON plgt.GUAR_TITLE_ID = pb.BAIL_TITLE_ID AND plgt.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pb.COURT_ID AND plc.REMOVED_BY = 0
---
-LEFT JOIN PC_BAIL_SEC_BAILSMAN pbsb ON pbsb.SEC_ID = pbs.SEC_ID AND pbsb.REMOVED_BY = 0
-LEFT JOIN PC_BAIL_BAILSMAN pbb ON pbb.BAILSMAN_ID = pbsb.BAILSMAN_ID AND pbb.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_TITLE plt ON plt.TITLE_ID = pbb.NAME_TITLE_ID AND plt.REMOVED_BY = 0
---
-LEFT JOIN PC_CASE pc ON pc.CASE_ID = pb.CASE_ID AND pc.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc.REMOVED_BY = 0
-LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_red ON pltc_red.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_red.REMOVED_BY = 0
---
-WHERE pb.bail_id = $P{BAIL_ID} AND pc.REMOVED_BY = 0]]>
+LEFT JOIN PC_JUDGEMENT pj ON
+	pj.CASE_ID = pc.CASE_ID	AND pj.REMOVED_BY = 0
+-- เลขคดีแดง
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON
+	pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
+-- เลขคดีดำ
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON
+	pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID 	AND pltc_r.REMOVED_BY = 0
+--ชื่อศาล
+CROSS JOIN (SELECT plc.COURT_NAME_TH
+             FROM PC_PARAM pp
+             JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+             WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
+WHERE pc.CASE_ID = $P{CASE_ID} AND pc.REMOVED_BY = 0]]>
 	</queryString>
-	<field name="THAILDATE(PB.BAIL_DATE)" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="THAILDATE(PB.BAIL_DATE)"/>
-	</field>
-	<field name="BAIL_NOTES" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="BAIL_NOTES"/>
+	<field name="COURT_NAME_TH" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
 	</field>
 	<field name="BLACK_CASE_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="BLACK_CASE_NO"/>
 	</field>
 	<field name="RED_CASE_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="RED_CASE_NO"/>
-	</field>
-	<field name="BAIL_CASE_NO" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="BAIL_CASE_NO"/>
-	</field>
-	<field name="BAILMAN_NAME" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="BAILMAN_NAME"/>
-	</field>
-	<field name="COURT_NAME_TH" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
 	</field>
 	<field name="PROS_DESC" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="PROS_DESC"/>
@@ -127,45 +112,27 @@ WHERE pb.bail_id = $P{BAIL_ID} AND pc.REMOVED_BY = 0]]>
 		<band splitType="Stretch"/>
 	</background>
 	<detail>
-		<band height="538" splitType="Stretch">
-			<rectangle>
-				<reportElement x="-1" y="374" width="556" height="161" uuid="ff4c551f-b405-46ca-950b-3d30e81167b3"/>
-				<graphicElement>
-					<pen lineWidth="0.5"/>
-				</graphicElement>
-			</rectangle>
-			<rectangle>
-				<reportElement x="0" y="274" width="556" height="89" uuid="e37ce0e3-6208-4cc6-a0b6-3f59ce590b53"/>
-				<graphicElement>
-					<pen lineWidth="0.5"/>
-				</graphicElement>
-			</rectangle>
-			<rectangle>
-				<reportElement x="-1" y="0" width="283" height="270" uuid="e4f55389-c157-4f67-946c-e7cc947794e4"/>
-				<graphicElement>
-					<pen lineWidth="0.5"/>
-				</graphicElement>
-			</rectangle>
+		<band height="555" splitType="Stretch">
 			<textField>
-				<reportElement x="1" y="6" width="279" height="25" uuid="dbe16ff2-e492-473b-8958-afdea60a143d">
+				<reportElement x="2" y="25" width="279" height="18" uuid="dbe16ff2-e492-473b-8958-afdea60a143d">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
-				<textElement textAlignment="Center">
-					<font fontName="TH Sarabun New" size="16" isBold="true"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["บัตรติดต่อราชการ" +$F{COURT_NAME_TH}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="91" y="49" width="80" height="25" uuid="1a97f81d-fcc5-4946-8cb7-e638334dc7a7">
+				<reportElement x="128" y="67" width="49" height="20" uuid="1a97f81d-fcc5-4946-8cb7-e638334dc7a7">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
 				<text><![CDATA[คดีอาญาแดงที่]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="177" y="24" width="103" height="25" uuid="8a157929-5511-4d4e-a307-0b5d3e122c9a">
+				<reportElement x="177" y="42" width="103" height="25" uuid="8a157929-5511-4d4e-a307-0b5d3e122c9a">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<box>
@@ -175,79 +142,79 @@ WHERE pb.bail_id = $P{BAIL_ID} AND pc.REMOVED_BY = 0]]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BLACK_CASE_NO}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="91" y="27" width="80" height="25" uuid="c677a13b-8774-4236-b777-d7dc8c68788f">
+				<reportElement x="128" y="46" width="49" height="17" uuid="c677a13b-8774-4236-b777-d7dc8c68788f">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
 				<text><![CDATA[คดีอาญาดำที่]]></text>
 			</staticText>
 			<line>
-				<reportElement x="177" y="44" width="70" height="1" uuid="ad4cbdf2-1a04-44a4-80d8-df6f427cfb3b"/>
+				<reportElement x="177" y="62" width="70" height="1" uuid="ad4cbdf2-1a04-44a4-80d8-df6f427cfb3b"/>
 				<graphicElement>
 					<pen lineStyle="Dotted"/>
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement x="177" y="45" width="103" height="25" uuid="354eacdc-97b6-45fd-b63c-f40adb824ee7">
+				<reportElement x="177" y="63" width="103" height="25" uuid="354eacdc-97b6-45fd-b63c-f40adb824ee7">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
 				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RED_CASE_NO}.equals("/") ? "" : $F{RED_CASE_NO}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="178" y="65" width="70" height="1" uuid="8fc749cf-b2f0-4acb-ba13-e279ac5c238c"/>
+				<reportElement x="178" y="83" width="70" height="1" uuid="8fc749cf-b2f0-4acb-ba13-e279ac5c238c"/>
 				<graphicElement>
 					<pen lineStyle="Dotted"/>
 				</graphicElement>
 			</line>
 			<staticText>
-				<reportElement x="6" y="97" width="40" height="25" uuid="59d2637d-5c57-4da6-8304-468a38e4ee0a">
+				<reportElement x="15" y="116" width="40" height="25" uuid="59d2637d-5c57-4da6-8304-468a38e4ee0a">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14" isBold="true"/>
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ระหว่าง]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="63" y="102" width="188" height="20" uuid="cd178b73-6645-4568-b53f-a886c060d3ba">
+				<reportElement x="63" y="120" width="188" height="20" uuid="cd178b73-6645-4568-b53f-a886c060d3ba">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
 				<textElement>
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ACCU_DESC}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="63" y="82" width="188" height="20" uuid="82120435-6f20-4f53-91ac-a40c2f004ae5">
+				<reportElement x="63" y="100" width="188" height="20" uuid="82120435-6f20-4f53-91ac-a40c2f004ae5">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
 				<textElement>
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PROS_DESC}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="63" y="98" width="190" height="1" uuid="1cbe8bc8-aebf-492f-8a18-c50505130b70"/>
+				<reportElement x="63" y="116" width="190" height="1" uuid="1cbe8bc8-aebf-492f-8a18-c50505130b70"/>
 				<graphicElement>
 					<pen lineStyle="Dotted"/>
 				</graphicElement>
 			</line>
 			<line>
-				<reportElement x="63" y="118" width="190" height="1" uuid="94a37441-584a-4945-849b-82e762825cb6">
+				<reportElement x="63" y="136" width="190" height="1" uuid="94a37441-584a-4945-849b-82e762825cb6">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
 				<graphicElement>
@@ -255,29 +222,29 @@ WHERE pb.bail_id = $P{BAIL_ID} AND pc.REMOVED_BY = 0]]>
 				</graphicElement>
 			</line>
 			<staticText>
-				<reportElement x="251" y="84" width="30" height="25" uuid="427baa51-3673-4e6f-a8ff-04609d90352a">
+				<reportElement x="251" y="101" width="30" height="25" uuid="427baa51-3673-4e6f-a8ff-04609d90352a">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<textElement>
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
 				<text><![CDATA[โจทก์]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="251" y="105" width="30" height="25" uuid="b5c77e87-7ed0-4d9d-b41d-311beec6f8ca">
+				<reportElement x="251" y="122" width="30" height="25" uuid="b5c77e87-7ed0-4d9d-b41d-311beec6f8ca">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<textElement>
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
 				<text><![CDATA[จำเลย]]></text>
 			</staticText>
 			<line>
-				<reportElement x="63" y="139" width="190" height="1" uuid="c4689fbc-2843-47fe-8284-5e793f96bc3b">
+				<reportElement x="63" y="157" width="190" height="1" uuid="c4689fbc-2843-47fe-8284-5e793f96bc3b">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
 				<graphicElement>
@@ -285,161 +252,137 @@ WHERE pb.bail_id = $P{BAIL_ID} AND pc.REMOVED_BY = 0]]>
 				</graphicElement>
 			</line>
 			<staticText>
-				<reportElement x="251" y="125" width="30" height="25" uuid="4c2a22c2-6444-4da4-80b6-38d29d394abf">
+				<reportElement x="251" y="144" width="30" height="25" uuid="4c2a22c2-6444-4da4-80b6-38d29d394abf">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<textElement>
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
 				<text><![CDATA[ข้อหา]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="63" y="123" width="188" height="120" uuid="27c33277-8639-4760-b849-5fd09a7a4e39">
+				<reportElement x="61" y="141" width="188" height="91" uuid="27c33277-8639-4760-b849-5fd09a7a4e39">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
 				<textElement>
-					<font fontName="TH Sarabun New" size="12"/>
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ALLE_DESC} == null ? "" : $F{ALLE_DESC}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="61" y="242" width="49" height="25" uuid="d1db1456-9d1d-4824-9f2b-c2e3ad6207bc">
+				<reportElement x="61" y="233" width="49" height="25" uuid="d1db1456-9d1d-4824-9f2b-c2e3ad6207bc">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14" isBold="true"/>
+					<font fontName="THSarabunNew" size="10" isBold="true"/>
 				</textElement>
 				<text><![CDATA[หมายเหตุ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="373" y="0" width="100" height="25" uuid="7c2d04d5-0c9f-4f54-b6ae-599900671a02">
+				<reportElement x="379" y="0" width="100" height="25" uuid="7c2d04d5-0c9f-4f54-b6ae-599900671a02">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16" isBold="true"/>
+					<font fontName="THSarabunNew" size="14" isBold="true"/>
 				</textElement>
 				<text><![CDATA[กำหนดนัด]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="6" y="274" width="204" height="25" uuid="9295123a-1f59-4c3d-a802-3d2c83102c3f">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="2" y="274" width="204" height="20" uuid="9295123a-1f59-4c3d-a802-3d2c83102c3f"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
 				<text><![CDATA[(   )   รูปถ่ายสีขนาด  1  นิ้ว  ของจำเลย จำนวน  1 รูป]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="6" y="293" width="204" height="25" uuid="32afbaa1-e5ca-4c45-aa01-4d56e47b7608">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="2" y="294" width="204" height="20" uuid="32afbaa1-e5ca-4c45-aa01-4d56e47b7608"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
 				<text><![CDATA[(   )   สำเนาบัตรประชาชนของจำเลย]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="6" y="314" width="204" height="25" uuid="12cc309f-7ac3-40af-bee0-4a01bb964598">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="2" y="314" width="204" height="20" uuid="12cc309f-7ac3-40af-bee0-4a01bb964598"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
 				<text><![CDATA[(   )   สำเนาทะเบียนบ้านของจำเลย]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="6" y="334" width="204" height="25" uuid="68b68532-b825-4d0f-97be-8d2bc6b61837">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="2" y="334" width="204" height="20" uuid="68b68532-b825-4d0f-97be-8d2bc6b61837"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
 				<text><![CDATA[(   )   สำเนาทะเบียนบ้านของนายประกัน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="213" y="334" width="166" height="25" uuid="c6e8c29b-def8-41e2-9c91-ac580f1d8517">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="213" y="334" width="166" height="20" uuid="c6e8c29b-def8-41e2-9c91-ac580f1d8517"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
 				<text><![CDATA[(   )   ใบมรณะบัตรคู่สมรสนายประกัน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="213" y="314" width="166" height="25" uuid="e5bbae87-3194-4412-a935-990fae4ae94b">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="213" y="314" width="166" height="20" uuid="e5bbae87-3194-4412-a935-990fae4ae94b"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
 				<text><![CDATA[(   )   หนังสือยินยอมคู่สมรสนายประกัน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="213" y="274" width="166" height="25" uuid="5de7f03d-a37d-45a6-8a59-be189c0c92bb">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="213" y="274" width="166" height="20" uuid="5de7f03d-a37d-45a6-8a59-be189c0c92bb"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
 				<text><![CDATA[(   )   สำเนาบัตรประชาชนของนายประกัน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="213" y="293" width="166" height="25" uuid="16128116-c977-4b03-ae93-bf2b1dc6243d">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="213" y="294" width="166" height="20" uuid="16128116-c977-4b03-ae93-bf2b1dc6243d"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
 				<text><![CDATA[(   )   สำเนาทะเบียนบ้านคู่สมรสนายประกัน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="390" y="293" width="166" height="25" uuid="483baf22-d813-4498-b540-4a1f7e5e9f01">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="385" y="294" width="166" height="20" uuid="483baf22-d813-4498-b540-4a1f7e5e9f01"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
 				<text><![CDATA[(   )   ทะเบียนสมรส / ทะเบียนหย่า]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="390" y="334" width="40" height="25" uuid="0e48e34e-43a7-4a3e-820b-47afaac889f9">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="385" y="334" width="40" height="20" uuid="0e48e34e-43a7-4a3e-820b-47afaac889f9"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
 				<text><![CDATA[ส่งภายใน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="390" y="314" width="166" height="25" uuid="4e25bb30-c4d1-4ac8-820f-4dd9df4259a1">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="385" y="314" width="166" height="20" uuid="4e25bb30-c4d1-4ac8-820f-4dd9df4259a1"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
 				<text><![CDATA[(   )   อื่น ๆ ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="390" y="274" width="166" height="25" uuid="a0af3655-98cc-475f-ac28-c2771e607b82">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="385" y="274" width="166" height="20" uuid="a0af3655-98cc-475f-ac28-c2771e607b82"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
 				<text><![CDATA[(   )   สลิปเงินเดือน ของเดือนปัจจุบัน]]></text>
 			</staticText>
 			<line>
-				<reportElement x="426" y="350" width="70" height="1" uuid="ff18beb7-0be7-4164-ad0e-c60c02c246e0"/>
+				<reportElement x="425" y="350" width="119" height="1" uuid="ff18beb7-0be7-4164-ad0e-c60c02c246e0"/>
 				<graphicElement>
 					<pen lineStyle="Dotted"/>
 				</graphicElement>
 			</line>
 			<line>
-				<reportElement x="2" y="370" width="553" height="1" uuid="ea05467f-f35c-48c3-8132-86005157871b">
+				<reportElement x="2" y="379" width="553" height="1" uuid="ea05467f-f35c-48c3-8132-86005157871b">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<graphicElement>
@@ -447,7 +390,7 @@ WHERE pb.bail_id = $P{BAIL_ID} AND pc.REMOVED_BY = 0]]>
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement x="450" y="376" width="103" height="25" uuid="30ceff56-bbf5-4c74-a6b7-86af359425e2">
+				<reportElement x="450" y="394" width="103" height="25" uuid="30ceff56-bbf5-4c74-a6b7-86af359425e2">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<box>
@@ -457,103 +400,103 @@ WHERE pb.bail_id = $P{BAIL_ID} AND pc.REMOVED_BY = 0]]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BLACK_CASE_NO}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="451" y="418" width="70" height="1" uuid="0067131d-36a3-451e-80db-18455c9cc7fb"/>
+				<reportElement x="451" y="436" width="70" height="1" uuid="0067131d-36a3-451e-80db-18455c9cc7fb"/>
 				<graphicElement>
 					<pen lineStyle="Dotted"/>
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement x="450" y="396" width="95" height="25" uuid="12e75633-8710-4c41-b613-d2b8f31b6fec">
+				<reportElement x="450" y="414" width="95" height="25" uuid="12e75633-8710-4c41-b613-d2b8f31b6fec">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
 				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RED_CASE_NO}.equals("/") ? "" : $F{RED_CASE_NO}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="364" y="380" width="80" height="25" uuid="87b42e16-9e3a-4856-9af1-10617b7e2c5e">
+				<reportElement x="396" y="394" width="54" height="25" uuid="87b42e16-9e3a-4856-9af1-10617b7e2c5e">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[คดีอาญาดำที่]]></text>
 			</staticText>
 			<line>
-				<reportElement x="450" y="397" width="70" height="1" uuid="1cf6f5fc-9800-43bd-8009-2640dca78bba"/>
+				<reportElement x="450" y="415" width="70" height="1" uuid="1cf6f5fc-9800-43bd-8009-2640dca78bba"/>
 				<graphicElement>
 					<pen lineStyle="Dotted"/>
 				</graphicElement>
 			</line>
 			<staticText>
-				<reportElement x="364" y="402" width="80" height="25" uuid="0e064a3c-86ae-4f5d-a44a-18984c87c19c">
+				<reportElement x="396" y="419" width="54" height="25" uuid="0e064a3c-86ae-4f5d-a44a-18984c87c19c">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[คดีอาญาแดงที่]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="91" y="440" width="368" height="25" uuid="1bede069-655f-4b4b-a97a-4f56be355053">
+				<reportElement x="91" y="458" width="368" height="25" uuid="1bede069-655f-4b4b-a97a-4f56be355053">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
 				<textElement>
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PROS_DESC}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="473" y="467" width="72" height="25" uuid="5e5bfc26-be3a-4279-bd6a-d7c8ee501e6f">
+				<reportElement x="459" y="485" width="72" height="25" uuid="5e5bfc26-be3a-4279-bd6a-d7c8ee501e6f">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box rightPadding="3"/>
-				<textElement textAlignment="Right">
-					<font fontName="TH Sarabun New" size="16"/>
+				<textElement textAlignment="Left">
+					<font fontName="THSarabunNew" size="13"/>
 				</textElement>
 				<text><![CDATA[จำเลย/ผู้ต้องหา]]></text>
 			</staticText>
 			<line>
-				<reportElement x="91" y="459" width="370" height="1" uuid="61447a8f-557c-4f9c-8859-b48e57727efb"/>
+				<reportElement x="91" y="477" width="370" height="1" uuid="61447a8f-557c-4f9c-8859-b48e57727efb"/>
 				<graphicElement>
 					<pen lineStyle="Dotted"/>
 				</graphicElement>
 			</line>
 			<staticText>
-				<reportElement x="473" y="443" width="72" height="25" uuid="421b8410-884a-46d9-a126-3ee06bc7bca2">
+				<reportElement x="460" y="458" width="72" height="25" uuid="421b8410-884a-46d9-a126-3ee06bc7bca2">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box rightPadding="3"/>
-				<textElement textAlignment="Right">
-					<font fontName="TH Sarabun New" size="16"/>
+				<textElement textAlignment="Left">
+					<font fontName="THSarabunNew" size="13"/>
 				</textElement>
 				<text><![CDATA[โจทก์/ผู้ร้อง]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="91" y="465" width="368" height="25" uuid="77721979-7bb6-443d-adae-1390890dcc8c">
+				<reportElement x="91" y="483" width="368" height="25" uuid="77721979-7bb6-443d-adae-1390890dcc8c">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
 				<textElement>
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ACCU_DESC}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="91" y="484" width="370" height="1" uuid="cf72b585-6269-4dda-a68b-4c7e86e99983">
+				<reportElement x="91" y="502" width="370" height="1" uuid="cf72b585-6269-4dda-a68b-4c7e86e99983">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
 				<graphicElement>
@@ -561,27 +504,27 @@ WHERE pb.bail_id = $P{BAIL_ID} AND pc.REMOVED_BY = 0]]>
 				</graphicElement>
 			</line>
 			<staticText>
-				<reportElement x="42" y="456" width="40" height="25" uuid="abe1df3e-c679-43be-a616-8af03831b8ec">
+				<reportElement x="42" y="474" width="40" height="25" uuid="abe1df3e-c679-43be-a616-8af03831b8ec">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16" isBold="true"/>
+					<font fontName="THSarabunNew" size="13" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ระหว่าง]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="91" y="496" width="59" height="25" uuid="adc844f0-ebeb-444d-b71d-d82919f0ce57">
+				<reportElement x="91" y="514" width="59" height="25" uuid="adc844f0-ebeb-444d-b71d-d82919f0ce57">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[คดีอาญาดำที่]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="150" y="493" width="150" height="25" uuid="cb76564d-3318-4709-a0ba-dc16e2989c00">
+				<reportElement x="150" y="511" width="150" height="25" uuid="cb76564d-3318-4709-a0ba-dc16e2989c00">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<box>
@@ -591,18 +534,18 @@ WHERE pb.bail_id = $P{BAIL_ID} AND pc.REMOVED_BY = 0]]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BLACK_CASE_NO}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="150" y="513" width="140" height="1" uuid="eae858f3-75f0-4ff9-b5f5-533535f7d736"/>
+				<reportElement x="150" y="531" width="140" height="1" uuid="eae858f3-75f0-4ff9-b5f5-533535f7d736"/>
 				<graphicElement>
 					<pen lineStyle="Dotted"/>
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement x="390" y="493" width="154" height="25" uuid="36f0aff6-7a88-4655-98ed-472b2c6fe1df">
+				<reportElement x="370" y="511" width="154" height="25" uuid="36f0aff6-7a88-4655-98ed-472b2c6fe1df">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<box>
@@ -612,27 +555,27 @@ WHERE pb.bail_id = $P{BAIL_ID} AND pc.REMOVED_BY = 0]]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="THSarabunNew" size="16"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{THAILDATE(PB.BAIL_DATE)}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="390" y="513" width="144" height="1" uuid="348ccc13-a5ec-4f73-92bb-8fb30c4d2b8e"/>
+				<reportElement x="370" y="531" width="144" height="1" uuid="348ccc13-a5ec-4f73-92bb-8fb30c4d2b8e"/>
 				<graphicElement>
 					<pen lineStyle="Dotted"/>
 				</graphicElement>
 			</line>
 			<staticText>
-				<reportElement x="300" y="496" width="90" height="25" uuid="7c025669-8fb1-4b5c-9ccd-c1516163ea01">
+				<reportElement x="300" y="514" width="70" height="25" uuid="7c025669-8fb1-4b5c-9ccd-c1516163ea01">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[วันที่ขอประกัน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="91" y="379" width="79" height="25" uuid="f39a53be-e6b0-4c10-a3c8-1a318dba62e5">
+				<reportElement x="91" y="397" width="79" height="25" uuid="f39a53be-e6b0-4c10-a3c8-1a318dba62e5">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -641,271 +584,316 @@ WHERE pb.bail_id = $P{BAIL_ID} AND pc.REMOVED_BY = 0]]>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14" isBold="true"/>
+					<font fontName="THSarabunNew" size="14" isBold="true"/>
 				</textElement>
 				<text><![CDATA[เลขที่เก็บเอกสาร]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="91" y="404" width="79" height="25" uuid="fc4271c4-f6a9-4c00-9500-d2c895a7e0ae">
+				<reportElement x="91" y="422" width="79" height="25" uuid="fc4271c4-f6a9-4c00-9500-d2c895a7e0ae">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="THSarabunNew" size="16"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{BAIL_CASE_NO}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="110" y="246" width="171" height="20" uuid="0c091017-5a5b-4508-be10-a1e28e221437">
+				<reportElement x="110" y="237" width="171" height="20" uuid="0c091017-5a5b-4508-be10-a1e28e221437">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
 				<textElement>
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{BAIL_NOTES}==null ? "" : $F{BAIL_NOTES}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="294" y="35" width="100" height="29" uuid="d106ff08-b76c-4f05-9de6-bbbfc49e0c5d"/>
+				<reportElement x="300" y="34" width="100" height="29" uuid="d106ff08-b76c-4f05-9de6-bbbfc49e0c5d"/>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[วัน เดือน ปี]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="394" y="35" width="51" height="29" uuid="71e3ea07-c1f5-4bcc-85ee-d64eab0ae11c"/>
+				<reportElement x="400" y="34" width="51" height="29" uuid="71e3ea07-c1f5-4bcc-85ee-d64eab0ae11c"/>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[เวลา]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="445" y="35" width="108" height="29" uuid="24a4e07f-f9b1-4c5f-ba53-98ac088b54df"/>
+				<reportElement x="451" y="34" width="108" height="29" uuid="24a4e07f-f9b1-4c5f-ba53-98ac088b54df"/>
 				<box>
 					<pen lineWidth="0.5" lineStyle="Solid"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[นัดมาทำไม]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="294" y="64" width="100" height="29" uuid="fc3218b6-fd9b-4614-bba8-67d395d040f6"/>
+				<reportElement x="300" y="63" width="100" height="29" uuid="fc3218b6-fd9b-4614-bba8-67d395d040f6"/>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="394" y="64" width="51" height="29" uuid="9080e1a9-44f0-48f4-98f3-a475c19e5f0f"/>
+				<reportElement x="400" y="63" width="51" height="29" uuid="9080e1a9-44f0-48f4-98f3-a475c19e5f0f"/>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="445" y="64" width="108" height="29" uuid="c51612e2-f853-4853-96ee-213412c8f3ea"/>
+				<reportElement x="451" y="63" width="108" height="29" uuid="c51612e2-f853-4853-96ee-213412c8f3ea"/>
 				<box>
 					<pen lineWidth="0.5" lineStyle="Solid"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="294" y="93" width="100" height="29" uuid="9feb5ebe-615b-4754-9b88-d87c3ebe7435"/>
+				<reportElement x="300" y="92" width="100" height="29" uuid="9feb5ebe-615b-4754-9b88-d87c3ebe7435"/>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="394" y="93" width="51" height="29" uuid="3a240458-7cdb-4d97-a95f-343fb5132688"/>
+				<reportElement x="400" y="92" width="51" height="29" uuid="3a240458-7cdb-4d97-a95f-343fb5132688"/>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="445" y="93" width="108" height="29" uuid="67e39176-fdbf-4536-9381-4ef17acd8b47"/>
+				<reportElement x="451" y="92" width="108" height="29" uuid="67e39176-fdbf-4536-9381-4ef17acd8b47"/>
 				<box>
 					<pen lineWidth="0.5" lineStyle="Solid"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="294" y="122" width="100" height="29" uuid="7c20a753-9494-4345-b435-0fb20dd3066c"/>
+				<reportElement x="300" y="121" width="100" height="29" uuid="7c20a753-9494-4345-b435-0fb20dd3066c"/>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="394" y="122" width="51" height="29" uuid="83fb4d8b-1562-434f-923d-426359ec545e"/>
+				<reportElement x="400" y="121" width="51" height="29" uuid="83fb4d8b-1562-434f-923d-426359ec545e"/>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="445" y="122" width="108" height="29" uuid="748b5f24-1370-4e39-8c73-577bd120c087"/>
+				<reportElement x="451" y="121" width="108" height="29" uuid="748b5f24-1370-4e39-8c73-577bd120c087"/>
 				<box>
 					<pen lineWidth="0.5" lineStyle="Solid"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="294" y="151" width="100" height="29" uuid="23e5bca9-fc70-471b-8374-6ea9185faea6"/>
+				<reportElement x="300" y="150" width="100" height="29" uuid="23e5bca9-fc70-471b-8374-6ea9185faea6"/>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="394" y="151" width="51" height="29" uuid="737ff8a9-2cf2-4aa1-a078-0e773337a6d8"/>
+				<reportElement x="400" y="150" width="51" height="29" uuid="737ff8a9-2cf2-4aa1-a078-0e773337a6d8"/>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="445" y="151" width="108" height="29" uuid="ddd0125a-590d-444e-9d6a-3a29b54f4e29"/>
+				<reportElement x="451" y="150" width="108" height="29" uuid="ddd0125a-590d-444e-9d6a-3a29b54f4e29"/>
 				<box>
 					<pen lineWidth="0.5" lineStyle="Solid"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="294" y="180" width="100" height="29" uuid="093482d9-9735-4be9-a7a1-13d08677c980"/>
+				<reportElement x="300" y="179" width="100" height="29" uuid="093482d9-9735-4be9-a7a1-13d08677c980"/>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="394" y="180" width="51" height="29" uuid="27da06a9-5524-48d7-85f9-65a289d3f92c"/>
+				<reportElement x="400" y="179" width="51" height="29" uuid="27da06a9-5524-48d7-85f9-65a289d3f92c"/>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="445" y="180" width="108" height="29" uuid="4c60a7f6-02a3-4a01-b236-f87a316d48a8"/>
+				<reportElement x="451" y="179" width="108" height="29" uuid="4c60a7f6-02a3-4a01-b236-f87a316d48a8"/>
 				<box>
 					<pen lineWidth="0.5" lineStyle="Solid"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="445" y="209" width="108" height="29" uuid="6cff7434-afa5-4881-97c4-b334edcc49d7"/>
+				<reportElement x="451" y="208" width="108" height="29" uuid="6cff7434-afa5-4881-97c4-b334edcc49d7"/>
 				<box>
 					<pen lineWidth="0.5" lineStyle="Solid"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="394" y="209" width="51" height="29" uuid="f91d7ead-e9d9-4ea2-ac89-f6f857d9e272"/>
+				<reportElement x="400" y="208" width="51" height="29" uuid="f91d7ead-e9d9-4ea2-ac89-f6f857d9e272"/>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="294" y="209" width="100" height="29" uuid="01a14906-675c-40a7-9fc5-1dbcde50866f"/>
+				<reportElement x="300" y="208" width="100" height="29" uuid="01a14906-675c-40a7-9fc5-1dbcde50866f"/>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="445" y="238" width="108" height="29" uuid="6932aaed-1657-4876-b0ac-6e40af29b44f"/>
+				<reportElement x="451" y="237" width="108" height="29" uuid="6932aaed-1657-4876-b0ac-6e40af29b44f"/>
 				<box>
 					<pen lineWidth="0.5" lineStyle="Solid"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="394" y="238" width="51" height="29" uuid="4ae60b93-a660-41d3-a5ad-192af949e6f5"/>
+				<reportElement x="400" y="237" width="51" height="29" uuid="4ae60b93-a660-41d3-a5ad-192af949e6f5"/>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="294" y="238" width="100" height="29" uuid="3b3a9b34-77cf-4d76-aadf-2e386300a696"/>
+				<reportElement x="300" y="237" width="100" height="29" uuid="3b3a9b34-77cf-4d76-aadf-2e386300a696"/>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
+			<staticText>
+				<reportElement x="63" y="5" width="156" height="20" uuid="9b02092c-8d9b-44e9-8a18-0b905c538ea8"/>
+				<textElement textAlignment="Center">
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[บัตรติดต่อราชการ]]></text>
+			</staticText>
+			<line>
+				<reportElement x="-1" y="1" width="1" height="265" uuid="9cca1456-032e-4edb-ba00-364bbfd36d2c"/>
+			</line>
+			<line>
+				<reportElement x="290" y="1" width="1" height="265" uuid="e8b2a2b0-ee07-4d8c-b633-ce04b18f58cc"/>
+			</line>
+			<line>
+				<reportElement x="-1" y="266" width="291" height="1" uuid="1aedeaaf-630c-4a69-a295-bb30066867d8"/>
+			</line>
+			<line>
+				<reportElement x="-1" y="1" width="291" height="1" uuid="95eb15cc-b95f-4dec-a259-d564b519ed1f"/>
+			</line>
+			<line>
+				<reportElement x="-1" y="270" width="1" height="101" uuid="888ea94c-bf77-4c02-a241-7a6f269d6f8b"/>
+			</line>
+			<line>
+				<reportElement x="558" y="270" width="1" height="101" uuid="0531edb4-bc1b-46c8-9e89-bd04103ea1e1"/>
+			</line>
+			<line>
+				<reportElement x="0" y="270" width="559" height="1" uuid="289cde19-7ace-4d63-9323-1a923fc5128a"/>
+			</line>
+			<line>
+				<reportElement x="-1" y="371" width="559" height="1" uuid="ed721621-6270-4c53-959d-45a209b0d8b5"/>
+			</line>
+			<line>
+				<reportElement x="-1" y="390" width="559" height="1" uuid="e541a068-6b09-4e03-8a1d-20cf1f8ef4a2"/>
+			</line>
+			<line>
+				<reportElement x="-1" y="550" width="559" height="1" uuid="9e49a660-8c5e-4bf6-8b33-aadac346c65c"/>
+			</line>
+			<line>
+				<reportElement x="-1" y="391" width="1" height="159" uuid="1ede1d02-742e-4f3d-8394-86fcb6ebeea7"/>
+			</line>
+			<line>
+				<reportElement x="558" y="390" width="1" height="160" uuid="50a74b22-1a7b-4d6e-a6d2-9752db504c54">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+			</line>
 		</band>
 	</detail>
 </jasperReport>
