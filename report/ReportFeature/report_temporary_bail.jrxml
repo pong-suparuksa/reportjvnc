@@ -2,6 +2,11 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report_temporary_bail" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="ab6c8d06-e554-4aa0-b616-206e33f75a73">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/ReportFeature/report_temporary_bail_files/main_jrxml"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/ReportFeature/report_temporary_bail"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["10/03/2021"]]></defaultValueExpression>
 	</parameter>
@@ -9,8 +14,73 @@
 		<defaultValueExpression><![CDATA["28/04/2021"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[]]>
+		<![CDATA[SELECT 
+	NVL(cou.COURT_NAME_TH, '') COURT_NAME_TH, 
+	NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR)  BLACK_CASE_NO ,
+	NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || CASE WHEN pj.RED_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pj.RED_YEAR)     RED_CASE_NO ,
+	pc.PROS_DESC ,
+    pc.ACCU_DESC ,
+    pc.ALLE_DESC ,
+	pbb.FULLNAME ,
+	pb.RATE_AMOUNT ,
+	pbst.TYPE_NAME ,
+	CASE WHEN pb.COURT_ORDER = 1 THEN  'อนุญาต' ELSE 'ไม่อนุญาต'END COURT_ORDER
+FROM  PC_BAIL pb
+LEFT JOIN  PC_BAIL_BAILSMAN pbb ON pbb.BAIL_ID = pb.BAIL_ID AND pbb.REMOVED_BY = 0
+LEFT JOIN  PC_BAIL_SEC pbs ON pbs.BAILSMAN_ID = pb.BAIL_ID 
+LEFT JOIN PC_BAIL_SEC_TYPE pbst ON pbst.SEC_TYPE_ID = pbs.SEC_TYPE_ID 
+LEFT JOIN  PC_LIST_OF_VALUE plov ON plov.VALUE = pb.BAIL_PERIOD   AND plov.LOV_TYPE = 'BAIL_CLASS' AND PLOV.REMOVED_BY = 0
+
+--Case
+LEFT JOIN PC_CASE pc ON
+	pc.CASE_ID = pb.CASE_ID AND pc.REMOVED_BY = 0
+LEFT JOIN PC_JUDGEMENT pj ON
+	pj.CASE_ID = pc.CASE_ID	AND pj.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON
+	pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON
+	pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID 	AND pltc_r.REMOVED_BY = 0
+--ชื่อศาล
+CROSS JOIN (SELECT plc.COURT_NAME_TH
+             FROM PC_PARAM pp
+             JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+             WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
+WHERE 
+	pb.REMOVED_BY = 0
+	AND pb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE} || 'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') AND TO_DATE($P{END_DATE} || 'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+ORDER BY
+	BLACK_CASE_NO ASC]]>
 	</queryString>
+	<field name="COURT_NAME_TH" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
+	</field>
+	<field name="BLACK_CASE_NO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="BLACK_CASE_NO"/>
+	</field>
+	<field name="RED_CASE_NO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="RED_CASE_NO"/>
+	</field>
+	<field name="PROS_DESC" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PROS_DESC"/>
+	</field>
+	<field name="ACCU_DESC" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="ACCU_DESC"/>
+	</field>
+	<field name="ALLE_DESC" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="ALLE_DESC"/>
+	</field>
+	<field name="FULLNAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="FULLNAME"/>
+	</field>
+	<field name="RATE_AMOUNT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="RATE_AMOUNT"/>
+	</field>
+	<field name="TYPE_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TYPE_NAME"/>
+	</field>
+	<field name="COURT_ORDER" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="COURT_ORDER"/>
+	</field>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -28,13 +98,14 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="14" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["จากวันที่ : " + new java.text.SimpleDateFormat("d MMMM y", new Locale("TH","th")).format(new SimpleDateFormat("dd/MM/yyyy", new Locale("TH","th")).parse($P{START_DATE} )) + "  ถึงวันที่ : " + new java.text.SimpleDateFormat("d MMMM y", new Locale("TH","th")).format(new SimpleDateFormat("dd/MM/yyyy", new Locale("TH","th")).parse( $P{END_DATE} ))]]></textFieldExpression>
+				<textFieldExpression><![CDATA["จากวันที่ :  " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +"  ถึงวันที่ :  " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="103" y="30" width="554" height="30" uuid="94e038f1-314c-4a23-a28f-006fabb7c48b"/>
+				<reportElement x="103" y="30" width="554" height="30" uuid="80878f0d-cd49-4074-b51a-f10cfdb335c3"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="14" isBold="true"/>
 				</textElement>
+				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>
@@ -60,7 +131,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew"/>
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ลำดับ]]></text>
 			</staticText>
@@ -73,7 +144,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew"/>
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[เลขคดีดำ]]></text>
 			</staticText>
@@ -86,7 +157,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew"/>
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[เลขคดีแดง]]></text>
 			</staticText>
@@ -99,7 +170,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew"/>
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[โจทก์]]></text>
 			</staticText>
@@ -112,7 +183,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew"/>
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[จำเลย]]></text>
 			</staticText>
@@ -125,7 +196,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew"/>
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[นายประกัน]]></text>
 			</staticText>
@@ -138,7 +209,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew"/>
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ข้อหา]]></text>
 			</staticText>
@@ -151,7 +222,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew"/>
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ราคาประกัน]]></text>
 			</staticText>
@@ -164,7 +235,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew"/>
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[หลักประกัน]]></text>
 			</staticText>
@@ -177,7 +248,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew"/>
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[คำสั่งศาล]]></text>
 			</staticText>
@@ -190,7 +261,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew"/>
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[หมายเหตุ]]></text>
 			</staticText>
@@ -208,10 +279,10 @@
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement>
-					<font fontName="THSarabunNew"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Text Field"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{FULLNAME}==null?  "-" :$F{FULLNAME}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="-10" y="0" width="50" height="30" uuid="e07ceebf-0338-4bdf-8454-aa941f9b6e88"/>
@@ -222,7 +293,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew"/>
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{COLUMN_COUNT}]]></textFieldExpression>
 			</textField>
@@ -234,10 +305,10 @@
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement>
-					<font fontName="THSarabunNew"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Text Field"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{RATE_AMOUNT}==null? "-":$F{RATE_AMOUNT}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="160" y="0" width="90" height="30" uuid="b99aba50-f903-49e5-86d1-7464cb8ca3de">
@@ -249,10 +320,10 @@
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement>
-					<font fontName="THSarabunNew"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Text Field"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{PROS_DESC}==null? "-": $F{PROS_DESC}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="680" y="0" width="60" height="30" uuid="5d57daee-60a9-4a58-b0cb-572a8887dbb1">
@@ -264,10 +335,10 @@
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement>
-					<font fontName="THSarabunNew"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Text Field"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{COURT_ORDER}==null? "-": $F{COURT_ORDER}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="40" y="0" width="60" height="30" uuid="9a78cf7d-76d6-400b-b05b-9089266cd963">
@@ -279,10 +350,10 @@
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement>
-					<font fontName="THSarabunNew"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Text Field"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{BLACK_CASE_NO}== null? "-" : $F{BLACK_CASE_NO}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="100" y="0" width="60" height="30" uuid="c6b22e9c-2a13-4e0b-9132-71abb2f2580e">
@@ -294,10 +365,10 @@
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement>
-					<font fontName="THSarabunNew"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Text Field"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{RED_CASE_NO}==null? "-":$F{RED_CASE_NO}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="340" y="0" width="90" height="30" uuid="cc99480c-370d-4f67-a223-b45d07f57889">
@@ -309,10 +380,10 @@
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement>
-					<font fontName="THSarabunNew"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Text Field"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{ALLE_DESC}==null? "-" :$F{ALLE_DESC}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="250" y="0" width="90" height="30" uuid="09f02504-8790-4b13-b64a-75d10a2795e8">
@@ -324,10 +395,10 @@
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement>
-					<font fontName="THSarabunNew"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Text Field"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{ACCU_DESC}==null? "-":$F{ACCU_DESC}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="610" y="0" width="70" height="30" uuid="7662e302-3172-4032-bc70-19ad4d61cb23">
@@ -339,10 +410,10 @@
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement>
-					<font fontName="THSarabunNew"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Text Field"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{TYPE_NAME}==null? "-":$F{TYPE_NAME}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="740" y="0" width="70" height="30" uuid="7337e4cd-d282-446e-9d20-db252e236fa8">
@@ -354,10 +425,10 @@
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement>
-					<font fontName="THSarabunNew"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Text Field"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

@@ -5,6 +5,10 @@
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="382"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="612"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/ReportFeature/report_appointment_criminal_files/main_jrxml"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/ReportFeature/report_appointment_criminal"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["10/03/2021"]]></defaultValueExpression>
 	</parameter>
@@ -54,7 +58,7 @@ WHERE
 	AND pc.CASE_TYPE_ID = 1
 	AND ppac.START_DATE BETWEEN TO_DATE( $P{START_DATE}  || 'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') AND TO_DATE(  $P{END_DATE}  || 'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 ORDER BY
-	BLACK_CASE_NO ASC ]]>
+	BLACK_CASE_NO ASC]]>
 	</queryString>
 	<field name="ROW_NUM" class="java.math.BigDecimal">
 		<property name="com.jaspersoft.studio.field.label" value="ROW_NUM"/>
@@ -110,7 +114,7 @@ ORDER BY
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="14" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["จากวันที่ : " + new java.text.SimpleDateFormat("d MMMM y", new Locale("TH","th")).format(new SimpleDateFormat("dd/MM/yyyy", new Locale("TH","th")).parse($P{START_DATE} )) + "  ถึงวันที่ : " + new java.text.SimpleDateFormat("d MMMM y", new Locale("TH","th")).format(new SimpleDateFormat("dd/MM/yyyy", new Locale("TH","th")).parse( $P{END_DATE} ))]]></textFieldExpression>
+				<textFieldExpression><![CDATA["จากวันที่ :  " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +"  ถึงวันที่ :  " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>
