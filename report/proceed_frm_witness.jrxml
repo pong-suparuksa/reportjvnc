@@ -1,39 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="proceed_frm_witness" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="474" leftMargin="65" rightMargin="56" topMargin="70" bottomMargin="45" uuid="7ea5f4e4-e512-4ffb-9bf7-cf2fd2c37890">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="CojDB[193]"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-229"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.193:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_frm_witness"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="620"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="368"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="621"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="370"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.report.description" value=""/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_frm_witness_files/main_jrxml"/>
 	<parameter name="CASE_ID" class="java.lang.Integer">
-		<defaultValueExpression><![CDATA[0]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA[103]]></defaultValueExpression>
+	</parameter>
+	<parameter name="USER_LOGIN_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[SELECT 
   THAINUM(ROW_NUMBER() OVER (ORDER BY pplw.CASE_ID)) RNUM,
-  pplw.CASE_ID, 
-  
+  pplw.CASE_ID,   
   NVL(pltc_b.TITLE_CASE_NAME,' ') ||  THAINUM(TO_CHAR(pc.BLACK_IDNUM)) || '/' || THAINUM(TO_CHAR(pc.BLACK_YEAR))  CASE_BLACK_NO,    
   CASE WHEN pj.RED_IDNUM IS NULL THEN ' '
        ELSE NVL(pltc_r.TITLE_CASE_NAME,' ')  || THAINUM(TO_CHAR(pj.RED_IDNUM)) || '/' || THAINUM(TO_CHAR(pj.RED_YEAR))  END	CASE_RED_NO,
   NVL(plc.COURT_NAME_TH,' ')															    COURT_NAME_TH,
-  NVL(plct.CASE_TYPE_NAME,' ')                                                           CASE_TYPE_NAME,
-  --  
+  NVL(plct.CASE_TYPE_NAME,' ')                                                          CASE_TYPE_NAME,  --  
   THAINUMSTR(NVL(pc.PROS_DESC,' '))									          	CLAIMANT, 
   THAINUMSTR(NVL(pc.ACCU_DESC,' '))										        DEFENDANT,     
   --
-  NVL(pplw.WITNESS_NAME,' ')                                                      		REQUESTOR,  
+  (SELECT pup.USER_PROFILE_FULL_NAME FROM PC_USER_PROFILE pup WHERE pup.USER_ID = $P{USER_LOGIN_ID})   REQUESTOR,  
   --
-  THAINUM(TO_CHAR(EXTRACT(DAY FROM pplw.CREATED_DATE)))								CASE_DAY,
-  THAIMONTH(EXTRACT(MONTH FROM pplw.CREATED_DATE)) 										CASE_MONTH,
-  THAINUM(TO_CHAR(EXTRACT(YEAR FROM pplw.CREATED_DATE)+543))								CASE_YEAR,
+  THAINUM(TO_CHAR(EXTRACT(DAY FROM SYSDATE)))							CASE_DAY,  					
+   DECODE(SUBSTR(TO_CHAR(EXTRACT(MONTH FROM SYSDATE)),1,2), 
+       	       '1', 'มกราคม', '2', 'กุมภาพันธ์', '3', 'มีนาคม', 
+               '4', 'เมษายน', '5', 'พฤษภาคม', '6', 'มิถุนายน',  
+               '7','กรกฎาคม', '8', 'สิงหาคม',  '9', 'กันยายน', 
+               '10', 'ตุลาคม',  '11', 'พฤศจิกายน','12', 'ธันวาคม', '-')            CASE_MONTH,
+  THAINUM(TO_CHAR(EXTRACT(YEAR FROM SYSDATE)+543))							CASE_YEAR,
   --  
   pplw.WITNESS_NAME,
   THAINUMSTR(NVL(pplw.ADDRESS_NO,' '))														ADDRESS_NO,
@@ -43,8 +49,7 @@
   THAINUMSTR(NVL(pls.SUBDISTRICT_NAME,' '))										 			SUBDISTRICT_NAME,
   THAiNUMSTR(NVL(pld.DISTRICT_NAME,' '))													    DISTRICT_NAME,
   THAINUMSTR(NVL(plp.PROVINCE_NAME,' '))													PROVINCE_NAME,
-  THAINUMSTR(NVL(pplw.ADDRESS_POST_CODE,' '))											ADDRESS_POST_CODE
-  
+  THAINUMSTR(NVL(pplw.ADDRESS_POST_CODE,' '))											ADDRESS_POST_CODE  
 FROM PC_PROCEED_LOG_WITNESS pplw 
 --
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pplw.CASE_ID AND pc.REMOVED_BY = 0
@@ -54,7 +59,7 @@ LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_I
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
 --
 LEFT JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_CASE_TYPE plct ON plct.CASE_TYPE_ID = plcc.CASE_TYPE_ID AND plct.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_CASE_TYPE plct ON plct.CASE_TYPE_ID = pc.CASE_TYPE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pc.COURT_ID AND plc.REMOVED_BY = 0
 --
 LEFT JOIN PC_LOOKUP_PROVINCE plp ON plp.PROVINCE_ID = pplw.ADDRESS_PROVINCE AND plp.REMOVED_BY = 0
@@ -62,7 +67,8 @@ LEFT JOIN PC_LOOKUP_DISTRICT pld ON pld.DISTRICT_ID = pplw.ADDRESS_DISTRICT AND 
 LEFT JOIN PC_LOOKUP_SUBDISTRICT pls ON pls.SUBDISTRICT_ID = pplw.ADDRESS_SUB_DISTRICT AND pls.DISTRICT_ID = pld.DISTRICT_ID AND pls.PROVINCE_ID = plp.PROVINCE_ID AND pls.REMOVED_BY = 0
 --
 WHERE NVL(pplw.REMOVED_BY,0) = 0
-AND pplw.CASE_ID = $P{CASE_ID}]]>
+AND pplw.CASE_ID = $P{CASE_ID}
+AND pplw.ADDRESS_PROVINCE > 0]]>
 	</queryString>
 	<field name="RNUM" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="RNUM"/>
@@ -134,7 +140,7 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 		<band height="351" splitType="Stretch">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<textField>
-				<reportElement x="251" y="139" width="38" height="25" uuid="0cdac2eb-a812-4e8b-9cba-b9a97ea18541">
+				<reportElement x="250" y="144" width="176" height="25" uuid="0cdac2eb-a812-4e8b-9cba-b9a97ea18541">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
@@ -147,7 +153,7 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 				<reportElement x="342" y="108" width="43" height="25" uuid="3a0c9cbc-f3ee-4ba9-8cd9-a3ed0df4f8a5">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
-				<textElement>
+				<textElement textAlignment="Center">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_YEAR}==null?" ":$F{CASE_YEAR}]]></textFieldExpression>
@@ -254,7 +260,7 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement x="67" y="167" width="333" height="25" uuid="3703269f-ce22-44ba-9564-072fcae03cf6">
+				<reportElement x="66" y="172" width="333" height="25" uuid="3703269f-ce22-44ba-9564-072fcae03cf6">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
@@ -264,11 +270,11 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 				<textFieldExpression><![CDATA[$F{CLAIMANT}==null?" ":$F{CLAIMANT}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="219" y="108" width="20" height="25" uuid="3ffa8083-34d0-47dc-b220-029edc2b4fc5">
+				<reportElement x="210" y="108" width="29" height="25" uuid="3ffa8083-34d0-47dc-b220-029edc2b4fc5">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
-				<textElement>
+				<textElement textAlignment="Center">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_DAY}==null?" ":$F{CASE_DAY}]]></textFieldExpression>
@@ -278,13 +284,13 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
-				<textElement>
+				<textElement textAlignment="Center">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_MONTH}==null?" ":$F{CASE_MONTH}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="428" y="206" width="30" height="25" uuid="473d9b11-2b54-4941-baf3-f602a0376ef3">
+				<reportElement x="427" y="211" width="30" height="25" uuid="473d9b11-2b54-4941-baf3-f602a0376ef3">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -295,7 +301,7 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 				<text><![CDATA[จำเลย]]></text>
 			</staticText>
 			<line>
-				<reportElement x="67" y="184" width="360" height="1" uuid="15590220-0453-4137-9e33-7c858111d397">
+				<reportElement x="66" y="189" width="360" height="1" uuid="15590220-0453-4137-9e33-7c858111d397">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<graphicElement>
@@ -303,7 +309,7 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement x="67" y="206" width="333" height="25" uuid="43aa1ba9-7a50-4dee-9331-da73532e4008">
+				<reportElement x="66" y="211" width="333" height="25" uuid="43aa1ba9-7a50-4dee-9331-da73532e4008">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
@@ -313,7 +319,7 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 				<textFieldExpression><![CDATA[$F{DEFENDANT}==null?" ":$F{DEFENDANT}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="67" y="223" width="360" height="1" uuid="34933d8e-41a8-4613-85aa-ddee0948851f">
+				<reportElement x="66" y="228" width="360" height="1" uuid="34933d8e-41a8-4613-85aa-ddee0948851f">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -332,17 +338,9 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 				<text><![CDATA[เดือน]]></text>
 			</staticText>
 			<image>
-				<reportElement x="60" y="178" width="50" height="50" uuid="37f7c55b-35de-4a96-964c-36f26086d8c2"/>
+				<reportElement x="59" y="183" width="50" height="50" uuid="37f7c55b-35de-4a96-964c-36f26086d8c2"/>
 				<imageExpression><![CDATA["/images/peakka.jpg"]]></imageExpression>
 			</image>
-			<line>
-				<reportElement x="251" y="156" width="30" height="1" uuid="53d3af01-2dcc-4900-896f-3add6a1d58be">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<graphicElement>
-					<pen lineStyle="Dotted"/>
-				</graphicElement>
-			</line>
 			<line>
 				<reportElement x="255" y="99" width="200" height="1" uuid="3e5d0b5c-b556-4a54-8569-09f971d61534">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -370,7 +368,7 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 				<text><![CDATA[วันที่]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="223" y="139" width="28" height="25" uuid="426556e6-0c9a-4a8c-926b-2b314e23eaa0">
+				<reportElement x="222" y="144" width="28" height="25" uuid="426556e6-0c9a-4a8c-926b-2b314e23eaa0">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -381,7 +379,7 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 				<text><![CDATA[ความ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="5" y="195" width="40" height="25" uuid="57f01958-a76c-43ce-a8bd-93f2a96f0206">
+				<reportElement x="4" y="200" width="40" height="25" uuid="57f01958-a76c-43ce-a8bd-93f2a96f0206">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -401,7 +399,7 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 				<text><![CDATA[ศาล]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="253" y="82" width="100" height="25" uuid="ee922133-4353-4358-aa55-73dc2b22d34c">
+				<reportElement x="253" y="82" width="202" height="25" uuid="ee922133-4353-4358-aa55-73dc2b22d34c">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement>
@@ -410,7 +408,7 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}==null?" ":$F{COURT_NAME_TH}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="428" y="167" width="30" height="25" uuid="ef0de565-b709-42d4-939e-a9c76e647467">
+				<reportElement x="427" y="172" width="30" height="25" uuid="ef0de565-b709-42d4-939e-a9c76e647467">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -432,13 +430,13 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 				<text><![CDATA[พ.ศ. ]]></text>
 			</staticText>
 			<line>
-				<reportElement x="216" y="125" width="20" height="1" uuid="5e0d9319-b645-4648-b779-2bc81399518e"/>
+				<reportElement x="214" y="125" width="20" height="1" uuid="5e0d9319-b645-4648-b779-2bc81399518e"/>
 				<graphicElement>
 					<pen lineStyle="Dotted"/>
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement x="30" y="235" width="428" height="25" uuid="649f345b-c757-4357-9817-b9b4a63f325e">
+				<reportElement x="29" y="240" width="428" height="25" uuid="649f345b-c757-4357-9817-b9b4a63f325e">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -446,10 +444,10 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 				<textElement>
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA["ข้าพเจ้า " + ($F{REQUESTOR}==null?" ":$F{REQUESTOR})]]></textFieldExpression>
+				<textFieldExpression><![CDATA["ข้าพเจ้า " + $F{REQUESTOR}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="69" y="251" width="360" height="1" uuid="71def452-e461-436a-a608-6d9a7133a14d">
+				<reportElement x="68" y="256" width="360" height="1" uuid="71def452-e461-436a-a608-6d9a7133a14d">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<graphicElement>
@@ -457,7 +455,7 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 				</graphicElement>
 			</line>
 			<textField evaluationTime="Report">
-				<reportElement x="0" y="261" width="428" height="25" uuid="3c490a48-1aca-4593-aa1f-fed79b9f9d9f">
+				<reportElement x="-1" y="266" width="428" height="25" uuid="3c490a48-1aca-4593-aa1f-fed79b9f9d9f">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -468,7 +466,7 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 				<textFieldExpression><![CDATA["ขอระบุพยานของข้าพเจ้ารวม "+  ($F{RNUM}==null?" ":$F{RNUM}) +" อันดับ ตามบัญชีข้างล่างดังนี้"]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="129" y="277" width="30" height="1" uuid="61d0552a-5294-4d36-9c9b-a784907e2e81">
+				<reportElement x="128" y="282" width="30" height="1" uuid="61d0552a-5294-4d36-9c9b-a784907e2e81">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
 				<graphicElement>
@@ -481,7 +479,7 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 		<band height="25">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<textField>
-				<reportElement x="370" y="-72" width="74" height="25" uuid="42503c4f-1445-46b3-9c25-70558641eb5b">
+				<reportElement x="369" y="-67" width="74" height="25" uuid="42503c4f-1445-46b3-9c25-70558641eb5b">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
@@ -495,7 +493,7 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 	<columnHeader>
 		<band height="48">
 			<staticText>
-				<reportElement x="0" y="-71" width="45" height="48" uuid="fae0fc82-efab-47cd-9745-7a95c08b5681">
+				<reportElement x="-1" y="-66" width="45" height="48" uuid="fae0fc82-efab-47cd-9745-7a95c08b5681">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="956730c6-4d68-4954-816a-e4724b523db7"/>
 				</reportElement>
 				<box>
@@ -510,7 +508,7 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 				<text><![CDATA[อันดับ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="45" y="-71" width="120" height="48" uuid="e3917205-2dfc-4b68-8cb2-1e7a5a6f3878">
+				<reportElement x="44" y="-66" width="120" height="48" uuid="e3917205-2dfc-4b68-8cb2-1e7a5a6f3878">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="956730c6-4d68-4954-816a-e4724b523db7"/>
 				</reportElement>
 				<box>
@@ -525,7 +523,7 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 				<text><![CDATA[ชื่อและสกุลพยาน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="165" y="-71" width="220" height="48" uuid="b1eda09c-859a-4e6c-89bb-c35e4faae9b5">
+				<reportElement x="164" y="-66" width="220" height="48" uuid="b1eda09c-859a-4e6c-89bb-c35e4faae9b5">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="956730c6-4d68-4954-816a-e4724b523db7"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -543,7 +541,7 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 ตำบล/แขวง อำเภอ/เขต จังหวัด]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="385" y="-71" width="69" height="48" uuid="0d134cd8-c1a4-47f2-96a8-e794b621cdac">
+				<reportElement x="384" y="-66" width="69" height="48" uuid="0d134cd8-c1a4-47f2-96a8-e794b621cdac">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="956730c6-4d68-4954-816a-e4724b523db7"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -563,7 +561,7 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 	<detail>
 		<band height="50" splitType="Stretch">
 			<textField>
-				<reportElement x="0" y="-71" width="45" height="50" uuid="2303a3e9-e69a-4fbd-9e2d-4f6ce4c12294">
+				<reportElement x="-1" y="-66" width="45" height="50" uuid="2303a3e9-e69a-4fbd-9e2d-4f6ce4c12294">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="956730c6-4d68-4954-816a-e4724b523db7"/>
 				</reportElement>
 				<box>
@@ -578,7 +576,7 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 				<textFieldExpression><![CDATA[$F{RNUM}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="45" y="-71" width="120" height="50" uuid="5ddbcd7c-0787-4a50-87bd-52d5db5ddfc6">
+				<reportElement x="44" y="-66" width="120" height="50" uuid="5ddbcd7c-0787-4a50-87bd-52d5db5ddfc6">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="956730c6-4d68-4954-816a-e4724b523db7"/>
 				</reportElement>
 				<box>
@@ -593,7 +591,7 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 				<textFieldExpression><![CDATA[$F{WITNESS_NAME}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="165" y="-71" width="220" height="50" uuid="55d01c9c-ce68-4f6f-b062-f87e4573e07f">
+				<reportElement x="164" y="-66" width="220" height="50" uuid="55d01c9c-ce68-4f6f-b062-f87e4573e07f">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="956730c6-4d68-4954-816a-e4724b523db7"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -616,7 +614,7 @@ AND pplw.CASE_ID = $P{CASE_ID}]]>
 " " + $F{ADDRESS_POST_CODE}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="385" y="-71" width="69" height="50" uuid="35f1b333-2c60-41b9-ad07-61a6c647b400">
+				<reportElement x="384" y="-66" width="69" height="50" uuid="35f1b333-2c60-41b9-ad07-61a6c647b400">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="956730c6-4d68-4954-816a-e4724b523db7"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>

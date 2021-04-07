@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="writ_rpt_acc_dtimpr_appsup" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="5f59f5d6-72e8-4213-a4bd-9da4a38ca818">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="writ_rpt_acc_release_d4" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="5f59f5d6-72e8-4213-a4bd-9da4a38ca818">
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -11,17 +11,21 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.137:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
-	<property name="ireport.jasperserver.reportUnit" value="/reports/writ_rpt_acc_release"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/writ_rpt_acc_release_d4"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-229"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/writ_rpt_acc_release_d4_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/07/2020"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="END_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["14/07/2020"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="NOTICE_TYPE_CODE" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["211"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[SELECT DISTINCT
@@ -29,7 +33,9 @@
     pn.NOTICE_DATE,
     THAISDATE(pn.NOTICE_DATE)               NOTICE_DATE_TEXT,
     pn.NOTICE_CODE_NO || NOTICE_CODE_YEAR	NOTICE_NO,
-    NVL(pltc_b.TITLE_CASE_CODE || TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR),'-')   CASE_BLACK_NO,
+	CASE WHEN pc.BLACK_IDNUM IS NOT NULL 
+		     THEN pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR 
+		     ELSE '-' END CASE_BLACK_NO, 
     NVL(lit.LITIGANT_NAME,'-') DETAINEE,
     NVL(alle.ALLEGATION_NAME,'-') ALLEGATION_NAME,
     NVL(lit.PENALTY_NAME,'-') PENALTY_NAME
@@ -59,7 +65,7 @@ LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME,
                    GROUP BY pcl.CASE_ID, pcl.LITIGANT_NAME) lit ON lit.CASE_ID = pn.CASE_ID
 --           
 WHERE pn.REMOVED_BY = 0
-AND plnt.NOTICE_TYPE_CODE = '211'
+AND (plnt.NOTICE_TYPE_CODE = $P{NOTICE_TYPE_CODE} OR $P{NOTICE_TYPE_CODE} IS NULL)
 AND pn.NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
                                               AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 ORDER BY pn.NOTICE_DATE]]>
@@ -98,7 +104,7 @@ ORDER BY pn.NOTICE_DATE]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
-				<text><![CDATA[บัญชีหมายปล่อย]]></text>
+				<text><![CDATA[บัญชีหมายปล่อย (ด.๔)]]></text>
 			</staticText>
 			<textField evaluationTime="Report">
 				<reportElement x="0" y="10" width="140" height="30" uuid="b9e79db7-d13f-4525-a64f-5876e9ece71c"/>

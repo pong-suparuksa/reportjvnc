@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Blank_A4" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="b6d6a94e-7af3-4eb4-a1cd-69c3f2cbca85">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/calendar/calendar_rpt_activity_from_date"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/calendar/calendar_rpt_activity_from_date_files/main_jrxml"/>
+	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF" fontName="THSarabunNew">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table 1_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_CH" mode="Opaque" backcolor="#FFFFFF" fontName="TH Sarabun New">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table 1_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_TD" mode="Opaque" backcolor="#FFFFFF" fontName="THSarabunNew">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table 1_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<subDataset name="activity_from_date" uuid="e49c4dd3-32ea-4949-bf8e-24181add0926">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="308"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="683"/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+		<parameter name="startDate" class="java.lang.String"/>
+		<parameter name="endDate" class="java.lang.String"/>
+		<queryString language="SQL">
+			<![CDATA[SELECT
+    ROW_NUMBER() OVER (ORDER BY a.activity_id  desc) as row_num,
+    ('กจ/' || a.case_idnum || '/' || a.case_year  ) as caseIdNum,
+    TO_CHAR(a.activity_date_from, 'DD/MM/YYYY' , 'nls_calendar=''Thai Buddha'' nls_date_language = Thai') as date_from ,
+    a.activity_time_from,
+    a.activity_name,
+    a.activity_place,
+    a.activity_org,
+    a.remark
+FROM
+    pc_activity a
+WHERE
+        a.activity_date_from <= to_date($P{endDate},  'DD/MM/YYYY HH24:MI:SS', 'nls_calendar=''Thai Buddha'' nls_date_language = Thai') --activity_date_from <= endDate
+    AND
+    a.activity_date_to >= to_date( $P{startDate} , 'DD/MM/YYYY HH24:MI:SS', 'nls_calendar=''Thai Buddha'' nls_date_language = Thai') --activity_date_to >= startDate
+    AND
+    a.REMOVED_BY = 0
+    AND
+    a.activity_id IN (
+        SELECT
+            p.activity_id
+        FROM
+            pc_activity_participant p
+        WHERE
+            a.activity_id = p.activity_id 
+        )]]>
+		</queryString>
+		<field name="ROW_NUM" class="java.math.BigDecimal">
+			<property name="com.jaspersoft.studio.field.label" value="ROW_NUM"/>
+		</field>
+		<field name="CASEIDNUM" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CASEIDNUM"/>
+		</field>
+		<field name="DATE_FROM" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="DATE_FROM"/>
+		</field>
+		<field name="ACTIVITY_TIME_FROM" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="ACTIVITY_TIME_FROM"/>
+		</field>
+		<field name="ACTIVITY_NAME" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="ACTIVITY_NAME"/>
+		</field>
+		<field name="ACTIVITY_PLACE" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="ACTIVITY_PLACE"/>
+		</field>
+		<field name="ACTIVITY_ORG" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="ACTIVITY_ORG"/>
+		</field>
+		<field name="REMARK" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="REMARK"/>
+		</field>
+	</subDataset>
+	<parameter name="startDate" class="java.lang.String">
+		<defaultValueExpression><![CDATA["01/06/2563"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="endDate" class="java.lang.String">
+		<defaultValueExpression><![CDATA["08/01/2564"]]></defaultValueExpression>
+	</parameter>
+	<queryString language="SQL">
+		<![CDATA[select * from DUAL]]>
+	</queryString>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch">
+			<staticText>
+				<reportElement x="210" y="20" width="60" height="26" uuid="08dc8315-e750-4e41-ba5c-c5131da9e653"/>
+				<textElement textAlignment="Left">
+					<font fontName="TH Sarabun New" size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[วันที่เริ่มต้น]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="210" y="50" width="60" height="26" uuid="9d7e2f99-2edc-4b6a-9e2d-856158a75eb0"/>
+				<textElement textAlignment="Left">
+					<font fontName="TH Sarabun New" size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[วันที่สิ้นสุด]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="271" y="20" width="120" height="26" uuid="5700f1dd-1ec7-4755-9b7b-0d345bcf0839"/>
+				<textElement textAlignment="Left">
+					<font fontName="TH Sarabun New" size="16" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{startDate}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="270" y="50" width="120" height="26" uuid="6a5a3e61-2e21-4284-a6e2-95e5bdf750c7"/>
+				<textElement textAlignment="Left">
+					<font fontName="TH Sarabun New" size="16" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{endDate}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<detail>
+		<band height="160" splitType="Stretch">
+			<componentElement>
+				<reportElement isPrintRepeatedValues="false" x="10" y="10" width="535" height="140" uuid="11ec2503-951d-462c-a8fd-5ab3758490d3">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+					<property name="com.jaspersoft.studio.table.style.table_header" value="Table_TH"/>
+					<property name="com.jaspersoft.studio.table.style.column_header" value="Table_CH"/>
+					<property name="com.jaspersoft.studio.table.style.detail" value="Table_TD"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="activity_from_date" uuid="eaaf9c84-2f76-4175-a895-3e1f59d9c5e8">
+						<datasetParameter name="startDate">
+							<datasetParameterExpression><![CDATA[$P{startDate}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="endDate">
+							<datasetParameterExpression><![CDATA[$P{endDate}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:columnGroup width="536" uuid="4c7ffc0e-c4ab-4beb-ac61-d40767c5e418">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Columns [8]"/>
+						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
+							<staticText>
+								<reportElement mode="Opaque" x="0" y="0" width="536" height="30" forecolor="#FFFFFF" backcolor="#3D3A3A" uuid="fa8e6f51-e5b5-4b17-b2e8-fa948d37b8ca"/>
+								<box topPadding="5" leftPadding="5"/>
+								<textElement textAlignment="Left">
+									<font fontName="TH Sarabun New" size="16" isBold="true"/>
+								</textElement>
+								<text><![CDATA[รายงานข้อมูลกิจกรรม]]></text>
+							</staticText>
+						</jr:tableHeader>
+						<jr:column width="44" uuid="e1c784d5-65ff-4666-b528-8d531af40c71">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
+							<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+								<staticText>
+									<reportElement x="0" y="0" width="44" height="30" backcolor="#FFFFFF" uuid="847fb379-2995-43b3-b2b2-e4c0fe64d54f"/>
+									<box topPadding="5" leftPadding="5"/>
+									<textElement textAlignment="Center">
+										<font fontName="TH Sarabun New" size="14" isBold="false"/>
+									</textElement>
+									<text><![CDATA[ลำดับ]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell style="Table_TD" height="30">
+								<textField isBlankWhenNull="true">
+									<reportElement key="" stretchType="RelativeToBandHeight" x="0" y="0" width="44" height="30" isPrintWhenDetailOverflows="true" uuid="afc00197-51e0-4b01-a069-3699ca3ae5ca"/>
+									<box topPadding="5" leftPadding="5"/>
+									<textElement textAlignment="Center">
+										<font fontName="TH Sarabun New" size="14"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{ROW_NUM}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="72" uuid="8dda5fbc-02fb-4c45-9a36-8133ca001c36">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
+							<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+								<staticText>
+									<reportElement x="0" y="0" width="72" height="30" backcolor="#FFFFFF" uuid="6bddfa2a-5493-408e-a3b6-d82a348267aa"/>
+									<box topPadding="5" leftPadding="5"/>
+									<textElement textAlignment="Center">
+										<font fontName="TH Sarabun New" size="14" isBold="false"/>
+									</textElement>
+									<text><![CDATA[เลขกิจกรรม]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell style="Table_TD" height="30">
+								<textField isBlankWhenNull="true">
+									<reportElement key="" stretchType="RelativeToBandHeight" x="0" y="0" width="72" height="30" isPrintWhenDetailOverflows="true" uuid="17ed88e5-e192-45e8-971a-e573f296344a"/>
+									<box topPadding="5" leftPadding="5"/>
+									<textElement>
+										<font fontName="TH Sarabun New" size="14"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{CASEIDNUM}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="64" uuid="f9ec6cd6-29ec-49f0-b4af-7ee9fdcd0270">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
+							<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+								<staticText>
+									<reportElement x="0" y="0" width="64" height="30" backcolor="#FFFFFF" uuid="dac50e43-51fb-49b4-85af-2cfd4edc2a10"/>
+									<box topPadding="5" leftPadding="5"/>
+									<textElement textAlignment="Center">
+										<font fontName="TH Sarabun New" size="14" isBold="false"/>
+									</textElement>
+									<text><![CDATA[วันที่เริ่ม]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell style="Table_TD" height="30">
+								<textField isBlankWhenNull="true">
+									<reportElement key="" stretchType="RelativeToBandHeight" x="0" y="0" width="64" height="30" isPrintWhenDetailOverflows="true" uuid="849b0d7c-9ef1-4866-9093-18e766bbe197"/>
+									<box topPadding="5" leftPadding="5"/>
+									<textElement>
+										<font fontName="TH Sarabun New" size="14"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{DATE_FROM}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="46" uuid="5045a200-4dd7-41d2-87d2-2f68e8e45119">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column4"/>
+							<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+								<staticText>
+									<reportElement x="0" y="0" width="46" height="30" backcolor="#FFFFFF" uuid="6189b9c6-f7e3-4680-b6f9-1d04d9804a87"/>
+									<box topPadding="5" leftPadding="5"/>
+									<textElement textAlignment="Center">
+										<font fontName="TH Sarabun New" size="14" isBold="false"/>
+										<paragraph lineSpacing="Single"/>
+									</textElement>
+									<text><![CDATA[เวลา]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell style="Table_TD" height="30">
+								<textField isBlankWhenNull="true">
+									<reportElement key="" stretchType="RelativeToBandHeight" x="0" y="0" width="46" height="30" isPrintWhenDetailOverflows="true" uuid="df62c00d-c5ba-46d0-982b-b7c39abd895c"/>
+									<box topPadding="5" leftPadding="5"/>
+									<textElement>
+										<font fontName="TH Sarabun New" size="14"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{ACTIVITY_TIME_FROM}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="88" uuid="325b0853-c8ce-4a76-af10-800a6f5657b6">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
+							<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+								<staticText>
+									<reportElement x="0" y="0" width="88" height="30" backcolor="#FFFFFF" uuid="51c7aa1c-9d95-4281-8b65-ec55663f7a3c"/>
+									<box topPadding="5" leftPadding="5"/>
+									<textElement textAlignment="Center">
+										<font fontName="TH Sarabun New" size="14" isBold="false"/>
+									</textElement>
+									<text><![CDATA[ชื่อกิจกรรม/หัวข้อ]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell style="Table_TD" height="30">
+								<textField isBlankWhenNull="true">
+									<reportElement key="" stretchType="RelativeToBandHeight" x="0" y="0" width="88" height="30" isPrintWhenDetailOverflows="true" uuid="9a4ff594-df6c-4fd0-99a7-862eca93a5c6"/>
+									<box topPadding="5" leftPadding="5"/>
+									<textElement>
+										<font fontName="TH Sarabun New" size="14"/>
+										<paragraph>
+											<tabStop position="20" alignment="Left"/>
+										</paragraph>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{ACTIVITY_NAME}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="51" uuid="292e58ba-b209-4b48-9c21-3f6130902ca9">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
+							<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+								<staticText>
+									<reportElement x="0" y="0" width="51" height="30" backcolor="#FFFFFF" uuid="9a856bd2-62ef-49d2-a149-1deaace3e3be"/>
+									<box topPadding="5" leftPadding="5"/>
+									<textElement textAlignment="Center">
+										<font fontName="TH Sarabun New" size="14" isBold="false"/>
+									</textElement>
+									<text><![CDATA[สถานที่]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell style="Table_TD" height="30">
+								<textField isBlankWhenNull="true">
+									<reportElement key="" style="Table_TH" stretchType="RelativeToBandHeight" x="0" y="0" width="51" height="30" isPrintWhenDetailOverflows="true" backcolor="#FFFFFF" uuid="9c56026e-d40e-488b-9674-e0c2f67bfe83"/>
+									<box topPadding="5" leftPadding="5"/>
+									<textElement>
+										<font fontName="TH Sarabun New" size="14"/>
+										<paragraph>
+											<tabStop position="20" alignment="Left"/>
+										</paragraph>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{ACTIVITY_PLACE}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="94" uuid="c3082c1a-5dff-4e4b-b403-3fca644db52d">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column7"/>
+							<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+								<staticText>
+									<reportElement x="0" y="0" width="94" height="30" backcolor="#FFFFFF" uuid="e850fe05-a820-4b2d-8206-64174ce375a7"/>
+									<box topPadding="5" leftPadding="5"/>
+									<textElement textAlignment="Center">
+										<font fontName="TH Sarabun New" size="14" isBold="false"/>
+									</textElement>
+									<text><![CDATA[หน่วยงานที่เกี่ยวข้อง]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell style="Table_TD" height="30">
+								<textField isBlankWhenNull="true">
+									<reportElement key="" stretchType="RelativeToBandHeight" x="0" y="0" width="94" height="30" isPrintWhenDetailOverflows="true" uuid="d0a1632c-0e1c-448f-9ac6-3c03a8497c62"/>
+									<box topPadding="5" leftPadding="5"/>
+									<textElement>
+										<font fontName="TH Sarabun New" size="14"/>
+										<paragraph>
+											<tabStop position="20" alignment="Left"/>
+										</paragraph>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{ACTIVITY_ORG}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+						<jr:column width="77" uuid="987adcc8-1bcb-461d-b502-5db8fda5a953">
+							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column8"/>
+							<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
+								<staticText>
+									<reportElement x="0" y="0" width="77" height="30" backcolor="#FFFFFF" uuid="ee61c0fc-3714-4d61-bece-6c448faaca26"/>
+									<box topPadding="5" leftPadding="5"/>
+									<textElement textAlignment="Center">
+										<font fontName="TH Sarabun New" size="14" isBold="false"/>
+									</textElement>
+									<text><![CDATA[หมายเหตุ]]></text>
+								</staticText>
+							</jr:columnHeader>
+							<jr:detailCell style="Table_TD" height="30">
+								<textField isBlankWhenNull="true">
+									<reportElement key="" stretchType="RelativeToBandHeight" x="0" y="0" width="77" height="30" isRemoveLineWhenBlank="true" isPrintWhenDetailOverflows="true" uuid="b80cd1ab-79eb-4069-94b0-fbea22419e69"/>
+									<box topPadding="5" leftPadding="5"/>
+									<textElement>
+										<font fontName="TH Sarabun New" size="14"/>
+										<paragraph>
+											<tabStop position="20" alignment="Left"/>
+										</paragraph>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{REMARK}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
+						</jr:column>
+					</jr:columnGroup>
+				</jr:table>
+			</componentElement>
+		</band>
+	</detail>
+</jasperReport>

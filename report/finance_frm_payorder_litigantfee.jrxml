@@ -2,9 +2,9 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="finance_frm_payorder_litigantfee" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="454" leftMargin="85" rightMargin="56" topMargin="49" bottomMargin="56" uuid="7ea5f4e4-e512-4ffb-9bf7-cf2fd2c37890">
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="CojDB[193]"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-229"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.193:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_frm_payorder_litigantfee"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -12,7 +12,6 @@
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="617"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="372"/>
 	<property name="com.jaspersoft.studio.report.description" value=""/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/finance_frm_payorder_litigantfee_files/main_jrxml"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
@@ -45,8 +44,8 @@
 		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="dataadapter\RemoteCojTest.xml"/>
 		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-		<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="572"/>
-		<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="417"/>
+		<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="590"/>
+		<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="400"/>
 		<parameter name="TABLE_PAYID" class="java.lang.Long">
 			<defaultValueExpression><![CDATA[121924]]></defaultValueExpression>
 		</parameter>
@@ -58,6 +57,7 @@
        pfr.RECEIVED_DATE,
        THAISDATE(pfr.RECEIVED_DATE) RECEIVED_DATE_TEXT,
        NVL(pfp.CASH_AMOUNT,0)+NVL(pfp.CHEQUE_AMOUNT,0)+NVL(pfp.TRANSFER_AMOUNT,0) AMOUNT,
+       plrt.RECEIPT_TYPE_NAME,
        plrst.RECEIPT_SUB_TYPE_NAME,
        THAILDATE(pfp.PAYMENT_DATE) PAYMENT_DATE_TEXT 
 FROM PC_FIN_PAYMENT_DETAIL pfpd
@@ -67,6 +67,7 @@ LEFT JOIN PC_FIN_RECEIPT_DETAIL pfrd ON pfrd.DETAIL_ID = pfrbh.RECEIPT_DETAIL_ID
 LEFT JOIN PC_FIN_RECEIPT pfr ON pfr.RECEIPT_ID = pfpd.RECEIPT_ID AND pfr.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_RECEIPT_SUB_TYPE plrst ON plrst.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE 
                                      AND plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE AND plrst.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE  AND plrst.REMOVED_BY = 0
 WHERE pfpd.PAYMENT_ID = $P{TABLE_PAYID}]]>
 		</queryString>
 		<field name="ROW_ORDER" class="java.lang.String">
@@ -92,6 +93,9 @@ WHERE pfpd.PAYMENT_ID = $P{TABLE_PAYID}]]>
 		</field>
 		<field name="RECEIPT_SUB_TYPE_NAME" class="java.lang.String">
 			<property name="com.jaspersoft.studio.field.label" value="RECEIPT_SUB_TYPE_NAME"/>
+		</field>
+		<field name="RECEIPT_TYPE_NAME" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="RECEIPT_TYPE_NAME"/>
 		</field>
 		<variable name="SUM_AMOUNT" class="java.lang.Double" calculation="Sum">
 			<variableExpression><![CDATA[$F{AMOUNT}]]></variableExpression>
@@ -139,7 +143,7 @@ WHERE pfpd.PAYMENT_ID = $P{TABLE_PAYID}]]>
 	   pfp.TRANSFER_NUMBER,
 	   trf.BANK_NAME TRANSFER_BANKNAME,
 	   NVL(pup1.USER_PROFILE_FULL_NAME, pfpd.PAYER1_NAME) PAYER1,
-	   pup2.USER_PROFILE_FULL_NAME PAYER2,
+	    NVL(plj2.JUDGE_NAME,'..................................')  PAYER2,
 	   pup.USER_PROFILE_FULL_NAME  USER_PAY
 FROM PC_FIN_PAYMENT pfp 
 LEFT JOIN PC_FIN_PAYMENT_DETAIL pfpd ON pfpd.PAYMENT_ID = pfp.PAYMENT_ID AND pfpd.REMOVED_BY = 0
@@ -170,7 +174,7 @@ LEFT JOIN (SELECT ROW_NUMBER() OVER(ORDER BY pfp.PAYMENT_ID) ROW_NUM,
 LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pfp.JUDGE_ID AND pfp.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE AND plrt.REMOVED_BY = 0
 LEFT JOIN PC_USER_PROFILE pup1 ON pup1.USER_PROFILE_ID = pfpd.PAYER1 AND pup1.REMOVED_BY = 0
-LEFT JOIN PC_USER_PROFILE pup2 ON pup2.USER_PROFILE_ID = pfpd.PAYER2 AND pup2.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_JUDGE plj2 ON plj2.JUDGE_ID = pfpd.PAYER2 AND plj2.REMOVED_BY = 0
 LEFT JOIN PC_USER_PROFILE pup ON pup.USER_PROFILE_ID = pfpd.CREATED_BY AND pup.REMOVED_BY = 0
 --
 CROSS JOIN (SELECT plc.COURT_NAME_TH 
@@ -573,7 +577,7 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 							</box>
 						</jr:columnFooter>
 						<jr:detailCell height="30">
-							<textField>
+							<textField isStretchWithOverflow="true">
 								<reportElement x="0" y="0" width="56" height="30" uuid="7bdad2df-acc0-4c15-8683-0a4edd09117d"/>
 								<box>
 									<pen lineWidth="0.5"/>
@@ -614,7 +618,7 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 							</staticText>
 						</jr:columnFooter>
 						<jr:detailCell height="30">
-							<textField>
+							<textField isStretchWithOverflow="true">
 								<reportElement x="0" y="0" width="300" height="30" uuid="00bf2b9f-cc85-4eba-b8cd-6dc65a320a24"/>
 								<box leftPadding="3">
 									<pen lineWidth="0.5"/>
@@ -626,8 +630,8 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 								<textElement verticalAlignment="Middle">
 									<font fontName="THSarabunNew" size="17"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{RECEIPT_SUB_TYPE_NAME}==null?"เงินกลาง":
-$F{RECEIPT_SUB_TYPE_NAME}+ ($F{RECEIVED_DATE}==null?" ":"  วันที่วางเงิน " +$F{RECEIVED_DATE_TEXT})]]></textFieldExpression>
+								<textFieldExpression><![CDATA[($F{RECEIPT_TYPE_NAME}==null?" ":$F{RECEIPT_TYPE_NAME}+" ")+($F{RECEIPT_SUB_TYPE_NAME}==null?"เงินกลาง":
+$F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่วางเงิน " +$F{RECEIVED_DATE_TEXT})]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -660,7 +664,7 @@ $F{RECEIPT_SUB_TYPE_NAME}+ ($F{RECEIVED_DATE}==null?" ":"  วันที่ว
 							</textField>
 						</jr:columnFooter>
 						<jr:detailCell height="30">
-							<textField>
+							<textField isStretchWithOverflow="true">
 								<reportElement x="0" y="0" width="98" height="30" uuid="be21f4d2-5b17-4027-87c7-89302feedc81"/>
 								<box rightPadding="3">
 									<pen lineWidth="0.5"/>
