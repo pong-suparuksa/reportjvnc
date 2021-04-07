@@ -21,7 +21,7 @@ c.case_id, NVL(tcb.TITLE_CASE_NAME,' ') ||  TO_CHAR(c.BLACK_IDNUM) || '/' || TO_
  bm.contact_phone_no, cl.litigant_name,
  regexp_replace((SELECT LISTAGG(st.type_name, ',') WITHIN GROUP (ORDER BY st.sec_type_id)
     FROM PC_BAIL_SEC sc
-    JOIN PC_BAIL_SEC_TYPE st ON (st.sec_type_id = sc.sec_type_id)
+    JOIN PC_BAIL_SEC_TYPE st ON (st.sec_type_id = sc.sec_type_code)
     WHERE sc.bail_id = bm.bail_id
     AND sc.BAILSMAN_ID = bm.BAILSMAN_ID 
     AND sc.REMOVED_BY = 0 ),'([^,]+)(,\1)+', '\1') SEC_LAND_ID
