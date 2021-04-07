@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.193:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080//jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/bail_rpt_acc_position"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="261"/>
@@ -32,20 +32,18 @@ CASE BSP.POSITION_TYPE
     ELSE 'อื่น ๆ'
 END,
 BSP.POSITION, BSP.VALUE_AMOUNT, BSP.NOTES, LC.COURT_NAME_TH,
-CASE BD.COURT_ORDER
+CASE B.COURT_ORDER
 	WHEN 1 THEN 'อนุญาต'
     ELSE 'ไม่อนุญาต'
 END
 
 FROM PC_BAIL_SEC_POSITION BSP
 LEFT JOIN PC_BAIL_SEC BS ON(BS.SEC_ID=BSP.SEC_ID)
-LEFT JOIN PC_BAIL B ON(B.BAIL_ID=BS.BAIL_ID)
-LEFT JOIN PC_BAIL_DETAIL BD ON(BD.BAIL_ID=B.BAIL_ID)
+LEFT JOIN PC_BAIL_BAILSMAN BB ON(BB.BAILSMAN_ID=BS.BAILSMAN_ID)
+LEFT JOIN PC_BAIL B ON(B.BAIL_ID=BB.BAIL_ID)
 LEFT JOIN PC_CASE C ON(C.CASE_ID=B.CASE_ID)
 LEFT JOIN PC_LOOKUP_TITLE_CASE LTC ON(LTC.TITLE_CASE_ID=C.BLACK_TITLE_ID)
 LEFT JOIN PC_LOOKUP_COURT LC ON(LC.COURT_ID=B.COURT_ID)
-LEFT JOIN PC_BAIL_SEC_BAILSMAN BSBM ON(BSBM.SEC_ID=BS.SEC_ID)
-LEFT JOIN PC_BAIL_BAILSMAN BB ON(BB.BAILSMAN_ID=BSBM.BAILSMAN_ID)
 LEFT JOIN PC_LOOKUP_TITLE LT ON(LT.TITLE_ID=BB.NAME_TITLE_ID)
 --
 WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONTH}, 'MM-YYYY')]]>

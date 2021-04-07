@@ -11,7 +11,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.137:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080//jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/bail_rpt_acc_asset"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
@@ -24,9 +24,9 @@
 	</parameter>
 	<queryString language="SQL">
 		<![CDATA[SELECT pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR  BLACK_CASE_NO,
-     CASE WHEN pbd.COURT_ORDER  = 1 THEN 'อนุญาต' ELSE 'ไม่อนุญาต' END COURT_ORDER_TEXT,
+     CASE WHEN pb.COURT_ORDER  = 1 THEN 'อนุญาต' ELSE 'ไม่อนุญาต' END COURT_ORDER_TEXT,
      pbb.NAME || ' ' ||pbb.LASTNAME BAILSMAN,
-     NVL(pbd.DEFENDANT_BAIL_COST,0)   BAIL_COST,
+     NVL(pbs.TOTAL_AMOUNT ,0)   BAIL_COST,
      pc.PROS_DESC,
      pc.ACCU_DESC,
      pc.ALLE_DESC,
@@ -44,21 +44,19 @@
      CASE WHEN pbscd.SEC_ID > 0 THEN 'บัญชีประกันด้วยห้องชุด' ELSE ' ' END BAIL_CONDO,
      CASE WHEN pbsp.SEC_ID > 0 THEN 'บัญชีประกันด้วยตำแหน่ง' ELSE ' ' END BAIL_POSITION,
      CASE WHEN pspc.SEC_ID > 0 THEN 'บัญชีประกันด้วยเงินสด' ELSE ' ' END BAIL_CASH,
+     CASE WHEN pbsac.SEC_ID > 0 THEN 'หนังสือรับรองโดยต้นสังกัด' ELSE ' ' END BAIL_AFFILIATE_CERTIFICATE,
      LISTAGG(pla.ALLEGATION_NAME, ', ') WITHIN GROUP (ORDER BY pla.ALLEGATION_NAME) "ALLE"     
 FROM PC_BAIL pb 
-LEFT JOIN PC_BAIL_DETAIL pbd ON pbd.BAIL_ID = pb.BAIL_ID AND pbd.REMOVED_BY = 0
 --
-LEFT JOIN PC_BAIL_SEC_BAIL pbsb1 ON pbsb1.BAIL_ID = pb.BAIL_ID AND pbsb1.REMOVED_BY = 0
-LEFT JOIN PC_BAIL_SEC_BAILSMAN pbsb2 ON pbsb2.SEC_ID = pbsb1.SEC_ID AND pbsb2.REMOVED_BY = 0
-LEFT JOIN PC_BAIL_BAILSMAN pbb ON pbb.BAILSMAN_ID = pbsb2.BAILSMAN_ID AND pbb.REMOVED_BY = 0
+LEFT JOIN PC_BAIL_BAILSMAN pbb ON pbb.BAIL_ID = pb.BAIL_ID AND pbb.REMOVED_BY = 0
 --
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pb.CASE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID
 LEFT JOIN PC_CASE_ALLE pca ON pca.CASE_ID = pc.CASE_ID 
 --
-LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pbd.JUDGE_ID AND plj.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pb.JUDGE_ID AND plj.REMOVED_BY = 0
 --
-LEFT JOIN PC_BAIL_SEC pbs ON pbs.SEC_ID = pbsb1.SEC_ID AND pbs.REMOVED_BY = 0
+LEFT JOIN PC_BAIL_SEC pbs ON pbb.BAILSMAN_ID = pbs.BAILSMAN_ID AND pbs.REMOVED_BY = 0
 LEFT JOIN PC_BAIL_SEC_ACCOUNT pbsa ON pbsa.SEC_ID = pbs.SEC_ID AND pbsa.REMOVED_BY = 0
 LEFT JOIN PC_BAIL_SEC_LAND pbsl ON pbsl.SEC_ID = pbs.SEC_ID AND pbsl.REMOVED_BY = 0
 LEFT JOIN PC_BAIL_SEC_BOND pbsb ON pbsb.SEC_ID = pbs.SEC_ID AND pbsb.REMOVED_BY = 0
@@ -67,15 +65,16 @@ LEFT JOIN PC_BAIL_SEC_INSURANCE pbsi ON pbsi.SEC_ID = pbs.SEC_ID AND pbsi.REMOVE
 LEFT JOIN PC_BAIL_SEC_CONDO pbscd ON pbscd.SEC_ID = pbs.SEC_ID AND pbscd.REMOVED_BY = 0
 LEFT JOIN PC_BAIL_SEC_POSITION pbsp ON pbsp.SEC_ID = pbs.SEC_ID AND pbsp.REMOVED_BY = 0
 LEFT JOIN PC_BAIL_SEC_CASH pspc ON pspc.SEC_ID = pbs.SEC_ID AND pspc.REMOVED_BY = 0
+LEFT JOIN PC_BAIL_SEC_AFFILIATE_CERTIFICATE pbsac ON pbsac.SEC_ID = pbs.SEC_ID AND pbsac.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_BOND_TYPE plbt ON plbt.BOND_TYPE_ID=pbsb.BOND_TYPE_ID AND plbt.REMOVED_BY = 0
 --
 LEFT JOIN PC_LOOKUP_ALLEGATION pla ON pla.ALLEGATION_ID = pca.ALLEGATION_ID
 WHERE pb.REMOVED_BY = 0 AND pb.BAIL_DATE = TO_DATE($P{SELECT_DATE}, 'DD-MM-YYYY') 
 --
 GROUP BY pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR,
-       CASE WHEN pbd.COURT_ORDER  = 1 THEN 'อนุญาต' ELSE 'ไม่อนุญาต' END,
+       CASE WHEN pb.COURT_ORDER  = 1 THEN 'อนุญาต' ELSE 'ไม่อนุญาต' END,
        pbb.NAME || ' ' ||pbb.LASTNAME,
-       NVL(pbd.DEFENDANT_BAIL_COST,0),
+       NVL(pbs.TOTAL_AMOUNT,0),
        pc.PROS_DESC,
        pc.ACCU_DESC,
        pc.ALLE_DESC,
@@ -88,8 +87,9 @@ GROUP BY pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR,
        CASE WHEN pbsi.SEC_ID > 0 THEN 'บัญชีประกันด้วยกรมธรรม์' ELSE ' ' END,
        CASE WHEN pbscd.SEC_ID > 0 THEN 'บัญชีประกันด้วยห้องชุด' ELSE ' ' END,
        CASE WHEN pbsp.SEC_ID > 0 THEN 'บัญชีประกันด้วยตำแหน่ง' ELSE ' ' END,
-       CASE WHEN pspc.SEC_ID > 0 THEN 'บัญชีประกันด้วยเงินสด' ELSE ' ' END
-ORDER BY  CASE WHEN pbd.COURT_ORDER  = 1 THEN 'อนุญาต' ELSE 'ไม่อนุญาต' END]]>
+       CASE WHEN pspc.SEC_ID > 0 THEN 'บัญชีประกันด้วยเงินสด' ELSE ' ' END,
+       CASE WHEN pbsac.SEC_ID > 0 THEN 'หนังสือรับรองโดยต้นสังกัด' ELSE ' ' END 
+ORDER BY  CASE WHEN pb.COURT_ORDER  = 1 THEN 'อนุญาต' ELSE 'ไม่อนุญาต' END]]>
 	</queryString>
 	<field name="BLACK_CASE_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="BLACK_CASE_NO"/>
@@ -242,7 +242,7 @@ ORDER BY  CASE WHEN pbd.COURT_ORDER  = 1 THEN 'อนุญาต' ELSE 'ไม�
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="18" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new SimpleDateFormat("บัญชีการประกันวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{SELECT_DATE}))	]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("บัญชีการประกันวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{SELECT_DATE}))]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="730" y="30" width="70" height="25" uuid="1e7fc211-95b6-4a07-8b14-e284f28345ea">

@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.193:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080//jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/bail_rpt_acc_insurpol"/>
 	<property name="com.jaspersoft.studio.report.description" value="25.บัญชีประกันด้วยกรมธรรม์"/>
@@ -31,8 +31,8 @@ BSI.VALUE_AMOUNT, LC.COURT_NAME_TH
 --
 FROM PC_BAIL_SEC_INSURANCE BSI
 LEFT JOIN PC_BAIL_SEC BS ON(BS.SEC_ID=BSI.SEC_ID AND BS.REMOVED_BY = 0)
-LEFT JOIN PC_BAIL B ON(B.BAIL_ID=BS.BAIL_ID AND B.REMOVED_BY = 0)
-LEFT JOIN PC_BAIL_DETAIL BD ON(BD.BAIL_ID=B.BAIL_ID AND BD.REMOVED_BY = 0)
+LEFT JOIN PC_BAIL_BAILSMAN BB ON(BB.BAILSMAN_ID=BS.BAILSMAN_ID AND BB.REMOVED_BY = 0)
+LEFT JOIN PC_BAIL B ON(B.BAIL_ID=BB.BAIL_ID AND B.REMOVED_BY = 0)
 --
 LEFT JOIN PC_CASE C ON(C.CASE_ID=B.CASE_ID AND C.REMOVED_BY = 0)
 LEFT JOIN PC_LOOKUP_TITLE_CASE LTC ON(LTC.TITLE_CASE_ID=C.BLACK_TITLE_ID AND LTC.REMOVED_BY = 0)
@@ -41,8 +41,6 @@ LEFT JOIN PC_LOOKUP_TITLE_CASE LTC_RED ON(LTC_RED.TITLE_CASE_ID = J.RED_TITLE_ID
 --
 LEFT JOIN PC_LOOKUP_COURT LC ON(LC.COURT_ID=B.COURT_ID AND LC.REMOVED_BY = 0)
 --
-LEFT JOIN PC_BAIL_SEC_BAILSMAN BSBM ON(BSBM.SEC_ID=BS.SEC_ID AND BSBM.REMOVED_BY = 0)
-LEFT JOIN PC_BAIL_BAILSMAN BB ON(BB.BAILSMAN_ID=BSBM.BAILSMAN_ID AND BB.REMOVED_BY = 0)
 LEFT JOIN PC_LOOKUP_TITLE LT ON(LT.TITLE_ID=BB.NAME_TITLE_ID AND LT.REMOVED_BY = 0)
 --
 WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONTH}, 'MM-YYYY')]]>

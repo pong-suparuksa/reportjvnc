@@ -11,7 +11,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.193:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080//jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/bail_rpt_acc_govbond"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="cojtest"/>
@@ -35,16 +35,14 @@ END BOND_TYPE
 
 FROM PC_BAIL_SEC_BOND BSB
 LEFT JOIN PC_BAIL_SEC BS ON(BS.SEC_ID=BSB.SEC_ID AND BS.REMOVED_BY = 0)
-LEFT JOIN PC_BAIL B ON(B.BAIL_ID=BS.BAIL_ID AND B.REMOVED_BY = 0)
-LEFT JOIN PC_BAIL_DETAIL BD ON(BD.BAIL_ID=B.BAIL_ID AND BD.REMOVED_BY = 0)
+LEFT JOIN PC_BAIL_BAILSMAN BB ON(BS.BAILSMAN_ID=BB.BAILSMAN_ID AND BB.REMOVED_BY = 0)
+LEFT JOIN PC_BAIL B ON(B.BAIL_ID=BB.BAIL_ID AND B.REMOVED_BY = 0)
 --
 LEFT JOIN PC_CASE C ON(C.CASE_ID=B.CASE_ID AND C.REMOVED_BY = 0)
 LEFT JOIN PC_LOOKUP_TITLE_CASE LTC ON(LTC.TITLE_CASE_ID=C.BLACK_TITLE_ID AND LTC.REMOVED_BY = 0)
 LEFT JOIN PC_LOOKUP_COURT LC ON(LC.COURT_ID=B.COURT_ID AND LC.REMOVED_BY = 0)
 LEFT JOIN PC_LOOKUP_BANK LB ON(LB.BANK_ID=BSB.BANK_ID)
 --
-LEFT JOIN PC_BAIL_SEC_BAILSMAN BSBM ON(BSBM.SEC_ID=BS.SEC_ID AND BSBM.REMOVED_BY = 0)
-LEFT JOIN PC_BAIL_BAILSMAN BB ON(BB.BAILSMAN_ID=BSBM.BAILSMAN_ID AND BB.REMOVED_BY = 0)
 LEFT JOIN PC_LOOKUP_TITLE LT ON(LT.TITLE_ID=BB.NAME_TITLE_ID AND LT.REMOVED_BY = 0)
 LEFT JOIN PC_LOOKUP_BOND_TYPE LBT ON(LBT.BOND_TYPE_ID=BSB.BOND_TYPE_ID AND LBT.REMOVED_BY = 0)
 --

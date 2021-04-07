@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.193:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080//jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/bail_rpt_bailproperty"/>
 	<property name="com.jaspersoft.studio.report.description" value="31.รายงานแฟ้มเก็บหลักประกัน"/>
@@ -27,18 +27,15 @@
 		<![CDATA[SELECT pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR  BLACK_CASE_NO,
 plt.TITLE_NAME || pbb.NAME || ' ' || pbb.LASTNAME BAILMAN_NAME,
 THAISDATE(pb.BAIL_DATE) THAIDATE,	
-plgt.GUAR_TITLE_NAME || pb.BAIL_CODE_NO || '/' || pb.BAIL_CODE_YEAR BAIL_CASE,
+pb.BAIL_CODE_NO || '/' || pb.BAIL_CODE_YEAR BAIL_CASE,
 pbst.TYPE_NAME, THAISDATE(pbs.CREATED_DATE) CREATE_DATE, pup.USER_PROFILE_FULL_NAME
 
 FROM PC_BAIL_SEC pbs
 --
-LEFT JOIN PC_BAIL_SEC_TYPE pbst ON pbst.SEC_TYPE_ID = pbs.SEC_TYPE_ID AND pbst.REMOVED_BY = 0
+LEFT JOIN PC_BAIL_SEC_TYPE pbst ON pbst.TYPE_CODE = pbs.SEC_TYPE_CODE AND pbst.REMOVED_BY = 0
+LEFT JOIN PC_BAIL_BAILSMAN pbb ON pbb.BAILSMAN_ID = pbs.BAILSMAN_ID AND pbb.REMOVED_BY = 0
 LEFT JOIN PC_BAIL pb ON pb.BAIL_ID = pbs.BAIL_ID AND pb.REMOVED_BY = 0
-LEFT JOIN PC_BAIL_DETAIL pbd ON pbd.BAIL_ID = pb.BAIL_ID AND pbd.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_GUAR_TITLE plgt ON plgt.GUAR_TITLE_ID = pb.BAIL_TITLE_ID AND plgt.REMOVED_BY = 0
 --
-LEFT JOIN PC_BAIL_SEC_BAILSMAN pbsb ON pbsb.SEC_ID = pbs.SEC_ID AND pbsb.REMOVED_BY = 0
-LEFT JOIN PC_BAIL_BAILSMAN pbb ON pbb.BAILSMAN_ID = pbsb.BAILSMAN_ID AND pbb.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE plt ON plt.TITLE_ID = pbb.NAME_TITLE_ID AND plt.REMOVED_BY = 0
 --
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pb.CASE_ID AND pc.REMOVED_BY = 0
