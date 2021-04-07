@@ -51,7 +51,7 @@ pbs.SEQUESTER_REMARK NOTES,
 --
 NVL(pbsa.BALANCE_AMOUNT,0) BAIL_ACCOUNT_AMOUNT, NVL(pbsl.VALUES_FOR_BAILING,0) BAIL_LAND_AMOUNT, NVL(pbsb.VALUE_AMOUNT,0) BAIL_BOND_AMOUNT,
 NVL(pbsbgt.LIMIT_AMOUNT,0) BAIL_BANKGUARANTEE_AMOUNT, NVL(pbsi.VALUE_AMOUNT,0) BAIL_INSURANCE_AMOUNT, NVL(pbscd.VALUES_FOR_BAILING,0) BAIL_CONDO_AMOUNT,
-NVL(pbsp.VALUE_AMOUNT,0) BAIL_POSITION_AMOUNT, NVL(pspc.AMOUNT,0) BAIL_CASH_AMOUNT
+NVL(pbsp.VALUE_AMOUNT,0) BAIL_POSITION_AMOUNT, NVL(pspc.AMOUNT,0) BAIL_CASH_AMOUNT, NVL(pbsac.AMOUNT,0) BAIL_AFFILIATE_CERTIFICATE_AMOUNT
 --
 FROM PC_BAIL_SEC pbs
 LEFT JOIN PC_BAIL pb ON pb.BAIL_ID = pbs.BAIL_ID AND pb.REMOVED_BY = 0
@@ -78,7 +78,7 @@ LEFT JOIN PC_BAIL_SEC_POSITION pbsp ON pbsp.SEC_ID = pbs.SEC_ID AND pbsp.REMOVED
 LEFT JOIN PC_BAIL_SEC_CASH pspc ON pspc.SEC_ID = pbs.SEC_ID AND pspc.REMOVED_BY = 0
 LEFT JOIN PC_BAIL_SEC_AFFILIATE_CERTIFICATE pbsac ON pbsac.SEC_ID = pbs.SEC_ID AND pbsac.REMOVED_BY = 0
 --
-WHERE pbs.REMOVED_BY = 0
+WHERE pbs.REMOVED_BY = 0 AND pbs.SEQUESTER_TYPE = '01'
 AND pbs.SEQUESTER_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')]]>
 	</queryString>
 	<field name="BLACK_CASE_NO" class="java.lang.String">
@@ -150,6 +150,8 @@ AND pbs.SEQUESTER_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"
 	<field name="BAIL_CASH_AMOUNT" class="java.lang.Double">
 		<property name="com.jaspersoft.studio.field.label" value="BAIL_CASH_AMOUNT"/>
 	</field>
+	<field name="BAIL_AFFILIATE_CERTIFICATE" class="java.lang.String"/>
+	<field name="BAIL_AFFILIATE_CERTIFICATE_AMOUNT" class="java.lang.Double"/>
 	<variable name="TEMP_START_DATE" class="java.lang.String">
 		<initialValueExpression><![CDATA[$P{START_DATE}]]></initialValueExpression>
 	</variable>
@@ -346,7 +348,7 @@ AND pbs.SEQUESTER_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"
 					<font fontName="TH Sarabun New" size="14"/>
 				</textElement>
 				<textFieldExpression><![CDATA[" " + ($F{BAIL_ACCOUNT} +$F{BAIL_LAND} + $F{BAIL_BOND} + $F{BAIL_BANKGUARANTEE} 
-+ $F{BAIL_INSURANCE} + $F{BAIL_CONDO}+ $F{BAIL_POSITION}+ $F{BAIL_CASH}).replace(" ","")]]></textFieldExpression>
++ $F{BAIL_INSURANCE} + $F{BAIL_CONDO}+ $F{BAIL_POSITION}+ $F{BAIL_CASH} + $F{BAIL_AFFILIATE_CERTIFICATE}).replace(" ","")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement stretchType="ContainerHeight" x="580" y="0" width="122" height="25" uuid="14ab354d-85e4-40a9-8828-751231218501">
@@ -359,7 +361,7 @@ AND pbs.SEQUESTER_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($F{BAIL_ACCOUNT_AMOUNT} + $F{BAIL_LAND_AMOUNT} + $F{BAIL_BOND_AMOUNT} +$F{BAIL_BANKGUARANTEE_AMOUNT} + $F{BAIL_INSURANCE_AMOUNT} + $F{BAIL_CONDO_AMOUNT} + $F{BAIL_POSITION_AMOUNT} + $F{BAIL_CASH_AMOUNT})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($F{BAIL_ACCOUNT_AMOUNT} + $F{BAIL_LAND_AMOUNT} + $F{BAIL_BOND_AMOUNT} +$F{BAIL_BANKGUARANTEE_AMOUNT} + $F{BAIL_INSURANCE_AMOUNT} + $F{BAIL_CONDO_AMOUNT} + $F{BAIL_POSITION_AMOUNT} + $F{BAIL_CASH_AMOUNT} + $F{BAIL_AFFILIATE_CERTIFICATE_AMOUNT})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="702" y="0" width="100" height="25" uuid="431bd41f-136f-448c-a04d-c7197e695d93">
