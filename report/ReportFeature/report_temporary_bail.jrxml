@@ -5,8 +5,8 @@
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/ReportFeature/report_temporary_bail_files/main_jrxml"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/ReportFeature/report_temporary_bail"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/ReportFeature/report_temporary_bail_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["10/03/2021"]]></defaultValueExpression>
 	</parameter>
@@ -22,12 +22,12 @@
     pc.ACCU_DESC ,
     pc.ALLE_DESC ,
 	pbb.FULLNAME ,
-	pb.RATE_AMOUNT ,
+	pbs.TOTAL_AMOUNT ,
 	pbst.TYPE_NAME ,
 	CASE WHEN pb.COURT_ORDER = 1 THEN  'อนุญาต' ELSE 'ไม่อนุญาต'END COURT_ORDER
 FROM  PC_BAIL pb
 LEFT JOIN  PC_BAIL_BAILSMAN pbb ON pbb.BAIL_ID = pb.BAIL_ID AND pbb.REMOVED_BY = 0
-LEFT JOIN  PC_BAIL_SEC pbs ON pbs.BAILSMAN_ID = pb.BAIL_ID 
+JOIN  PC_BAIL_SEC pbs ON pbs.BAILSMAN_ID = pbb.BAILSMAN_ID 
 LEFT JOIN PC_BAIL_SEC_TYPE pbst ON pbst.TYPE_CODE = pbs.SEC_TYPE_CODE 
 LEFT JOIN  PC_LIST_OF_VALUE plov ON plov.VALUE = pb.BAIL_PERIOD   AND plov.LOV_TYPE = 'BAIL_CLASS' AND PLOV.REMOVED_BY = 0
 
@@ -72,7 +72,7 @@ ORDER BY
 	<field name="FULLNAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="FULLNAME"/>
 	</field>
-	<field name="RATE_AMOUNT" class="java.lang.String">
+	<field name="TOTAL_AMOUNT" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="RATE_AMOUNT"/>
 	</field>
 	<field name="TYPE_NAME" class="java.lang.String">
@@ -295,7 +295,7 @@ ORDER BY
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{COLUMN_COUNT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="520" y="0" width="90" height="30" uuid="758f38a2-5f59-4ee7-bc6d-c0ef33101e5e"/>
@@ -308,7 +308,7 @@ ORDER BY
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{RATE_AMOUNT}==null? "-":$F{RATE_AMOUNT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{TOTAL_AMOUNT}==null? "-":$F{TOTAL_AMOUNT}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="160" y="0" width="90" height="30" uuid="b99aba50-f903-49e5-86d1-7464cb8ca3de">

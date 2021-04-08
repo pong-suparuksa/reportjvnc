@@ -22,7 +22,7 @@
 FROM PC_BAIL pb 
 JOIN PC_CASE pc ON pc.CASE_ID = pb.CASE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN  PC_BAIL_BAILSMAN pbb ON pbb.BAIL_ID = pb.BAIL_ID AND pbb.REMOVED_BY = 0
-LEFT JOIN  PC_BAIL_SEC pbs ON pbs.BAILSMAN_ID = pb.BAIL_ID 
+JOIN  PC_BAIL_SEC pbs ON pbs.BAILSMAN_ID = pbb.BAILSMAN_ID  AND pbs.REMOVED_BY = 0
 LEFT JOIN PC_BAIL_SEC_TYPE pbst ON pbst.TYPE_CODE = pbs.SEC_TYPE_CODE  
 LEFT JOIN  PC_LIST_OF_VALUE plov ON plov.VALUE = pb.BAIL_PERIOD   AND plov.LOV_TYPE = 'BAIL_CLASS' AND PLOV.REMOVED_BY = 0
 
@@ -45,7 +45,7 @@ WHERE
 	AND pb.IS_PRINTED = 1
 	AND pb.CASE_ID = $P{CASE_ID}
 ORDER BY
-	BLACK_CASE_NO ASC ]]>
+	BLACK_CASE_NO ASC]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
@@ -230,7 +230,7 @@ ORDER BY
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{COLUMN_COUNT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="390" y="0" width="179" height="30" uuid="e0627af7-7a3f-4635-9f22-c1bca167c8d7">

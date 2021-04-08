@@ -5,8 +5,8 @@
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
 	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/ReportFeature/report_surrendering_parents_files/main_jrxml"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/ReportFeature/report_surrendering_parents"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/ReportFeature/report_surrendering_parents_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["10/03/2020"]]></defaultValueExpression>
 	</parameter>
@@ -21,7 +21,7 @@ c.case_id, NVL(tcb.TITLE_CASE_NAME,' ') ||  TO_CHAR(c.BLACK_IDNUM) || '/' || TO_
  bm.contact_phone_no, cl.litigant_name,
  regexp_replace((SELECT LISTAGG(st.type_name, ',') WITHIN GROUP (ORDER BY st.sec_type_id)
     FROM PC_BAIL_SEC sc
-    JOIN PC_BAIL_SEC_TYPE st ON (st.sec_type_id = sc.sec_type_code)
+    JOIN PC_BAIL_SEC_TYPE st ON (st.TYPE_CODE = sc.sec_type_code)
     WHERE sc.bail_id = bm.bail_id
     AND sc.BAILSMAN_ID = bm.BAILSMAN_ID 
     AND sc.REMOVED_BY = 0 ),'([^,]+)(,\1)+', '\1') SEC_LAND_ID
@@ -240,7 +240,7 @@ ORDER BY
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{COLUMN_COUNT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="99" y="0" width="60" height="20" uuid="6825fb24-c3cc-4c2f-a5a8-cde416f7e003">
