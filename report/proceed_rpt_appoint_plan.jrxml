@@ -11,17 +11,17 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_plan"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="610"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="379"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_plan_files/main_jrxml"/>
 	<parameter name="SELMONTH" class="java.lang.String">
 		<defaultValueExpression><![CDATA["032021"]]></defaultValueExpression>
-	</parameter>
-	<parameter name="PERS_TYPE_CODE" class="java.lang.Integer" isForPrompting="false">
-		<defaultValueExpression><![CDATA[801]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
 		<![CDATA[SELECT
@@ -86,10 +86,10 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
 			 JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
 			 WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) co  
 --			 
-WHERE ppaw.REMOVED_BY = 0 AND ($P{PERS_TYPE_CODE} IS NULL OR ppaw.PERS_TYPE_CODE = $P{PERS_TYPE_CODE}) 
+WHERE ppaw.REMOVED_BY = 0 
 AND TO_CHAR(ppac.START_DATE,'MMYYYY') = $P{SELMONTH}
 ORDER BY ppa.CASE_ID, ppac.START_DATE, ppac.CHOICE_TIME
---		]]>
+--]]>
 	</queryString>
 	<field name="ALERT_WITNESS_ID" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="ALERT_WITNESS_ID"/>
