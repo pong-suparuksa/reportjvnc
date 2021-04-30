@@ -1,0 +1,1653 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="TJ73-11" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="731307ad-1cb7-4a93-be97-10805dff6c38">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[210]"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="MONTH" class="java.lang.String">
+		<defaultValueExpression><![CDATA["04-2021"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+*
+FROM
+(
+SELECT DISTINCT
+	COUNT(DISTINCT PC_CASE.CASE_ID) AS C1_COUNT_MATRA_309_321 -- คำร้อง
+FROM
+	PC_CASE
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2136'
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT 
+	COUNT(*) AS C2_COUNT_MATRA_309_321 -- อื่นๆ
+FROM
+	PC_CASE
+INNER JOIN 
+	(
+		SELECT
+			*
+		FROM 
+			PC_CASE_LIT 
+		WHERE LITIGANT_TYPE_ID = 3
+	) CASE_LIT_LITIGANT_TYPE_ID_3
+ON 
+	PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_3.CASE_ID
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2136'
+	AND
+  LAWFUL_FLAG = 1
+	AND
+	OTHER_ORDER_FLAG = 1
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT 
+	COUNT(*) AS C3_COUNT_MATRA_309_321 -- มอบตัว
+FROM
+	PC_CASE
+INNER JOIN 
+	(
+		SELECT
+			*
+		FROM 
+			PC_CASE_LIT 
+		WHERE LITIGANT_TYPE_ID = 3
+	) CASE_LIT_LITIGANT_TYPE_ID_3
+ON 
+	PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_3.CASE_ID
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2136'
+	AND
+  LAWFUL_FLAG = 1
+	AND
+	SURRENDER_FLAG = 1
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT 
+	COUNT(*) AS C4_COUNT_MATRA_309_321 -- บำบัด
+FROM
+	PC_CASE
+INNER JOIN 
+	(
+		SELECT
+			*
+		FROM 
+			PC_CASE_LIT 
+		WHERE LITIGANT_TYPE_ID = 3
+	) CASE_LIT_LITIGANT_TYPE_ID_3
+ON 
+	PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_3.CASE_ID
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2136'
+	AND
+  LAWFUL_FLAG = 1
+	AND
+	CURE_FLAG = 1
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT 
+	COUNT(*) AS C5_COUNT_MATRA_309_321 -- ควบคุมสถานพินิจ
+FROM
+	PC_CASE
+INNER JOIN 
+	(
+		SELECT
+			*
+		FROM 
+			PC_CASE_LIT 
+		WHERE LITIGANT_TYPE_ID = 3
+	) CASE_LIT_LITIGANT_TYPE_ID_3
+ON 
+	PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_3.CASE_ID
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2136'
+	AND
+  LAWFUL_FLAG = 1
+	AND
+	CUSTODY_FLAG = 1
+	AND
+	CUSTODY_PLACE_FLAG  = 1
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT 
+	COUNT(*) AS C6_COUNT_MATRA_309_321 -- ควบคุมเรือนจำ
+FROM
+	PC_CASE
+INNER JOIN 
+	(
+		SELECT
+			*
+		FROM 
+			PC_CASE_LIT 
+		WHERE LITIGANT_TYPE_ID = 3
+	) CASE_LIT_LITIGANT_TYPE_ID_3
+ON 
+	PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_3.CASE_ID
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2136'
+	AND
+  LAWFUL_FLAG = 1
+	AND
+	CUSTODY_FLAG = 1
+	AND
+	CUSTODY_PLACE_FLAG  = 2
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT 
+	COUNT(*) AS C7_COUNT_MATRA_309_321 -- ควบคุมสถานที่อื่นๆ
+FROM
+	PC_CASE
+INNER JOIN 
+	(
+		SELECT
+			*
+		FROM 
+			PC_CASE_LIT 
+		WHERE LITIGANT_TYPE_ID = 3
+	) CASE_LIT_LITIGANT_TYPE_ID_3
+ON 
+	PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_3.CASE_ID
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2136'
+	AND
+  LAWFUL_FLAG = 1
+	AND
+	CUSTODY_FLAG = 1
+	AND
+	CUSTODY_PLACE_FLAG  = 3
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT 
+	COUNT(*) AS C8_COUNT_MATRA_309_321 -- ชอบ
+FROM
+	PC_CASE
+INNER JOIN 
+	(
+		SELECT
+			*
+		FROM 
+			PC_CASE_LIT 
+		WHERE LITIGANT_TYPE_ID = 3
+	) CASE_LIT_LITIGANT_TYPE_ID_3
+ON 
+	PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_3.CASE_ID
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2136'
+	AND
+  LAWFUL_FLAG = 0
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT 
+	COUNT(*) AS C9_COUNT_MATRA_309_321 -- มิชอบ
+FROM
+	PC_CASE
+INNER JOIN 
+	(
+		SELECT
+			*
+		FROM 
+			PC_CASE_LIT 
+		WHERE LITIGANT_TYPE_ID = 3
+	) CASE_LIT_LITIGANT_TYPE_ID_3
+ON 
+	PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_3.CASE_ID
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2136'
+	AND
+  LAWFUL_FLAG = 1
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT DISTINCT
+	COUNT(DISTINCT PC_CASE.CASE_ID) AS C1_COUNT_MATRA_322_325 -- คำร้อง
+FROM
+	PC_CASE
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2137'
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT 
+	COUNT(*) AS C2_COUNT_MATRA_322_325 -- อื่นๆ
+FROM
+	PC_CASE
+INNER JOIN 
+	(
+		SELECT
+			*
+		FROM 
+			PC_CASE_LIT 
+		WHERE LITIGANT_TYPE_ID = 3
+	) CASE_LIT_LITIGANT_TYPE_ID_3
+ON 
+	PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_3.CASE_ID
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2137'
+	AND
+  LAWFUL_FLAG = 1
+	AND
+	OTHER_ORDER_FLAG = 1
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT 
+	COUNT(*) AS C3_COUNT_MATRA_322_325 -- มอบตัว
+FROM
+	PC_CASE
+INNER JOIN 
+	(
+		SELECT
+			*
+		FROM 
+			PC_CASE_LIT 
+		WHERE LITIGANT_TYPE_ID = 3
+	) CASE_LIT_LITIGANT_TYPE_ID_3
+ON 
+	PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_3.CASE_ID
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2137'
+	AND
+  LAWFUL_FLAG = 1
+	AND
+	SURRENDER_FLAG = 1
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT 
+	COUNT(*) AS C4_COUNT_MATRA_322_325 -- บำบัด
+FROM
+	PC_CASE
+INNER JOIN 
+	(
+		SELECT
+			*
+		FROM 
+			PC_CASE_LIT 
+		WHERE LITIGANT_TYPE_ID = 3
+	) CASE_LIT_LITIGANT_TYPE_ID_3
+ON 
+	PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_3.CASE_ID
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2137'
+	AND
+  LAWFUL_FLAG = 1
+	AND
+	CURE_FLAG = 1
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT 
+	COUNT(*) AS C5_COUNT_MATRA_322_325 -- ควบคุมสถานพินิจ
+FROM
+	PC_CASE
+INNER JOIN 
+	(
+		SELECT
+			*
+		FROM 
+			PC_CASE_LIT 
+		WHERE LITIGANT_TYPE_ID = 3
+	) CASE_LIT_LITIGANT_TYPE_ID_3
+ON 
+	PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_3.CASE_ID
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2137'
+	AND
+  LAWFUL_FLAG = 1
+	AND
+	CUSTODY_FLAG = 1
+	AND
+	CUSTODY_PLACE_FLAG  = 1
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT 
+	COUNT(*) AS C6_COUNT_MATRA_322_325 -- ควบคุมเรือนจำ
+FROM
+	PC_CASE
+INNER JOIN 
+	(
+		SELECT
+			*
+		FROM 
+			PC_CASE_LIT 
+		WHERE LITIGANT_TYPE_ID = 3
+	) CASE_LIT_LITIGANT_TYPE_ID_3
+ON 
+	PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_3.CASE_ID
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2137'
+	AND
+  LAWFUL_FLAG = 1
+	AND
+	CUSTODY_FLAG = 1
+	AND
+	CUSTODY_PLACE_FLAG  = 2
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT 
+	COUNT(*) AS C7_COUNT_MATRA_322_325 -- ควบคุมสถานที่อื่นๆ
+FROM
+	PC_CASE
+INNER JOIN 
+	(
+		SELECT
+			*
+		FROM 
+			PC_CASE_LIT 
+		WHERE LITIGANT_TYPE_ID = 3
+	) CASE_LIT_LITIGANT_TYPE_ID_3
+ON 
+	PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_3.CASE_ID
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2137'
+	AND
+  LAWFUL_FLAG = 1
+	AND
+	CUSTODY_FLAG = 1
+	AND
+	CUSTODY_PLACE_FLAG  = 3
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT 
+	COUNT(*) AS C8_COUNT_MATRA_322_325 -- ชอบ
+FROM
+	PC_CASE
+INNER JOIN 
+	(
+		SELECT
+			*
+		FROM 
+			PC_CASE_LIT 
+		WHERE LITIGANT_TYPE_ID = 3
+	) CASE_LIT_LITIGANT_TYPE_ID_3
+ON 
+	PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_3.CASE_ID
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2137'
+	AND
+  LAWFUL_FLAG = 0
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT 
+	COUNT(*) AS C9_COUNT_MATRA_322_325 -- มิชอบ
+FROM
+	PC_CASE
+INNER JOIN 
+	(
+		SELECT
+			*
+		FROM 
+			PC_CASE_LIT 
+		WHERE LITIGANT_TYPE_ID = 3
+	) CASE_LIT_LITIGANT_TYPE_ID_3
+ON 
+	PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_3.CASE_ID
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2137'
+	AND
+  LAWFUL_FLAG = 1
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT DISTINCT
+	COUNT(DISTINCT PC_CASE.CASE_ID) AS C1_COUNT_MATRA_326_333 -- คำร้อง
+FROM
+	PC_CASE
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2138'
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT 
+	COUNT(*) AS C2_COUNT_MATRA_326_333 -- อื่นๆ
+FROM
+	PC_CASE
+INNER JOIN 
+	(
+		SELECT
+			*
+		FROM 
+			PC_CASE_LIT 
+		WHERE LITIGANT_TYPE_ID = 3
+	) CASE_LIT_LITIGANT_TYPE_ID_3
+ON 
+	PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_3.CASE_ID
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2138'
+	AND
+  LAWFUL_FLAG = 1
+	AND
+	OTHER_ORDER_FLAG = 1
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT 
+	COUNT(*) AS C3_COUNT_MATRA_326_333 -- มอบตัว
+FROM
+	PC_CASE
+INNER JOIN 
+	(
+		SELECT
+			*
+		FROM 
+			PC_CASE_LIT 
+		WHERE LITIGANT_TYPE_ID = 3
+	) CASE_LIT_LITIGANT_TYPE_ID_3
+ON 
+	PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_3.CASE_ID
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2138'
+	AND
+  LAWFUL_FLAG = 1
+	AND
+	SURRENDER_FLAG = 1
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT 
+	COUNT(*) AS C4_COUNT_MATRA_326_333 -- บำบัด
+FROM
+	PC_CASE
+INNER JOIN 
+	(
+		SELECT
+			*
+		FROM 
+			PC_CASE_LIT 
+		WHERE LITIGANT_TYPE_ID = 3
+	) CASE_LIT_LITIGANT_TYPE_ID_3
+ON 
+	PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_3.CASE_ID
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2138'
+	AND
+  LAWFUL_FLAG = 1
+	AND
+	CURE_FLAG = 1
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT 
+	COUNT(*) AS C5_COUNT_MATRA_326_333 -- ควบคุมสถานพินิจ
+FROM
+	PC_CASE
+INNER JOIN 
+	(
+		SELECT
+			*
+		FROM 
+			PC_CASE_LIT 
+		WHERE LITIGANT_TYPE_ID = 3
+	) CASE_LIT_LITIGANT_TYPE_ID_3
+ON 
+	PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_3.CASE_ID
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2138'
+	AND
+  LAWFUL_FLAG = 1
+	AND
+	CUSTODY_FLAG = 1
+	AND
+	CUSTODY_PLACE_FLAG  = 1
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT 
+	COUNT(*) AS C6_COUNT_MATRA_326_333 -- ควบคุมเรือนจำ
+FROM
+	PC_CASE
+INNER JOIN 
+	(
+		SELECT
+			*
+		FROM 
+			PC_CASE_LIT 
+		WHERE LITIGANT_TYPE_ID = 3
+	) CASE_LIT_LITIGANT_TYPE_ID_3
+ON 
+	PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_3.CASE_ID
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2138'
+	AND
+  LAWFUL_FLAG = 1
+	AND
+	CUSTODY_FLAG = 1
+	AND
+	CUSTODY_PLACE_FLAG  = 2
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT 
+	COUNT(*) AS C7_COUNT_MATRA_326_333 -- ควบคุมสถานที่อื่นๆ
+FROM
+	PC_CASE
+INNER JOIN 
+	(
+		SELECT
+			*
+		FROM 
+			PC_CASE_LIT 
+		WHERE LITIGANT_TYPE_ID = 3
+	) CASE_LIT_LITIGANT_TYPE_ID_3
+ON 
+	PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_3.CASE_ID
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2138'
+	AND
+  LAWFUL_FLAG = 1
+	AND
+	CUSTODY_FLAG = 1
+	AND
+	CUSTODY_PLACE_FLAG  = 3
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT 
+	COUNT(*) AS C8_COUNT_MATRA_326_333 -- ชอบ
+FROM
+	PC_CASE
+INNER JOIN 
+	(
+		SELECT
+			*
+		FROM 
+			PC_CASE_LIT 
+		WHERE LITIGANT_TYPE_ID = 3
+	) CASE_LIT_LITIGANT_TYPE_ID_3
+ON 
+	PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_3.CASE_ID
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2138'
+	AND
+  LAWFUL_FLAG = 0
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+),
+(
+SELECT 
+	COUNT(*) AS C9_COUNT_MATRA_326_333 -- มิชอบ
+FROM
+	PC_CASE
+INNER JOIN 
+	(
+		SELECT
+			*
+		FROM 
+			PC_CASE_LIT 
+		WHERE LITIGANT_TYPE_ID = 3
+	) CASE_LIT_LITIGANT_TYPE_ID_3
+ON 
+	PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_3.CASE_ID
+INNER JOIN
+	PC_LOOKUP_TITLE_CASE
+ON
+	PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+LEFT JOIN
+	PC_CASE_ALLE
+ON
+	PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+LEFT JOIN
+	PC_LOOKUP_ALLEGATION
+ON
+	PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+WHERE 
+	PC_CASE.REMOVED_BY = 0
+	AND
+	PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE = '220101'
+	AND
+	PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2138'
+	AND
+  LAWFUL_FLAG = 1
+	AND
+	EXTRACT( MONTH FROM PC_CASE.CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	AND 
+	EXTRACT( YEAR FROM PC_CASE.CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+)
+]]>
+	</queryString>
+	<field name="C1_COUNT_MATRA_309_321" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C1_COUNT_MATRA_309_321"/>
+	</field>
+	<field name="C2_COUNT_MATRA_309_321" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C2_COUNT_MATRA_309_321"/>
+	</field>
+	<field name="C3_COUNT_MATRA_309_321" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C3_COUNT_MATRA_309_321"/>
+	</field>
+	<field name="C4_COUNT_MATRA_309_321" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C4_COUNT_MATRA_309_321"/>
+	</field>
+	<field name="C5_COUNT_MATRA_309_321" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C5_COUNT_MATRA_309_321"/>
+	</field>
+	<field name="C6_COUNT_MATRA_309_321" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C6_COUNT_MATRA_309_321"/>
+	</field>
+	<field name="C7_COUNT_MATRA_309_321" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C7_COUNT_MATRA_309_321"/>
+	</field>
+	<field name="C8_COUNT_MATRA_309_321" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C8_COUNT_MATRA_309_321"/>
+	</field>
+	<field name="C9_COUNT_MATRA_309_321" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C9_COUNT_MATRA_309_321"/>
+	</field>
+	<field name="C1_COUNT_MATRA_322_325" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C1_COUNT_MATRA_322_325"/>
+	</field>
+	<field name="C2_COUNT_MATRA_322_325" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C2_COUNT_MATRA_322_325"/>
+	</field>
+	<field name="C3_COUNT_MATRA_322_325" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C3_COUNT_MATRA_322_325"/>
+	</field>
+	<field name="C4_COUNT_MATRA_322_325" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C4_COUNT_MATRA_322_325"/>
+	</field>
+	<field name="C5_COUNT_MATRA_322_325" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C5_COUNT_MATRA_322_325"/>
+	</field>
+	<field name="C6_COUNT_MATRA_322_325" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C6_COUNT_MATRA_322_325"/>
+	</field>
+	<field name="C7_COUNT_MATRA_322_325" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C7_COUNT_MATRA_322_325"/>
+	</field>
+	<field name="C8_COUNT_MATRA_322_325" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C8_COUNT_MATRA_322_325"/>
+	</field>
+	<field name="C9_COUNT_MATRA_322_325" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C9_COUNT_MATRA_322_325"/>
+	</field>
+	<field name="C1_COUNT_MATRA_326_333" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C1_COUNT_MATRA_326_333"/>
+	</field>
+	<field name="C2_COUNT_MATRA_326_333" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C2_COUNT_MATRA_326_333"/>
+	</field>
+	<field name="C3_COUNT_MATRA_326_333" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C3_COUNT_MATRA_326_333"/>
+	</field>
+	<field name="C4_COUNT_MATRA_326_333" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C4_COUNT_MATRA_326_333"/>
+	</field>
+	<field name="C5_COUNT_MATRA_326_333" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C5_COUNT_MATRA_326_333"/>
+	</field>
+	<field name="C6_COUNT_MATRA_326_333" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C6_COUNT_MATRA_326_333"/>
+	</field>
+	<field name="C7_COUNT_MATRA_326_333" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C7_COUNT_MATRA_326_333"/>
+	</field>
+	<field name="C8_COUNT_MATRA_326_333" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C8_COUNT_MATRA_326_333"/>
+	</field>
+	<field name="C9_COUNT_MATRA_326_333" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="C9_COUNT_MATRA_326_333"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="40" splitType="Stretch">
+			<textField>
+				<reportElement x="578" y="-20" width="51" height="20" uuid="9dee20a5-e8af-4a2a-8984-7e2c7fafdbd5">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="629" y="-20" width="51" height="20" uuid="f2f3b6dc-16cd-46a5-9ddc-ab139ab79998">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="680" y="0" width="51" height="20" uuid="a6a858b6-f060-4976-85ad-055857be7bca">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="374" y="0" width="51" height="20" uuid="2c1fa0bf-96f9-4f64-83be-8611eb24eee8">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="425" y="0" width="51" height="20" uuid="f8a1eca9-db16-40bd-ae50-9d3140a0a420">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="323" y="20" width="51" height="20" uuid="853dcfc6-dd07-4f4d-9426-8e669acf7757">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="578" y="20" width="51" height="20" uuid="f0145058-51fa-4aa4-911f-4558e36ac8c8">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="476" y="20" width="51" height="20" uuid="171e833f-22a4-4e78-9913-1f56c2998618">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="527" y="-20" width="51" height="20" uuid="aea77bdf-a2ca-49a1-b5ac-02584364cae9">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="374" y="20" width="51" height="20" uuid="8731ffd5-65f3-4916-9fca-0fab2325e1a5">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="323" y="0" width="51" height="20" uuid="368929b4-af35-4df9-bcde-9e02c35a2222">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="-20" y="-20" width="343" height="20" uuid="616c3824-d40b-4525-8c69-b6a1132882c1">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[    11.1  ความผิดต่อเสรีภาพ  ม.309-ม.321]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="629" y="20" width="51" height="20" uuid="091cdc33-2ddc-4dcb-b636-67f61e184cce">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="578" y="0" width="51" height="20" uuid="795dd607-9002-4512-84f3-9ef2e22034b4">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="425" y="20" width="51" height="20" uuid="d4335d28-6b03-4c92-b68d-c639259065a5">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="-20" y="0" width="343" height="20" uuid="df01744b-239a-4230-91ab-fdb8b1cfc7a4">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[    11.2  ความผิดฐานเปิดเผยความลับ  ม.322-ม.325]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="680" y="-20" width="51" height="20" uuid="61ddd7c2-a469-4d0b-a6b4-8a6e2f3086a3">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="374" y="-20" width="51" height="20" uuid="2e6d7321-91a4-43f3-8d53-00deb308b196">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="476" y="-20" width="51" height="20" uuid="f466ed3c-b8b9-4311-bbf4-c93ac328889f">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="680" y="20" width="51" height="20" uuid="bfbf9838-24d1-4c0c-85ac-72521fbfbb09">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="476" y="0" width="51" height="20" uuid="02678f22-fa31-4913-b5c3-d2bbf483c7df">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="731" y="0" width="51" height="20" uuid="b0a4dae2-0151-4450-a313-161f645483bd">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="-20" y="20" width="343" height="20" uuid="fd9f1607-ddbb-4ad9-96ab-61f864e2f687">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement>
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[    11.3  ความผิดฐานหมิ่นประมาท  ม.326-ม.333]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="629" y="0" width="51" height="20" uuid="81cee4ea-3da3-4958-ab06-bd014f33a6aa">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="323" y="-20" width="51" height="20" uuid="b1999915-5f4a-4557-a887-4ab53996d62c">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="731" y="20" width="51" height="20" uuid="7b21b168-b67d-42cc-acb9-44174d163bab">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="527" y="20" width="51" height="20" uuid="52ef046e-7ddc-4d91-a1bf-b0fbb7eb6ff3">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="527" y="0" width="51" height="20" uuid="59e7e5e3-66e5-4253-8d71-0131719fead8">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="425" y="-20" width="51" height="20" uuid="524dd04d-3af6-496a-be09-7dca8a1b7034">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="731" y="-20" width="51" height="20" uuid="bd361348-d713-40c5-8246-f8dbfce17395">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>
