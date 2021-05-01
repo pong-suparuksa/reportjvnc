@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Criminal_law-2" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="583e5fc1-c49a-4aac-9b2b-1b5bb67a0bc5">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[210]"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="MONTH" class="java.lang.String">
+		<defaultValueExpression><![CDATA["04-2021"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT 
+NVL(SUM_COURTER,0) AS SUM_COURTER,
+NVL(RECORD,0) AS RECORD
+FROM
+(
+SELECT COUNT(*) AS SUM_COURTER
+FROM
+	(SELECT PC_CASE.CASE_ID,PC_CASE.CASE_TYPE_ID 
+	FROM PC_CASE 
+	WHERE EXTRACT( MONTH FROM CASE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )	AND 	EXTRACT( YEAR FROM CASE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	) T1 
+JOIN PC_CASE_ALLE T2 ON T1.CASE_ID = T2.CASE_ID
+JOIN PC_LOOKUP_ALLEGATION T3 ON T2.ALLEGATION_ID = T3.ALLEGATION_ID
+WHERE T1.CASE_TYPE_ID = 1
+),
+(
+SELECT
+COUNT(*) AS RECORD
+FROM
+	(SELECT PC_CASE.CASE_ID,PC_CASE.CASE_TYPE_ID 
+	FROM PC_CASE JOIN PC_JUDGEMENT ON PC_CASE.CASE_ID = PC_JUDGEMENT.CASE_ID 
+	WHERE EXTRACT( MONTH FROM JUDGE_DATE ) = EXTRACT( MONTH FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )	AND 	EXTRACT( YEAR FROM JUDGE_DATE ) = EXTRACT( YEAR FROM TO_DATE( $P{MONTH}, 'MM-YYYY' ) )
+	) T1 
+JOIN PC_CASE_ALLE T2 ON T1.CASE_ID = T2.CASE_ID
+JOIN PC_LOOKUP_ALLEGATION T3 ON T2.ALLEGATION_ID = T3.ALLEGATION_ID
+WHERE T1.CASE_TYPE_ID = 1)
+
+
+]]>
+	</queryString>
+	<field name="SUM_COURTER" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="SUM_COURTER"/>
+	</field>
+	<field name="RECORD" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="RECORD"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="23" splitType="Stretch">
+			<textField>
+				<reportElement positionType="Float" x="-20" y="-16" width="378" height="30" uuid="bd29e7b5-2337-408a-94e4-6123a386d8ec">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<textElement>
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["รวมจำนวนข้อหาทั้งหมด ........................  ข้อหา จากปริมาณคดีรับใหม่ทั้งหมด ........................ คดี "]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="71" y="-19" width="60" height="20" uuid="a9eefaa3-729c-4fe3-8002-26ca2bde9994"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUM_COURTER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="264" y="-19" width="60" height="20" uuid="7d3d3b9b-a36b-4658-9950-8c2b3439ac0b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{RECORD}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>
