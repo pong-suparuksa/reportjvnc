@@ -10,19 +10,19 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.193:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_noticefrees"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_noticefrees_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["01/07/2020"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["01/03/2021"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="END_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["14/07/2020"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["31/03/2021"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="SENDER" class="java.lang.String">
 		<defaultValueExpression><![CDATA[-1]]></defaultValueExpression>
@@ -43,7 +43,7 @@
         --
         NVL(pls.SUBDISTRICT_NAME,'-')																					SUBDISTRICT_NAME,
         NVL(pld.DISTRICT_NAME,'-')																						DISTRICT_NAME,
-        pn.SEND_FEE,																																	   
+        NVL(pn.SEND_FEE, 0) 																							SEND_FEE,																																	   
 	    NVL(pup1.USER_PROFILE_FULL_NAME,'-')																	   		USER_PROFILE_FULL_NAME
         --    
 FROM PC_NOTICE pn
@@ -72,7 +72,6 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
 			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
 --
 WHERE pn.REMOVED_BY = 0
-AND pn.SEND_METHOD = 2 
 AND NVL(pni.HAS_MONEY,0) = 0 
 AND pn.IS_COURT_AREA = 1
 AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 

@@ -14,18 +14,15 @@
 	<property name="ireport.jasperserver.url" value="http://119.59.126.193:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_othdeliv_free"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_othdeliv_free_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["01/07/2020"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["01/03/2021"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="END_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["14/07/2020"]]></defaultValueExpression>
-	</parameter>
-	<parameter name="SEND_TO_COURT_ID" class="java.lang.Integer">
-		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["31/03/2021"]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
 		<![CDATA[SELECT * FROM (
@@ -41,7 +38,7 @@ SELECT
   		    NVL(pn.RECEIVED_BY,'-')	                                       													TO_NAME,
             NVL(plnt.NOTICE_TYPE_NAME,'-')																					NOTICE_TYPE_NAME,            
 			NVL(plc1.COURT_NAME_TH, '-')																					OTHER_COURT,
-            pn.SEND_FEE
+            NVL(pn.SEND_FEE, 0)																								SEND_FEE
             
 FROM PC_NOTICE pn
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID AND pc.REMOVED_BY = 0
@@ -60,7 +57,7 @@ LEFT JOIN PC_LOOKUP_NOTICE_TYPE plnt ON plnt.NOTICE_TYPE_ID = pn.NOTICE_TYPE_ID 
 
 LEFT JOIN PC_LOOKUP_COURT plc1 ON plc1.COURT_ID = pn.SEND_TO_COURT AND plc1.REMOVED_BY = 0
 
-WHERE pn.SEND_METHOD = 2 AND NVL(pni.HAS_MONEY,0) = 0 AND pn.IS_COURT_AREA = 0  AND pn.SEND_TO_COURT = $P{SEND_TO_COURT_ID} AND ROWNUM <= 10
+WHERE pn.SEND_METHOD = 2 AND NVL(pni.HAS_MONEY,0) = 0 AND pn.IS_COURT_AREA = 0 AND ROWNUM <= 10
 
 )
 WHERE SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 

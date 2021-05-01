@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="litigant_rpt_postems" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2b00589c-6c9f-4881-8017-3aaf15e6fde3">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
@@ -12,11 +11,17 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.137:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_postems"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_postems_files/main_jrxml"/>
-	<parameter name="SEND_NOTICE_DATE" class="java.lang.String"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<parameter name="START_DATE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["01/03/2021"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="END_DATE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["31/03/2021"]]></defaultValueExpression>
+	</parameter>
 	<queryString>
 		<![CDATA[SELECT
  			pni.SEND_NOTICE_DATE,
@@ -32,6 +37,7 @@
 			pn.SEND_FEE,
 			NVL(pni.EMS_CODE,'-')         								   																			   EMS_CODE
 
+
 FROM PC_NOTICE pn
 
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID AND pc.REMOVED_BY = 0
@@ -40,7 +46,8 @@ LEFT JOIN PC_NOTICE_ISSUED pni ON pn.NOTICE_ID = pni.NOTICE_ID AND pn.REMOVED_BY
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID
 LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pn.COURT_ID AND plc.REMOVED_BY = 0
 
-WHERE pn.SEND_METHOD = 1 AND NVL(pni.HAS_MONEY,1) = 1 AND TO_CHAR(NVL(SEND_NOTICE_DATE,CURRENT_DATE),'DD/MM/YYYY') = $P{SEND_NOTICE_DATE}]]>
+WHERE pn.SEND_METHOD = 2 AND NVL(pni.HAS_MONEY,1) = 1 AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                              AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')]]>
 	</queryString>
 	<field name="SEND_NOTICE_DATE" class="java.sql.Date">
 		<property name="com.jaspersoft.studio.field.label" value="SEND_NOTICE_DATE"/>
@@ -151,7 +158,7 @@ WHERE pn.SEND_METHOD = 1 AND NVL(pni.HAS_MONEY,1) = 1 AND TO_CHAR(NVL(SEND_NOTIC
 				</textElement>
 				<text><![CDATA[วันที่]]></text>
 			</staticText>
-			<textField>
+			<textField pattern="dd/MM/yyyy">
 				<reportElement x="385" y="38" width="170" height="25" uuid="93666a80-d5d2-44e9-9d6a-f012856ef508">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -159,7 +166,8 @@ WHERE pn.SEND_METHOD = 1 AND NVL(pni.HAS_MONEY,1) = 1 AND TO_CHAR(NVL(SEND_NOTIC
 				<textElement verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{SEND_NOTICE_DATE_TEXT}==null?" ":$F{SEND_NOTICE_DATE_TEXT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+				<patternExpression><![CDATA[new java.text.SimpleDateFormat("d MMMM y ", new Locale("TH","th")).format(TODAY( ))]]></patternExpression>
 			</textField>
 			<textField>
 				<reportElement x="30" y="70" width="354" height="25" uuid="9d9190b5-fb61-4b3f-b9de-f37ca74341f8">
