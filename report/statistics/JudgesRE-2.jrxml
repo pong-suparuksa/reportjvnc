@@ -1,0 +1,1453 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="JudgesRE-2" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true" uuid="da5100e3-dbca-4d8e-bfd4-674f616a596a">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[210]"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="MONTH" class="java.lang.String">
+		<defaultValueExpression><![CDATA["04-2021"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+ j1.JUDGE_NAME,
+ NVL( J4.COUNT_CASE,0) COUNT_CASE,
+ NVL( J4.COUNT_REQ,0) COUNT_REQ,
+ NVL( J5.COUNT_PREV_MONTH , 0) COUNT_PREV_MONTH,
+ NVL( J5.COUNT_RECV_THIS_MONTH , 0) COUNT_RECV_THIS_MONTH,
+ NVL( J0.TOTAL_COUNT, 0) TOTAL_COUNT,
+ NVL( J0.TOTAL_PAGE, 0) TOTAL_PAGE,
+ NVL( J6.RE_JUDGE, 0 ) RE_JUDGE,
+ NVL( j2.COUNT_1_2, 0 ) COUNT_1_2,
+ NVL( j2.COUNT_03, 0 ) COUNT_03,
+ NVL( j2.COUNT_04, 0 ) COUNT_04,
+ NVL( j2.COUNT_05, 0 ) COUNT_05,
+ NVL( j2.COUNT_06, 0 ) COUNT_06,
+ NVL( j2.COUNT_08, 0 ) COUNT_08,
+ NVL( j2.COUNT_09, 0 ) COUNT_09,
+ NVL( j2.COUNT_1_2, 0 )
+ + NVL( j2.COUNT_03, 0 )
+ + NVL( j2.COUNT_04, 0 )
+ + NVL( j2.COUNT_05, 0 )
+ + NVL( j2.COUNT_06, 0 )
+ + NVL( j2.COUNT_08, 0 )
+ + NVL( j2.COUNT_09, 0 ) AS TOTAL_COUNT_ALL,
+ NVL( J7.LESS_6_MONTH , 0 ) LESS_6_MONTH,
+ NVL( J7.LESS_1_YEAR , 0 ) LESS_1_YEAR,
+ NVL( J7.LESS_2_YEAR , 0 ) LESS_2_YEAR,
+ NVL( J7.LESS_5_YEAR , 0 ) LESS_5_YEAR,
+ NVL( J7.MORE_5_YEAR , 0 ) MORE_5_YEAR,
+ NVL( J7.LESS_6_MONTH , 0 ) 
+ + NVL( J7.LESS_1_YEAR , 0 ) 
+ + NVL( J7.LESS_2_YEAR , 0 ) 
+ + NVL( J7.LESS_5_YEAR , 0 )
+ + NVL( J7.MORE_5_YEAR , 0 ) AS TOTAL_CASE,
+ NVL( J8.SEND , 0) SEND,
+ NVL( J9.RECV , 0) RECV 
+FROM
+ PC_LOOKUP_JUDGE j1
+LEFT JOIN ( 
+	SELECT
+		plj.JUDGE_ID,
+		nvl(TOTAL_COUNT, 0) AS TOTAL_COUNT,
+		nvl(TOTAL_PAGE, 0) AS TOTAL_PAGE
+	FROM
+		PC_LOOKUP_JUDGE plj
+	LEFT JOIN (
+		SELECT
+			CUSTOM_JUDGE_NAME,
+			CUSTOM_JUDGE_CODE,
+			COUNT(WITNESS_DEFENDANT_COUNT) + COUNT(WITNESS_OTHER_COUNT) + COUNT(WITNESS_PLAINTIFF_COUNT) AS TOTAL_COUNT,
+			COUNT(WITNESS_DEFENDANT_PAGE) + COUNT(WITNESS_PLAINTIFF_PAGE) AS TOTAL_PAGE
+		FROM
+			(
+			SELECT
+				ppacj.CASE_DETAIL_ID,
+				NVL(ppacj.JUDGE_REPLACE_NAME, ppacj.JUDGE_NAME) AS CUSTOM_JUDGE_NAME,
+				NVL(ppacj.JUDGE_REPLACE_CODE, ppacj.JUDGE_CODE) AS CUSTOM_JUDGE_CODE,
+				WITNESS_DEFENDANT_COUNT,
+				WITNESS_OTHER_COUNT,
+				WITNESS_PLAINTIFF_COUNT,
+				WITNESS_DEFENDANT_PAGE,
+				WITNESS_PLAINTIFF_PAGE
+			FROM
+				pc_proceed_case_detail_judge ppacj
+			JOIN (
+				SELECT
+					DISTINCT ppcd.case_detail_id,
+					ppcd.WITNESS_DEFENDANT_COUNT,
+					ppcd.WITNESS_OTHER_COUNT,
+					ppcd.WITNESS_PLAINTIFF_COUNT,
+					ppcd.WITNESS_DEFENDANT_PAGE,
+					ppcd.WITNESS_PLAINTIFF_PAGE
+				FROM
+					PC_PROCEED_CASE_DETAIL ppcd
+				INNER JOIN (
+					SELECT
+						T1.*
+					FROM
+						PC_CASE T1
+					JOIN PC_CASE_ALLE T2 ON
+						T1.CASE_ID = T2.CASE_ID
+					JOIN PC_LOOKUP_ALLEGATION T3 ON
+						T2.ALLEGATION_ID = T3.ALLEGATION_ID					
+					WHERE
+						T1.Removed_by = 0
+						AND T3.ALLEGATION_CODE = '2399' 
+						AND TRUNC(t1.CASE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')
+						) pc ON
+					ppcd.CASE_id = pc.case_id ) CUSTOM_CASE_DETAIL ON
+				ppacj.case_Detail_id = CUSTOM_CASE_DETAIL.case_detail_id)
+		GROUP BY
+			CUSTOM_JUDGE_NAME,
+			CUSTOM_JUDGE_CODE ) CASE_DETAIL_JUDGE_1 ON
+		plj.JUDGE_CODE = CASE_DETAIL_JUDGE_1.CUSTOM_JUDGE_CODE
+		AND plj.JUDGE_NAME = CASE_DETAIL_JUDGE_1.CUSTOM_JUDGE_NAME
+		) j0 ON j0.JUDGE_ID = j1.JUDGE_ID
+ LEFT JOIN (
+ SELECT
+  t5.JUDGE_ID,
+ NVL( SUM( CASE WHEN t4.JUDGE_RESULT_CODE IN ( '01', '02') THEN 1 ELSE 0 END ), 0 ) COUNT_1_2,--
+ NVL( SUM( CASE WHEN t4.JUDGE_RESULT_CODE = '03' THEN 1 ELSE 0 END ), 0 ) COUNT_03,--รับสารภาพสืบประกอบ
+ NVL( SUM( CASE WHEN t4.JUDGE_RESULT_CODE = '04' THEN 1 ELSE 0 END ), 0 ) COUNT_04,--รับสารภาพ
+ NVL( SUM( CASE WHEN t4.JUDGE_RESULT_CODE = '05' THEN 1 ELSE 0 END ), 0 ) COUNT_05,--ประนีประนอมพิพากษาตามยอมความ
+ NVL( SUM( CASE WHEN t4.JUDGE_RESULT_CODE = '06' THEN 1 ELSE 0 END ), 0 ) COUNT_06,--ถอนฟ้อง ถอนคำร้อง
+ NVL( SUM( CASE WHEN t4.JUDGE_RESULT_CODE = '08' THEN 1 ELSE 0 END ), 0 ) COUNT_08,--จำหน่ายคดี 
+ NVL( SUM( CASE WHEN t4.JUDGE_RESULT_CODE = '09' THEN 1 ELSE 0 END ), 0 ) COUNT_09 --โดยเหตุอื่น
+FROM
+ PC_CASE t1
+ LEFT JOIN PC_JUDGEMENT t2 ON t1.CASE_ID = t2.CASE_ID 
+ AND t2.REMOVED_BY = 0
+ LEFT JOIN PC_LOOKUP_JUDGE_RESULT t4 ON t4.JUDGE_RESULT_ID = t2.JUDGE_RESULT_ID 
+ AND t4.REMOVED_BY = 0
+ LEFT JOIN PC_CASE_JUDGE t5 ON t5.CASE_ID = t1.CASE_ID 
+ JOIN PC_CASE_ALLE CASE_ALLE ON T1.CASE_ID = CASE_ALLE.CASE_ID
+ JOIN PC_LOOKUP_ALLEGATION LOOKUP_ALLE ON CASE_ALLE.ALLEGATION_ID = LOOKUP_ALLE.ALLEGATION_ID	 
+WHERE
+ t1.REMOVED_BY = 0 
+ AND LOOKUP_ALLE.ALLEGATION_CODE = '2399' 
+ AND T1.CASE_TYPE_ID IN ( SELECT CASE_TYPE_ID FROM PC_LOOKUP_CASE_TYPE WHERE CASE_TYPE_CODE = '1' )
+ AND t1.CASE_CATE_ID IN ( SELECT CASE_CATE_ID FROM PC_LOOKUP_CASE_CATE WHERE CASE_CATE_CODE IN ('11003', '11005') ) 
+ AND TRUNC(t1.CASE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')
+ AND t5.JUDGE_TYPE_ID IN ( SELECT JUDGE_TYPE_ID FROM PC_LOOKUP_JUDGE_TYPE WHERE JUDGE_TYPE_CODE = '01' ) 
+GROUP BY
+ t5.JUDGE_ID 
+ ) 
+ j2 ON j2.JUDGE_ID = j1.JUDGE_ID LEFT JOIN 
+ (
+ SELECT
+  t1.JUDGE_ID,
+  COUNT( t2.CASE_ID ) COUNT_9 
+ FROM
+  PC_CASE_JUDGE t1
+  JOIN PC_JUDGEMENT t2 ON t2.CASE_ID = t1.CASE_ID 
+  AND t2.REMOVED_BY = 0
+  JOIN PC_CASE t3 ON t3.CASE_ID = t1.CASE_ID 
+  AND t3.REMOVED_BY = 0
+  JOIN PC_LOOKUP_CASE_CATE t4 ON t4.CASE_CATE_ID = t3.CASE_CATE_ID 
+  AND t4.REMOVED_BY = 0 
+  JOIN PC_CASE_ALLE CASE_ALLE ON t3.CASE_ID = CASE_ALLE.CASE_ID
+  JOIN PC_LOOKUP_ALLEGATION LOOKUP_ALLE ON CASE_ALLE.ALLEGATION_ID = LOOKUP_ALLE.ALLEGATION_ID	 
+WHERE
+  t1.REMOVED_BY = 0 
+  AND LOOKUP_ALLE.ALLEGATION_CODE = '2399'
+  AND T3.CASE_TYPE_ID IN ( SELECT CASE_TYPE_ID FROM PC_LOOKUP_CASE_TYPE WHERE CASE_TYPE_CODE = '1' )
+  AND TRUNC(t2.JUDGE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH') 
+  AND t1.TEMPORARY_JUDGE_FLAG = 2 -- 1-จ่ายชั่วคราว 2-โอนสำนวน 3-จ่ายต่อเนื่อง 4-จ่ายสำนวน(ปกติ)
+ GROUP BY
+  t1.JUDGE_ID 
+ ) 
+ j3 ON j3.JUDGE_ID = j1.JUDGE_ID LEFT JOIN
+ (
+ SELECT
+ t5.JUDGE_ID,
+ NVL( SUM( CASE WHEN T1.CASE_OR_REQ = 1 THEN 1 ELSE 0 END  ) , 0) COUNT_CASE,
+  NVL( SUM( CASE WHEN T1.CASE_OR_REQ = 2 THEN 1 ELSE 0 END  ) , 0) COUNT_REQ
+ FROM
+  PC_CASE t1 
+  JOIN PC_JUDGEMENT t2 ON t1.CASE_ID = t2.CASE_ID 
+  AND t2.REMOVED_BY = 0
+  JOIN PC_LOOKUP_JUDGE_RESULT t4 ON t4.JUDGE_RESULT_ID = t2.JUDGE_RESULT_ID 
+  AND t4.REMOVED_BY = 0
+  JOIN PC_CASE_JUDGE t5 ON t5.CASE_ID = t1.CASE_ID 
+  JOIN PC_CASE_ALLE CASE_ALLE ON T1.CASE_ID = CASE_ALLE.CASE_ID
+  JOIN PC_LOOKUP_ALLEGATION LOOKUP_ALLE ON CASE_ALLE.ALLEGATION_ID = LOOKUP_ALLE.ALLEGATION_ID	 
+WHERE
+ t1.REMOVED_BY = 0 
+ AND LOOKUP_ALLE.ALLEGATION_CODE = '2399' 
+ AND T1.CASE_TYPE_ID IN ( SELECT CASE_TYPE_ID FROM PC_LOOKUP_CASE_TYPE WHERE CASE_TYPE_CODE = '1' )
+ AND TRUNC(t1.CASE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')
+ GROUP BY
+ t5.JUDGE_ID 
+ ) 
+ J4 ON J4.JUDGE_ID = j1.JUDGE_ID LEFT JOIN
+ (
+ SELECT
+  t1.JUDGE_ID,
+  NVL( SUM( CASE WHEN TRUNC(t3.CASE_DATE,'MONTH') < TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH') AND T2.JUDGE_DATE IS NULL THEN 1 ELSE 0 END  ) , 0) COUNT_PREV_MONTH,
+  NVL( SUM( CASE WHEN TRUNC(t3.CASE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')  THEN 1 ELSE 0 END  ) , 0) COUNT_RECV_THIS_MONTH
+ FROM
+  PC_CASE_JUDGE t1
+  JOIN PC_JUDGEMENT t2 ON t2.CASE_ID = t1.CASE_ID 
+  AND t2.REMOVED_BY = 0
+  JOIN PC_CASE t3 ON t3.CASE_ID = t1.CASE_ID 
+  AND t3.REMOVED_BY = 0
+  JOIN PC_LOOKUP_CASE_CATE t4 ON t4.CASE_CATE_ID = t3.CASE_CATE_ID 
+  AND t4.REMOVED_BY = 0 
+  JOIN PC_CASE_ALLE CASE_ALLE ON t3.CASE_ID = CASE_ALLE.CASE_ID
+  JOIN PC_LOOKUP_ALLEGATION LOOKUP_ALLE ON CASE_ALLE.ALLEGATION_ID = LOOKUP_ALLE.ALLEGATION_ID	 
+WHERE
+  t1.REMOVED_BY = 0 
+  AND LOOKUP_ALLE.ALLEGATION_CODE = '2399'  
+  AND T3.CASE_TYPE_ID IN ( SELECT CASE_TYPE_ID FROM PC_LOOKUP_CASE_TYPE WHERE CASE_TYPE_CODE = '1' ) 
+  AND t1.JUDGE_TYPE_ID IN ( SELECT JUDGE_TYPE_ID FROM PC_LOOKUP_JUDGE_TYPE WHERE JUDGE_TYPE_CODE = '01' ) 
+GROUP BY
+ t1.JUDGE_ID
+ ) 
+ J5 ON J5.JUDGE_ID = J1.JUDGE_ID LEFT JOIN
+ (
+ SELECT
+ JUDGE_ID,
+ NVL( SUM( CASE WHEN RE_JUDGE_STATUS = 1 AND TRUNC(RE_JUDGE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')  THEN 1 ELSE 0 END  ) , 0) RE_JUDGE
+ FROM
+ PC_JUDGEMENT_SENTENCE_JUDGE T1 LEFT JOIN 
+ PC_JUDGEMENT_SENTENCE T2 ON T1.SENTENCE_ID = T2.SENTENCE_ID LEFT JOIN
+ PC_CASE T3 ON T2.CASE_ID = T3.CASE_ID
+ JOIN PC_CASE_ALLE CASE_ALLE ON T3.CASE_ID = CASE_ALLE.CASE_ID
+ JOIN PC_LOOKUP_ALLEGATION LOOKUP_ALLE ON CASE_ALLE.ALLEGATION_ID = LOOKUP_ALLE.ALLEGATION_ID	 
+WHERE
+  t1.REMOVED_BY = 0 
+  AND LOOKUP_ALLE.ALLEGATION_CODE = '2399'
+  AND T3.CASE_TYPE_ID IN ( SELECT CASE_TYPE_ID FROM PC_LOOKUP_CASE_TYPE WHERE CASE_TYPE_CODE = '1' ) 
+ GROUP BY
+ JUDGE_ID
+ ) 
+ J6 ON J6.JUDGE_ID = J1.JUDGE_ID LEFT JOIN 
+ (
+  SELECT
+  t5.JUDGE_ID,
+ NVL( SUM( CASE WHEN MONTHS_BETWEEN(T1.CASE_DATE,(TO_DATE($P{MONTH},'MM-YYYY'))) <= 6 AND T2.JUDGE_DATE IS NULL THEN 1 ELSE 0 END ), 0 ) LESS_6_MONTH,
+ NVL( SUM( CASE WHEN MONTHS_BETWEEN(T1.CASE_DATE,(TO_DATE($P{MONTH},'MM-YYYY'))) > 6 AND MONTHS_BETWEEN(T1.CASE_DATE,(TO_DATE($P{MONTH},'MM-YYYY'))) <= 12  AND T2.JUDGE_DATE IS NULL  THEN 1 ELSE 0 END ), 0 ) LESS_1_YEAR,
+ NVL( SUM( CASE WHEN MONTHS_BETWEEN(T1.CASE_DATE,(TO_DATE($P{MONTH},'MM-YYYY'))) > 12 AND MONTHS_BETWEEN(T1.CASE_DATE,(TO_DATE($P{MONTH},'MM-YYYY'))) <= 24  AND T2.JUDGE_DATE IS NULL  THEN 1 ELSE 0 END ), 0 ) LESS_2_YEAR,
+ NVL( SUM( CASE WHEN MONTHS_BETWEEN(T1.CASE_DATE,(TO_DATE($P{MONTH},'MM-YYYY'))) > 24 AND MONTHS_BETWEEN(T1.CASE_DATE,(TO_DATE($P{MONTH},'MM-YYYY'))) <= 60  AND T2.JUDGE_DATE IS NULL  THEN 1 ELSE 0 END ), 0 ) LESS_5_YEAR,
+ NVL( SUM( CASE WHEN MONTHS_BETWEEN(T1.CASE_DATE,(TO_DATE($P{MONTH},'MM-YYYY'))) > 60 AND T2.JUDGE_DATE IS NULL THEN 1 ELSE 0 END ), 0 ) MORE_5_YEAR
+FROM
+ PC_CASE t1
+ LEFT JOIN PC_JUDGEMENT t2 ON t1.CASE_ID = t2.CASE_ID 
+ AND t2.REMOVED_BY = 0
+ LEFT JOIN PC_LOOKUP_JUDGE_RESULT t4 ON t4.JUDGE_RESULT_ID = t2.JUDGE_RESULT_ID 
+ AND t4.REMOVED_BY = 0
+ LEFT JOIN PC_CASE_JUDGE t5 ON t5.CASE_ID = t1.CASE_ID 
+ JOIN PC_CASE_ALLE CASE_ALLE ON t1.CASE_ID = CASE_ALLE.CASE_ID
+ JOIN PC_LOOKUP_ALLEGATION LOOKUP_ALLE ON CASE_ALLE.ALLEGATION_ID = LOOKUP_ALLE.ALLEGATION_ID	 
+WHERE
+ t1.REMOVED_BY = 0 
+ AND LOOKUP_ALLE.ALLEGATION_CODE = '2399' 
+ AND t1.CASE_TYPE_ID IN ( SELECT CASE_TYPE_ID FROM PC_LOOKUP_CASE_TYPE WHERE CASE_TYPE_CODE = '1' ) 
+ AND t1.CASE_CATE_ID IN ( SELECT CASE_CATE_ID FROM PC_LOOKUP_CASE_CATE WHERE CASE_CATE_CODE IN ('11003', '11005') ) 
+ AND TRUNC(t2.JUDGE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH') 
+GROUP BY
+ t5.JUDGE_ID 
+ ) 
+ J7 ON J7.JUDGE_ID = J1.JUDGE_ID LEFT JOIN 
+ (
+  SELECT
+  OLD_JUDGE as JUDGE_ID,
+  COUNT(*) AS SEND
+  FROM
+  PC_MANAGER_JUDGE_TRANSFER_LOG T1 JOIN PC_CASE T2 ON T1.CASE_ID = T2.CASE_ID
+  JOIN PC_CASE_ALLE CASE_ALLE ON T2.CASE_ID = CASE_ALLE.CASE_ID
+  JOIN PC_LOOKUP_ALLEGATION LOOKUP_ALLE ON CASE_ALLE.ALLEGATION_ID = LOOKUP_ALLE.ALLEGATION_ID	
+WHERE
+  t1.REMOVED_BY = 0 
+  AND LOOKUP_ALLE.ALLEGATION_CODE = '2399' 
+  AND TRUNC(T1.TRANSFER_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')
+  AND T2.CASE_TYPE_ID IN ( SELECT CASE_TYPE_ID FROM PC_LOOKUP_CASE_TYPE WHERE CASE_TYPE_CODE = '1' ) 
+  GROUP BY
+  OLD_JUDGE
+ ) 
+ J8 ON J8.JUDGE_ID = J1.JUDGE_ID LEFT JOIN 
+  (
+  SELECT
+  NEW_JUDGE as JUDGE_ID,
+  COUNT(*) AS RECV
+  FROM
+  PC_MANAGER_JUDGE_TRANSFER_LOG T1 JOIN PC_CASE T2 ON T1.CASE_ID = T2.CASE_ID
+  JOIN PC_CASE_ALLE CASE_ALLE ON T2.CASE_ID = CASE_ALLE.CASE_ID
+  JOIN PC_LOOKUP_ALLEGATION LOOKUP_ALLE ON CASE_ALLE.ALLEGATION_ID = LOOKUP_ALLE.ALLEGATION_ID	
+WHERE
+  t1.REMOVED_BY = 0 
+  AND LOOKUP_ALLE.ALLEGATION_CODE = '2399'
+  AND TRUNC(T1.TRANSFER_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')
+  AND T2.CASE_TYPE_ID IN ( SELECT CASE_TYPE_ID FROM PC_LOOKUP_CASE_TYPE WHERE CASE_TYPE_CODE = '1' ) 
+  GROUP BY
+  NEW_JUDGE
+ ) 
+ J9 ON J9.JUDGE_ID = J1.JUDGE_ID
+WHERE
+ j1.REMOVED_BY = 0 AND
+ j1.FLAG_JUDGE = 1]]>
+	</queryString>
+	<field name="JUDGE_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="JUDGE_NAME"/>
+	</field>
+	<field name="COUNT_CASE" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_CASE"/>
+	</field>
+	<field name="COUNT_REQ" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_REQ"/>
+	</field>
+	<field name="COUNT_PREV_MONTH" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_PREV_MONTH"/>
+	</field>
+	<field name="COUNT_RECV_THIS_MONTH" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_RECV_THIS_MONTH"/>
+	</field>
+	<field name="TOTAL_COUNT" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="TOTAL_COUNT"/>
+	</field>
+	<field name="TOTAL_PAGE" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="TOTAL_PAGE"/>
+	</field>
+	<field name="RE_JUDGE" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="RE_JUDGE"/>
+	</field>
+	<field name="COUNT_1_2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_1_2"/>
+	</field>
+	<field name="COUNT_03" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_03"/>
+	</field>
+	<field name="COUNT_04" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_04"/>
+	</field>
+	<field name="COUNT_05" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_05"/>
+	</field>
+	<field name="COUNT_06" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_06"/>
+	</field>
+	<field name="COUNT_08" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_08"/>
+	</field>
+	<field name="COUNT_09" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_09"/>
+	</field>
+	<field name="TOTAL_COUNT_ALL" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="TOTAL_COUNT_ALL"/>
+	</field>
+	<field name="LESS_6_MONTH" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="LESS_6_MONTH"/>
+	</field>
+	<field name="LESS_1_YEAR" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="LESS_1_YEAR"/>
+	</field>
+	<field name="LESS_2_YEAR" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="LESS_2_YEAR"/>
+	</field>
+	<field name="LESS_5_YEAR" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="LESS_5_YEAR"/>
+	</field>
+	<field name="MORE_5_YEAR" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="MORE_5_YEAR"/>
+	</field>
+	<field name="TOTAL_CASE" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="TOTAL_CASE"/>
+	</field>
+	<field name="SEND" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="SEND"/>
+	</field>
+	<field name="RECV" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="RECV"/>
+	</field>
+	<variable name="sum1_1" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_CASE}.doubleValue()]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{COUNT_CASE}.doubleValue()]]></initialValueExpression>
+	</variable>
+	<variable name="sum1_2" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_REQ}.doubleValue()]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{COUNT_REQ}.doubleValue()]]></initialValueExpression>
+	</variable>
+	<variable name="sum1_3" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_PREV_MONTH}.doubleValue()]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{COUNT_PREV_MONTH}.doubleValue()]]></initialValueExpression>
+	</variable>
+	<variable name="sum1_4" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_RECV_THIS_MONTH}.doubleValue()]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{COUNT_RECV_THIS_MONTH}.doubleValue()]]></initialValueExpression>
+	</variable>
+	<variable name="sum1_5" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{TOTAL_COUNT}.doubleValue()]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{TOTAL_COUNT}.doubleValue()]]></initialValueExpression>
+	</variable>
+	<variable name="sum1_6" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{TOTAL_PAGE}.doubleValue()]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{TOTAL_PAGE}.doubleValue()]]></initialValueExpression>
+	</variable>
+	<variable name="sum1_7" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{RE_JUDGE}.doubleValue()]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{RE_JUDGE}.doubleValue()]]></initialValueExpression>
+	</variable>
+	<variable name="sum1_8" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_1_2}.doubleValue()]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{COUNT_1_2}.doubleValue()]]></initialValueExpression>
+	</variable>
+	<variable name="sum1_9" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_1_2}.doubleValue()]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{COUNT_1_2}.doubleValue()]]></initialValueExpression>
+	</variable>
+	<variable name="sum1_10" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_03}.doubleValue()]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{COUNT_03}.doubleValue()]]></initialValueExpression>
+	</variable>
+	<variable name="sum1_11" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_04}.doubleValue()]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{COUNT_04}.doubleValue()]]></initialValueExpression>
+	</variable>
+	<variable name="sum1_12" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{COUNT_05}.doubleValue()]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{COUNT_05}.doubleValue()]]></initialValueExpression>
+	</variable>
+	<variable name="sum1_13" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{TOTAL_COUNT_ALL}.doubleValue()]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{TOTAL_COUNT_ALL}.doubleValue()]]></initialValueExpression>
+	</variable>
+	<variable name="sum1_14" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{TOTAL_COUNT_ALL}.doubleValue()]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{TOTAL_COUNT_ALL}.doubleValue()]]></initialValueExpression>
+	</variable>
+	<variable name="sum1_15" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{LESS_1_YEAR}.doubleValue()]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{LESS_1_YEAR}.doubleValue()]]></initialValueExpression>
+	</variable>
+	<variable name="sum1_16" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{LESS_2_YEAR}.doubleValue()]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{LESS_2_YEAR}.doubleValue()]]></initialValueExpression>
+	</variable>
+	<variable name="sum1_17" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{LESS_5_YEAR}.doubleValue()]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{LESS_5_YEAR}.doubleValue()]]></initialValueExpression>
+	</variable>
+	<variable name="sum1_18" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{MORE_5_YEAR}.doubleValue()]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{MORE_5_YEAR}.doubleValue()]]></initialValueExpression>
+	</variable>
+	<variable name="sum1_19" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{TOTAL_CASE}.doubleValue()]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{TOTAL_CASE}.doubleValue()]]></initialValueExpression>
+	</variable>
+	<variable name="sum1_20" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{SEND}.doubleValue()]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{SEND}.doubleValue()]]></initialValueExpression>
+	</variable>
+	<variable name="sum1_21" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{RECV}.doubleValue()]]></variableExpression>
+		<initialValueExpression><![CDATA[$F{RECV}.doubleValue()]]></initialValueExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="100" splitType="Stretch">
+			<staticText>
+				<reportElement x="-20" y="-20" width="35" height="120" uuid="9d4f6ff2-aeb5-4953-8779-37ed7807a429"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[ลำดับ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="302" y="10" width="25" height="90" uuid="5f298428-4cc9-44ee-afab-72e03b3b32da"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="9"/>
+				</textElement>
+				<text><![CDATA[ค้างจากเดือนก่อน]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="432" y="10" width="25" height="90" uuid="f7cceecf-7ce8-4b3f-be20-1c056b564566"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="9"/>
+				</textElement>
+				<text><![CDATA[พิพากษา
+ความเรียง]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="327" y="10" width="25" height="90" uuid="522a359e-be63-47ad-aa00-587d7a16b424"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="9"/>
+				</textElement>
+				<text><![CDATA[รับใหม่เดือนนี้]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="402" y="-20" width="30" height="120" uuid="73dcacf3-b178-429d-8af8-787d3ddf708f"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[คคีแดง
+ที่นำมา
+พิจารณา
+ใหม่]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="302" y="-20" width="50" height="30" uuid="51e9c7c4-8ebf-4201-88b0-bf5585d7cb53"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[เป็นเจ้าของสำนวน]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="432" y="-20" width="150" height="30" uuid="f9ddc11a-52fd-4617-8735-74740ab60c2b"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[คดีเสร็จไป]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="277" y="10" width="25" height="90" uuid="07475710-38a7-48eb-8809-15ff64c15150"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="9"/>
+				</textElement>
+				<text><![CDATA[คำร้องขอ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="607" y="10" width="25" height="90" uuid="8930fe80-c84a-400f-8f9f-b0656947d690"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="9"/>
+				</textElement>
+				<text><![CDATA[เกิน
+ 6 เดือน
+ ไม่เกิน
+ 1 ปี]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="732" y="-20" width="50" height="30" uuid="00884bbd-669a-4e01-a798-b0fe94ca5056"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[หมายเหตุ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="252" y="-20" width="50" height="30" uuid="753d699e-c450-4897-93bd-cc0f5c51c94c"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[ตรวจฟ้องและ  คำร้องขอ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="482" y="10" width="25" height="90" uuid="aa7fa54f-ff0d-44cf-a881-3f563f2ea947"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="9"/>
+				</textElement>
+				<text><![CDATA[ถอนฟ้องถอนคำร้องขอ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="582" y="-20" width="150" height="30" uuid="c18e0885-36ef-40df-bfaf-359bfb6ab45c"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[คดีค้างไปเดือนหน้า]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="252" y="10" width="25" height="90" uuid="09aef71a-9f66-413b-80f8-20779b63e2d5"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="9"/>
+				</textElement>
+				<text><![CDATA[คำฟ้อง]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="682" y="10" width="25" height="90" uuid="e0f648d8-1850-4161-b491-f61b5879c21b"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="9"/>
+				</textElement>
+				<text><![CDATA[เกิน
+ 5 ปี
+ ขึ้นไป]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="657" y="10" width="25" height="90" uuid="3ad9db6c-490f-4999-814d-8aaea7057a67"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="9"/>
+				</textElement>
+				<text><![CDATA[เกิน
+ 2 ปี
+ ไม่เกิน
+ 5 ปี]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="352" y="10" width="25" height="90" uuid="6baafcba-0d20-4048-886f-d74e393d3f82"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="9"/>
+				</textElement>
+				<text><![CDATA[จำนวน
+ปาก]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="532" y="10" width="25" height="90" uuid="69f64867-cc14-4f4a-99e9-ba1cfd41fd51"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="9"/>
+				</textElement>
+				<text><![CDATA[โดย
+เหตุ
+อื่น]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="707" y="10" width="25" height="90" uuid="64988626-bc17-4aa5-9953-01cc80bc6998"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="9"/>
+				</textElement>
+				<text><![CDATA[รวมคดีค้างยกไป]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="557" y="10" width="25" height="90" uuid="69155e76-179d-4d0b-80ad-1f2711ac4300"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="9"/>
+				</textElement>
+				<text><![CDATA[รวม]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="457" y="10" width="25" height="90" uuid="b24e0cd6-2378-4fa7-b4b2-17b67ecf3b59"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="9"/>
+				</textElement>
+				<text><![CDATA[ประนี
+ประนอม
+พิพากษา
+ตามยอม]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="582" y="10" width="25" height="90" uuid="0c3b1bcc-699e-40e3-93db-0239c66d349c"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="9"/>
+				</textElement>
+				<text><![CDATA[ไม่เกิน
+ 6 เดือน]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="377" y="10" width="25" height="90" uuid="ed89a22c-e210-46bc-972d-4d7ad9380b1d"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="9"/>
+				</textElement>
+				<text><![CDATA[จำนวนหน้า
+กระดาษ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="732" y="10" width="25" height="90" uuid="9cd1f1d8-d3c1-4ffe-ab67-b3796fc30527"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="9"/>
+				</textElement>
+				<text><![CDATA[จำนวน
+คดีที่
+โอนไป
+(คดี)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="352" y="-20" width="50" height="30" uuid="54a6a921-73f4-4b0c-b336-809a86f67c9c"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[สืบพยาน]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="507" y="10" width="25" height="90" uuid="f6a7393b-b324-4cd5-a085-85df5de9ff7c"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="9"/>
+				</textElement>
+				<text><![CDATA[จำ
+หน่าย
+คดี]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="632" y="10" width="25" height="90" uuid="d2dce78e-1b1e-47b6-bf7e-456cbebffab4"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="9"/>
+				</textElement>
+				<text><![CDATA[เกิน
+ 1 ปี
+ ไม่เกิน
+ 2 ปี]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="757" y="10" width="25" height="90" uuid="d5398fa6-c0aa-4f9e-aa8f-578289737279"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="9"/>
+				</textElement>
+				<text><![CDATA[จำนวน
+คดีที่รับ
+โอนมา
+ (คดี)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="15" y="-20" width="237" height="120" uuid="15f4d8f7-fcde-4255-8539-8bf86c9a77da"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="10"/>
+				</textElement>
+				<text><![CDATA[ชื่อผู้พิพากษา]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="30" splitType="Stretch">
+			<textField>
+				<reportElement x="15" y="0" width="237" height="30" uuid="725b7acc-013a-4dc9-a57b-93808937dce1"/>
+				<box leftPadding="5">
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{JUDGE_NAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="252" y="0" width="25" height="30" uuid="9f155b47-a527-4276-a676-957701175609"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_CASE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="432" y="0" width="25" height="30" uuid="f953c8fd-4739-45f4-898f-1c81e110a68b"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_1_2}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="632" y="0" width="25" height="30" uuid="7eeb51c1-b0d7-4e73-a7ff-427dbe70ebaf"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{LESS_2_YEAR}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="607" y="0" width="25" height="30" uuid="ded574ad-4c7e-4616-918c-86ad43a72c45"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{LESS_1_YEAR}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="657" y="0" width="25" height="30" uuid="bb4a2344-c075-4f4c-a6d0-c12e3d937fc5"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{LESS_5_YEAR}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="402" y="0" width="30" height="30" uuid="abe0cd7f-bab4-4f76-9135-ba3f912c45c8"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{RE_JUDGE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="682" y="0" width="25" height="30" uuid="05716941-e048-404d-9b54-534a1dc2766e"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MORE_5_YEAR}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="302" y="0" width="25" height="30" uuid="b9150dcf-4bd9-4eb0-b85b-46a55fcf503f"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_PREV_MONTH}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="732" y="0" width="25" height="30" uuid="54449aff-29cb-4a63-b0b9-a1f3896b16fe"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SEND}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="327" y="0" width="25" height="30" uuid="8a5709b1-d550-4f6e-aa3c-8d5256cbb326"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_RECV_THIS_MONTH}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="482" y="0" width="25" height="30" uuid="106ff962-2d53-421b-acd4-626190371fb0"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_03}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="557" y="0" width="25" height="30" uuid="68fb8b05-4db8-48ce-a0ec-3d8bbc0161f4"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TOTAL_COUNT_ALL}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="507" y="0" width="25" height="30" uuid="47f53988-cea9-4afa-9339-ec54d040e6c8"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_04}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="757" y="0" width="25" height="30" uuid="d51867a4-003a-4ca1-8ea1-385cb36d7828"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{RECV}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="-20" y="0" width="35" height="30" uuid="c1f364bc-9d96-418b-8cf8-8cfc56751fa7"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{COLUMN_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="457" y="0" width="25" height="30" uuid="96f251ac-f164-4172-8cee-2781bfde2da5"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_1_2}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="377" y="0" width="25" height="30" uuid="0df7082d-d8cf-4652-b09e-8675e02408c4"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TOTAL_PAGE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="582" y="0" width="25" height="30" uuid="3d259b82-b981-4dbb-9658-3365ad600235"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{LESS_6_MONTH}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="277" y="0" width="25" height="30" uuid="d8361cab-60b3-4a7e-b283-5a81074667cc"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_REQ}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="707" y="0" width="25" height="30" uuid="56b2d2b7-d33b-4404-b294-6c557d6cf12c"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TOTAL_CASE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="352" y="0" width="25" height="30" uuid="67857a9e-320e-4ff1-84d5-5fc04e07e1db"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TOTAL_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="532" y="0" width="25" height="30" uuid="56bffa31-924f-4689-a405-4fd69df7efa6"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_05}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="30" splitType="Stretch">
+			<textField>
+				<reportElement x="277" y="0" width="25" height="30" uuid="bdfa9323-ef86-414c-8eb6-19b9e5c5e282"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{sum1_2}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="457" y="0" width="25" height="30" uuid="3b6080aa-2196-4146-840b-86dd95de061b"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{sum1_9}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="707" y="0" width="25" height="30" uuid="8950f256-debf-4ff4-acaa-bad2bcdc5aaf"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{sum1_19}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="252" y="0" width="25" height="30" uuid="a351a315-a9e6-4124-b9bf-0add7f06b7e2"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{sum1_1}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="432" y="0" width="25" height="30" uuid="d7382c47-3071-4c4a-a8c9-1f87cfb5c7c0"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{sum1_8}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="302" y="0" width="25" height="30" uuid="ca18daaa-2c44-480f-aba5-ea1bdd2c041e"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{sum1_3}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="507" y="0" width="25" height="30" uuid="d0a1f27b-a6b2-4b3f-a505-a793ba3870fb"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{sum1_11}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="682" y="0" width="25" height="30" uuid="43174a44-fcdb-44b2-a5bf-8a07baf9eb11"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{sum1_18}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="532" y="0" width="25" height="30" uuid="1e223810-7fe5-4894-9fb1-236e7c031840"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{sum1_12}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="482" y="0" width="25" height="30" uuid="998671a4-e8f0-4008-9c63-9658319eb758"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{sum1_10}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="757" y="0" width="25" height="30" uuid="f8d6f1fd-dddb-4408-87f2-4271bfde27d8"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{sum1_21}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="557" y="0" width="25" height="30" uuid="c112807e-b42b-44ae-baeb-2b5e02dcc338"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{sum1_13}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="582" y="0" width="25" height="30" uuid="6a099123-b9d0-46b5-95fe-c71e246f9696"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{sum1_14}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="15" y="0" width="237" height="30" uuid="227d4d00-e70d-476c-8974-3bf090b84490"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["รวม"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="632" y="0" width="25" height="30" uuid="11b0b446-740c-4b19-be5f-0f5df22cf41d"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{sum1_16}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="657" y="0" width="25" height="30" uuid="9e6bb133-f463-485e-954d-b5afd7da8f00"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{sum1_17}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="607" y="0" width="25" height="30" uuid="8e3f6cb7-43f9-4ae0-91ea-e48d00b6997b"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{sum1_15}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="377" y="0" width="25" height="30" uuid="4b1680d1-6a2d-4332-9d47-96d79b42c290"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{sum1_6}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="352" y="0" width="25" height="30" uuid="53e36528-c713-4fb8-9731-a57406c826c9"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{sum1_5}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="732" y="0" width="25" height="30" uuid="212b3c91-f4ab-4591-8295-e80da52b457b"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{sum1_20}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="402" y="0" width="30" height="30" uuid="776b1c81-651f-4594-898c-ee95648e71ba"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{sum1_7}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="327" y="0" width="25" height="30" uuid="1b7a7388-4007-4477-85b8-31ff7161a087"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{sum1_4}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnFooter>
+</jasperReport>

@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Before-18" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true" uuid="5cd2bd34-c702-4b1c-a92b-3dcfc6bc98d7">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[210]"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="MONTH" class="java.lang.String">
+		<defaultValueExpression><![CDATA["04-2021"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT * FROM 
+(SELECT
+		COUNT(*) AS M_358_361_FLAG_2--ไม่ชอบด้วยกฏหมาย
+	FROM
+	PC_CASE
+	INNER JOIN (
+		SELECT
+			*
+		FROM
+			pc_case_lit_review caseLitReview
+		JOIN pc_case_lit caseLit ON
+			caseLitReview.Case_lit_id = caseLit.Case_lit_id
+		WHERE
+			LITIGANT_TYPE_ID = 7 ) CASE_LIT_LITIGANT_TYPE_ID_7 ON
+		PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_7.CASE_ID
+	INNER JOIN PC_LOOKUP_TITLE_CASE ON
+		PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+	LEFT JOIN PC_CASE_ALLE ON
+		PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+	JOIN PC_LOOKUP_ALLEGATION ON
+		PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+	WHERE
+		PC_CASE.REMOVED_BY = 0
+		AND
+		REVIEW_FLAG = 2 
+	    AND
+		PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE IN ('220101', '220111')
+		AND
+		PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2151'
+		AND 
+    	TRUNC(PC_CASE.CASE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')
+), 
+(
+	SELECT
+		COUNT(*) AS M_358_361_REVIEW_FLAG_IS_1_MEASURE_RESULT_FLAG_1
+	FROM
+	PC_CASE
+	INNER JOIN (
+		SELECT
+			*
+		FROM
+			pc_case_lit casel
+		JOIN pc_case_lit_review caselr ON
+			caselr.Case_lit_id = casel.Case_lit_id
+		JOIN pc_case_lit_measure_result caselmr ON
+			caselmr.case_lit_id = casel.case_lit_id
+		WHERE
+			LITIGANT_TYPE_ID = 7 ) CASE_LIT_LITIGANT_TYPE_ID_7 ON
+		PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_7.CASE_ID
+	INNER JOIN PC_LOOKUP_TITLE_CASE ON
+		PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+	LEFT JOIN PC_CASE_ALLE ON
+		PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+	JOIN PC_LOOKUP_ALLEGATION ON
+		PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+	WHERE
+		PC_CASE.REMOVED_BY = 0
+		AND
+		REVIEW_FLAG = 1 --ชอบด้วยกฏหมาย
+		AND 
+		MEASURE_RESULT_FLAG = 1 -- ปฏิบัติครบถ้วน มีคําสั่งไม่ฟ้อง
+	    AND
+		PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE IN ('220101', '220111')
+		AND 
+		PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2151'
+		AND
+    	TRUNC(PC_CASE.CASE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')	
+),
+(
+	SELECT
+		COUNT(*) AS M_358_361_TOTAL
+	FROM
+	PC_CASE
+	INNER JOIN (
+		SELECT
+			*
+		FROM
+			pc_case_lit casel
+		JOIN pc_case_lit_review caselr ON
+			caselr.Case_lit_id = casel.Case_lit_id
+		JOIN pc_case_lit_measure_result caselmr ON
+			caselmr.case_lit_id = casel.case_lit_id
+		WHERE
+			LITIGANT_TYPE_ID = 7 ) CASE_LIT_LITIGANT_TYPE_ID_7 ON
+		PC_CASE.CASE_ID = CASE_LIT_LITIGANT_TYPE_ID_7.CASE_ID
+	INNER JOIN PC_LOOKUP_TITLE_CASE ON
+		PC_CASE.BLACK_TITLE_ID = PC_LOOKUP_TITLE_CASE.TITLE_CASE_ID
+	LEFT JOIN PC_CASE_ALLE ON
+		PC_CASE.CASE_ID = PC_CASE_ALLE.CASE_ID
+	JOIN PC_LOOKUP_ALLEGATION ON
+		PC_CASE_ALLE.ALLEGATION_ID = PC_LOOKUP_ALLEGATION.ALLEGATION_ID
+	WHERE
+		PC_CASE.REMOVED_BY = 0
+	    AND
+		PC_LOOKUP_TITLE_CASE.TITLE_CASE_CODE IN ('220101', '220111')
+		AND 
+		PC_LOOKUP_ALLEGATION.ALLEGATION_CODE = '2151'
+		AND
+    	TRUNC(PC_CASE.CASE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')
+)]]>
+	</queryString>
+	<field name="M_358_361_REVIEW_FLAG_IS_1_MEASURE_RESULT_FLAG_1" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="M_358_361_REVIEW_FLAG_IS_1_MEASURE_RESULT_FLAG_1"/>
+	</field>
+	<field name="M_358_361_FLAG_2" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="M_358_361_FLAG_2"/>
+	</field>
+	<field name="M_358_361_TOTAL" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.label" value="M_358_361_TOTAL"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band splitType="Stretch">
+			<textField>
+				<reportElement x="180" y="-20" width="100" height="20" uuid="a1eb7e92-e1a2-49f8-a5d7-a4a1be699069">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{M_358_361_TOTAL}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="80" y="-20" width="100" height="20" uuid="f3f604f0-b96a-4d1d-ac2e-a3e3fc47616b">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{M_358_361_FLAG_2}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="-20" y="-20" width="100" height="20" uuid="bdae5fc5-59a1-4af6-bef4-7a61e8d9f21e"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{M_358_361_REVIEW_FLAG_IS_1_MEASURE_RESULT_FLAG_1}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>
