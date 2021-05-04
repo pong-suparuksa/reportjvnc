@@ -19,184 +19,196 @@
 		<defaultValueExpression><![CDATA["25-03-2021"]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
-		<![CDATA[SELECT DISTINCT
-  NVL(pcl.LITIGANT_NAME,'-')           LITIGANT_NAME,
-  NVL(pn.ADDRESS,'-')                  ADDRESS,
-  NVL(pn.MOO,'-')					   MOO,
-  NVL('ถ.'||pn.ROAD,'-')                     ROAD,
-  NVL('ซ.'||pn.ALLEY,'-')                    ALLEY,
-  CASE WHEN  NVL(plp.PROVINCE_CODE,'0000') = '0010' 
-       THEN 'แขวง'||pls.SUBDISTRICT_NAME
-       ELSE pls.SUBDISTRICT_NAME END  SUBDISTRICT_NAME,  
-  NVL(pld.DISTRICT_NAME,'-')           DISTRICT_NAME,
-  NVL(plp.PROVINCE_NAME,'-')           PROVINCE_NAME,
-  NVL(pn.CURRENT_POST_CODE,'-')		   POST_CODE,
-  pni.SEND_NOTICE_DATE
-FROM PC_NOTICE_ISSUED pni
-LEFT JOIN PC_NOTICE pn ON pn.NOTICE_ID = pni.NOTICE_ID AND pn.REMOVED_BY = 0
-LEFT JOIN PC_CASE_LIT pcl ON pcl.CASE_ID = pn.CASE_ID AND pcl.REMOVED_BY = 0
---
-LEFT JOIN PC_LOOKUP_PROVINCE plp ON plp.PROVINCE_ID = pn.CURRENT_PROVINCE_ID 
-                                 AND plp.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_DISTRICT pld ON pld.DISTRICT_ID =  pn.CURRENT_DISTRICT_ID 
-                                 AND pld.PROVINCE_ID = pn.CURRENT_PROVINCE_ID
-                                 AND pld.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_SUBDISTRICT pls ON pls.SUBDISTRICT_ID = pn.CURRENT_SUBDISTRICT_ID 
-                                    AND  pls.DISTRICT_ID =  pn.CURRENT_DISTRICT_ID 
-                                    AND pls.PROVINCE_ID = pn.CURRENT_PROVINCE_ID
-                                    AND pls.REMOVED_BY = 0
-WHERE pni.REMOVED_BY = 0
-AND NVL(pni.HAS_MONEY,0) = 0
-AND TO_CHAR(SEND_NOTICE_DATE,'DD-MM-YYYY') = $P{SELECT_DATE}]]>
+		<![CDATA[select * from dual]]>
 	</queryString>
-	<field name="LITIGANT_NAME" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="LITIGANT_NAME"/>
+	<field name="DUMMY" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DUMMY"/>
 	</field>
-	<field name="ADDRESS" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="ADDRESS"/>
-	</field>
-	<field name="MOO" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="MOO"/>
-	</field>
-	<field name="ROAD" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="ROAD"/>
-	</field>
-	<field name="ALLEY" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="ALLEY"/>
-	</field>
-	<field name="SUBDISTRICT_NAME" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="SUBDISTRICT_NAME"/>
-	</field>
-	<field name="DISTRICT_NAME" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="DISTRICT_NAME"/>
-	</field>
-	<field name="PROVINCE_NAME" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="PROVINCE_NAME"/>
-	</field>
-	<field name="POST_CODE" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="POST_CODE"/>
-	</field>
-	<field name="SEND_NOTICE_DATE" class="java.util.Date">
-		<property name="com.jaspersoft.studio.field.label" value="SEND_NOTICE_DATE"/>
-	</field>
-	<background>
-		<band splitType="Stretch"/>
-	</background>
 	<detail>
-		<band height="181" splitType="Stretch">
-			<rectangle>
-				<reportElement x="0" y="0" width="553" height="181" uuid="fe720c76-08c5-4074-949c-e81d698062e6"/>
-				<graphicElement>
-					<pen lineWidth="0.5" lineStyle="Dotted"/>
-				</graphicElement>
-			</rectangle>
+		<band height="160" splitType="Stretch">
 			<textField>
-				<reportElement x="154" y="33" width="240" height="25" uuid="d31c0f80-2b25-4986-9084-9edf7b385b42">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="0" y="0" width="100" height="20" uuid="9d2a3de9-c190-4f9a-aa30-cfda9460ad0b"/>
+				<box leftPadding="5"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{LITIGANT_NAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["สำนักงานประจำ"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="20" width="100" height="20" uuid="bea366ab-ca1c-4a2d-b9b4-46e73d06ac0d"/>
+				<box leftPadding="5"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["ที่อยู่"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="40" width="100" height="20" uuid="876271d1-3830-4178-b084-22650fef0820"/>
+				<box leftPadding="5"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["ที่ ศย"]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="104" y="33" width="50" height="25" uuid="39234e1f-e0e1-4136-84f5-ac2a214b2094">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement verticalAlignment="Middle">
+				<reportElement x="70" y="0" width="110" height="20" uuid="b83403b3-93ff-467a-8c9f-731c8f172741"/>
+				<textElement verticalAlignment="Bottom">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<text><![CDATA[เรียน]]></text>
+				<text><![CDATA[..............................................................]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="426" y="4" width="127" height="25" uuid="9b687d61-1b92-4555-8821-7503667fcd8d">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<reportElement x="30" y="20" width="150" height="20" uuid="9d648d58-daf5-4067-b0bc-494aacdcb813"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[...............................................................................]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="30" y="40" width="150" height="20" uuid="25223fa0-87f9-49cd-bab8-5fc7fd491db1"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[...............................................................................]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="440" y="0" width="116" height="60" uuid="f41fecb7-0429-4828-be4d-46be0e63e14b"/>
+				<box leftPadding="5">
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="440" y="0" width="116" height="20" uuid="45b96666-cc51-4eed-a15d-c0a6361f5318"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
 				<text><![CDATA[ชำระค่าฝากส่งเป็นรายเดือน]]></text>
 			</staticText>
-			<textField>
-				<reportElement x="154" y="52" width="240" height="25" uuid="18226667-efd9-4146-9b98-ad29b445b1f3">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{ADDRESS}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="154" y="70" width="240" height="25" uuid="e3fbd2b7-942e-4367-bcec-b2c18d1c4645">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{MOO}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="154" y="88" width="240" height="25" uuid="62f2995d-e8c5-4d22-a9fc-b73be3770999">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{ROAD}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="154" y="106" width="240" height="25" uuid="4269e52b-72e8-4da6-a316-b3b6ee3fdc6d">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{SUBDISTRICT_NAME}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="154" y="125" width="240" height="25" uuid="8c6a22d7-adea-4252-b51c-ae9f7ecb62bb">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{DISTRICT_NAME}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="154" y="144" width="122" height="25" uuid="04f3c16f-600b-4d5c-8216-01d94e688c28">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{PROVINCE_NAME}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="276" y="144" width="122" height="25" uuid="e0aa2340-c7c8-4f0d-b529-ecce53f7c42c">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{POST_CODE}]]></textFieldExpression>
-			</textField>
 			<staticText>
-				<reportElement x="426" y="23" width="127" height="25" uuid="ddc0af91-b3f0-4b5a-996c-5949b2020ff8">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<reportElement x="440" y="20" width="116" height="20" uuid="d173e195-ffca-4beb-97c5-9e19bc85fb7b"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<text><![CDATA[ใบอนุญาตที่ 29/2551]]></text>
+				<text><![CDATA[ใบอนุญาตเลขที่]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="426" y="44" width="127" height="25" uuid="ac8c1e6f-a264-4368-8327-663ce034e65b">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
+				<reportElement x="440" y="40" width="116" height="20" uuid="f79636ad-92ee-47a6-a849-e66d9153114f"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<text><![CDATA[ไปรษณีย์ฉะเชิงเทรา]]></text>
+				<text><![CDATA[.....................]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="157" y="80" width="40" height="20" uuid="7ebbfda0-2b49-4b35-8688-96b98d30d90a"/>
+				<box leftPadding="5"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["เรียน"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="157" y="100" width="40" height="20" uuid="a6ce6989-31f2-4d61-b337-919300003645"/>
+				<box leftPadding="5"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["ที่อยู่"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="284" y="100" width="40" height="20" uuid="381b6fd4-a123-4f11-8ee2-e8ebeb716009"/>
+				<box leftPadding="5"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["ถนน"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="157" y="120" width="40" height="20" uuid="59eca58e-d178-4f69-bb52-5d8e9ac092ac"/>
+				<box leftPadding="5"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["ตำบล"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="284" y="120" width="40" height="20" uuid="f8196cbc-3f23-4408-8032-cad42b7577b6"/>
+				<box leftPadding="5"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["อำเภอ"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="152" y="140" width="40" height="20" uuid="b8d95fd9-ba19-4e34-8772-c8cd3ab3a408"/>
+				<box leftPadding="5"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["จังหวัด"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="284" y="140" width="50" height="20" uuid="8a459d9c-63ec-4ac1-9e4c-c9ea3e841d93"/>
+				<box leftPadding="5"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["ไปรษณีย์"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="190" y="80" width="220" height="20" uuid="8921b41a-4d40-4f57-b7cd-10ec9367f5bd"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[.............................................................................................................]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="190" y="100" width="90" height="20" uuid="014dd68e-5f4a-4a3d-9a57-840aad0314f7"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[.............................................................................................................]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="320" y="100" width="90" height="20" uuid="4ce5193f-c51d-4f3e-9be1-b9c6c10f5529"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[.............................................................................................................]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="190" y="120" width="90" height="20" uuid="75067203-e306-4ac3-bf7d-7614c884eed7"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[.............................................................................................................]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="190" y="140" width="90" height="20" uuid="234d953c-b53e-4e94-90d2-a29ad5737bcb"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[.............................................................................................................]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="320" y="120" width="90" height="20" uuid="9abab46a-ac49-44f5-9c4d-ce079233300c"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[.............................................................................................................]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="330" y="140" width="80" height="20" uuid="c39148a6-6661-4349-b1f3-41fdb745f5a8"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[.............................................................................................................]]></text>
 			</staticText>
 		</band>
 	</detail>
