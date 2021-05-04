@@ -3,10 +3,10 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report_payment_st3" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="3748cf02-fe93-46af-92af-e789844974b7">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080//jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/ReportFeature/report_payment_st3_files/main_jrxml"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/ReportFeature/report_payment_st3"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/ReportFeature/report_payment_st3_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/04/2021"]]></defaultValueExpression>
 	</parameter>
@@ -18,8 +18,8 @@
 c.case_id, NVL(tcb.TITLE_CASE_NAME,' ') ||  TO_CHAR(c.BLACK_IDNUM) || '/' || TO_CHAR(c.BLACK_YEAR)  BLACK_CASE_NO ,
 bb.AMOUNT , ba.DISCOUNT_AMOUNT , pbb.FULLNAME , bb.REMAIN_AMOUNT 
 FROM PC_BAIL_BAILSMAN_BREACH bb
-JOIN PC_BAIL_BREACH_ADJUST ba ON (bb.BREACH_ID = ba.BREACH_ID AND (ba.REQUEST_TYPE = 2 OR ba.REQUEST_TYPE = 3) AND ba.REMOVED_BY = 0 AND ba.IS_ALLOWED = 1)
-JOIN PC_BAIL b ON (b.BAIL_ID = bb.BAIL_ID AND b.REMOVED_BY = 0)
+LEFT JOIN PC_BAIL_BREACH_ADJUST ba ON (bb.BREACH_ID = ba.BREACH_ID AND (ba.REQUEST_TYPE = 2 OR ba.REQUEST_TYPE = 3) AND ba.REMOVED_BY = 0 AND ba.IS_ALLOWED = 1)
+JOIN PC_BAIL b ON (b.BAIL_ID = bb.BAIL_ID AND b.IS_PRINTED = 1 AND b.REMOVED_BY = 0)
 LEFT JOIN PC_CASE c ON (c.CASE_ID = b.CASE_ID AND c.REMOVED_BY = 0)
 LEFT JOIN PC_LOOKUP_TITLE_CASE tcb ON (c.black_title_id = tcb.title_case_id  AND tcb.REMOVED_BY = 0)
 LEFT JOIN PC_BAIL_BAILSMAN pbb ON pbb.BAIL_ID = bb.BAIL_ID AND pbb.REMOVED_BY = 0
