@@ -27,11 +27,7 @@
 	<parameter name="JUDGE_ID" class="java.lang.String">
 		<defaultValueExpression><![CDATA[5]]></defaultValueExpression>
 	</parameter>
-	<parameter name="MORNING" class="java.lang.String">
-		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
-	</parameter>
-	<parameter name="AFTERNOON" class="java.lang.String"/>
-	<parameter name="EVENING" class="java.lang.String"/>
+	<parameter name="CHOICE" class="java.lang.String"/>
 	<parameter name="LEVEL_ROOM_ID" class="java.lang.String"/>
 	<queryString language="SQL">
 		<![CDATA[SELECT
@@ -42,10 +38,11 @@
 	NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR)  BLACK_CASE_NO ,
 	NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || CASE WHEN pj.RED_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pj.RED_YEAR)     RED_CASE_NO,
 	ppac.UPDATED_DATE ,
+	 ppac.CHOICE,
 	ppac.CHOICE_TIME ,
 	pc.PROS_DESC ,
     pc.ACCU_DESC ,
-    pc.ALLE_DESC ,
+    pc.ALLE_DESC ,   
 	plar.APPOINT_REASON_NAME  ,
 	pllr.LEVEL_ROOM_DESC ,
 	idiom_owner.JUDGE_NAME,
@@ -116,10 +113,7 @@ WHERE ppa.REMOVED_BY = 0
 AND (idiom_owner.JUDGE_ID = $P{JUDGE_ID} OR $P{JUDGE_ID} IS NULL)
 AND ppac.START_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS')
                            AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
-AND (
-		(($P{MORNING} IS NULL) OR (ppac.CHOICE =1) AND (1 = $P{MORNING}) ) OR
-     (($P{AFTERNOON} IS NULL) OR (ppac.CHOICE =2)AND(1 = $P{AFTERNOON})) OR 
-     (($P{EVENING} IS NULL) OR (ppac.CHOICE =3)AND(1 = $P{EVENING})))
+AND $P{CHOICE} IS NULL OR ppac.CHOICE = $P{CHOICE}
 AND ($P{LEVEL_ROOM_ID} IS NULL OR pllr.LEVEL_ROOM_ID = $P{LEVEL_ROOM_ID} OR 0 = $P{LEVEL_ROOM_ID})
 ORDER BY row_num]]>
 	</queryString>
@@ -375,7 +369,7 @@ ORDER BY row_num]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="9" isBold="true"/>
 				</textElement>
-				<text><![CDATA[องค์คณะ 1]]></text>
+				<text><![CDATA[ผู้พิพากษา]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="580" y="2" width="50" height="25" uuid="793d4c37-e1df-4a9c-a81e-43513b00261d">
@@ -390,7 +384,7 @@ ORDER BY row_num]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="9" isBold="true"/>
 				</textElement>
-				<text><![CDATA[องค์คณะ 2]]></text>
+				<text><![CDATA[สมทบ 1]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="630" y="2" width="50" height="25" uuid="f74e0210-bebb-4eaa-960e-13035a7e284b">
@@ -405,7 +399,7 @@ ORDER BY row_num]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="9" isBold="true"/>
 				</textElement>
-				<text><![CDATA[สมทบ ]]></text>
+				<text><![CDATA[สมทบ 2]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="680" y="2" width="80" height="25" uuid="c303b1b5-f45d-4d41-8821-1a2ea6819534">
@@ -441,7 +435,7 @@ ORDER BY row_num]]>
 	</columnHeader>
 	<detail>
 		<band height="20" splitType="Stretch">
-			<textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="-10" y="0" width="20" height="20" uuid="33607062-199a-452d-903e-08a73f87f63b"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -454,7 +448,7 @@ ORDER BY row_num]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ROW_NUM}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="10" y="0" width="30" height="20" uuid="b60b5930-d684-4fe1-849d-453dc7ff2bed"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -467,7 +461,7 @@ ORDER BY row_num]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BLACK_CASE_NO}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="40" y="0" width="30" height="20" uuid="2c840799-9343-4749-bdf7-cb0a5c090f4b"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -480,7 +474,7 @@ ORDER BY row_num]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RED_CASE_NO}.equals(" ") ? "-" :$F{RED_CASE_NO}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="70" y="0" width="40" height="20" uuid="0821d923-e243-4641-974e-22c6c6eeb247"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -493,7 +487,7 @@ ORDER BY row_num]]>
 				</textElement>
 				<textFieldExpression><![CDATA[new SimpleDateFormat("dd/MM/yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("yyyy-MM-dd").parse( $F{START_DATE}))]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="110" y="0" width="40" height="20" uuid="e1190fae-13d0-4515-b104-722ee33dfac0"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -504,9 +498,9 @@ ORDER BY row_num]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="9"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CHOICE_TIME}  == null ?  "-"  :  $F{CHOICE_TIME}.substring( 0, 5 )]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{CHOICE_TIME}  == null ?  "-"  :  $F{CHOICE_TIME}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="150" y="0" width="100" height="20" uuid="3f92aae9-784f-4662-88f0-969a43f6af02"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -519,7 +513,7 @@ ORDER BY row_num]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PROS_DESC}  == null ?  "-"  : $F{PROS_DESC}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="250" y="0" width="100" height="20" uuid="0ec29df4-d920-47c7-ac65-f1090eae95c8"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -532,7 +526,7 @@ ORDER BY row_num]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ACCU_DESC}  == null ?  "-"  :  $F{ACCU_DESC}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="350" y="0" width="60" height="20" uuid="ac427fa2-8212-489a-9bcd-bd11d8942703"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -545,7 +539,7 @@ ORDER BY row_num]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ALLE_DESC}  == null ?  "-"  :  $F{ALLE_DESC}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="410" y="0" width="50" height="20" uuid="242df793-f04d-4479-b714-29df7c86f8b1"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -558,7 +552,7 @@ ORDER BY row_num]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{APPOINT_REASON_NAME} == null ? "-" : $F{APPOINT_REASON_NAME}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="460" y="0" width="70" height="20" uuid="8b00d546-fe4c-457e-a38a-ffb83b78959a"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -571,7 +565,7 @@ ORDER BY row_num]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{JUDGE_NAME}  == null ? "-" : $F{JUDGE_NAME}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="530" y="0" width="50" height="20" uuid="a4515a6d-f6aa-4a46-8dc6-dac913727144"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -584,7 +578,7 @@ ORDER BY row_num]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ONG_1} == null ? "-" : $F{ONG_1}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="580" y="0" width="50" height="20" uuid="48a89003-76b5-4985-8e3e-54cd855f5f87"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -597,7 +591,7 @@ ORDER BY row_num]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ONG_2}  == null ? "-" : $F{ONG_2}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="630" y="0" width="50" height="20" uuid="21c4572a-3c32-46d5-b68f-0dbf2d9a4c06"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -610,7 +604,7 @@ ORDER BY row_num]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ADD_1} == null ? "-" : $F{ADD_1}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="680" y="0" width="80" height="20" uuid="9ac3114e-15e5-4d03-a80f-76a3bd45feb0"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -623,7 +617,7 @@ ORDER BY row_num]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{LEVEL_ROOM_DESC} == null ? "-" : $F{LEVEL_ROOM_DESC}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="760" y="0" width="50" height="20" uuid="f61903d1-24f8-4ec9-9d5a-7f36e45aced3"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>

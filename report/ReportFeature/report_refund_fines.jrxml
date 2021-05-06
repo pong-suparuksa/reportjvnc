@@ -6,11 +6,10 @@
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="612"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="377"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/ReportFeature/report_refund_fines"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/ReportFeature/report_refund_fines_files/main_jrxml"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-229"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
@@ -125,8 +124,7 @@ SELECT
     NVL(pfrd.TOTAL_AMOUNT,0)              TOTAL_RECEIVED_AMOUNT,
     --
     NVL(pfpd.CASE_LIT_NAME,' ')    PAYEE,
-    SUM(NVL(pfp.TOTAL_AMOUNT,0))   TOTAL_PAY_AMOUNT,
-   
+    SUM(NVL(pfp.TOTAL_AMOUNT,0))   TOTAL_PAY_AMOUNT,   
     pfp.PAYMENT_DATE,
     CASE WHEN pfp.PAYMENT_DATE IS NOT NULL 
          THEN THAISDATE(pfp.PAYMENT_DATE)
@@ -137,7 +135,6 @@ NVL(pfpc.CHEQUE_CODE,' ') CHEQUE_CODE,
 NVL(pfp.CHEQUE_AMOUNT,0) CHEQUE_AMOUNT,
 NVL(pfp.CASH_AMOUNT,0) CASH_AMOUNT,
 NVL(pfp.TRANSFER_AMOUNT,0) TRANSFER_AMOUNT
-
 FROM PC_FIN_PAYMENT pfp
 LEFT JOIN PC_FIN_PAYMENT_DETAIL pfpd ON pfpd.PAYMENT_ID = pfp.PAYMENT_ID AND pfpd.REMOVED_BY = 0
 LEFT JOIN PC_FIN_PAYMENT_CHEQUE pfpc ON pfpc.PAYMENT_ID = pfp.PAYMENT_ID AND pfpc.REMOVED_BY = 0
@@ -163,9 +160,7 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
 			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
 --
 WHERE pfp.REMOVED_BY = 0
-AND pfp.PAYMENT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
-                         AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
-AND plrt.RECEIPT_TYPE_CODE = 3
+AND pfp.PAYMENT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
 --
 GROUP BY plrt.RECEIPT_TYPE_NAME, pfr.RECEIVED_DATE, pfr.RECEIVED_DATE,
 	     pltc_b.TITLE_CASE_NAME, pc.BLACK_IDNUM, pc.BLACK_YEAR,
@@ -256,7 +251,7 @@ ORDER BY PAYMENT_DATE]]>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
-				<text><![CDATA[รายงานใบสั่งคืนเงินค่าปรับ]]></text>
+				<text><![CDATA[รายงานสั่งคืนเงิน]]></text>
 			</staticText>
 			<textField>
 				<reportElement stretchType="ContainerHeight" x="0" y="42" width="802" height="25" uuid="ac27c048-dda0-4559-b342-edbd11b2c3a5">
