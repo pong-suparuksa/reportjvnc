@@ -2,7 +2,7 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="stat_rpt_case_remain" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a2858dec-e48c-4db9-b9e5-528e888a925a">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojStage2"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-229"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -12,49 +12,54 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.140/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/ReportFeature/report_case_remain"/>
 	<property name="com.jaspersoft.studio.report.description" value="6.สำนวนคดีที่ค้างพิจารณาอยู่ที่ผู้พิพากษา"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<parameter name="SELECT_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["01-07-2020"]]></defaultValueExpression>
-	</parameter>
-	<parameter name="CODE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["110"]]></defaultValueExpression>
+	<parameter name="START_DATE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["29-04-2021"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="END_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["31-12-2020"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["30-04-2021"]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
 		<![CDATA[SELECT DISTINCT
         pc.CASE_DATE,
         TO_CHAR(pc.CASE_DATE , 'yyyy', 'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI') CASE_YEAR,  
-        pltc.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR  CASE_BLACK_NO,
-        pcl_c.LITIGANT_NAME CLAIMANT,
-        pcl_d.LITIGANT_NAME DEFENDANT,
+        --pltc.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR  CASE_BLACK_NO,
+        NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR)  CASE_BLACK_NO ,
+		NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || CASE WHEN pj.RED_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pj.RED_YEAR)     CASE_RED_NO,
+        plaintiff.LITIGANT_NAME CLAIMANT,
+        dfd.LITIGANT_NAME DEFENDANT,
         alle.ALLEGATiON,
         THAISDATE(pc.CASE_DATE) CASE_DATE_TEXT,
         jud.JUDGE_NAME,
         plcc.CASE_CATE_CODE,
         plcc.CASE_CATE_NAME,
-        THAISDATE(TO_TIMESTAMP($P{SELECT_DATE},'DD-MM-YYYY')) SEL_DATE_TEXT 
+        THAISDATE(TO_TIMESTAMP($P{START_DATE},'DD-MM-YYYY')) SEL_DATE_TEXT 
 FROM PC_CASE pc
-LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
 --
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
---โจทก์
-LEFT JOIN PC_CASE_LIT pcl_c ON pcl_c.CASE_ID = pc.CASE_ID AND pcl_c.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_LIT_TYPE pllt_c ON pllt_c.LIT_TYPE_ID = pcl_c.LITIGANT_TYPE_ID 
+--โจทก์ 
+LEFT JOIN (
+ SELECT pcl_c.CASE_ID, pcl_c.LITIGANT_NAME,pllt_c.LIT_TYPE_CODE
+ FROM PC_CASE_LIT pcl_c
+ LEFT JOIN PC_LOOKUP_LIT_TYPE pllt_c ON pllt_c.LIT_TYPE_ID = pcl_c.LITIGANT_TYPE_ID 
                                     AND pllt_c.REMOVED_BY = 0
-                                    AND pllt_c.LIT_TYPE_CODE = '01'
---จำเลย                                    
-LEFT JOIN PC_CASE_LIT pcl_d ON pcl_d.CASE_ID = pc.CASE_ID AND pcl_d.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_LIT_TYPE pllt_d ON pllt_d.LIT_TYPE_ID = pcl_d.LITIGANT_TYPE_ID 
+WHERE pcl_c.REMOVED_BY = 0 AND pllt_c.LIT_TYPE_CODE = '01'
+) plaintiff ON plaintiff.CASE_ID = pc.CASE_ID 
+--จำเลย    
+LEFT JOIN (
+ SELECT pcl_d.CASE_ID, pcl_d.LITIGANT_NAME,pllt_d.LIT_TYPE_CODE
+ FROM PC_CASE_LIT pcl_d
+ LEFT JOIN PC_LOOKUP_LIT_TYPE pllt_d ON pllt_d.LIT_TYPE_ID = pcl_d.LITIGANT_TYPE_ID 
                                     AND pllt_d.REMOVED_BY = 0
-                                    AND pllt_d.LIT_TYPE_CODE = '03'                                    
+WHERE pcl_d.REMOVED_BY = 0 AND pllt_d.LIT_TYPE_CODE = '03'  
+) dfd ON dfd.CASE_ID = pc.CASE_ID                                     
 --ข้อหา    
 LEFT JOIN (SELECT pca.CASE_ID, NVL(LISTAGG(pla.ALLEGATION_NAME,', ') WITHIN GROUP (ORDER BY pla.ALLEGATION_NAME),'-') ALLEGATION 
 	  FROM PC_CASE_ALLE pca 
@@ -69,14 +74,15 @@ LEFT JOIN (SELECT DISTINCT pcj.CASE_ID, plj.JUDGE_NAME
                                     AND pljt.JUDGE_TYPE_CODE = '01'
       JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID AND plj.REMOVED_BY = 0
       WHERE pcj.REMOVED_BY = 0) jud ON jud.CASE_ID = pc.CASE_ID
+--
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON 
+	pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0	
 --                             
 WHERE pc.REMOVED_BY = 0
 AND pc.CASE_DATE IS NOT NULL 
-
-AND pc.CASE_DATE BETWEEN TO_DATE($P{SELECT_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+AND pc.CASE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
                          AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS') 
 AND pj.CASE_ID IS NULL
-AND plcc.CASE_CATE_CODE = $P{CODE} 
 ORDER BY EXTRACT(YEAR FROM pc.CASE_DATE)]]>
 	</queryString>
 	<field name="CASE_DATE" class="java.util.Date">
@@ -154,7 +160,7 @@ ORDER BY EXTRACT(YEAR FROM pc.CASE_DATE)]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="17" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new SimpleDateFormat("คดีค้างตั้งแต่วันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd-MM-yyyy").parse($P{SELECT_DATE})) + new SimpleDateFormat(" ถึงวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd-MM-yyyy").parse($P{END_DATE}))]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("คดีค้างตั้งแต่วันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd-MM-yyyy").parse($P{START_DATE})) + new SimpleDateFormat(" ถึงวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd-MM-yyyy").parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="20" width="186" height="30" uuid="48103c17-601d-401e-927d-88b7e0b0d0f9">
