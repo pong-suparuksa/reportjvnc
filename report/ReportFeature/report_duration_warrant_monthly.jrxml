@@ -11,74 +11,73 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.140/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/ReportFeature/report_duration_warrant_monthly"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-229"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<parameter name="START_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["01/07/2020"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["01/03/2021"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="END_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["14/07/2020"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["14/07/2021"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[SELECT 
-			pni.SEND_NOTICE_DATE,
-			THAILDATE(NVL(pni.SEND_NOTICE_DATE,CURRENT_DATE))                                                SEND_NOTICE_DATE_TEXT,
-			THAISDATE(NVL(pnsr.CREATED_DATE,TO_TIMESTAMP('01/01/1900','DD/MM/YYYY')))                        SEND_NOTICE_SDATE,
+			pnsr.REPORT_DATE ,
+			CASE WHEN pnsr.REPORT_DATE IS NOT NULL THEN THAISDATE(NVL(pnsr.REPORT_DATE,TO_TIMESTAMP('01/01/1900','DD/MM/YYYY'))) ELSE ' ' END     REPORT_DATE_TEXT,
+			THAISDATE(NVL(pni.SEND_NOTICE_DATE,TO_TIMESTAMP('01/01/1900','DD/MM/YYYY')))                        SEND_NOTICE_SDATE,
             --
-            NVL(plc.COURT_NAME_TH, ' ') 	     													       COURT_NAME_TH,                        
-            NVL(pltc_b.TITLE_CASE_CODE,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR)     CASE_BLACK_NO,    
-            NVL(pltc_r.TITLE_CASE_CODE,' ')  || TO_CHAR(pj.RED_IDNUM) || '/' || TO_CHAR(pj.RED_YEAR)  		   CASE_RED_NO,
+            NVL(plc.COURT_NAME_TH, ' ') 	     													       COURT_NAME_TH,   
+            CASE WHEN pc.BLACK_IDNUM IS NOT NULL THEN pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR ELSE '-' END CASE_BLACK_NO, 
+			CASE WHEN pj.RED_IDNUM IS NOT NULL THEN pltc_r.TITLE_CASE_NAME||pj.RED_IDNUM||'/'||pj.RED_YEAR ELSE '-' END CASE_RED_NO,	
             NVL(pc.PROS_DESC,' ')	      													       CLAIMANT, 
             NVL(pc.ACCU_DESC,' ')		   												  		   DEFENDANT,
             NVL(pfr.PAYER_NAME,' ')																	   PAYER_NAME,
-  		    pnld.TO_NAME,
+  		    pn.LITIGANT_NAME  TO_NAME,
             NVL(plnt.NOTICE_TYPE_NAME,' ')															   NOTICE_TYPE_NAME,            
             --
             NVL(pls.SUBDISTRICT_NAME,' ')														 	   SUBDISTRICT_NAME,
             NVL(pld.DISTRICT_NAME,' ')																   DISTRICT_NAME,
-            pn.SEND_FEE,																																	   
+           NVL(pn.SEND_FEE,'0') SEND_FEE,																																	   
 		    NVL(pup.USER_PROFILE_FULL_NAME,' ')														   USER_PROFILE_FULL_NAME,
             NVL(plc1.COURT_NAME_TH,' ')                                                                 OTHER_COURT,
             pfr.RECEIPT_BOOK_NO || '/' || pfr.RECEIPT_NO                                                       RECEIPT_REF,
             THAISDATE(NVL(pnsr.CREATED_DATE,TO_TIMESTAMP('01/01/1900','DD/MM/YYYY')))                        RESULT_CREATE_DATE,
-            NVL(pnsr.RESULT_DETAIL,' ')                                                                 RESULT_DETAIL
-FROM PC_NOTICE_LIT_DETAIL  pnld
-LEFT JOIN PC_NOTICE pn ON pn.NOTICE_ID = pnld.NOTICE_ID
-LEFT JOIN PC_NOTICE_SEND_RESULT pnsr ON pnsr.NOTICE_ID = pnld.NOTICE_ID 
+            plnsr.NOTICE_SEND_RESULT_NAME  || ' '|| pnsr.UNSEND_DETAIL   																	SEND_RESULT,
+            CASE WHEN pn.SEND_METHOD = 1 THEN 'ไปรษณีย์ ' ELSE 'เจ้าหน้าที่' END SEND_METHOD
+FROM PC_NOTICE_SEND_RESULT pnsr
+LEFT JOIN PC_NOTICE pn ON pn.NOTICE_ID = pnsr.NOTICE_ID AND pn.REMOVED_BY = 0
 --
-LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID
+INNER JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN PC_NOTICE_ISSUED pni ON pni.NOTICE_ID = pn.NOTICE_ID
 LEFT JOIN PC_FIN_RECEIPT pfr ON pfr.RECEIPT_ID = pni.RECEIPT_ID
-LEFT JOIN PC_JUDGEMENT pj ON pj.COURT_ID = pn.COURT_ID AND pj.CASE_ID = pn.COURT_ID
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pn.CASE_ID AND pj.REMOVED_BY = 0
 --
 LEFT JOIN PC_USER_PROFILE pup ON pup.USER_ID = pn.SEND_BY
 --
-LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.COURT_ID = pc.COURT_ID AND pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID
-LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.COURT_ID = pj.COURT_ID AND pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
 --
 LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pn.COURT_ID
 LEFT JOIN PC_LOOKUP_COURT plc1 ON plc1.COURT_ID = pn.SEND_TO_COURT
 --
-LEFT JOIN PC_LOOKUP_NOTICE_TYPE plnt ON plnt.NOTICE_TYPE_ID = pn.NOTICE_TYPE_ID AND plnt.COURT_ID = pn.COURT_ID
+LEFT JOIN PC_LOOKUP_NOTICE_TYPE plnt ON plnt.NOTICE_TYPE_ID = pn.NOTICE_TYPE_ID
+--
+LEFT JOIN PC_LOOKUP_NOTICE_SEND_RESULT plnsr ON plnsr.NOTICE_SEND_RESULT_ID = pnsr.POST_SEND_RESULT
 --
 LEFT JOIN PC_LOOKUP_DISTRICT pld ON pld.DISTRICT_ID =  pn.CURRENT_DISTRICT_ID AND pld.PROVINCE_ID = pn.CURRENT_PROVINCE_ID 
 LEFT JOIN PC_LOOKUP_SUBDISTRICT pls ON pls.SUBDISTRICT_ID = pn.CURRENT_SUBDISTRICT_ID AND  pls.DISTRICT_ID =  pn.CURRENT_DISTRICT_ID AND pls.PROVINCE_ID = pn.CURRENT_PROVINCE_ID
-
-WHERE pn.SEND_METHOD = 2
-AND NVL(pni.HAS_MONEY,1) = 1
-AND pn.IS_COURT_AREA = 0
+WHERE pnsr.REMOVED_BY = 0 AND pnsr.POST_SEND_RESULT IS NOT NULL AND pnsr.REPORT_DATE IS NOT NULL
 AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
                               AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')]]>
 	</queryString>
-	<field name="SEND_NOTICE_DATE" class="java.util.Date">
-		<property name="com.jaspersoft.studio.field.label" value="SEND_NOTICE_DATE"/>
+	<field name="REPORT_DATE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="REPORT_DATE"/>
 	</field>
-	<field name="SEND_NOTICE_DATE_TEXT" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="SEND_NOTICE_DATE_TEXT"/>
+	<field name="REPORT_DATE_TEXT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="REPORT_DATE_TEXT"/>
 	</field>
 	<field name="SEND_NOTICE_SDATE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="SEND_NOTICE_SDATE"/>
@@ -128,8 +127,11 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 	<field name="RESULT_CREATE_DATE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="RESULT_CREATE_DATE"/>
 	</field>
-	<field name="RESULT_DETAIL" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="RESULT_DETAIL"/>
+	<field name="SEND_RESULT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="SEND_RESULT"/>
+	</field>
+	<field name="SEND_METHOD" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="SEND_METHOD"/>
 	</field>
 	<variable name="TOTAL" class="java.math.BigDecimal" calculation="Sum">
 		<variableExpression><![CDATA[$F{SEND_FEE}]]></variableExpression>
@@ -273,7 +275,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<text><![CDATA[ดำเนินการต่ออย่างไร]]></text>
+				<text><![CDATA[ส่งโดย]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="713" y="0" width="89" height="25" uuid="71ba1c16-550c-4a95-bb60-ff21f5b637d9">
@@ -318,7 +320,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{RESULT_CREATE_DATE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{REPORT_DATE_TEXT}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="110" y="0" width="70" height="25" uuid="8ae2f465-399f-45a1-9a91-578b5cf30aa4">
@@ -386,7 +388,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<textElement verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{RESULT_DETAIL}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{SEND_RESULT}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="558" y="0" width="60" height="25" uuid="663ed596-4a96-419c-b40d-91f123ee1a76">
@@ -413,7 +415,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<textElement verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{SEND_METHOD}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="713" y="0" width="89" height="25" uuid="8fd4cce9-0e13-4d34-b316-9edbe8fd12a5">

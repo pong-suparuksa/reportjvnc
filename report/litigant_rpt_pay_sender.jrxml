@@ -11,61 +11,59 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.193:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_pay_sender"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojStage2"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_pay_sender_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["01/05/2020"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["01/03/2021"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="END_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["31/05/2020"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["31/03/2021"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="SENDER" class="java.lang.String">
 		<defaultValueExpression><![CDATA[-1]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
 		<![CDATA[SELECT 
-  NVL(cou.COURT_NAME_TH, '-') 	                                                           COURT_NAME_TH, 
-  pfp.PAYMENT_DATE,
-  THAISDATE(NVL(pfp.PAYMENT_DATE,TO_TIMESTAMP('01/01/1900','DD/MM/YYYY')))                        PAYMENT_DATE_TEXT,
+  NVL(cou.COURT_NAME_TH, '-') 	                                                           COURT_NAME_TH,
+  (pnsr.PAID_DATE)                      																	PAYMENT_DATE ,
+  THAISDATE(NVL(pnsr.PAID_DATE,TO_TIMESTAMP('01/01/1900','DD/MM/YYYY')))                        PAYMENT_DATE_TEXT,
   NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR)    CASE_BLACK_NO,    
   NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || '/' || TO_CHAR(pj.RED_YEAR)  	    CASE_RED_NO,
   NVL(pc.PROS_DESC,'-')	      													           CLAIMANT, 
-  NVL(pc.ACCU_DESC ,'-')		   												  		   DEFENDANT, 
+  NVL(pc.ACCU_DESC ,'-')		   												  		   DEFENDANT,
   --
-  NVL(pnld.TO_NAME,'-')																	   TO_NAME,
+  NVL(pn.LITIGANT_NAME,'-')																	   TO_NAME,
   NVL(pls.SUBDISTRICT_NAME,'-')														 	   SUBDISTRICT_NAME,
-  NVL(pld.DISTRICT_NAME,'-')															   DISTRICT_NAME,  
+  NVL(pld.DISTRICT_NAME,'-')															   DISTRICT_NAME,
   --
   pfr.RECEIPT_BOOK_NO || '/' || pfr.RECEIPT_NO                                             RECEIPT_REF,
-  NVL(pfrc.CHEQUE_CODE,'-')                                                                CHEQUE_CODE,
+ -- NVL(pfrc.CHEQUE_CODE,'-')                                                                CHEQUE_CODE,
   NVL(pn.SEND_FEE,0)                                                                       SEND_FEE,
   NVL(pfr.PAYER_NAME,'-')																   PAYER_NAME,
   NVL(pup.USER_PROFILE_FULL_NAME,'-')													   NOTICE_SENDER,
   NVL(pup1.USER_PROFILE_FULL_NAME,'-')													   PAYER
 --  
-FROM PC_FIN_PAYMENT_DETAIL pfpd
-LEFT JOIN PC_FIN_PAYMENT pfp ON pfp.PAYMENT_ID = pfpd.PAYMENT_ID AND pfp.REMOVED_BY = 0
---
-LEFT JOIN PC_FIN_RECEIPT pfr ON pfr.RECEIPT_ID = pfpd.RECEIPT_ID AND pfr.REMOVED_BY = 0
-LEFT JOIN PC_FIN_RECEIPT_CHEQUE pfrc ON pfrc.RECEIPT_ID = pfpd.RECEIPT_ID AND pfrc.REMOVED_BY = 0
---
-LEFT JOIN PC_NOTICE_ISSUED pni ON pni.RECEIPT_ID = pfr.RECEIPT_ID AND pni.REMOVED_BY = 0
+  FROM PC_NOTICE_SEND_RESULT pnsr 
+LEFT JOIN PC_NOTICE pn ON pn.NOTICE_ID = pnsr.NOTICE_ID AND pn.REMOVED_BY = 0
+LEFT JOIN PC_NOTICE_ISSUED pni ON pni.NOTICE_ID = pn.NOTICE_ID AND pni.REMOVED_BY = 0
 LEFT JOIN PC_NOTICE_LIT_DETAIL pnld ON pnld.NOTICE_ID = pni.NOTICE_ID AND pnld.REMOVED_BY = 0
-LEFT JOIN PC_NOTICE pn ON pn.NOTICE_ID = pni.NOTICE_ID AND pn.REMOVED_BY = 0
 --
-LEFT JOIN PC_CASE pc ON pc.CASE_ID = pfr.CASE_ID AND pc.REMOVED_BY = 0
-LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pfr.CASE_ID AND pj.REMOVED_BY = 0
+LEFT JOIN PC_FIN_RECEIPT pfr ON pfr.RECEIPT_ID = pni.RECEIPT_ID AND pfr.REMOVED_BY = 0
+LEFT JOIN PC_FIN_RECEIPT_CHEQUE pfrc ON pfrc.RECEIPT_ID = pfr.RECEIPT_ID AND pfrc.REMOVED_BY = 0
+--
+LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID AND pc.REMOVED_BY = 0
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pn.CASE_ID AND pj.REMOVED_BY = 0
 --
 LEFT JOIN (SELECT COURT_ID, CASE_ID, LITIGANT_NAME FROM PC_CASE_LIT pcl WHERE pcl.PERSON_TYPE_ID = 0 AND pcl.REMOVED_BY = 0) cl ON cl.CASE_ID  = pn.CASE_ID
 LEFT JOIN (SELECT COURT_ID, CASE_ID, LITIGANT_NAME FROM PC_CASE_LIT pcl WHERE pcl.PERSON_TYPE_ID = 1 AND pcl.REMOVED_BY = 0) de ON de.CASE_ID = pn.CASE_ID
 --
 LEFT JOIN PC_USER_PROFILE pup ON pup.USER_ID = pn.SEND_BY AND pup.REMOVED_BY = 0
-LEFT JOIN PC_USER_PROFILE pup1 ON pup1.USER_ID = pfp.CREATED_BY AND pup1.REMOVED_BY = 0
+LEFT JOIN PC_USER_PROFILE pup1 ON pup1.USER_ID = pnsr.CREATED_BY AND pup1.REMOVED_BY = 0
 --
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
@@ -88,16 +86,11 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
 			JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
 			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
 --
-WHERE pfpd.REMOVED_BY = 0
-AND NVL(pn.SEND_METHOD,2) = 2
-AND pfp.PAYMENT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS')  AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
-AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
-						   FROM(SELECT NVL(pn.SEND_BY,0) SEND_BY, -1 SENDER 
-		     	 	     		 FROM PC_NOTICE pn 
-			                     UNION 
-			                     SELECT NVL(pn.SEND_BY,0) SEND_BY, NVL(pn.SEND_BY,0) SENDER
-			                     FROM PC_NOTICE pn) A 
-		                   WHERE A.SENDER IN ($P!{SENDER}))]]>
+WHERE pnsr.REMOVED_BY = 0
+AND pnsr.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS')  AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
+AND pn.SEND_METHOD = 2
+
+]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
@@ -131,9 +124,6 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 	</field>
 	<field name="RECEIPT_REF" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_REF"/>
-	</field>
-	<field name="CHEQUE_CODE" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="CHEQUE_CODE"/>
 	</field>
 	<field name="SEND_FEE" class="java.lang.Double">
 		<property name="com.jaspersoft.studio.field.label" value="SEND_FEE"/>
@@ -366,7 +356,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<text><![CDATA[ชื่อผู้วางเงิน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="420" y="0" width="98" height="25" uuid="4b7674d4-6ae9-4abe-ae36-d01632f847cd">
+				<reportElement x="420" y="0" width="110" height="25" uuid="4b7674d4-6ae9-4abe-ae36-d01632f847cd">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d6f3be46-ebd3-4944-a418-026b02c2ef0f"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -398,7 +388,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<text><![CDATA[ส่งหมายถึงใคร]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="518" y="0" width="68" height="25" uuid="157e74d7-db28-4b18-aa02-ba449a68ed3d">
+				<reportElement x="530" y="0" width="95" height="25" uuid="157e74d7-db28-4b18-aa02-ba449a68ed3d">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e5a431d-ad40-4073-81e9-7e6399ae90d3"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -414,23 +404,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<text><![CDATA[อำเภอ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="586" y="0" width="68" height="25" uuid="4ea4668d-3ebe-4315-ad00-4aa5b10095f9">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7b12ef6e-6139-4dad-b389-8a982c6f495a"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center">
-					<font fontName="TH Sarabun New" size="17"/>
-				</textElement>
-				<text><![CDATA[เลขที่เช็ค]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="654" y="0" width="52" height="25" uuid="acffd833-685c-4e3d-b8e1-8785067e09de">
+				<reportElement x="625" y="0" width="76" height="25" uuid="acffd833-685c-4e3d-b8e1-8785067e09de">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="250a77d4-40a6-4356-bb66-8b40c1bba297"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -446,7 +420,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<text><![CDATA[ราคา]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="706" y="0" width="96" height="25" uuid="a8e4ca27-9ebf-4040-a539-dfb7cdb43e09">
+				<reportElement x="701" y="0" width="101" height="25" uuid="a8e4ca27-9ebf-4040-a539-dfb7cdb43e09">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="eb81ec2d-c8d1-4a6c-b22e-871e3ba7c66b"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -459,7 +433,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<textElement textAlignment="Center">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<text><![CDATA[ผู้จ่ายเงิน]]></text>
+				<text><![CDATA[หมายเหตุ]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="0" y="0" width="34" height="25" uuid="3d85c395-de09-4e8b-9ce1-2644a5f92fc5">
@@ -545,7 +519,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<textFieldExpression><![CDATA[$F{PAYER_NAME}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="420" y="0" width="98" height="25" uuid="6f2d7650-27ed-425d-b65a-af0d70f01b3f">
+				<reportElement x="420" y="0" width="110" height="25" uuid="6f2d7650-27ed-425d-b65a-af0d70f01b3f">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d6f3be46-ebd3-4944-a418-026b02c2ef0f"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -577,7 +551,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<textFieldExpression><![CDATA[$F{TO_NAME}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="518" y="0" width="68" height="25" uuid="7fb97607-dc5a-409f-9b5b-9d954ac1989b">
+				<reportElement x="530" y="0" width="95" height="25" uuid="7fb97607-dc5a-409f-9b5b-9d954ac1989b">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e5a431d-ad40-4073-81e9-7e6399ae90d3"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -593,23 +567,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<textFieldExpression><![CDATA[$F{DISTRICT_NAME}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="586" y="0" width="68" height="25" uuid="3d34313d-2a9d-4560-bd17-0263a8ef973b">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7b12ef6e-6139-4dad-b389-8a982c6f495a"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement>
-					<font fontName="TH Sarabun New" size="17"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{CHEQUE_CODE}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="654" y="0" width="52" height="25" uuid="5a15b967-9e01-433a-9e9d-6d6bf9cb5408">
+				<reportElement x="625" y="0" width="76" height="25" uuid="5a15b967-9e01-433a-9e9d-6d6bf9cb5408">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="250a77d4-40a6-4356-bb66-8b40c1bba297"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -624,8 +582,8 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				</textElement>
 				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format($F{SEND_FEE})]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="706" y="0" width="96" height="25" uuid="65cee6c8-7e8c-437d-93f9-9891b21c35d1">
+			<textField isBlankWhenNull="true">
+				<reportElement x="701" y="0" width="101" height="25" uuid="65cee6c8-7e8c-437d-93f9-9891b21c35d1">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="eb81ec2d-c8d1-4a6c-b22e-871e3ba7c66b"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -638,7 +596,6 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<textElement>
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{PAYER}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="0" width="34" height="25" uuid="d5589104-d9ff-436e-8cb9-ef7a9987b288">
