@@ -11,10 +11,10 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080//jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/bail_rpt_acc_apartment"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
 	<property name="com.jaspersoft.studio.report.description" value="30.บัญชีประกันด้วยห้องชุด"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/bail_rpt_acc_apartment_files/main_jrxml"/>
 	<parameter name="SELECT_MONTH" class="java.lang.String">
@@ -25,7 +25,7 @@
 THAIMONTH(EXTRACT(MONTH FROM B.BAIL_DATE)) MONTH_STR,
 THAIMONTH(EXTRACT(YEAR FROM B.BAIL_DATE) +543) YEAR_STR, THAISDATE(B.BAIL_DATE) THAIDATE,	
 BSC.ADDRESS, BSC.FLOOR_NO, BSC.BUILDING_NAME, CONDO_NAME, BSC.VALUES_FOR_BAILING,
-LS.SUBDISTRICT_NAME, LD.DISTRICT_NAME, LP.PROVINCE_NAME, LC.COURT_NAME_TH
+LS.SUBDISTRICT_NAME, LD.DISTRICT_NAME, LP.PROVINCE_NAME, COU.COURT_NAME_TH
 --
 FROM PC_BAIL_SEC_CONDO BSC
 LEFT JOIN PC_BAIL_SEC BS ON(BS.SEC_ID=BSC.SEC_ID AND BS.REMOVED_BY = 0)
@@ -33,7 +33,10 @@ LEFT JOIN PC_BAIL B ON(B.BAIL_ID=BS.BAIL_ID AND B.REMOVED_BY = 0)
 --
 LEFT JOIN PC_CASE C ON(C.CASE_ID=B.CASE_ID AND C.REMOVED_BY = 0)
 LEFT JOIN PC_LOOKUP_TITLE_CASE LTC ON(LTC.TITLE_CASE_ID=C.BLACK_TITLE_ID AND LTC.REMOVED_BY = 0)
-LEFT JOIN PC_LOOKUP_COURT LC ON(LC.COURT_ID=B.COURT_ID AND LC.REMOVED_BY = 0)
+LEFT JOIN (SELECT plc.COURT_NAME_TH
+			FROM PC_PARAM pp
+			JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) COU ON 1 = 1
 --
 LEFT JOIN PC_LOOKUP_SUBDISTRICT LS ON(LS.SUBDISTRICT_ID=BSC.SUBDISTRICT_ID)
 LEFT JOIN PC_LOOKUP_DISTRICT LD ON(LD.DISTRICT_ID=BSC.DISTRICT_ID)
@@ -90,9 +93,9 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="18" isBold="true"/>
+					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["ศาล" + ($F{COURT_NAME_TH} == null ? "" :  $F{COURT_NAME_TH})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{COURT_NAME_TH} == null ? "" :  $F{COURT_NAME_TH})]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="201" y="0" width="430" height="25" uuid="95db4473-7568-4901-92cc-f94d3fdc125c">
@@ -107,7 +110,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="18" isBold="true"/>
+					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
 				<text><![CDATA[แบบรายงานประกันภัยโดยใช้ห้องชุด ในการปล่อยตัวชั่วคราว]]></text>
 			</staticText>
@@ -116,7 +119,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="18" isBold="true"/>
+					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["ประจำเดือน " +  ($F{MONTH_STR} == null ? "" :   $F{MONTH_STR} + " " + $F{YEAR_STR})]]></textFieldExpression>
 			</textField>
@@ -125,7 +128,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA["แผ่นที่ "+$V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
@@ -146,7 +149,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<text><![CDATA[ที่]]></text>
 			</staticText>
@@ -163,7 +166,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<text><![CDATA[วันเดือนปีประกัน]]></text>
 			</staticText>
@@ -180,7 +183,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<text><![CDATA[เลขดำที่]]></text>
 			</staticText>
@@ -197,7 +200,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<text><![CDATA[ห้องชุดเลขที่]]></text>
 			</staticText>
@@ -214,7 +217,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<text><![CDATA[ชั้น]]></text>
 			</staticText>
@@ -231,7 +234,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<text><![CDATA[อาคาร]]></text>
 			</staticText>
@@ -248,7 +251,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<text><![CDATA[จังหวัด]]></text>
 			</staticText>
@@ -265,7 +268,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<text><![CDATA[มูลค่า]]></text>
 			</staticText>
@@ -282,7 +285,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<text><![CDATA[ชื่ออาคารชุด]]></text>
 			</staticText>
@@ -299,7 +302,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<text><![CDATA[ตำบล]]></text>
 			</staticText>
@@ -316,7 +319,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<text><![CDATA[อำเภอ]]></text>
 			</staticText>
@@ -336,7 +339,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
@@ -352,7 +355,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{THAIDATE}==null?" ":$F{THAIDATE}]]></textFieldExpression>
 			</textField>
@@ -368,7 +371,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BLACK_CASE_NO}==null?" ":$F{BLACK_CASE_NO}]]></textFieldExpression>
 			</textField>
@@ -384,7 +387,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ADDRESS}==null?" ":$F{ADDRESS}]]></textFieldExpression>
 			</textField>
@@ -400,7 +403,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{FLOOR_NO}==null?" ":$F{FLOOR_NO}]]></textFieldExpression>
 			</textField>
@@ -416,7 +419,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BUILDING_NAME}==null?" ":$F{BUILDING_NAME}]]></textFieldExpression>
 			</textField>
@@ -432,7 +435,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CONDO_NAME}==null?" ":$F{CONDO_NAME}]]></textFieldExpression>
 			</textField>
@@ -448,7 +451,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{SUBDISTRICT_NAME}==null?" ":$F{SUBDISTRICT_NAME}]]></textFieldExpression>
 			</textField>
@@ -464,7 +467,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{DISTRICT_NAME}==null?" ":$F{DISTRICT_NAME}]]></textFieldExpression>
 			</textField>
@@ -480,7 +483,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PROVINCE_NAME}==null?" ":$F{PROVINCE_NAME}]]></textFieldExpression>
 			</textField>
@@ -496,7 +499,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[NumberFormat.getInstance().format(Double.parseDouble(String.format("%.2f", (double)$F{VALUES_FOR_BAILING})))]]></textFieldExpression>
 			</textField>
@@ -520,7 +523,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<text><![CDATA[รวม]]></text>
 			</staticText>
@@ -537,7 +540,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<text><![CDATA[เรื่อง]]></text>
 			</staticText>
@@ -553,7 +556,7 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>

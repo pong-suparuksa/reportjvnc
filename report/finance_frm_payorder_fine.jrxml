@@ -1,16 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="finance_frm_payorder_fine" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="454" leftMargin="85" rightMargin="56" topMargin="49" bottomMargin="56" uuid="7ea5f4e4-e512-4ffb-9bf7-cf2fd2c37890">
-	<property name="com.jaspersoft.studio.unit." value="pixel"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-229"/>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="finance_frm_payorder_fine" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="511" leftMargin="42" rightMargin="42" topMargin="42" bottomMargin="42" uuid="7ea5f4e4-e512-4ffb-9bf7-cf2fd2c37890">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_frm_payorder_fine"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="462"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="532"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/finance_frm_payorder_fine_files/main_jrxml"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
@@ -101,7 +109,9 @@ WHERE pfpd.PAYMENT_ID = $P{TABLE_PAYID}]]>
 			<variableExpression><![CDATA[$F{AMOUNT}]]></variableExpression>
 		</variable>
 	</subDataset>
-	<parameter name="PAYID" class="java.lang.Long"/>
+	<parameter name="PAYID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[4952]]></defaultValueExpression>
+	</parameter>
 	<parameter name="RECEIPT_TYPE" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["3"]]></defaultValueExpression>
 	</parameter>
@@ -127,11 +137,11 @@ WHERE pfpd.PAYMENT_ID = $P{TABLE_PAYID}]]>
   	   NVL(pfp.CASH_AMOUNT,0)     CASH_AMOUNT,
 	   NVL(pfp.CHEQUE_AMOUNT,0)   CHEQUE_AMOUNT,
 	   NVL(pfp.TRANSFER_AMOUNT,0) TRANSFER_AMOUNT,
-  	   --เช็ค
+  	   --????
        CASE WHEN NVL(pfp.CHEQUE_AMOUNT,0) > 0 THEN NVL(plb.BANK_NAME,'-') ELSE '-'  END BANK_NAME,
        CASE WHEN NVL(pfp.CHEQUE_AMOUNT,0) > 0 THEN NVL(pfpc.CHEQUE_CODE,'-') ELSE '-' END CHEQUE_CODE,
        CASE WHEN NVL(pfp.CHEQUE_AMOUNT,0) > 0 THEN pfpc.PAID_DATE ELSE NULL END PAID_DATE,
-  	   --โอน
+  	   --???
        CASE WHEN NVL(pfp.TRANSFER_AMOUNT,0) > 0 THEN NVL(trf.ROW_NUM,0) ELSE 0 END ROW_NUM,
        CASE WHEN NVL(pfp.TRANSFER_AMOUNT,0) > 0 THEN trf.TRANSFER_DATE ELSE NULL END TRANSFER_DATE,
        CASE WHEN NVL(pfp.TRANSFER_AMOUNT,0) > 0 THEN NVL(trf.TRANSFER_YEAR,0) ELSE 0 END TRANSFER_YEAR,
@@ -140,7 +150,7 @@ WHERE pfpd.PAYMENT_ID = $P{TABLE_PAYID}]]>
 	   pfp.TRANSFER_NUMBER,
   	   trf.BANK_NAME TRANSFER_BANKNAME,
 	   NVL(pup1.USER_PROFILE_FULL_NAME, pfpd.PAYER1_NAME) PAYER1,
-	   NVL(plj2.JUDGE_NAME,'..................................')  PAYER2,
+	   NVL(pup2.USER_PROFILE_FULL_NAME,'..................................')  PAYER2,
 	   pup.USER_PROFILE_FULL_NAME  USER_PAY
 FROM PC_FIN_PAYMENT pfp 
 LEFT JOIN PC_FIN_PAYMENT_DETAIL pfpd ON pfpd.PAYMENT_ID = pfp.PAYMENT_ID AND pfpd.REMOVED_BY = 0
@@ -172,7 +182,7 @@ LEFT JOIN (SELECT ROW_NUMBER() OVER(ORDER BY pfp.PAYMENT_ID) ROW_NUM,
 LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pfp.JUDGE_ID AND plj.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE AND plrt.REMOVED_BY = 0
 LEFT JOIN PC_USER_PROFILE pup1 ON pup1.USER_PROFILE_ID = pfpd.PAYER1 AND pup1.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_JUDGE plj2 ON plj2.JUDGE_ID = pfpd.PAYER2 AND plj2.REMOVED_BY = 0
+LEFT JOIN PC_USER_PROFILE pup2 ON pup2.USER_PROFILE_ID = pfpd.PAYER2 AND pup2.REMOVED_BY = 0
 LEFT JOIN PC_USER_PROFILE pup ON pup.USER_PROFILE_ID = pfp.CREATED_BY AND pup.REMOVED_BY = 0
 --
 CROSS JOIN (SELECT plc.COURT_NAME_TH 
@@ -271,13 +281,13 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 		<band height="111">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<image>
-				<reportElement x="186" y="1" width="75" height="75" uuid="ced8f717-d300-429c-8125-a036190a3643">
+				<reportElement x="218" y="1" width="75" height="75" uuid="ced8f717-d300-429c-8125-a036190a3643">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
 				<imageExpression><![CDATA["/images/ตราครุฑ.jpg"]]></imageExpression>
 			</image>
 			<staticText>
-				<reportElement x="130" y="77" width="186" height="30" uuid="aa85fccf-96ce-4a99-adf4-9c50ab921613"/>
+				<reportElement x="162" y="77" width="186" height="30" uuid="aa85fccf-96ce-4a99-adf4-9c50ab921613"/>
 				<textElement textAlignment="Center">
 					<font fontName="THSarabunNew" size="20"/>
 				</textElement>
@@ -294,10 +304,11 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 				<text><![CDATA[(รจ.๓)]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="377" y="1" width="71" height="25" uuid="bbb3a3bb-803d-48a2-a4eb-6c0950b0976f">
+				<reportElement x="440" y="1" width="71" height="25" uuid="bbb3a3bb-803d-48a2-a4eb-6c0950b0976f">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
+				<box rightPadding="3"/>
 				<textElement textAlignment="Right">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
@@ -310,14 +321,14 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 				</reportElement>
 			</line>
 			<line>
-				<reportElement x="0" y="0" width="454" height="1" uuid="b3476c08-2fe1-470f-9de9-4ca78a17951e">
+				<reportElement x="0" y="0" width="510" height="1" uuid="b3476c08-2fe1-470f-9de9-4ca78a17951e">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 			</line>
 			<line>
-				<reportElement x="453" y="1" width="1" height="110" uuid="3445dddd-1e93-4f2e-8101-b7c0578d44e8">
+				<reportElement x="510" y="1" width="1" height="110" uuid="3445dddd-1e93-4f2e-8101-b7c0578d44e8">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
 			</line>
 		</band>
@@ -341,7 +352,7 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 				<textFieldExpression><![CDATA[$F{PAYER_NAME}==null?" ":$F{PAYER_NAME}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="268" y="50" width="80" height="25" uuid="5b4cb6af-b488-4729-9b90-11894d768af7">
+				<reportElement x="300" y="50" width="80" height="25" uuid="5b4cb6af-b488-4729-9b90-11894d768af7">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
@@ -351,7 +362,7 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 				<text><![CDATA[คดีหมายเลขแดงที่]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="348" y="50" width="103" height="25" uuid="2d553414-1b87-48dd-ba10-c88441f32920">
+				<reportElement x="380" y="50" width="103" height="25" uuid="2d553414-1b87-48dd-ba10-c88441f32920">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -362,7 +373,7 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 				<textFieldExpression><![CDATA[$F{CASE_RED_NO}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="268" y="25" width="80" height="25" uuid="dfceef33-4f79-43df-abe3-07ccbbd62ec2">
+				<reportElement x="300" y="25" width="80" height="25" uuid="dfceef33-4f79-43df-abe3-07ccbbd62ec2">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
@@ -372,13 +383,15 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 				<text><![CDATA[คดีหมายเลขดำที่]]></text>
 			</staticText>
 			<line>
-				<reportElement x="349" y="66" width="70" height="1" uuid="4be58c6a-8ddb-4a62-8985-d37faf33bd4d"/>
+				<reportElement x="381" y="66" width="100" height="1" uuid="4be58c6a-8ddb-4a62-8985-d37faf33bd4d">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<graphicElement>
 					<pen lineStyle="Dotted"/>
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement x="348" y="25" width="103" height="25" uuid="4c2eee10-2420-4cfb-b4b2-b28849812197">
+				<reportElement x="380" y="25" width="103" height="25" uuid="4c2eee10-2420-4cfb-b4b2-b28849812197">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<box>
@@ -393,13 +406,15 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="348" y="42" width="70" height="1" uuid="110f01f3-c8f0-48c7-be60-03fd7de99c7b"/>
+				<reportElement x="380" y="42" width="100" height="1" uuid="110f01f3-c8f0-48c7-be60-03fd7de99c7b">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<graphicElement>
 					<pen lineStyle="Dotted"/>
 				</graphicElement>
 			</line>
 			<staticText>
-				<reportElement x="268" y="75" width="25" height="25" uuid="d87eb5b1-9fdd-4d06-a639-a7ccd706093c">
+				<reportElement x="300" y="75" width="25" height="25" uuid="d87eb5b1-9fdd-4d06-a639-a7ccd706093c">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -410,7 +425,7 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 				<text><![CDATA[วันที่]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="293" y="75" width="154" height="25" uuid="6b79bf20-bbe3-4223-ace7-e7b764b4b43f">
+				<reportElement x="325" y="75" width="154" height="25" uuid="6b79bf20-bbe3-4223-ace7-e7b764b4b43f">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -421,7 +436,7 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 				<textFieldExpression><![CDATA[$F{PAYMENT_DATE_TEXT}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="293" y="90" width="151" height="1" uuid="08c99a4b-9a26-48aa-82af-0cd4cc9ec3e0">
+				<reportElement x="325" y="90" width="151" height="1" uuid="08c99a4b-9a26-48aa-82af-0cd4cc9ec3e0">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
 				<graphicElement>
@@ -429,10 +444,9 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 				</graphicElement>
 			</line>
 			<staticText>
-				<reportElement x="3" y="111" width="40" height="25" uuid="48893696-6d52-42dd-924f-02f3b4dee472">
+				<reportElement x="14" y="111" width="40" height="25" uuid="48893696-6d52-42dd-924f-02f3b4dee472">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Left">
 					<font fontName="THSarabunNew" size="17"/>
@@ -440,9 +454,10 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 				<text><![CDATA[ระหว่าง]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="62" y="100" width="100" height="25" uuid="cabc68f4-17ed-4486-a82b-0ca8d94eb3f5">
+				<reportElement x="62" y="100" width="394" height="25" uuid="cabc68f4-17ed-4486-a82b-0ca8d94eb3f5">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<textElement>
 					<font fontName="THSarabunNew" size="17"/>
@@ -450,15 +465,18 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 				<textFieldExpression><![CDATA[$F{PROS_DESC}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="62" y="117" width="300" height="1" uuid="5146cccf-b2a9-422f-bd67-b33c4403ce9d"/>
+				<reportElement x="62" y="117" width="390" height="1" uuid="5146cccf-b2a9-422f-bd67-b33c4403ce9d">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<graphicElement>
 					<pen lineStyle="Dotted"/>
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement x="62" y="127" width="100" height="25" uuid="c15df7e3-284a-4851-a662-dc3d03cf7d23">
+				<reportElement x="62" y="127" width="394" height="25" uuid="c15df7e3-284a-4851-a662-dc3d03cf7d23">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<textElement>
 					<font fontName="THSarabunNew" size="17"/>
@@ -466,17 +484,17 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 				<textFieldExpression><![CDATA[$F{ACCU_DESC}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="62" y="144" width="300" height="1" uuid="fd2e27dd-e818-4d64-bbdf-b483f5fb3f34">
+				<reportElement x="62" y="144" width="390" height="1" uuid="fd2e27dd-e818-4d64-bbdf-b483f5fb3f34">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<graphicElement>
 					<pen lineStyle="Dotted"/>
 				</graphicElement>
 			</line>
 			<staticText>
-				<reportElement x="366" y="100" width="30" height="25" uuid="e2e0d5f3-91bf-461a-becb-05a52f336794">
+				<reportElement x="457" y="100" width="30" height="25" uuid="e2e0d5f3-91bf-461a-becb-05a52f336794">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<textElement>
@@ -485,9 +503,10 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 				<text><![CDATA[โจทก์]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="366" y="127" width="30" height="25" uuid="a524b676-b960-46dd-a69b-3a9d3afa5b70">
+				<reportElement x="457" y="127" width="30" height="25" uuid="a524b676-b960-46dd-a69b-3a9d3afa5b70">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
 				<textElement>
 					<font fontName="THSarabunNew" size="17"/>
@@ -521,15 +540,17 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 				</reportElement>
 			</line>
 			<line>
-				<reportElement x="453" y="0" width="1" height="190" uuid="918fda27-0f7e-4d0a-8a35-1695ee93cbbb">
+				<reportElement x="510" y="0" width="1" height="190" uuid="918fda27-0f7e-4d0a-8a35-1695ee93cbbb">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
 			</line>
 			<componentElement>
-				<reportElement stretchType="ContainerHeight" mode="Transparent" x="0" y="190" width="454" height="90" uuid="89d9b47c-dbc1-4626-bc20-d0ac3ae55fe4">
+				<reportElement stretchType="ContainerHeight" mode="Transparent" x="0" y="190" width="510" height="90" uuid="89d9b47c-dbc1-4626-bc20-d0ac3ae55fe4">
 					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
 					<property name="com.jaspersoft.studio.components.autoresize.proportional" value="true"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
 					<datasetRun subDataset="DS_PAYMENT_DETAIL" uuid="b2a2415c-2a4c-4d0f-bc75-df567e7d6692">
@@ -538,11 +559,11 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 						</datasetParameter>
 						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 					</datasetRun>
-					<jr:column width="56" uuid="a362afc6-3aa8-4219-b672-8c32bdc39695">
+					<jr:column width="64" uuid="a362afc6-3aa8-4219-b672-8c32bdc39695">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
 						<jr:columnHeader height="30" rowSpan="1">
 							<staticText>
-								<reportElement x="0" y="0" width="56" height="30" uuid="a13a2865-a977-44ff-b4e2-40d5a4c40ad0"/>
+								<reportElement x="0" y="0" width="64" height="30" uuid="a13a2865-a977-44ff-b4e2-40d5a4c40ad0"/>
 								<box>
 									<pen lineWidth="0.5"/>
 									<leftPen lineWidth="1.0"/>
@@ -560,7 +581,7 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 						</jr:columnFooter>
 						<jr:detailCell height="30">
 							<textField isStretchWithOverflow="true">
-								<reportElement x="0" y="0" width="56" height="30" uuid="7bdad2df-acc0-4c15-8683-0a4edd09117d"/>
+								<reportElement x="0" y="0" width="64" height="30" uuid="7bdad2df-acc0-4c15-8683-0a4edd09117d"/>
 								<box>
 									<pen lineWidth="0.5"/>
 									<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
@@ -575,11 +596,11 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="300" uuid="0e2fea2d-744e-4213-86f0-1c451fca4f81">
+					<jr:column width="337" uuid="0e2fea2d-744e-4213-86f0-1c451fca4f81">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
 						<jr:columnHeader height="30" rowSpan="1">
 							<staticText>
-								<reportElement x="0" y="0" width="300" height="30" uuid="3c6c0f52-0565-4120-8ad6-f964f46f1d03"/>
+								<reportElement x="0" y="0" width="337" height="30" uuid="3c6c0f52-0565-4120-8ad6-f964f46f1d03"/>
 								<box>
 									<pen lineWidth="0.5"/>
 								</box>
@@ -591,7 +612,7 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 						</jr:columnHeader>
 						<jr:columnFooter height="30" rowSpan="1">
 							<staticText>
-								<reportElement x="0" y="0" width="300" height="30" uuid="1f1b0fb8-b5fe-40de-930a-2d6c8d729847"/>
+								<reportElement x="0" y="0" width="337" height="30" uuid="1f1b0fb8-b5fe-40de-930a-2d6c8d729847"/>
 								<box rightPadding="3"/>
 								<textElement textAlignment="Right" verticalAlignment="Middle">
 									<font fontName="THSarabunNew" size="17"/>
@@ -601,7 +622,7 @@ AND pfp.PAYMENT_ID = $P{PAYID}]]>
 						</jr:columnFooter>
 						<jr:detailCell height="30">
 							<textField isStretchWithOverflow="true">
-								<reportElement x="0" y="0" width="300" height="30" uuid="00bf2b9f-cc85-4eba-b8cd-6dc65a320a24"/>
+								<reportElement x="0" y="0" width="337" height="30" uuid="00bf2b9f-cc85-4eba-b8cd-6dc65a320a24"/>
 								<box leftPadding="3">
 									<pen lineWidth="0.5"/>
 									<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
@@ -617,11 +638,11 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="98" uuid="d6ecee4d-e589-4344-b3d3-0edc5efa5586">
+					<jr:column width="109" uuid="d6ecee4d-e589-4344-b3d3-0edc5efa5586">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
 						<jr:columnHeader height="30" rowSpan="1">
 							<staticText>
-								<reportElement x="0" y="0" width="98" height="30" uuid="88b4a692-e954-4a3a-925b-1912793316ad"/>
+								<reportElement x="0" y="0" width="109" height="30" uuid="88b4a692-e954-4a3a-925b-1912793316ad"/>
 								<box>
 									<pen lineWidth="0.5"/>
 									<rightPen lineWidth="1.0"/>
@@ -634,7 +655,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 						</jr:columnHeader>
 						<jr:columnFooter height="30" rowSpan="1">
 							<textField>
-								<reportElement x="0" y="0" width="98" height="30" uuid="99c606fa-20f1-4001-a5c8-5a8a53bcc2f6"/>
+								<reportElement x="0" y="0" width="109" height="30" uuid="99c606fa-20f1-4001-a5c8-5a8a53bcc2f6"/>
 								<box rightPadding="3">
 									<pen lineWidth="0.5"/>
 									<rightPen lineWidth="1.0"/>
@@ -647,7 +668,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 						</jr:columnFooter>
 						<jr:detailCell height="30">
 							<textField isStretchWithOverflow="true">
-								<reportElement x="0" y="0" width="98" height="30" uuid="be21f4d2-5b17-4027-87c7-89302feedc81"/>
+								<reportElement x="0" y="0" width="109" height="30" uuid="be21f4d2-5b17-4027-87c7-89302feedc81"/>
 								<box rightPadding="3">
 									<pen lineWidth="0.5"/>
 									<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
@@ -664,29 +685,32 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 					</jr:column>
 				</jr:table>
 			</componentElement>
-			<line>
-				<reportElement x="290" y="17" width="130" height="1" uuid="80db2a58-e2b0-44d1-9bea-ea77d7d1b77f"/>
-				<graphicElement>
-					<pen lineStyle="Dotted"/>
-				</graphicElement>
-			</line>
 			<textField>
-				<reportElement x="269" y="0" width="175" height="25" uuid="74877ca1-0d41-4b69-9142-2c8fb82babba">
+				<reportElement x="300" y="0" width="197" height="25" uuid="74877ca1-0d41-4b69-9142-2c8fb82babba">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<textElement>
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}==null?"ศาล":$F{COURT_NAME_TH}]]></textFieldExpression>
 			</textField>
+			<line>
+				<reportElement x="319" y="17" width="177" height="1" uuid="80db2a58-e2b0-44d1-9bea-ea77d7d1b77f">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
 		</band>
 	</detail>
 	<summary>
-		<band height="303">
-			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+		<band height="330">
 			<textField>
-				<reportElement x="136" y="78" width="114" height="25" uuid="74e25fac-fd98-4a0f-b56f-08603e31a0b5">
+				<reportElement x="136" y="78" width="158" height="25" uuid="74e25fac-fd98-4a0f-b56f-08603e31a0b5">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -697,7 +721,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<textFieldExpression><![CDATA[$F{TRANSFER_BANKNAME}==null?" ":$F{TRANSFER_BANKNAME}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="371" y="36" width="60" height="25" uuid="68d9f7cc-7e31-4505-be83-15b6effada43">
+				<reportElement x="434" y="36" width="60" height="25" uuid="68d9f7cc-7e31-4505-be83-15b6effada43">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
@@ -709,7 +733,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 :$F{PAID_DATE}==null?" ": new java.text.SimpleDateFormat("dd/MM/YYYY",new Locale("th","TH")).format($F{PAID_DATE})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="119" y="40" width="142" height="25" uuid="119ccb73-07d7-43c5-8c8a-0b0f9cd6a717">
+				<reportElement x="119" y="40" width="205" height="25" uuid="119ccb73-07d7-43c5-8c8a-0b0f9cd6a717">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<printWhenExpression><![CDATA[$F{BANK_NAME}!="-"]]></printWhenExpression>
 				</reportElement>
@@ -719,9 +743,8 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<textFieldExpression><![CDATA[$F{CHEQUE_AMOUNT}==null?" ":$F{CHEQUE_AMOUNT}==0?" ":$F{BANK_NAME}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="119" y="52" width="142" height="1" uuid="b0fe181c-7fad-4ca6-812b-459e6e94ddfb">
+				<reportElement x="119" y="52" width="205" height="1" uuid="b0fe181c-7fad-4ca6-812b-459e6e94ddfb">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<graphicElement>
 					<pen lineStyle="Dotted"/>
@@ -739,7 +762,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<text><![CDATA[จ่ายเป็นเช็คธนาคาร]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="288" y="36" width="48" height="25" uuid="e18e4515-8a51-4a94-b3b1-8347b06e3f08">
+				<reportElement x="351" y="36" width="48" height="25" uuid="e18e4515-8a51-4a94-b3b1-8347b06e3f08">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
@@ -749,7 +772,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<textFieldExpression><![CDATA[$F{CHEQUE_AMOUNT}==null?" ":$F{CHEQUE_AMOUNT}==0?" ":$F{CHEQUE_CODE}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="288" y="52" width="50" height="1" uuid="9ed69a61-5c80-49af-b7f2-7c3a5d1c7c78">
+				<reportElement x="351" y="52" width="50" height="1" uuid="9ed69a61-5c80-49af-b7f2-7c3a5d1c7c78">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
 				<graphicElement>
@@ -757,7 +780,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				</graphicElement>
 			</line>
 			<staticText>
-				<reportElement x="262" y="36" width="26" height="25" uuid="d255401d-ae0a-4f5c-a7aa-634811084ec1">
+				<reportElement x="325" y="36" width="26" height="25" uuid="d255401d-ae0a-4f5c-a7aa-634811084ec1">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -769,7 +792,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<text><![CDATA[เลขที่]]></text>
 			</staticText>
 			<line>
-				<reportElement x="372" y="52" width="60" height="1" uuid="928e777a-1f4e-4ed1-b4db-89994c82eccd">
+				<reportElement x="434" y="52" width="60" height="1" uuid="928e777a-1f4e-4ed1-b4db-89994c82eccd">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
 				<graphicElement>
@@ -777,7 +800,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				</graphicElement>
 			</line>
 			<staticText>
-				<reportElement x="336" y="36" width="35" height="25" uuid="84de15f9-ba08-4b88-bec0-e89c59da01aa">
+				<reportElement x="399" y="36" width="35" height="25" uuid="84de15f9-ba08-4b88-bec0-e89c59da01aa">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -810,7 +833,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<reportElement x="7" y="80" width="15" height="15" uuid="60a01421-6309-4704-8a75-d8173d0ea786"/>
 			</rectangle>
 			<textField>
-				<reportElement x="6" y="127" width="210" height="25" uuid="5718cb4b-1133-432e-93df-d4552a19fe40">
+				<reportElement x="17" y="135" width="210" height="25" uuid="5718cb4b-1133-432e-93df-d4552a19fe40">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -821,7 +844,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<textFieldExpression><![CDATA["("+($F{PAYER1}==null?" ":$F{PAYER1})+")"]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="4" y="147" width="196" height="25" uuid="ecb5f678-a1eb-4f5e-a9b6-570c7493f76d">
+				<reportElement x="15" y="155" width="196" height="25" uuid="ecb5f678-a1eb-4f5e-a9b6-570c7493f76d">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
@@ -831,7 +854,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<text><![CDATA[ผู้สั่งจ่ายเงินคนที่ ๑]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="239" y="127" width="190" height="25" uuid="dbca68f0-8647-4874-b5d5-07c7b41d7255">
+				<reportElement x="279" y="135" width="190" height="25" uuid="dbca68f0-8647-4874-b5d5-07c7b41d7255">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -842,7 +865,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<textFieldExpression><![CDATA["("+($F{PAYER2}==null?" ":$F{PAYER2})+")"]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="239" y="108" width="190" height="25" uuid="af5f0a83-e824-4242-96f7-a7463aac1f98">
+				<reportElement x="279" y="116" width="190" height="25" uuid="af5f0a83-e824-4242-96f7-a7463aac1f98">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
@@ -852,7 +875,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<text><![CDATA[(ลงชื่อ)...................................................]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="265" y="147" width="133" height="25" uuid="ef87cc8a-cdc6-4b88-8b6f-aa714e4549e4">
+				<reportElement x="305" y="155" width="133" height="25" uuid="ef87cc8a-cdc6-4b88-8b6f-aa714e4549e4">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
@@ -862,7 +885,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<text><![CDATA[ผู้สั่งจ่ายเงินคนที่ ๒]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="30" y="212" width="140" height="25" uuid="0968b880-4e2e-4e44-a2bc-b870a2e77392">
+				<reportElement x="41" y="243" width="140" height="25" uuid="0968b880-4e2e-4e44-a2bc-b870a2e77392">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -873,7 +896,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<textFieldExpression><![CDATA["("+($F{USER_PAY}==null?" ":$F{USER_PAY})+")"]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="29" y="232" width="157" height="25" uuid="28d91b92-2e6b-4066-93b2-c3310132a15c">
+				<reportElement x="40" y="263" width="157" height="25" uuid="28d91b92-2e6b-4066-93b2-c3310132a15c">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
@@ -883,7 +906,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<text><![CDATA[ผู้จ่ายเงิน/ผู้ทำรายการ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="239" y="193" width="190" height="25" uuid="b56a39c2-63e5-4873-be6b-9ce7d1b247cb">
+				<reportElement x="279" y="224" width="190" height="25" uuid="b56a39c2-63e5-4873-be6b-9ce7d1b247cb">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
@@ -893,7 +916,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<text><![CDATA[(ลงชื่อ)...................................................]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="266" y="212" width="140" height="25" uuid="19faa772-4724-4de4-aac7-57a70ab8bb2f">
+				<reportElement x="306" y="243" width="140" height="25" uuid="19faa772-4724-4de4-aac7-57a70ab8bb2f">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -904,7 +927,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<text><![CDATA[(..........................................)]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="265" y="232" width="133" height="25" uuid="8f294645-3f1b-4810-903b-d7c6441752e8">
+				<reportElement x="305" y="263" width="133" height="25" uuid="8f294645-3f1b-4810-903b-d7c6441752e8">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
@@ -914,7 +937,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<text><![CDATA[ผู้รับเงิน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="3" y="175" width="200" height="25" uuid="cb42100a-2717-4b76-ae68-09055aa0eb76">
+				<reportElement x="14" y="183" width="200" height="25" uuid="cb42100a-2717-4b76-ae68-09055aa0eb76">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
@@ -924,7 +947,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<text><![CDATA[ได้จ่ายเงินดังกล่าวข้างต้นเป็นที่เรียบร้อยแล้ว]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="3" y="193" width="190" height="25" uuid="a3e485e4-7761-45f4-8e9b-542d4057de6c">
+				<reportElement x="14" y="224" width="190" height="25" uuid="a3e485e4-7761-45f4-8e9b-542d4057de6c">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
@@ -934,7 +957,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<text><![CDATA[(ลงชื่อ)...................................................]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="3" y="108" width="190" height="25" uuid="187d8235-9d70-4971-8b3b-d99f2c408754">
+				<reportElement x="14" y="116" width="190" height="25" uuid="187d8235-9d70-4971-8b3b-d99f2c408754">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
@@ -944,7 +967,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<text><![CDATA[(ลงชื่อ).........................................................]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="210" y="175" width="242" height="25" uuid="ec803194-27f2-468a-9a69-a3d709a9b8dc">
+				<reportElement x="250" y="183" width="242" height="25" uuid="ec803194-27f2-468a-9a69-a3d709a9b8dc">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -955,9 +978,8 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<text><![CDATA[ข้าพเจ้าได้รับเงินจำนวนดังกล่าวข้างต้นเป็นการถูกต้องแล้ว]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="4" y="263" width="444" height="25" uuid="a9b4e290-66ba-4165-8781-208b1c7f2710">
+				<reportElement x="4" y="292" width="444" height="25" uuid="a9b4e290-66ba-4165-8781-208b1c7f2710">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Left">
 					<font fontName="THSarabunNew" size="16"/>
@@ -965,26 +987,28 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<text><![CDATA[หมายเหตุ : กรณีจ่ายเงินผ่านธนาคาร ผู้รับเงินไม่ต้องลงลายมือชื่อผู้รับเงินในช่องผู้รับเงิน]]></text>
 			</staticText>
 			<line>
-				<reportElement x="0" y="25" width="453" height="1" uuid="efd0ca4f-2e8f-45d8-a855-37f1e966c1bf">
+				<reportElement x="0" y="25" width="510" height="1" uuid="efd0ca4f-2e8f-45d8-a855-37f1e966c1bf">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-				</reportElement>
-			</line>
-			<line>
-				<reportElement x="0" y="287" width="454" height="1" uuid="226f2268-9764-41b4-aee9-b3481f5d7e21">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 			</line>
 			<line>
-				<reportElement x="0" y="0" width="1" height="288" uuid="727432f9-1fe8-470f-8880-2bfe8d152c45">
+				<reportElement x="0" y="329" width="510" height="1" uuid="226f2268-9764-41b4-aee9-b3481f5d7e21">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+			</line>
+			<line>
+				<reportElement x="0" y="0" width="1" height="330" uuid="727432f9-1fe8-470f-8880-2bfe8d152c45">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+			</line>
+			<line>
+				<reportElement x="510" y="0" width="1" height="330" uuid="e7bf1338-00fd-45fd-a4a3-5bb21c56c13f">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-			</line>
-			<line>
-				<reportElement x="453" y="0" width="1" height="288" uuid="e7bf1338-00fd-45fd-a4a3-5bb21c56c13f">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
 			</line>
 			<textField>
@@ -1049,22 +1073,8 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				</textElement>
 				<text><![CDATA[✓]]></text>
 			</staticText>
-			<staticText>
-				<reportElement x="0" y="288" width="200" height="15" uuid="879da646-c9f3-431b-9cdd-f7901a30f96f">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<printWhenExpression><![CDATA[$P{SHOWVERSION}==1]]></printWhenExpression>
-				</reportElement>
-				<box leftPadding="3"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="THSarabunNew"/>
-				</textElement>
-				<text><![CDATA[finance_frm_payorder_fine : version.2020.08.17.001]]></text>
-			</staticText>
 			<textField>
-				<reportElement x="389" y="75" width="60" height="25" uuid="e4f1106b-a546-441c-ab98-2ab914febc99">
+				<reportElement x="433" y="75" width="60" height="25" uuid="e4f1106b-a546-441c-ab98-2ab914febc99">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -1086,7 +1096,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<text><![CDATA[การจ่ายเงินผ่านธนาคาร]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="251" y="75" width="45" height="25" uuid="e85043f0-f76c-4926-a2a8-70434f1bbe5b">
+				<reportElement x="295" y="75" width="45" height="25" uuid="e85043f0-f76c-4926-a2a8-70434f1bbe5b">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -1098,7 +1108,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<text><![CDATA[โอนครั้งที่]]></text>
 			</staticText>
 			<line>
-				<reportElement x="316" y="91" width="30" height="1" uuid="1257f73b-f14b-4a08-bf7a-3c9ef225aa3b">
+				<reportElement x="360" y="91" width="30" height="1" uuid="1257f73b-f14b-4a08-bf7a-3c9ef225aa3b">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1107,7 +1117,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement x="294" y="75" width="20" height="25" uuid="a27c464c-8db9-4a6a-b025-9ebb53d12d08">
+				<reportElement x="338" y="75" width="20" height="25" uuid="a27c464c-8db9-4a6a-b025-9ebb53d12d08">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
@@ -1117,7 +1127,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<textFieldExpression><![CDATA[$F{TRANSFER_NUMBER}==null?" ":$F{TRANSFER_NUMBER}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="389" y="91" width="60" height="1" uuid="73307bde-f157-4c12-ad85-5c9ebda2ab3d">
+				<reportElement x="433" y="91" width="60" height="1" uuid="73307bde-f157-4c12-ad85-5c9ebda2ab3d">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -1126,7 +1136,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				</graphicElement>
 			</line>
 			<line>
-				<reportElement x="294" y="91" width="20" height="1" uuid="e775c515-cda8-46cd-83fe-9ccb30fc40c1">
+				<reportElement x="338" y="91" width="20" height="1" uuid="e775c515-cda8-46cd-83fe-9ccb30fc40c1">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
 				<graphicElement>
@@ -1134,7 +1144,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				</graphicElement>
 			</line>
 			<textField>
-				<reportElement x="317" y="75" width="30" height="25" uuid="ec4b4011-eb85-4297-9a8d-af57c3675dc4">
+				<reportElement x="361" y="75" width="30" height="25" uuid="ec4b4011-eb85-4297-9a8d-af57c3675dc4">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -1145,7 +1155,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<textFieldExpression><![CDATA[$F{TRANSFER_YEAR}==null||$F{TRANSFER_YEAR}==0?" ":$F{TRANSFER_YEAR}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="348" y="75" width="41" height="25" uuid="2ceff5f2-b7c6-403b-88db-9096b902c423">
+				<reportElement x="392" y="75" width="41" height="25" uuid="2ceff5f2-b7c6-403b-88db-9096b902c423">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -1156,7 +1166,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				<text><![CDATA[วันที่โอน]]></text>
 			</staticText>
 			<line>
-				<reportElement x="137" y="91" width="114" height="1" uuid="bfe8bb78-93a8-4c7e-a473-cb0de9c51df3">
+				<reportElement x="137" y="91" width="158" height="1" uuid="bfe8bb78-93a8-4c7e-a473-cb0de9c51df3">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
 				<graphicElement>
@@ -1164,7 +1174,7 @@ $F{RECEIPT_SUB_TYPE_NAME})+ ($F{RECEIVED_DATE}==null?" ":"  วันที่�
 				</graphicElement>
 			</line>
 			<staticText>
-				<reportElement x="313" y="75" width="10" height="25" uuid="db8e0385-a6e2-48c9-bfe2-5a0b7b9fe7ce">
+				<reportElement x="357" y="75" width="10" height="25" uuid="db8e0385-a6e2-48c9-bfe2-5a0b7b9fe7ce">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>

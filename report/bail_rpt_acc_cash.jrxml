@@ -11,25 +11,27 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/bail_rpt_acc_cash"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="256"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="739"/>
 	<property name="com.jaspersoft.studio.report.description" value="บัญชีประกันด้วยเงินสด"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/bail_rpt_acc_cash_files/main_jrxml"/>
 	<parameter name="SELECT_MONTH" class="java.lang.String">
 		<defaultValueExpression><![CDATA["03/2020"]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
 		<![CDATA[SELECT 
-plc.COURT_NAME_TH,
+cou.COURT_NAME_TH,
 THAISDATE(pb.BAIL_DATE) THAIDATE ,
 THAIMONTH(EXTRACT(MONTH FROM pb.BAIL_DATE)) MONTH_STR,
 THAIMONTH(EXTRACT(YEAR FROM pb.BAIL_DATE) +543) YEAR_STR,
 CASE WHEN pc.BLACK_IDNUM IS NOT NULL THEN pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR ELSE '-' END CASE_BLACE_NO, 
 pbsc.AMOUNT,
-plt.TITLE_NAME || pbb.FULLNAME  BAILMAN_NAME
+plt.TITLE_NAME || pbb.FULLNAME  BAILMAN_NAME,
+pbsc.NOTES 
 --
 FROM PC_BAIL_SEC_CASH pbsc 
 LEFT JOIN PC_BAIL_SEC pbs ON pbs.SEC_ID = pbsc.SEC_ID 
@@ -40,9 +42,12 @@ LEFT JOIN PC_LOOKUP_TITLE plt ON(plt.TITLE_ID=pbb.NAME_TITLE_ID AND plt.REMOVED_
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pb.CASE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
 --
-LEFT JOIN PC_LOOKUP_COURT plc ON(plc.COURT_ID=pb.COURT_ID AND plc.REMOVED_BY = 0)
+LEFT JOIN (SELECT plc.COURT_NAME_TH
+			FROM PC_PARAM pp
+			JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 = 1
 WHERE pbsc.REMOVED_BY = 0 
-AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONTH}, 'MM-YYYY') ]]>
+AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONTH}, 'MM-YYYY')]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
@@ -65,6 +70,9 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 	<field name="BAILMAN_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="BAILMAN_NAME"/>
 	</field>
+	<field name="NOTES" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="NOTES"/>
+	</field>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -75,9 +83,9 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="18" isBold="true"/>
+					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["ศาล" + ($F{COURT_NAME_TH} == null ? "" :  $F{COURT_NAME_TH})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{COURT_NAME_TH} == null ? "" :  $F{COURT_NAME_TH})]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="201" y="0" width="430" height="25" uuid="95db4473-7568-4901-92cc-f94d3fdc125c">
@@ -92,7 +100,7 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="18" isBold="true"/>
+					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
 				<text><![CDATA[แบบรายงานบัญชีประกันด้วยเงินสด ในการปล่อยตัวชั่วคราว]]></text>
 			</staticText>
@@ -101,7 +109,7 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="18" isBold="true"/>
+					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["ประจำเดือน " +  ($F{MONTH_STR} == null ? "" :   $F{MONTH_STR} + " " + $F{YEAR_STR})]]></textFieldExpression>
 			</textField>
@@ -110,7 +118,7 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA["แผ่นที่ "+$V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
@@ -132,7 +140,7 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<text><![CDATA[ที่]]></text>
 			</staticText>
@@ -149,16 +157,15 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<text><![CDATA[วันเดือนปีประกัน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="179" y="0" width="100" height="25" uuid="9728c828-4b89-4b13-a3e5-5742e3a09c8d">
+				<reportElement x="179" y="0" width="101" height="25" uuid="9728c828-4b89-4b13-a3e5-5742e3a09c8d">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -167,7 +174,7 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<text><![CDATA[เลขดำที่]]></text>
 			</staticText>
@@ -184,7 +191,7 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<text><![CDATA[จำนวนเงิน]]></text>
 			</staticText>
@@ -202,7 +209,7 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<text><![CDATA[เป็นของ]]></text>
 			</staticText>
@@ -219,7 +226,7 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<text><![CDATA[หมายเหตุ]]></text>
 			</staticText>
@@ -240,7 +247,7 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
@@ -256,15 +263,14 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{THAIDATE} == null ? " " : $F{THAIDATE}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="179" y="0" width="100" height="25" uuid="d2d8253c-2a3d-4946-b7f0-ed2197962418">
+				<reportElement x="179" y="0" width="101" height="25" uuid="d2d8253c-2a3d-4946-b7f0-ed2197962418">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -273,7 +279,7 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_BLACE_NO}]]></textFieldExpression>
 			</textField>
@@ -289,7 +295,7 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{AMOUNT} == null ? "" : NumberFormat.getInstance().format(Double.parseDouble(String.format("%.2f", (double)$F{AMOUNT})))]]></textFieldExpression>
 			</textField>
@@ -306,7 +312,7 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BAILMAN_NAME}]]></textFieldExpression>
 			</textField>
@@ -322,9 +328,9 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{NOTES}==null?" ":$F{NOTES}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
@@ -345,7 +351,7 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="12"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[bail_rpt_acc_cash]]></text>
 			</staticText>
@@ -366,7 +372,7 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<text><![CDATA[รวม]]></text>
 			</staticText>
@@ -383,7 +389,7 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<text><![CDATA[เรื่อง]]></text>
 			</staticText>
@@ -399,7 +405,7 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
