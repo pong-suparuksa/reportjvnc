@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report_payment_st4" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="487f9c12-faf0-4592-ba10-670c6c035660">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="229"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
@@ -20,7 +20,7 @@ bb.AMOUNT , ba.INSTALLMENT_COUNT , ba.INSTALLMENT_AMOUNT ,bb.REMAIN_AMOUNT , pbb
 CASE WHEN ba.INSTALLMENT_COUNT = 1 THEN  'ขอลด' ELSE 'ขอผ่อน'END COURT_ORDER 
 FROM PC_BAIL_BAILSMAN_BREACH bb
 JOIN PC_BAIL_BREACH_ADJUST ba ON (bb.BREACH_ID = ba.BREACH_ID AND ba.REQUEST_TYPE = 1 AND ba.REMOVED_BY = 0 AND ba.IS_ALLOWED = 1)
-JOIN PC_BAIL b ON (b.BAIL_ID = bb.BAIL_ID AND b.REMOVED_BY = 0)
+JOIN PC_BAIL b ON (b.BAIL_ID = bb.BAIL_ID AND b.IS_PRINTED = 1 AND b.REMOVED_BY = 0)
 LEFT JOIN PC_CASE c ON (c.CASE_ID = b.CASE_ID AND c.REMOVED_BY = 0)
 LEFT JOIN PC_LOOKUP_TITLE_CASE tcb ON (c.black_title_id = tcb.title_case_id  AND tcb.REMOVED_BY = 0)
 LEFT JOIN PC_BAIL_BAILSMAN pbb ON pbb.BAIL_ID = bb.BAIL_ID AND pbb.REMOVED_BY = 0
