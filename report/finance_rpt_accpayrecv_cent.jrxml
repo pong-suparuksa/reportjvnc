@@ -16,7 +16,7 @@
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="490"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="501"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_rpt_accpayrecv_cent"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/finance_rpt_accpayrecv_cent_files/main_jrxml"/>
@@ -180,14 +180,14 @@ AND plrt.RECEIPT_TYPE_CODE =  $P{RECEIVETYPE}]]>
     NVL(pfrd.PAID_DESCRIPTION,' ') PAID_DESCRIPTION,
     pfr.TOTAL_AMOUNT        TOTAL_RECEIVED_AMOUNT,
     --
-    NVL(pcl.LITIGANT_NAME,' ')   PAYEE,
+    NVL(pcl.LITIGANT_NAME,pfpd.CASE_LIT_NAME)   PAYEE,
     NVL(pfp.TOTAL_AMOUNT,0) TOTAL_PAY_AMOUNT,
     pfr.TOTAL_AMOUNT - NVL(pfp.TOTAL_AMOUNT,0) BALANCE,
     pfp.PAYMENT_DATE,
     CASE WHEN pfp.PAYMENT_DATE IS NOT NULL 
          THEN THAISDATE(pfp.PAYMENT_DATE)
          ELSE '-' END PAYMENT_DATE_TEXT,
-    NVL(pfp.ACCOUNT_NO,' ')    ACCOUNT_NO,
+    CASE WHEN pfp.CHEQUE_AMOUNT > 0 THEN NVL(pfp.ACCOUNT_NO,'-') ELSE ' ' END    ACCOUNT_NO,
     plrt.RECEIPT_TYPE_CODE,
     plrt.RECEIPT_TYPE_NAME,
     plrst.RECEIPT_SUB_TYPE_NAME,
@@ -213,8 +213,7 @@ LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID 
 --
 LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pc.COURT_ID
 LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE
-LEFT JOIN PC_LOOKUP_RECEIPT_SUB_TYPE plrst ON plrst.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE 
-                                           AND plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE 
+LEFT JOIN PC_LOOKUP_RECEIPT_SUB_TYPE plrst ON plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE 
                                            AND plrst.REMOVED_BY = 0
 --
 WHERE plrt.RECEIPT_TYPE_CODE = $P{RECVTYPE} 
@@ -697,7 +696,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 	</columnHeader>
 	<detail>
 		<band height="25" splitType="Stretch">
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="26" y="0" width="60" height="25" uuid="ebb41c74-4730-4049-b7f7-b2514e7ee03b">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d652a191-64ee-46ee-ade8-888c40a7a5ca"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -710,7 +709,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIVED_DATE_TEXT}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="86" y="0" width="53" height="25" uuid="c110471b-1673-4a2c-a549-0b46a37c3f39">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f7997d05-3659-4564-ba2e-8cc9f3aad56c"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -723,7 +722,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="139" y="0" width="53" height="25" uuid="51e31cb8-d0ae-47ed-b079-d40cb5f1dadc">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f6558574-a68e-44e4-b7aa-b799de4c8922"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -762,7 +761,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ACCU_DESC}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="298" y="0" width="40" height="25" uuid="29e53519-0e6a-4b7d-b480-5f4b86d262ce">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="60c7eabb-066d-4cae-b9ec-2ecdb822c6b8"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -776,7 +775,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIPT_BOOK_NO}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="338" y="0" width="40" height="25" uuid="b0222623-cdbf-4618-91c3-d5acc0481cb7">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="484c3bf8-cfc6-4954-af0b-11742d833900"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -790,7 +789,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIPT_NO}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="378" y="0" width="53" height="25" uuid="25cd2b89-f8b1-4553-956f-224467eee1fc">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="07ee0e3a-d2fa-4b46-8b53-7fedced43015"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -816,7 +815,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIPT_SUB_TYPE_NAME}==null?" ":$F{RECEIPT_SUB_TYPE_NAME}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="484" y="0" width="53" height="25" uuid="b030985c-15bd-40c8-bd48-367537c42036">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1163dde4-b0f6-42c8-b864-7b26f53e4078"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -840,9 +839,9 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				<textElement verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="16"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{PAYEE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{PAYEE}==null?" ":$F{PAYEE}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="590" y="0" width="53" height="25" uuid="7b728138-21f7-48de-a69d-b54bc358cc71">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="425a239d-3821-4180-8a7b-4566324632d8"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -855,7 +854,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				</textElement>
 				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{TOTAL_PAY_AMOUNT}))]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="643" y="0" width="53" height="25" uuid="7e181468-cb94-4123-91f8-4d05b3d8fe66">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a89b3bb9-ea17-4c7d-a17e-dd4dbb5467b7"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -868,7 +867,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				</textElement>
 				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{BALANCE}))]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="696" y="0" width="53" height="25" uuid="c6921154-c0f1-4e68-9ba7-ee549fa8e6b7">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="50a9a217-613a-4403-b129-54542c41053c"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -881,7 +880,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PAYMENT_DATE_TEXT}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="749" y="0" width="53" height="25" uuid="d63918e8-2ea2-49e1-adfc-c78d411a4ffa">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="143ca130-8bb8-4c90-90d8-3062f693ee88"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -894,7 +893,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ACCOUNT_NO}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="0" y="0" width="26" height="25" uuid="445f8df6-20c0-478d-b9a4-5c6f38237942">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d652a191-64ee-46ee-ade8-888c40a7a5ca"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
