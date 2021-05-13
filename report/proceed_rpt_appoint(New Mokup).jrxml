@@ -32,7 +32,7 @@
 	<queryString language="SQL">
 		<![CDATA[SELECT
 	ROW_NUMBER() OVER (
-	ORDER BY ppac.START_DATE ) AS row_num ,
+	ORDER BY pc.CASE_ID) AS row_num ,
 	ppac.START_DATE,
 	NVL(cou.COURT_NAME_TH, '') COURT_NAME_TH, 
 	NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR)  BLACK_CASE_NO ,
@@ -110,12 +110,12 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
              WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
 --             
 WHERE ppa.REMOVED_BY = 0 
-AND (idiom_owner.JUDGE_ID = $P{JUDGE_ID} OR $P{JUDGE_ID} IS NULL)
 AND ppac.START_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS')
                            AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
-AND $P{CHOICE} IS NULL OR ppac.CHOICE = $P{CHOICE}
+AND (idiom_owner.JUDGE_ID = $P{JUDGE_ID} OR $P{JUDGE_ID} IS NULL)
+AND ($P{CHOICE} IS NULL OR ppac.CHOICE = $P{CHOICE})
 AND ($P{LEVEL_ROOM_ID} IS NULL OR pllr.LEVEL_ROOM_ID = $P{LEVEL_ROOM_ID} OR 0 = $P{LEVEL_ROOM_ID})
-ORDER BY row_num]]>
+ORDER BY pc.CASE_ID]]>
 	</queryString>
 	<field name="ROW_NUM" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="ROW_NUM"/>
