@@ -2,7 +2,7 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="proceed_rpt_appoint_givemediate" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="560dff98-d96c-45a2-a226-4bbd5b63e811">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojStage2"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-210"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.137:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_givemediate"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -40,8 +40,8 @@
     plar.APPOINT_REASON_NAME,
     co.LOCATION,
     NVL(jass.JUDGE_NAME,'-') JUDGE_ASSOCIATE,
-    NVL(jmed.JUDGE_NAME,'-') JUDGE,
-    NVL(medi.MEDIATOR_NAME,'-') MEDIATOR_NAME
+    NVL(jmed.JUDGE_NAME,'-') JUDGE
+   -- NVL(medi.MEDIATOR_NAME,'-') MEDIATOR_NAME
 --
 FROM PC_PROCEED_APPOINT ppa 
 JOIN PC_PROCEED_APPOINT_CONTINUE ppac ON ppac.APPOINT_ID = ppa.APPOINT_ID 
@@ -91,12 +91,12 @@ LEFT JOIN (SELECT pcj.CASE_ID, plj.JUDGE_NAME
                                           AND pljt.REMOVED_BY = 0
             WHERE pcj.REMOVED_BY = 0) jmed ON jmed.CASE_ID = ppa.CASE_ID
 --
-LEFT JOIN (SELECT pm.CASE_ID, 
-                   LISTAGG(pmum.MEDIATOR_NAME,' ') WITHIN GROUP(ORDER BY pmum.MEDIATOR_NAME) MEDIATOR_NAME
-			FROM PC_MEDIATION_USE_MEDIATOR pmum 
-			JOIN PC_MEDIATION pm ON pm.MEDIATION_ID = pmum.MEDIATOR_ID AND pm.REMOVED_BY = 0
-			WHERE pmum.REMOVED_BY = 0
-			GROUP BY pm.CASE_ID) medi ON medi.CASE_ID = ppa.CASE_ID 
+--LEFT JOIN (SELECT pm.CASE_ID, 
+--                   LISTAGG(pmum.MEDIATOR_NAME,' ') WITHIN GROUP(ORDER BY pmum.MEDIATOR_NAME) MEDIATOR_NAME
+--			FROM PC_MEDIATION_USE_MEDIATOR pmum 
+--			JOIN PC_MEDIATION pm ON pm.MEDIATION_ID = pmum.MEDIATOR_ID AND pm.REMOVED_BY = 0
+--			WHERE pmum.REMOVED_BY = 0
+--			GROUP BY pm.CASE_ID) medi ON medi.CASE_ID = ppa.CASE_ID 
 --			
 WHERE ppa.REMOVED_BY = 0
 AND plar.APPOINT_REASON_CODE IN ($P!{REASON_CODE})
@@ -132,9 +132,6 @@ AND (CASE WHEN ppac.CHOICE_TIME < '12:00:00' THEN '1' ELSE '2' END) LIKE  CASE W
 	</field>
 	<field name="JUDGE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="JUDGE"/>
-	</field>
-	<field name="MEDIATOR_NAME" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="MEDIATOR_NAME"/>
 	</field>
 	<background>
 		<band splitType="Stretch"/>
@@ -282,7 +279,7 @@ IF($P{PERIOD}.equals("2"),
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<text><![CDATA[ผู้ประนอม]]></text>
+				<text><![CDATA[หมายเหตุ]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
@@ -405,7 +402,7 @@ IF($P{PERIOD}.equals("2"),
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{MEDIATOR_NAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
