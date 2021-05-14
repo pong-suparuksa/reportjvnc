@@ -2,10 +2,9 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report_insurance_contract" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="3bda3608-fc33-4238-a31e-9340b2f7bb6a">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-229"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210/jasperserver/"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="210"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080//jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/ReportFeature/report_insurance_contract_files/main_jrxml"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/ReportFeature/report_insurance_contract"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["10/03/2021"]]></defaultValueExpression>
@@ -14,7 +13,7 @@
 		<defaultValueExpression><![CDATA["28/04/2021"]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
-		<![CDATA[SELECT 
+		<![CDATA[SELECT  DISTINCT 
 	NVL(cou.COURT_NAME_TH, '') COURT_NAME_TH, 
 	NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR)  BLACK_CASE_NO ,
 	NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || CASE WHEN pj.RED_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pj.RED_YEAR)     RED_CASE_NO ,
@@ -41,7 +40,7 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
              WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
 WHERE 
 	pbb.REMOVED_BY = 0
-	AND pbb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE} || 'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') AND TO_DATE($P{END_DATE} || 'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+	AND pbbb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE} || 'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') AND TO_DATE($P{END_DATE} || 'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 ORDER BY
 	BLACK_CASE_NO ASC]]>
 	</queryString>
@@ -188,7 +187,7 @@ ORDER BY
 	<detail>
 		<band height="30" splitType="Stretch">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement x="45" y="0" width="50" height="30" uuid="625a037d-8114-4799-aad3-50d3e96a2d9f"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -201,7 +200,7 @@ ORDER BY
 				</textElement>
 				<textFieldExpression><![CDATA[$V{COLUMN_COUNT}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement x="440" y="0" width="185" height="30" uuid="6f1911da-8b59-4517-b2c0-038f19a95eab">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -216,7 +215,7 @@ ORDER BY
 				</textElement>
 				<textFieldExpression><![CDATA[$F{AMOUNT} == null ? "-"  :$F{AMOUNT}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement x="255" y="0" width="185" height="30" uuid="21b02d33-699d-4c07-b019-672c14d82fdc"/>
 				<box leftPadding="5">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -229,7 +228,7 @@ ORDER BY
 				</textElement>
 				<textFieldExpression><![CDATA[$F{FULLNAME}  == null ?  "-"  :$F{FULLNAME}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement x="95" y="0" width="80" height="30" uuid="f23598ed-3aa8-45fd-bfcf-5726b8bcf0e2">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -244,7 +243,7 @@ ORDER BY
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BLACK_CASE_NO} == null ?  "-"  :$F{BLACK_CASE_NO}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement x="625" y="0" width="138" height="30" uuid="7072ae1e-be64-453e-83ed-8723ed528137"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -257,7 +256,7 @@ ORDER BY
 				</textElement>
 				<textFieldExpression><![CDATA[""]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement x="175" y="0" width="80" height="30" uuid="4db8b193-42bd-48eb-a4fc-427f893e71eb">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
