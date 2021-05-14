@@ -11,23 +11,22 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_givecase"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="202"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="793"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-229"/>
-	<parameter name="PERIOD" class="java.lang.String">
-		<defaultValueExpression><![CDATA["%"]]></defaultValueExpression>
-	</parameter>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_givecase_files/main_jrxml"/>
+	<parameter name="PERIOD" class="java.lang.String"/>
 	<parameter name="START_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["01/07/2020"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["01/03/2020"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="END_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["31/07/2020"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["31/05/2021"]]></defaultValueExpression>
 	</parameter>
-	<parameter name="APPOINT_BY_ID" class="java.lang.Integer">
-		<defaultValueExpression><![CDATA[0]]></defaultValueExpression>
+	<parameter name="APPOIN_TABLE_CODE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["001"]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
 		<![CDATA[SELECT DISTINCT
@@ -45,7 +44,12 @@
        NVL(lyc.LITIGANT_NAME,' ')  CLAIMANT_PART,
        NVL(lyd.LITIGANT_NAME,' ')  DEFENDANT_PART,
        jud.JUDGE_NAME,
-       NVL(pljr.JUDGE_ROOM_NAME,' ') ROOM
+       NVL(pljr.JUDGE_ROOM_NAME,' ') ROOM,
+       (CASE 
+	       WHEN $P{APPOIN_TABLE_CODE} = '003' THEN 'เสนอจ่ายสำนวน' 
+	       WHEN $P{APPOIN_TABLE_CODE} = '001' THEN 'เสนอจ่ายสำนวนเข้าศูนย์ไกล่เกลี่ย' 
+	       WHEN $P{APPOIN_TABLE_CODE} = '004' THEN 'เสนอจ่ายสำนวนเข้าจัดการพิเศษ'
+       END) APPOINT_TITLE
 --
 FROM PC_PROCEED_APPOINT ppa 
 JOIN PC_PROCEED_APPOINT_CONTINUE ppac ON ppac.APPOINT_ID = ppa.APPOINT_ID 
@@ -101,8 +105,8 @@ LEFT JOIN (SELECT pcj.CASE_ID, plj.JUDGE_NAME
 --
 WHERE ppac.START_DATE BETWEEN TO_DATE( $P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
 --
-AND ppac.CHOICE LIKE $P{PERIOD}
-AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID}) 
+AND $P{PERIOD}   is null or ppac.CHOICE = $P{PERIOD}
+AND ppac.APPOINT_TABLE_CODE = $P{APPOIN_TABLE_CODE}
 --
 ORDER BY ppac.START_DATE]]>
 	</queryString>
@@ -151,6 +155,7 @@ ORDER BY ppac.START_DATE]]>
 	<field name="CASE_BLACE_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="CASE_BLACE_NO"/>
 	</field>
+	<field name="APPOINT_TITLE" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -161,7 +166,7 @@ ORDER BY ppac.START_DATE]]>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="17" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["ใช้ติดหน้าศาลไม่ได้ บัญชีนัดความ เสนอจ่ายสำนวน" +
+				<textFieldExpression><![CDATA["ใช้ติดหน้าศาลไม่ได้ บัญชีนัดความ " + $F{APPOINT_TITLE}  +
 ($P{START_DATE}==$P{END_DATE} ? " ประจำวันที่ " + new java.text.SimpleDateFormat("d MMMM yyyy", new Locale("TH","th")).format(DATE(Integer.valueOf($P{START_DATE}.substring(6,10)),Integer.valueOf($P{START_DATE}.substring(3,5)),Integer.valueOf($P{START_DATE}.substring(0,2)))) : " ระหว่างวันที่ " +new java.text.SimpleDateFormat("d MMMM yyyy", new Locale("TH","th")).format(DATE(Integer.valueOf($P{START_DATE}.substring(6,10)),Integer.valueOf($P{START_DATE}.substring(3,5)),Integer.valueOf($P{START_DATE}.substring(0,2)))) + "  - " + new java.text.SimpleDateFormat("d MMMM yyyy", new Locale("TH","th")).format(DATE(Integer.valueOf($P{END_DATE}.substring(6,10)),Integer.valueOf($P{END_DATE}.substring(3,5)),Integer.valueOf($P{END_DATE}.substring(0,2)))))]]></textFieldExpression>
 			</textField>
 			<textField>

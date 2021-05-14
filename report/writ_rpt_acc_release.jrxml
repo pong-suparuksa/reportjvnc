@@ -11,28 +11,31 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
-	<property name="ireport.jasperserver.reportUnit" value="/reports/writ_rpt_acc_release_d4"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-229"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/writ_rpt_acc_release"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[210]"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/writ_rpt_acc_release_d4_files/main_jrxml"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/writ_rpt_acc_release_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/07/2020"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="END_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["14/07/2020"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["14/07/2021"]]></defaultValueExpression>
 	</parameter>
-	<parameter name="NOTICE_TYPE_CODE" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["211"]]></defaultValueExpression>
+	<parameter name="SEND_METHOD_ID" class="java.lang.String">
+		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[SELECT DISTINCT
 	NVL(plc.COURT_NAME_TH,'-') COURT_NAME_TH,
     pn.NOTICE_DATE,
     THAISDATE(pn.NOTICE_DATE)               NOTICE_DATE_TEXT,
-    pn.NOTICE_CODE_NO || NOTICE_CODE_YEAR	NOTICE_NO,
+--    pn.NOTICE_CODE_NO || NOTICE_CODE_YEAR	NOTICE_NO,
+    CASE WHEN pn.NOTICE_CODE_NO IS NOT NULL 
+		     THEN pn.NOTICE_CODE_NO||'/'||NOTICE_CODE_YEAR
+		     ELSE '-' END NOTICE_NO, 
 	CASE WHEN pc.BLACK_IDNUM IS NOT NULL 
 		     THEN pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR 
 		     ELSE '-' END CASE_BLACK_NO, 
@@ -65,7 +68,7 @@ LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME,
                    GROUP BY pcl.CASE_ID, pcl.LITIGANT_NAME) lit ON lit.CASE_ID = pn.CASE_ID
 --           
 WHERE pn.REMOVED_BY = 0
-AND (plnt.NOTICE_TYPE_CODE = $P{NOTICE_TYPE_CODE} OR $P{NOTICE_TYPE_CODE} IS NULL)
+AND pn.SEND_METHOD = ($P{SEND_METHOD_ID})
 AND pn.NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
                                               AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 ORDER BY pn.NOTICE_DATE]]>
