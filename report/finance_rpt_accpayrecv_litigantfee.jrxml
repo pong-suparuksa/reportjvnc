@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="finance_rpt_accpayrecv_litigantfee" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="d03f7ede-1ea2-4619-9ec3-f39b8e97e467">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojStage2"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -16,9 +15,10 @@
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="490"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="501"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.137:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_rpt_accpayrecv_litigantfee"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB210"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/finance_rpt_accpayrecv_litigantfee_files/main_jrxml"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
 		<box>
@@ -109,10 +109,10 @@ AND((plrt.RECEIPT_TYPE_CODE = '2') OR (plrt.RECEIPT_TYPE_CODE = $P{RECEIVETYPE})
 		</field>
 	</subDataset>
 	<parameter name="START_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["01/04/2020"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["01/05/2021"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="END_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["30/04/2020"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["15/05/2021"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="RECEIVETYPE" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["5"]]></defaultValueExpression>
@@ -128,7 +128,7 @@ AND((plrt.RECEIPT_TYPE_CODE = '2') OR (plrt.RECEIPT_TYPE_CODE = $P{RECEIVETYPE})
 	pltc_b.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR CASE_BLACK_NO,
   	CASE WHEN pj.RED_IDNUM  IS NULL 
   	     THEN '-' 
-  	     ELSE pltc_r.TITLE_CASE_NAME || pj.RED_IDNUM  || '/' || pj.RED_IDNUM END CASE_RED_NO,
+  	     ELSE pltc_r.TITLE_CASE_NAME || pj.RED_IDNUM  || '/' || pj.RED_YEAR END CASE_RED_NO,
   	NVL(pc.PROS_DESC,'-')  PROS_DESC,
   	NVL(pc.ACCU_DESC,'-')  ACCU_DESC,
     --
@@ -138,7 +138,7 @@ AND((plrt.RECEIPT_TYPE_CODE = '2') OR (plrt.RECEIPT_TYPE_CODE = $P{RECEIVETYPE})
     NVL(pfrd.PAID_DESCRIPTION,'-') PAID_DESCRIPTION,
     pfr.TOTAL_AMOUNT        TOTAL_RECEIVED_AMOUNT,
     --
-    '-'   PAYEE,
+    pfpd.CASE_LIT_NAME   PAYEE,
     NVL(pfp.TOTAL_AMOUNT,0) TOTAL_PAY_AMOUNT,
     pfr.TOTAL_AMOUNT - NVL(pfp.TOTAL_AMOUNT,0) BALANCE,
     pfp.PAYMENT_DATE,
@@ -336,7 +336,7 @@ ORDER BY pfr.RECEIVED_DATE,pfr.RECEIPT_BOOK_NO,pfr.RECEIPT_NO, plrst.RECEIPT_SUB
 		<band height="50" splitType="Stretch">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<staticText>
-				<reportElement x="26" y="0" width="60" height="50" uuid="73c9a8ad-2d55-42a2-8c71-946f5de08dcb">
+				<reportElement x="26" y="0" width="54" height="50" uuid="73c9a8ad-2d55-42a2-8c71-946f5de08dcb">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d652a191-64ee-46ee-ade8-888c40a7a5ca"/>
 				</reportElement>
 				<box>
@@ -348,8 +348,9 @@ ORDER BY pfr.RECEIVED_DATE,pfr.RECEIPT_BOOK_NO,pfr.RECEIPT_NO, plrst.RECEIPT_SUB
 				<text><![CDATA[วันเดือนปี ที่รับเงิน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="86" y="0" width="53" height="50" uuid="2b05467b-d231-42db-9a5b-3ab4872fd2a0">
+				<reportElement x="80" y="0" width="56" height="50" uuid="2b05467b-d231-42db-9a5b-3ab4872fd2a0">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f7997d05-3659-4564-ba2e-8cc9f3aad56c"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
@@ -360,8 +361,9 @@ ORDER BY pfr.RECEIVED_DATE,pfr.RECEIPT_BOOK_NO,pfr.RECEIPT_NO, plrst.RECEIPT_SUB
 				<text><![CDATA[หมายเลข คดีดำ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="139" y="0" width="53" height="50" uuid="8dedee7a-1d1b-41e3-94f7-acc934611f59">
+				<reportElement x="136" y="0" width="56" height="50" uuid="8dedee7a-1d1b-41e3-94f7-acc934611f59">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f6558574-a68e-44e4-b7aa-b799de4c8922"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
@@ -534,41 +536,43 @@ ORDER BY pfr.RECEIVED_DATE,pfr.RECEIPT_BOOK_NO,pfr.RECEIPT_NO, plrst.RECEIPT_SUB
 	</columnHeader>
 	<detail>
 		<band height="25" splitType="Stretch">
-			<textField>
-				<reportElement stretchType="ContainerHeight" x="26" y="0" width="60" height="25" uuid="ebb41c74-4730-4049-b7f7-b2514e7ee03b">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="26" y="0" width="54" height="25" uuid="ebb41c74-4730-4049-b7f7-b2514e7ee03b">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d652a191-64ee-46ee-ade8-888c40a7a5ca"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="16"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIVED_DATE_TEXT}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement stretchType="ContainerHeight" x="86" y="0" width="53" height="25" uuid="c110471b-1673-4a2c-a549-0b46a37c3f39">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="80" y="0" width="56" height="25" uuid="c110471b-1673-4a2c-a549-0b46a37c3f39">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f7997d05-3659-4564-ba2e-8cc9f3aad56c"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="16"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement stretchType="ContainerHeight" x="139" y="0" width="53" height="25" uuid="51e31cb8-d0ae-47ed-b079-d40cb5f1dadc">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="136" y="0" width="56" height="25" uuid="51e31cb8-d0ae-47ed-b079-d40cb5f1dadc">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f6558574-a68e-44e4-b7aa-b799de4c8922"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="16"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_RED_NO}]]></textFieldExpression>
@@ -581,7 +585,7 @@ ORDER BY pfr.RECEIVED_DATE,pfr.RECEIPT_BOOK_NO,pfr.RECEIPT_NO, plrst.RECEIPT_SUB
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement verticalAlignment="Middle">
+				<textElement verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="16"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PROS_DESC}]]></textFieldExpression>
@@ -594,12 +598,12 @@ ORDER BY pfr.RECEIVED_DATE,pfr.RECEIPT_BOOK_NO,pfr.RECEIPT_NO, plrst.RECEIPT_SUB
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement verticalAlignment="Middle">
+				<textElement verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="16"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ACCU_DESC}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="298" y="0" width="40" height="25" uuid="29e53519-0e6a-4b7d-b480-5f4b86d262ce">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="60c7eabb-066d-4cae-b9ec-2ecdb822c6b8"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -608,12 +612,12 @@ ORDER BY pfr.RECEIVED_DATE,pfr.RECEIPT_BOOK_NO,pfr.RECEIPT_NO, plrst.RECEIPT_SUB
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="16"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIPT_BOOK_NO}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="338" y="0" width="40" height="25" uuid="b0222623-cdbf-4618-91c3-d5acc0481cb7">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="484c3bf8-cfc6-4954-af0b-11742d833900"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -622,12 +626,12 @@ ORDER BY pfr.RECEIVED_DATE,pfr.RECEIPT_BOOK_NO,pfr.RECEIPT_NO, plrst.RECEIPT_SUB
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="16"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIPT_NO}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="378" y="0" width="53" height="25" uuid="25cd2b89-f8b1-4553-956f-224467eee1fc">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="07ee0e3a-d2fa-4b46-8b53-7fedced43015"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -635,7 +639,7 @@ ORDER BY pfr.RECEIVED_DATE,pfr.RECEIPT_BOOK_NO,pfr.RECEIPT_NO, plrst.RECEIPT_SUB
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement verticalAlignment="Middle">
+				<textElement verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="16"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PAYER_NAME}]]></textFieldExpression>
@@ -648,12 +652,12 @@ ORDER BY pfr.RECEIVED_DATE,pfr.RECEIPT_BOOK_NO,pfr.RECEIPT_NO, plrst.RECEIPT_SUB
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement verticalAlignment="Middle">
+				<textElement verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="16"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIPT_SUB_TYPE_NAME}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="484" y="0" width="53" height="25" uuid="b030985c-15bd-40c8-bd48-367537c42036">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1163dde4-b0f6-42c8-b864-7b26f53e4078"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -661,7 +665,7 @@ ORDER BY pfr.RECEIVED_DATE,pfr.RECEIPT_BOOK_NO,pfr.RECEIPT_NO, plrst.RECEIPT_SUB
 				<box rightPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Right" verticalAlignment="Middle">
+				<textElement textAlignment="Right" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="16"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{TOTAL_RECEIVED_AMOUNT}))]]></textFieldExpression>
@@ -674,12 +678,12 @@ ORDER BY pfr.RECEIVED_DATE,pfr.RECEIPT_BOOK_NO,pfr.RECEIPT_NO, plrst.RECEIPT_SUB
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement verticalAlignment="Middle">
+				<textElement verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="16"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{PAYEE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{PAYEE}==null?" ":$F{PAYEE}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="590" y="0" width="53" height="25" uuid="7b728138-21f7-48de-a69d-b54bc358cc71">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="425a239d-3821-4180-8a7b-4566324632d8"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -687,12 +691,12 @@ ORDER BY pfr.RECEIVED_DATE,pfr.RECEIPT_BOOK_NO,pfr.RECEIPT_NO, plrst.RECEIPT_SUB
 				<box rightPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Right" verticalAlignment="Middle">
+				<textElement textAlignment="Right" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="16"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{TOTAL_PAY_AMOUNT}))]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="643" y="0" width="53" height="25" uuid="7e181468-cb94-4123-91f8-4d05b3d8fe66">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a89b3bb9-ea17-4c7d-a17e-dd4dbb5467b7"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -700,12 +704,12 @@ ORDER BY pfr.RECEIVED_DATE,pfr.RECEIPT_BOOK_NO,pfr.RECEIPT_NO, plrst.RECEIPT_SUB
 				<box rightPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Right" verticalAlignment="Middle">
+				<textElement textAlignment="Right" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="16"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{BALANCE}))]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="696" y="0" width="53" height="25" uuid="c6921154-c0f1-4e68-9ba7-ee549fa8e6b7">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="50a9a217-613a-4403-b129-54542c41053c"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -713,12 +717,12 @@ ORDER BY pfr.RECEIVED_DATE,pfr.RECEIPT_BOOK_NO,pfr.RECEIPT_NO, plrst.RECEIPT_SUB
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="16"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PAYMENT_DATE_TEXT}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="749" y="0" width="53" height="25" uuid="d63918e8-2ea2-49e1-adfc-c78d411a4ffa">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="143ca130-8bb8-4c90-90d8-3062f693ee88"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -726,12 +730,12 @@ ORDER BY pfr.RECEIVED_DATE,pfr.RECEIPT_BOOK_NO,pfr.RECEIPT_NO, plrst.RECEIPT_SUB
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="16"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ACCOUNT_NO}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="0" y="0" width="26" height="25" uuid="445f8df6-20c0-478d-b9a4-5c6f38237942">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d652a191-64ee-46ee-ade8-888c40a7a5ca"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -739,7 +743,7 @@ ORDER BY pfr.RECEIVED_DATE,pfr.RECEIPT_BOOK_NO,pfr.RECEIPT_NO, plrst.RECEIPT_SUB
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="16"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
