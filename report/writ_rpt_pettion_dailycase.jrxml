@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="writ_rpt_pettion_dailycase" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="3861b480-704f-47bb-a9ca-7622f54d09e0">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojStage2"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB210"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.137:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/writ_rpt_pettion_dailycase"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -38,7 +38,8 @@
   	NVL(pc.DEPOSIT,0) DEPOSIT,
   	NVL(plp.PROVINCE_NAME,'-') PROVINCE_NAME,
   	plj.JUDGE_NAME,
-  	ppa.APPOINT_DATE,
+  	CASE WHEN ppa.APPOINT_DATE IS NULL THEN ' '
+  	     ELSE TO_CHAR(ppa.APPOINT_DATE, 'dd MONTHyyyy hh:mm', 'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI')||' น.' END APPOINT_DATE,  	
   	' ' REMARK
 FROM PC_CASE pc 
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID  = pc.CASE_ID AND pj.REMOVED_BY = 0
@@ -68,10 +69,10 @@ LEFT JOIN (SELECT pca.CASE_ID, LISTAGG(pla.ALLEGATION_NAME,',') WITHIN GROUP(ORD
 			WHERE pca.REMOVED_BY = 0
 			GROUP BY pca.CASE_ID ) alle ON alle.CASE_ID = pc.CASE_ID
 --
-CROSS JOIN (SELECT plc.COURT_NAME_TH
+LEFT JOIN (SELECT plc.COURT_NAME_TH
 			 FROM PC_PARAM pp
 			 JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
-			 WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
+			 WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 = 1
 --
 WHERE pc.REMOVED_BY = 0
 AND pljt.JUDGE_TYPE_CODE = '01'
@@ -108,7 +109,7 @@ AND pc.CASE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24
 	<field name="JUDGE_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="JUDGE_NAME"/>
 	</field>
-	<field name="APPOINT_DATE" class="java.util.Date">
+	<field name="APPOINT_DATE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="APPOINT_DATE"/>
 	</field>
 	<field name="REMARK" class="java.lang.String">
@@ -127,11 +128,13 @@ AND pc.CASE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24
 				<text><![CDATA[สำนวนที่จะต้องยื่นคำร้อง]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="241" y="30" width="320" height="30" uuid="f66b38f1-b0f8-4340-8e52-0afc52100a98"/>
+				<reportElement x="176" y="30" width="450" height="30" uuid="f66b38f1-b0f8-4340-8e52-0afc52100a98"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new SimpleDateFormat("ระหว่างวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{START_DATE})) + new SimpleDateFormat(" ถึงวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{END_DATE}))]]></textFieldExpression>
+				<textFieldExpression><![CDATA["ระหว่างวันที่  " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +
+" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))
+]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="0" y="0" width="230" height="30" uuid="bb2c47e9-d7f8-4415-a357-6b504601c5da">
@@ -144,7 +147,7 @@ AND pc.CASE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24
 				<textFieldExpression><![CDATA["ศาล"+($F{COURT_NAME_TH}==null?"-":$F{COURT_NAME_TH})]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="0" y="30" width="230" height="30" uuid="f0144ee7-1684-45bd-ae9d-21883199d843"/>
+				<reportElement x="0" y="30" width="176" height="30" uuid="f0144ee7-1684-45bd-ae9d-21883199d843"/>
 				<box leftPadding="3"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="18" isBold="true"/>
@@ -299,7 +302,7 @@ AND pc.CASE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO} =="/" && $F{CASE_RED_NO} == "/" ? "-" :
@@ -313,7 +316,7 @@ AND pc.CASE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Left" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PROS_DESC} == null && $F{ACCU_DESC} == null ? "-" :
@@ -327,12 +330,12 @@ AND pc.CASE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ALLEGATION_NAME}==null?"-":$F{ALLEGATION_NAME}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="373" y="0" width="89" height="25" uuid="742e4355-2ae1-4807-bbb6-28b5b1794dc5">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6650bfa4-6549-4dbf-8d41-997750b87519"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -340,12 +343,12 @@ AND pc.CASE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24
 				<box leftPadding="3" rightPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Right" verticalAlignment="Middle">
+				<textElement textAlignment="Right" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format($F{DEPOSIT})]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="462" y="0" width="89" height="25" uuid="c011a335-f4a5-4206-9c16-aabe91d025d1">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a54afcc9-8624-4aeb-adc3-aceb5d9134ac"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -353,12 +356,12 @@ AND pc.CASE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PROVINCE_NAME}==null?"-":$F{PROVINCE_NAME}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="551" y="0" width="89" height="25" uuid="2156f2e8-23c5-4339-b648-94f34e12cb45">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bbc13ca4-57ef-424b-bb39-271bd72aad45"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -366,7 +369,7 @@ AND pc.CASE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement verticalAlignment="Middle">
+				<textElement verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{JUDGE_NAME}==null?"-":$F{JUDGE_NAME}]]></textFieldExpression>
@@ -379,12 +382,12 @@ AND pc.CASE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement verticalAlignment="Middle">
+				<textElement verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{APPOINT_DATE}==null?"-":$F{APPOINT_DATE}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="713" y="0" width="89" height="25" uuid="be745940-0558-4e18-9c3c-e5dd1db1c62b">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3cb310d1-4ab5-44fb-b656-e96c709b6558"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -392,12 +395,12 @@ AND pc.CASE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement verticalAlignment="Middle">
+				<textElement verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{REMARK}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="0" y="0" width="48" height="25" uuid="3563cfe5-e6f2-4ed2-938e-411112e9eeca">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f342e062-2cf9-43b2-9750-3d3d338b2bef"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -405,7 +408,7 @@ AND pc.CASE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>

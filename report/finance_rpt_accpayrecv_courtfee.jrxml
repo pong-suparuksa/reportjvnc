@@ -15,10 +15,11 @@
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="490"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="501"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_rpt_accpayrecv_courtfee"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB210"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/finance_rpt_accpayrecv_courtfee_files/main_jrxml"/>
 	<subDataset name="DSET_SUMM_RECEIPT" uuid="abf30ad3-c388-4856-818d-e47ff172b531">
 		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
@@ -98,7 +99,7 @@ AND (plrt.RECEIPT_TYPE_CODE IN ('2','5') )]]>
     CASE WHEN pfp.PAYMENT_DATE IS NOT NULL 
          THEN THAISDATE(pfp.PAYMENT_DATE)
          ELSE '-' END PAYMENT_DATE_TEXT,
-    CASE WHEN pfp.CHEQUE_AMOUNT > 0 THEN NVL(pfp.ACCOUNT_NO,'-') ELSE ' ' END    ACCOUNT_NO,
+    CASE WHEN pfp.CHEQUE_AMOUNT > 0 THEN NVL(pfpc.CHEQUE_CODE ,'-') ELSE ' ' END    ACCOUNT_NO,
     plrt.RECEIPT_TYPE_NAME,
     plrst.RECEIPT_SUB_TYPE_NAME,
     pfrc.CANCEL_ID 
@@ -109,6 +110,7 @@ LEFT JOIN PC_FIN_RECEIPT_CANCEL pfrc ON pfrc.RECEIPT_ID = pfr.RECEIPT_ID
 LEFT JOIN PC_FIN_RECEIPT_BALANCE_HISTORY pfrbh ON pfrbh.RECEIPT_DETAIL_ID = pfrd.DETAIL_ID
 LEFT JOIN PC_FIN_PAYMENT_DETAIL pfpd ON pfpd.DETAIL_ID = pfrbh.PAYMENT_DETAIL_ID
 LEFT JOIN PC_FIN_PAYMENT pfp ON pfp.PAYMENT_ID = pfpd.PAYMENT_ID
+LEFT JOIN PC_FIN_PAYMENT_CHEQUE pfpc ON pfpc.PAYMENT_ID = pfp.PAYMENT_ID AND pfpc.REMOVED_BY = 0
 --
 LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE AND plrt.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_RECEIPT_SUB_TYPE plrst ON plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE AND plrst.REMOVED_BY = 0
@@ -200,7 +202,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 	<pageHeader>
 		<band height="92" splitType="Stretch">
 			<staticText>
-				<reportElement x="9" y="30" width="161" height="30" uuid="9c52ed75-b79d-4692-a234-7db36297931d"/>
+				<reportElement x="9" y="30" width="151" height="30" uuid="9c52ed75-b79d-4692-a234-7db36297931d"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
@@ -252,7 +254,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				<text><![CDATA[คงเหลือ]]></text>
 			</staticText>
 			<textField>
-				<reportElement stretchType="ContainerHeight" x="180" y="30" width="280" height="25" uuid="ac27c048-dda0-4559-b342-edbd11b2c3a5">
+				<reportElement stretchType="ContainerHeight" x="160" y="32" width="312" height="25" uuid="ac27c048-dda0-4559-b342-edbd11b2c3a5">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d652a191-64ee-46ee-ade8-888c40a7a5ca"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -264,9 +266,9 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="16"/>
+					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new SimpleDateFormat("ข้อมูลระหว่างวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{START_DATE})) + new SimpleDateFormat(" ถึงวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{END_DATE}))]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("ข้อมูลระหว่างวันที่ d MMMM พ.ศ. yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{START_DATE})) + new SimpleDateFormat(" ถึงวันที่ d MMMM พ.ศ. yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="726" y="64" width="70" height="25" uuid="5d361be6-5c15-4636-85f6-91d55aaa8bad">

@@ -15,7 +15,7 @@
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="490"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="501"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_rpt_accpayrecv_litigantfee"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB210"/>
@@ -145,7 +145,7 @@ AND((plrt.RECEIPT_TYPE_CODE = '2') OR (plrt.RECEIPT_TYPE_CODE = $P{RECEIVETYPE})
     CASE WHEN pfp.PAYMENT_DATE IS NOT NULL 
          THEN THAISDATE(pfp.PAYMENT_DATE)
          ELSE '-' END PAYMENT_DATE_TEXT,
-    NVL(pfp.ACCOUNT_NO,'-')    ACCOUNT_NO,
+    CASE WHEN pfp.CHEQUE_AMOUNT > 0 THEN NVL(pfp.ACCOUNT_NO,'-') ELSE ' ' END    ACCOUNT_NO,
     plrt.RECEIPT_TYPE_NAME,
     plrst.RECEIPT_SUB_TYPE_NAME 
 FROM PC_FIN_RECEIPT pfr 
@@ -250,7 +250,7 @@ ORDER BY pfr.RECEIVED_DATE,pfr.RECEIPT_BOOK_NO,pfr.RECEIPT_NO, plrst.RECEIPT_SUB
 	<pageHeader>
 		<band height="92" splitType="Stretch">
 			<staticText>
-				<reportElement x="9" y="30" width="161" height="30" uuid="9c52ed75-b79d-4692-a234-7db36297931d"/>
+				<reportElement x="3" y="29" width="161" height="30" uuid="9c52ed75-b79d-4692-a234-7db36297931d"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
@@ -305,9 +305,10 @@ ORDER BY pfr.RECEIVED_DATE,pfr.RECEIPT_BOOK_NO,pfr.RECEIPT_NO, plrst.RECEIPT_SUB
 				<text><![CDATA[คงเหลือ]]></text>
 			</staticText>
 			<textField>
-				<reportElement stretchType="ContainerHeight" x="180" y="30" width="280" height="25" uuid="ac27c048-dda0-4559-b342-edbd11b2c3a5">
+				<reportElement stretchType="ContainerHeight" x="170" y="32" width="302" height="25" uuid="ac27c048-dda0-4559-b342-edbd11b2c3a5">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d652a191-64ee-46ee-ade8-888c40a7a5ca"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
@@ -317,9 +318,9 @@ ORDER BY pfr.RECEIVED_DATE,pfr.RECEIPT_BOOK_NO,pfr.RECEIPT_NO, plrst.RECEIPT_SUB
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="16"/>
+					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new SimpleDateFormat("ข้อมูลระหว่างวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{START_DATE})) + new SimpleDateFormat(" ถึงวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{END_DATE}))]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("ข้อมูลระหว่างวันที่ d MMMM พ.ศ. yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{START_DATE})) + new SimpleDateFormat(" ถึงวันที่ d MMMM พ.ศ. yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="726" y="64" width="70" height="25" uuid="5d361be6-5c15-4636-85f6-91d55aaa8bad">
