@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="finance_rpt_arecp_feetyp" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="8d3bf9ee-fab2-423e-b093-90beeadfc341">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="finance_rpt_accpay_fine" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="8d3bf9ee-fab2-423e-b093-90beeadfc341">
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -44,7 +44,7 @@
         NVL(pc.ACCU_DESC,'-' ) ACCU_DESC,
         NVL(pc.PROS_DESC,'-')  PAYEE,
         plrst.RECEIPT_SUB_TYPE_NAME  PAID_DESCRIPTION,
-        pfp.ACCOUNT_NO,
+        CASE WHEN pfp.CHEQUE_AMOUNT > 0 THEN pfpc.CHEQUE_CODE ELSE ' ' END ACCOUNT_NO,
         pfp.TOTAL_AMOUNT,
         NVL(pup.USER_PROFILE_FULL_NAME,'-') OFFICER,
         THAISDATE(pup.CREATED_DATE) CREATED_DATE_TEXT,
@@ -52,8 +52,10 @@
 --
 FROM PC_FIN_PAYMENT pfp 
 LEFT JOIN PC_FIN_PAYMENT_DETAIL pfpd ON pfpd.PAYMENT_ID = pfp.PAYMENT_ID
-JOIN PC_FIN_RECEIPT_BALANCE_HISTORY pfrbh ON pfrbh.PAYMENT_DETAIL_ID = pfpd.DETAIL_ID
-JOIN PC_FIN_RECEIPT_DETAIL pfrd ON pfrd.DETAIL_ID = pfrbh.RECEIPT_DETAIL_ID
+LEFT JOIN PC_FIN_PAYMENT_CHEQUE pfpc ON pfpc.PAYMENT_ID = pfp.PAYMENT_ID 
+--
+LEFT JOIN PC_FIN_RECEIPT_BALANCE_HISTORY pfrbh ON pfrbh.PAYMENT_DETAIL_ID = pfpd.DETAIL_ID
+LEFT JOIN PC_FIN_RECEIPT_DETAIL pfrd ON pfrd.DETAIL_ID = pfrbh.RECEIPT_DETAIL_ID
 --
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pfpd.CASE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID  = pc.CASE_ID AND pc.REMOVED_BY = 0
