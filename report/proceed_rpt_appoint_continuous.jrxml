@@ -2,7 +2,7 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="proceed_rpt_appoint_continuous" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2442022f-f774-4941-965d-fac8362ad9aa">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="CojDB[193]"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.137:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_continuous"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_continuous_files/main_jrxml"/>
@@ -100,47 +100,32 @@
 			<defaultValueExpression><![CDATA["31-05-2020"]]></defaultValueExpression>
 		</parameter>
 		<queryString language="SQL">
-			<![CDATA[SELECT A.A_DATE    COL_DAY, 
-             A.WK_DAY,
-             B.APPOINT_DESC,
-             B.JUDGE
---crosstab column       
-FROM  (SELECT EXTRACT(DAY FROM A.DT) A_DATE,  
-		       DECODE(TO_CHAR(A.DT,'D'),'2','จันทร์','3','อังคาร','4','พุธ','5','พฤหัสฯ','6','ศุกร์','-') WK_DAY, 
-		       A.DT
+			<![CDATA[SELECT  A.A_DATE COL_DAY 
+        ,A.WK_DAY
+        ,B.APPOINT_DESC
+        ,B.JUDGE
+--crosstab column
+FROM (SELECT  EXTRACT(DAY FROM A.DT) A_DATE  
+		       ,DECODE(TO_CHAR(A.DT,'D'),'2','จันทร์','3','อังคาร','4','พุธ','5','พฤหัสฯ','6','ศุกร์','-') WK_DAY 
+		       ,A.DT
+		       ,TO_CHAR(A.DT,'D') 
 		FROM (SELECT TO_DATE($P{FROM_DATE},'DD/MM/YYYY') + ROWNUM -1 DT
 			  FROM ALL_OBJECTS
 			  WHERE ROWNUM <= TO_DATE($P{TO_DATE},'DD/MM/YYYY')-TO_DATE($P{FROM_DATE},'DD/MM/YYYY')+1) A	  
-		WHERE TO_CHAR(A.DT,'Dy') IN ('Mon','Tue','Wed','Thu','Fri')) A
---crosstab measure 
-LEFT JOIN (SELECT ppac.START_DATE APPOINT_DATE, 
-			       pltc.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR||CHR(10)||pc.ALLE_DESC APPOINT_DESC,
-			       j.JUDGE
-			--
+		WHERE TO_CHAR(A.DT,'D') IN (2,3,4,5,6)) A
+--crosstab measure
+LEFT JOIN (SELECT ppac.START_DATE APPOINT_DATE
+				   ,pltc.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR||CHR(10)||pc.ALLE_DESC APPOINT_DESC
+			       ,plj.JUDGE_NAME JUDGE
 			FROM PC_PROCEED_APPOINT_CONTINUE ppac 
-			--find not first appoint mean continuous appoint
-			LEFT JOIN (SELECT ppac.APPOINT_ID, MIN(ppac.APPOINT_CON_ID) APPOINT_CON_ID
-			            FROM PC_PROCEED_APPOINT_CONTINUE ppac
-			            WHERE ppac.REMOVED_BY = 0
-						GROUP BY ppac.APPOINT_ID) ppac_min ON ppac_min.APPOINT_CON_ID = ppac.APPOINT_CON_ID
-			--
-			JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID AND ppa.REMOVED_BY = 0
-			--
-			JOIN PC_CASE pc ON pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
+			--appoint
+			LEFT JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID 
+			LEFT JOIN PC_PROCEED_APPOINT_CASE_JUDGE ppacj ON ppacj.APPOINT_ID = ppac.APPOINT_ID 
+			LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = ppacj.JUDGE_ID AND plj.REMOVED_BY = 0
+			--case
+			LEFT JOIN PC_CASE pc ON pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
 			LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc.REMOVED_BY = 0
-			--judge
-			LEFT JOIN (SELECT ppacj.APPOINT_ID, LISTAGG(plj.JUDGE_NAME,CHR(10)) WITHIN GROUP(ORDER BY plj.JUDGE_NAME) JUDGE
-						FROM PC_PROCEED_APPOINT_CASE_JUDGE ppacj
-						LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = ppacj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
-						LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = ppacj.JUDGE_ID AND plj.REMOVED_BY = 0
-						--
-						WHERE ppacj.REMOVED_BY = 0
-						AND pljt.JUDGE_TYPE_CODE IN ('02','03')
-						GROUP BY ppacj.APPOINT_ID) j ON j.APPOINT_ID = ppac.APPOINT_ID 
-			--
-			WHERE ppac.REMOVED_BY = 0
-			AND ppac_min.APPOINT_CON_ID IS NULL) B ON B.APPOINT_DATE = A.DT
---
+			WHERE ppac.REMOVED_BY = 0) B ON B.APPOINT_DATE = A.DT
 ORDER BY A.A_DATE]]>
 		</queryString>
 		<field name="COL_DAY" class="java.lang.Integer">
@@ -157,10 +142,10 @@ ORDER BY A.A_DATE]]>
 		</field>
 	</subDataset>
 	<parameter name="START_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["01/05/2020"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["01/05/2021"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="END_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["31/05/2020"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["31/05/2021"]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
 		<![CDATA[SELECT plc.COURT_NAME_TH,
@@ -185,18 +170,20 @@ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
-	<title>
-		<band height="61" splitType="Stretch">
+	<pageHeader>
+		<band height="52">
 			<textField>
-				<reportElement x="0" y="17" width="802" height="30" uuid="0aaa6ab9-2600-4f01-a4a5-080644012690"/>
+				<reportElement x="2" y="10" width="802" height="30" uuid="e7c8c855-6463-4c37-bb12-bea03e378ef5"/>
 				<box leftPadding="5"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="17" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["ตารางนัดพิจารณาคดีต่อเนื่องของ"+$F{COURT_NAME_TH}+new SimpleDateFormat(" ระหว่างวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{START_DATE})) + new SimpleDateFormat(" ถึงวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{END_DATE}))]]></textFieldExpression>
+				<textFieldExpression><![CDATA["ตารางนัดพิจารณาคดีต่อเนื่องของ"+$F{COURT_NAME_TH}+
+"ระหว่างวันที่  " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +
+" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
 		</band>
-	</title>
+	</pageHeader>
 	<detail>
 		<band height="120" splitType="Stretch">
 			<crosstab>
@@ -297,8 +284,8 @@ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
 				</measure>
 				<crosstabCell width="60" height="50">
 					<cellContents mode="Opaque" style="Crosstab 1_CD">
-						<textField>
-							<reportElement x="0" y="0" width="60" height="50" uuid="90361f2b-0618-44e1-b117-3a2f28b12634"/>
+						<textField isStretchWithOverflow="true">
+							<reportElement stretchType="ContainerHeight" x="0" y="0" width="60" height="50" uuid="90361f2b-0618-44e1-b117-3a2f28b12634"/>
 							<textElement textAlignment="Center" verticalAlignment="Middle">
 								<font fontName="THSarabunNew" size="16"/>
 							</textElement>
