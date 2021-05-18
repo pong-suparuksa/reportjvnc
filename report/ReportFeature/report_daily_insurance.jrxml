@@ -7,7 +7,8 @@
 	<property name="ireport.jasperserver.reportUnit" value="/reports/ReportFeature/report_daily_insurance"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="211"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="784"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="210"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/ReportFeature/report_daily_insurance_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["10/03/2020"]]></defaultValueExpression>
 	</parameter>
@@ -37,7 +38,7 @@ LEFT JOIN PC_BAIL_SEC_TYPE pbst ON pbst.TYPE_CODE = pbs.SEC_TYPE_CODE
 LEFT JOIN  PC_LIST_OF_VALUE plov ON plov.VALUE = pb.BAIL_PERIOD   AND plov.LOV_TYPE = 'BAIL_CLASS' AND PLOV.REMOVED_BY = 0
 
 --Case
-LEFT JOIN PC_CASE pc ON
+JOIN PC_CASE pc ON
 	pc.CASE_ID = pb.CASE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN PC_JUDGEMENT pj ON
 	pj.CASE_ID = pc.CASE_ID	AND pj.REMOVED_BY = 0
@@ -51,7 +52,7 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
              JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
              WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
 WHERE pb.REMOVED_BY = 0
-AND pb.BAIL_DATE BETWEEN TO_DATE($P{START_DATE} || 'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') AND TO_DATE($P{END_DATE} || 'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+AND pb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE} || 'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') AND TO_DATE($P{END_DATE} || 'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 AND $P{BAIL_PERIOD} IS NULL OR pb.BAIL_PERIOD = $P{BAIL_PERIOD}
 ORDER BY BLACK_CASE_NO ASC]]>
 	</queryString>
@@ -293,7 +294,7 @@ ORDER BY BLACK_CASE_NO ASC]]>
 	</columnHeader>
 	<detail>
 		<band height="30" splitType="Stretch">
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement x="30" y="0" width="60" height="30" uuid="df9c3d20-fbb5-4993-a154-75d8b18a6d2c"/>
 				<box leftPadding="5">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -306,7 +307,7 @@ ORDER BY BLACK_CASE_NO ASC]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BLACK_CASE_NO}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement x="-10" y="0" width="40" height="30" uuid="c86a099a-59ea-4a70-b12b-544156d9d277"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -319,7 +320,7 @@ ORDER BY BLACK_CASE_NO ASC]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{COLUMN_COUNT}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement x="90" y="0" width="60" height="30" uuid="f7b9ee32-fb28-4e2b-8d03-8f716d188425"/>
 				<box leftPadding="5">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -332,7 +333,7 @@ ORDER BY BLACK_CASE_NO ASC]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RED_CASE_NO}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement x="150" y="0" width="80" height="30" uuid="e1004d2b-af78-410c-8161-9ed4d626c027">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -347,7 +348,7 @@ ORDER BY BLACK_CASE_NO ASC]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PROS_DESC}== null ? "-"  :$F{PROS_DESC}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement x="230" y="0" width="80" height="30" uuid="09f74167-f603-4842-8bcc-03644b3f6309">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -362,7 +363,7 @@ ORDER BY BLACK_CASE_NO ASC]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ACCU_DESC} == null ? "-" : $F{ACCU_DESC}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement x="310" y="0" width="100" height="30" uuid="c8dd93c6-4962-4701-8d45-e7d0c22850f0"/>
 				<box leftPadding="5">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -375,7 +376,7 @@ ORDER BY BLACK_CASE_NO ASC]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{FULLNAME}== null? "-":$F{FULLNAME}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement x="410" y="0" width="100" height="30" uuid="7ebe471d-fe37-47fd-a533-108756853c94"/>
 				<box leftPadding="5">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -388,7 +389,7 @@ ORDER BY BLACK_CASE_NO ASC]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ALLE_DESC} == null?  "-":$F{ALLE_DESC}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement x="510" y="0" width="70" height="30" uuid="393dd823-27a7-4910-9839-eeeb8eda2258"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -401,7 +402,7 @@ ORDER BY BLACK_CASE_NO ASC]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RATE_AMOUNT}== null ? "-": $F{RATE_AMOUNT}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement x="580" y="0" width="60" height="30" uuid="2904c2ad-ddd4-4b04-a537-2f45a4fc890d"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -414,7 +415,7 @@ ORDER BY BLACK_CASE_NO ASC]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{TYPE_NAME}==null?  "-":$F{TYPE_NAME}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement x="640" y="0" width="60" height="30" uuid="fec69807-4b0d-4810-80ef-3884535d7e30"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -427,7 +428,7 @@ ORDER BY BLACK_CASE_NO ASC]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{NAME}== null ? "-": $F{NAME}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement x="700" y="0" width="60" height="30" uuid="8751dc02-0ebb-4139-ba0b-41e9578f13f1"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -440,7 +441,7 @@ ORDER BY BLACK_CASE_NO ASC]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{COURT_ORDER}]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField isStretchWithOverflow="true">
 				<reportElement x="760" y="0" width="50" height="30" uuid="21882a90-e3c1-4708-8671-0b1420da3e0a"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>

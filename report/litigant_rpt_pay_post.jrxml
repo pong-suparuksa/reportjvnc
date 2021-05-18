@@ -2,7 +2,7 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="litigant_rpt_pay_post" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e317825e-f08b-43a4-b494-0a6b7e4d57da">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojStage2"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.137:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_pay_post"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -178,7 +178,9 @@ AND NVL(pn.SEND_METHOD,1) = 1]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="18" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new SimpleDateFormat("ตั้งแต่วันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{START_DATE})) + new SimpleDateFormat(" ถึงวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{END_DATE}))]]></textFieldExpression>
+				<textFieldExpression><![CDATA["ตั้งแต่วันที่  " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +
+" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))
+]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>
@@ -364,8 +366,8 @@ AND NVL(pn.SEND_METHOD,1) = 1]]>
 	</columnHeader>
 	<detail>
 		<band height="25" splitType="Stretch">
-			<textField>
-				<reportElement x="34" y="0" width="60" height="25" uuid="d76d7e7a-88c6-4081-aeb7-720d4b32b686">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="34" y="0" width="60" height="25" uuid="d76d7e7a-88c6-4081-aeb7-720d4b32b686">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="0457d3b5-8b6a-40bd-bd4c-f40f41bd7f51"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -375,13 +377,13 @@ AND NVL(pn.SEND_METHOD,1) = 1]]>
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement textAlignment="Center">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PAYMENT_DATE_TEXT}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="94" y="0" width="68" height="25" uuid="ecfce565-6052-4c88-b486-ff0b8f4de514">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="94" y="0" width="68" height="25" uuid="ecfce565-6052-4c88-b486-ff0b8f4de514">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3653f446-cb1b-4019-8778-a856d75a1268"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -391,13 +393,13 @@ AND NVL(pn.SEND_METHOD,1) = 1]]>
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement textAlignment="Center">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="162" y="0" width="68" height="25" uuid="eee469f2-65a5-4bb1-9244-ad8aabcf08b7">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="162" y="0" width="68" height="25" uuid="eee469f2-65a5-4bb1-9244-ad8aabcf08b7">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4df348aa-eeee-4e8e-bb51-b7d042cb90f0"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -407,13 +409,13 @@ AND NVL(pn.SEND_METHOD,1) = 1]]>
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement textAlignment="Center">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_RED_NO}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="230" y="0" width="92" height="25" uuid="5cd96b3a-63df-459b-9724-c0e667d6c693">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="230" y="0" width="92" height="25" uuid="5cd96b3a-63df-459b-9724-c0e667d6c693">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ad00984b-8a92-4372-bad0-0ead85141b5f"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -423,13 +425,13 @@ AND NVL(pn.SEND_METHOD,1) = 1]]>
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement>
+				<textElement verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CLAIMANT}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="322" y="0" width="98" height="25" uuid="6f2d7650-27ed-425d-b65a-af0d70f01b3f">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="322" y="0" width="98" height="25" uuid="6f2d7650-27ed-425d-b65a-af0d70f01b3f">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d6f3be46-ebd3-4944-a418-026b02c2ef0f"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -439,13 +441,13 @@ AND NVL(pn.SEND_METHOD,1) = 1]]>
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement>
+				<textElement verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{DEFENDANT}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="420" y="0" width="98" height="25" uuid="1b6be6b3-932b-4d86-9182-31011913e3ec">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="420" y="0" width="98" height="25" uuid="1b6be6b3-932b-4d86-9182-31011913e3ec">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="232a3959-e118-432c-b568-f9c88fb425a8"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -455,13 +457,13 @@ AND NVL(pn.SEND_METHOD,1) = 1]]>
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement>
+				<textElement verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{TO_NAME}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="518" y="0" width="68" height="25" uuid="7fb97607-dc5a-409f-9b5b-9d954ac1989b">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="518" y="0" width="68" height="25" uuid="7fb97607-dc5a-409f-9b5b-9d954ac1989b">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e5a431d-ad40-4073-81e9-7e6399ae90d3"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -471,13 +473,13 @@ AND NVL(pn.SEND_METHOD,1) = 1]]>
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement textAlignment="Center">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIPT_REF}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="586" y="0" width="68" height="25" uuid="3d34313d-2a9d-4560-bd17-0263a8ef973b">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="586" y="0" width="68" height="25" uuid="3d34313d-2a9d-4560-bd17-0263a8ef973b">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7b12ef6e-6139-4dad-b389-8a982c6f495a"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -487,13 +489,13 @@ AND NVL(pn.SEND_METHOD,1) = 1]]>
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement>
+				<textElement verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CHEQUE_CODE}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="654" y="0" width="52" height="25" uuid="5a15b967-9e01-433a-9e9d-6d6bf9cb5408">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="654" y="0" width="52" height="25" uuid="5a15b967-9e01-433a-9e9d-6d6bf9cb5408">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="250a77d4-40a6-4356-bb66-8b40c1bba297"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -503,13 +505,13 @@ AND NVL(pn.SEND_METHOD,1) = 1]]>
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement textAlignment="Right">
+				<textElement textAlignment="Right" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format($F{SEND_FEE})]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="706" y="0" width="96" height="25" uuid="65cee6c8-7e8c-437d-93f9-9891b21c35d1">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="706" y="0" width="96" height="25" uuid="65cee6c8-7e8c-437d-93f9-9891b21c35d1">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="eb81ec2d-c8d1-4a6c-b22e-871e3ba7c66b"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -519,13 +521,13 @@ AND NVL(pn.SEND_METHOD,1) = 1]]>
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement>
+				<textElement verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PAYER_NAME}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="0" y="0" width="34" height="25" uuid="d5589104-d9ff-436e-8cb9-ef7a9987b288">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="0" y="0" width="34" height="25" uuid="d5589104-d9ff-436e-8cb9-ef7a9987b288">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="0457d3b5-8b6a-40bd-bd4c-f40f41bd7f51"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -535,7 +537,7 @@ AND NVL(pn.SEND_METHOD,1) = 1]]>
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement textAlignment="Center">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="litigant_rpt_pay_post" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e317825e-f08b-43a4-b494-0a6b7e4d57da">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="litigant_rpt_payrecv_bycase" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e317825e-f08b-43a4-b494-0a6b7e4d57da">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojStage2"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.193:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_payrecv_bycase"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -173,7 +173,11 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="18" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["รายละเอียดการรับจ่ายเป็นรายคดี "+new SimpleDateFormat("ตั้งแต่วันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{START_DATE})) + new SimpleDateFormat(" ถึงวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{END_DATE}))]]></textFieldExpression>
+				<textFieldExpression><![CDATA["รายละเอียดการรับจ่ายเป็นรายคดี "+
+"ตั้งแต่วันที่  " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +
+" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))
+
+]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="180" y="0" width="429" height="25" uuid="23f24e0b-1e2b-4659-9aa9-2e58b3433751">
@@ -183,7 +187,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="18" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}==null?" ":"ศาล"+$F{COURT_NAME_TH}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}==null?" ":$F{COURT_NAME_TH}]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>
@@ -369,8 +373,8 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 	</columnHeader>
 	<detail>
 		<band height="25" splitType="Stretch">
-			<textField>
-				<reportElement x="193" y="0" width="60" height="25" uuid="ecfce565-6052-4c88-b486-ff0b8f4de514">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="193" y="0" width="60" height="25" uuid="ecfce565-6052-4c88-b486-ff0b8f4de514">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3653f446-cb1b-4019-8778-a856d75a1268"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -383,8 +387,8 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="253" y="0" width="60" height="25" uuid="eee469f2-65a5-4bb1-9244-ad8aabcf08b7">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="253" y="0" width="60" height="25" uuid="eee469f2-65a5-4bb1-9244-ad8aabcf08b7">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4df348aa-eeee-4e8e-bb51-b7d042cb90f0"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -397,8 +401,8 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_RED_NO}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="313" y="0" width="70" height="25" uuid="5cd96b3a-63df-459b-9724-c0e667d6c693">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="313" y="0" width="70" height="25" uuid="5cd96b3a-63df-459b-9724-c0e667d6c693">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ad00984b-8a92-4372-bad0-0ead85141b5f"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -411,8 +415,8 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CLAIMANT}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="383" y="0" width="70" height="25" uuid="6f2d7650-27ed-425d-b65a-af0d70f01b3f">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="383" y="0" width="70" height="25" uuid="6f2d7650-27ed-425d-b65a-af0d70f01b3f">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d6f3be46-ebd3-4944-a418-026b02c2ef0f"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -425,8 +429,8 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				</textElement>
 				<textFieldExpression><![CDATA[$F{DEFENDANT}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="0" y="0" width="25" height="25" uuid="d5589104-d9ff-436e-8cb9-ef7a9987b288">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="0" y="0" width="25" height="25" uuid="d5589104-d9ff-436e-8cb9-ef7a9987b288">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="0457d3b5-8b6a-40bd-bd4c-f40f41bd7f51"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -439,8 +443,8 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="453" y="0" width="74" height="25" uuid="dcfc8b44-f8f3-44ef-aa83-1fd4a396c71a">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="453" y="0" width="74" height="25" uuid="dcfc8b44-f8f3-44ef-aa83-1fd4a396c71a">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d6f3be46-ebd3-4944-a418-026b02c2ef0f"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -452,8 +456,8 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PAYER_NAME}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="25" y="0" width="50" height="25" uuid="055d91cc-94f9-4338-b0c2-41d1d11c11a5">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="25" y="0" width="50" height="25" uuid="055d91cc-94f9-4338-b0c2-41d1d11c11a5">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3653f446-cb1b-4019-8778-a856d75a1268"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -466,8 +470,8 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIPT_BOOK_NO}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="75" y="0" width="50" height="25" uuid="9ba47756-3b7d-4361-af79-d1cd62e50472">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="75" y="0" width="50" height="25" uuid="9ba47756-3b7d-4361-af79-d1cd62e50472">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3653f446-cb1b-4019-8778-a856d75a1268"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -479,8 +483,8 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIPT_NO}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="125" y="0" width="68" height="25" uuid="35f0c566-0164-4cf2-af94-9e3129f2ca50">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="125" y="0" width="68" height="25" uuid="35f0c566-0164-4cf2-af94-9e3129f2ca50">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3653f446-cb1b-4019-8778-a856d75a1268"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -492,8 +496,8 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				</textElement>
 				<textFieldExpression><![CDATA[$F{NOTICE_DATE}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="527" y="0" width="50" height="25" uuid="f539be0c-7d82-4839-8bc6-6a63a8e47f04">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="527" y="0" width="50" height="25" uuid="f539be0c-7d82-4839-8bc6-6a63a8e47f04">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d6f3be46-ebd3-4944-a418-026b02c2ef0f"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -505,8 +509,8 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				</textElement>
 				<textFieldExpression><![CDATA["เงินสด"]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="577" y="0" width="50" height="25" uuid="2f562637-4dd0-4a77-a5ce-07b9cc558a1a">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="577" y="0" width="50" height="25" uuid="2f562637-4dd0-4a77-a5ce-07b9cc558a1a">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d6f3be46-ebd3-4944-a418-026b02c2ef0f"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -518,8 +522,8 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CHEQUE_CODE}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="627" y="0" width="50" height="25" uuid="765a3306-b0d0-4884-8da9-2b631a040e90">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="627" y="0" width="50" height="25" uuid="765a3306-b0d0-4884-8da9-2b631a040e90">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d6f3be46-ebd3-4944-a418-026b02c2ef0f"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -533,8 +537,8 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 ?"0"
 :new java.text.DecimalFormat("#,##0").format($F{TOTAL_AMOUNT})]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="677" y="0" width="50" height="25" uuid="0e201f92-bee8-4f67-a79e-9e88b0efb174">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="677" y="0" width="50" height="25" uuid="0e201f92-bee8-4f67-a79e-9e88b0efb174">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d6f3be46-ebd3-4944-a418-026b02c2ef0f"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -546,8 +550,8 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				</textElement>
 				<textFieldExpression><![CDATA[$F{NOTES}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="727" y="0" width="74" height="25" uuid="010d064e-5af1-4e06-9723-f33036eb03e8">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="727" y="0" width="74" height="25" uuid="010d064e-5af1-4e06-9723-f33036eb03e8">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d6f3be46-ebd3-4944-a418-026b02c2ef0f"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
