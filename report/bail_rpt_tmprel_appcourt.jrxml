@@ -67,7 +67,7 @@ LEFT JOIN PC_BAIL_SEC_CONDO pbscd ON pbscd.SEC_ID = pbs.SEC_ID AND pbscd.REMOVED
 LEFT JOIN PC_BAIL_SEC_POSITION pbsp ON pbsp.SEC_ID = pbs.SEC_ID AND pbsp.REMOVED_BY = 0
 LEFT JOIN PC_BAIL_SEC_CASH pspc ON pspc.SEC_ID = pbs.SEC_ID AND pspc.REMOVED_BY = 0
 LEFT JOIN PC_BAIL_SEC_AFFILIATE_CERTIFICATE pbsac ON pbsac.SEC_ID = pbs.SEC_ID AND pbsac.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_BOND_TYPE plbt ON plbt.BOND_TYPE_ID=pbsb.BOND_TYPE_ID AND plbt.REMOVED_BY = 0
+LEFT JOIN PC_BAIL_BOND_TYPE plbt ON plbt.BOND_TYPE_ID=pbsb.BOND_TYPE_ID AND plbt.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_ALLEGATION pla ON pla.ALLEGATION_ID = pca.ALLEGATION_ID
 WHERE (pb.BAIL_PERIOD = $P!{BAIL_PERIOD} OR 99 = $P!{BAIL_PERIOD}) AND pb.REMOVED_BY = 0 AND pbb.BAILSMAN_ID > 0
 AND pb.BAIL_DATE BETWEEN TO_DATE( $P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
@@ -462,16 +462,16 @@ ORDER BY CASE WHEN pb.COURT_ORDER  = 1 THEN 'อนุญาต' ELSE 'ไม่
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
-				<box>
+				<box rightPadding="3">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Top">
+				<textElement textAlignment="Right" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{BAIL_COST}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format(Double.valueOf($F{BAIL_COST}))]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="605" y="0" width="126" height="25" uuid="a963e402-498a-4956-a845-ee352cf54eda">
