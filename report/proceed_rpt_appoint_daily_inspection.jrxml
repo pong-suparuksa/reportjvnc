@@ -2,7 +2,7 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="proceed_rpt_appoint_daily_inspection" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="91e475d7-d1e6-46cb-8b6b-dde87b1765a0">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-210"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_daily_inspection"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="315"/>
@@ -24,6 +24,7 @@
 	<parameter name="ROOM_COD" class="java.lang.String"/>
 	<queryString language="SQL">
 		<![CDATA[SELECT
+PCC.CASE_ID,
     PCPAC.START_DATE   AS  APPOINT_DATE,   
     CASE WHEN PCC.BLACK_IDNUM IS NOT NULL 
 		     THEN PCLTS.TITLE_CASE_NAME||PCC.BLACK_IDNUM||'/'||PCC.BLACK_YEAR 
@@ -50,7 +51,7 @@
     JOIN PC_PROCEED_APPOINT_CONTINUE PCPAC ON PCPA.APPOINT_ID = PCPAC.APPOINT_ID AND PCPAC.REMOVED_BY = 0 
     LEFT JOIN PC_CASE PCC ON PCPA.CASE_ID = PCC.CASE_ID    
     LEFT JOIN PC_JUDGEMENT PCJM ON PCC.CASE_ID = PCJM.CASE_ID
-    LEFT JOIN PC_LOOKUP_TITLE_CASE PCLTS ON PCC.CASE_CATE_ID = PCLTS.CASE_CATE_ID
+    LEFT JOIN PC_LOOKUP_TITLE_CASE PCLTS ON PCLTS.TITLE_CASE_ID = PCC.BLACK_TITLE_ID
     LEFT JOIN PC_LOOKUP_TITLE_CASE PCLTS_R ON PCLTS_R.TITLE_CASE_ID = PCJM.RED_TITLE_ID AND PCLTS_R.REMOVED_BY = 0    
     LEFT JOIN PC_LOOKUP_APPOINT_REASON PCLAR ON PCPAC.REASON_APPOINT_ID = PCLAR.APPOINT_REASON_ID
     LEFT JOIN 
@@ -301,7 +302,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="13"/>
 				</textElement>
-				<text><![CDATA[ผลการพิจรณา]]></text>
+				<text><![CDATA[ผลการพิจารณา]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="-10" y="0" width="30" height="40" uuid="314af480-db35-4564-9263-387f6e5973e4">
