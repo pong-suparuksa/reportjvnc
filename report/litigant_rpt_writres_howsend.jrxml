@@ -63,7 +63,7 @@ LEFT JOIN PC_NOTICE_SEND_RESULT pnsr ON pnsr.NOTICE_ID = pn.NOTICE_ID
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID
 LEFT JOIN PC_NOTICE_ISSUED pni ON pni.NOTICE_ID = pn.NOTICE_ID
 LEFT JOIN PC_FIN_RECEIPT pfr ON pfr.RECEIPT_ID = pni.RECEIPT_ID
-LEFT JOIN PC_JUDGEMENT pj ON pj.COURT_ID = pn.COURT_ID AND pj.CASE_ID = pn.COURT_ID
+LEFT JOIN PC_JUDGEMENT pj ON  pj.CASE_ID = pn.CASE_ID AND pj.REMOVED_BY = 0
 --
 LEFT JOIN PC_USER_PROFILE pup ON pup.USER_ID = pn.SEND_BY
 --
@@ -191,8 +191,7 @@ ORDER BY pn.SEND_METHOD, pni.SEND_NOTICE_DATE]]>
 					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["ระหว่างวันที่  " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +
-" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))
-]]></textFieldExpression>
+" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="130" y="30" width="120" height="30" uuid="7bcd4b40-c020-4376-95d3-9516fcc4229a"/>

@@ -66,8 +66,8 @@ LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME,LISTAGG(plp.PENALTY_NAME, ', ')
 --           
 WHERE pn.REMOVED_BY = 0
 AND pc.CASE_ID IS NOT NULL
-AND (plnt.NOTICE_TYPE_CODE = $P{NOTICE_TYPE_CODE} OR $P{NOTICE_TYPE_CODE} IS NULL)
-AND pn.PRINT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+AND (pn.NOTICE_TYPE_CODE = $P{NOTICE_TYPE_CODE} OR $P{NOTICE_TYPE_CODE} IS NULL)
+AND pn.NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
                                               AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 ORDER BY pn.PRINT_DATE]]>
 	</queryString>
@@ -136,8 +136,7 @@ ORDER BY pn.PRINT_DATE]]>
 					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["ระหว่างวันที่  " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +
-" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))
-]]></textFieldExpression>
+" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>

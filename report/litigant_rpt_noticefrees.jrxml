@@ -38,14 +38,14 @@
         NVL(pc.PROS_DESC,'-')	      													          						CLAIMANT, 
 		NVL(pc.ACCU_DESC,'-')																        					DEFENDANT,
         NVL(pup.USER_PROFILE_FULL_NAME,'-')																				PAYER_NAME,
-	    NVL(pn.RECEIVED_BY,'-')	                                       													TO_NAME,
+	    NVL(pn.LITIGANT_NAME,'-')	                                       													TO_NAME,
         NVL(plnt.NOTICE_TYPE_NAME,'-')																					NOTICE_TYPE_NAME,            
         --
         NVL(pls.SUBDISTRICT_NAME,'-')																					SUBDISTRICT_NAME,
         NVL(pld.DISTRICT_NAME,'-')																						DISTRICT_NAME,
         NVL(pn.SEND_FEE, 0) 																							SEND_FEE,																																	   
 	    NVL(pup1.USER_PROFILE_FULL_NAME,'-')																	   		USER_PROFILE_FULL_NAME
-        --    
+        --   
 FROM PC_NOTICE pn
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pn.CASE_ID AND pj.REMOVED_BY = 0
@@ -59,7 +59,7 @@ LEFT JOIN PC_NOTICE_SEND_RESULT pnsr ON pn.NOTICE_ID = pnsr.NOTICE_ID AND pn.REM
 LEFT JOIN PC_USER_PROFILE pup ON pnsr.SEND_FEE_PAYER = pup.USER_PROFILE_ID
 ----
 LEFT JOIN PC_NOTICE_ISSUED pni ON pn.NOTICE_ID = pni.NOTICE_ID AND pn.REMOVED_BY = 0
-LEFT JOIN PC_USER_PROFILE pup1 ON pni.CREATED_BY = pup.USER_PROFILE_ID
+LEFT JOIN PC_USER_PROFILE pup1 ON pup1.USER_PROFILE_ID = pni.CREATED_BY AND pup1.REMOVED_BY = 0
 --
 LEFT JOIN PC_LOOKUP_NOTICE_TYPE plnt ON plnt.NOTICE_TYPE_ID = pn.NOTICE_TYPE_ID AND plnt.REMOVED_BY = 0
 ----
@@ -161,8 +161,7 @@ $F{COURT_NAME_TH}]]></textFieldExpression>
 					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["ตั้งแต่วันที่  " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +
-" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))
-]]></textFieldExpression>
+" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>
