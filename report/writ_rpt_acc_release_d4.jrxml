@@ -14,7 +14,7 @@
 	<property name="ireport.jasperserver.url" value="http://119.59.126.210/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/writ_rpt_acc_release_d4"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[210]"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/writ_rpt_acc_release_d4_files/main_jrxml"/>
@@ -24,14 +24,11 @@
 	<parameter name="END_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["31/03/2021"]]></defaultValueExpression>
 	</parameter>
-	<parameter name="NOTICE_TYPE_CODE" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["211"]]></defaultValueExpression>
-	</parameter>
 	<queryString>
 		<![CDATA[SELECT DISTINCT
 	NVL(plc.COURT_NAME_TH,'-') COURT_NAME_TH,
-    pn.PRINT_DATE,
-    THAISDATE(pn.PRINT_DATE)               PRINT_DATE_TEXT,
+    pn.NOTICE_DATE ,
+    THAISDATE(pn.NOTICE_DATE)               PRINT_DATE_TEXT,
     pn.NOTICE_CODE_NO || '/' || NOTICE_CODE_YEAR	NOTICE_NO,
    CASE WHEN pc.BLACK_IDNUM IS NOT NULL 
 		     THEN pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR 
@@ -67,15 +64,15 @@ LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME,
 --           
 WHERE pn.REMOVED_BY = 0
 AND pc.CASE_ID IS NOT NULL
-AND (plnt.NOTICE_TYPE_CODE = $P{NOTICE_TYPE_CODE} OR $P{NOTICE_TYPE_CODE} IS NULL)
-AND pn.PRINT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
-                                              AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
-ORDER BY pn.PRINT_DATE]]>
+AND plnt.NOTICE_TYPE_CODE = 221 -- D4
+AND pn.NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+ORDER BY pn.NOTICE_DATE]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
 	</field>
-	<field name="PRINT_DATE" class="java.sql.Date">
+	<field name="NOTICE_DATE" class="java.sql.Date">
 		<property name="com.jaspersoft.studio.field.label" value="NOTICE_DATE"/>
 	</field>
 	<field name="PRINT_DATE_TEXT" class="java.lang.String">
