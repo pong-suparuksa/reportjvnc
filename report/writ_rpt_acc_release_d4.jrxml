@@ -11,15 +11,14 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/writ_rpt_acc_release_d4"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[210]"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/writ_rpt_acc_release_d4_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["01/02/2021"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["01/02/2020"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="END_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["31/03/2021"]]></defaultValueExpression>
@@ -36,7 +35,7 @@
     NVL(lit.LITIGANT_NAME,'-') DETAINEE,
     NVL(alle.ALLEGATION_NAME,'-') ALLEGATION_NAME,
     NVL(lit.PENALTY_NAME,'-') PENALTY_NAME,
-    NVL(pn.NOTICE_REASON,'') NOTICE_REASON 
+    NVL(pn.NOTICE_REASON,'-') NOTICE_REASON 
 --
 FROM PC_NOTICE pn 
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID
@@ -64,7 +63,7 @@ LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME,
 --           
 WHERE pn.REMOVED_BY = 0
 AND pc.CASE_ID IS NOT NULL
-AND plnt.NOTICE_TYPE_CODE = 221 -- D4
+AND plnt.NOTICE_TYPE_CODE = 221
 AND pn.NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
 AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 ORDER BY pn.NOTICE_DATE]]>
