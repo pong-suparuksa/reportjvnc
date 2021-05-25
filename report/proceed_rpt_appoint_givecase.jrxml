@@ -16,7 +16,7 @@
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_givecase"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="202"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="793"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_givecase_files/main_jrxml"/>
 	<parameter name="PERIOD" class="java.lang.String"/>
 	<parameter name="START_DATE" class="java.lang.String">
@@ -30,6 +30,7 @@
 	</parameter>
 	<queryString language="SQL">
 		<![CDATA[SELECT DISTINCT
+       pc.CASE_ID,
        ppac.START_DATE,
        THAILDATE(ppac.START_DATE,1,0,0) APPOINT_DATE,
        ppac.CHOICE_TIME APPOINT_TIME,
@@ -52,10 +53,7 @@
        END) APPOINT_TITLE
 --
 FROM PC_PROCEED_APPOINT ppa 
-JOIN PC_PROCEED_APPOINT_CONTINUE ppac ON ppac.APPOINT_ID = ppa.APPOINT_ID 
---JOIN (SELECT ppac.APPOINT_ID, MIN(ppac.APPOINT_CON_ID) APPOINT_CON_ID 
---	  FROM PC_PROCEED_APPOINT_CONTINUE ppac 
---	  GROUP BY ppac.APPOINT_ID) fapp ON fapp.APPOINT_CON_ID = ppac.APPOINT_CON_ID 
+JOIN PC_PROCEED_APPOINT_CONTINUE ppac ON ppac.APPOINT_ID = ppa.APPOINT_ID AND ppac.REMOVED_BY = 0
 --
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = ppa.CASE_ID AND pj.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc.REMOVED_BY = 0
@@ -63,26 +61,31 @@ LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pj.RED_TITLE_ID AND 
 LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME 
 			FROM PC_CASE_LIT pcl 
 			JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID 
-			                             AND pllt.REMOVED_BY = 0
-			WHERE pllt.LIT_TYPE_CODE = '01') cl ON cl.CASE_ID = ppa.CASE_ID
+			                            AND pllt.REMOVED_BY = 0
+			WHERE pcl.REMOVED_BY = 0
+			AND pllt.LIT_TYPE_CODE = '01') cl ON cl.CASE_ID = ppa.CASE_ID
 --จำเลย
 LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME 
 			FROM PC_CASE_LIT pcl 
 			JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID 
 			                             AND pllt.REMOVED_BY = 0
-			WHERE pllt.LIT_TYPE_CODE = '03') de ON de.CASE_ID = ppa.CASE_ID
+			WHERE pcl.REMOVED_BY = 0
+			AND pllt.LIT_TYPE_CODE = '03'
+			AND pcl.ORDER_NO = 1) de ON de.CASE_ID = ppa.CASE_ID
 --ฝ่ายโจทก์ (ทนายความ?)
 LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME 
 			FROM PC_CASE_LIT pcl 
 			JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID 
 			                             AND pllt.REMOVED_BY = 0
-			WHERE pllt.LIT_TYPE_CODE = '16') lyc ON lyc.CASE_ID = ppa.CASE_ID
+			WHERE pcl.REMOVED_BY = 0
+			AND pllt.LIT_TYPE_CODE = '16') lyc ON lyc.CASE_ID = ppa.CASE_ID
 --ฝ่ายจำเลย (ทนายความ)
 LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME 
 			FROM PC_CASE_LIT pcl 
 			JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID 
 			                             AND pllt.REMOVED_BY = 0
-			WHERE pllt.LIT_TYPE_CODE = '17') lyd ON lyd.CASE_ID = ppa.CASE_ID
+			WHERE pcl.REMOVED_BY = 0
+			AND pllt.LIT_TYPE_CODE = '17') lyd ON lyd.CASE_ID = ppa.CASE_ID
 --
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
@@ -103,9 +106,9 @@ LEFT JOIN (SELECT pcj.CASE_ID, plj.JUDGE_NAME
                                           AND pljt.REMOVED_BY = 0
             WHERE pcj.REMOVED_BY = 0) jud ON jud.CASE_ID = ppa.CASE_ID
 --
-WHERE ppac.START_DATE BETWEEN TO_DATE( $P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
---
-AND $P{PERIOD}   is null or ppac.CHOICE = $P{PERIOD}
+WHERE ppa.REMOVED_BY = 0
+AND ppac.START_DATE BETWEEN TO_DATE( $P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
+AND (($P{PERIOD}IS NULL)OR($P{PERIOD} = '%')OR(ppac.CHOICE = $P{PERIOD}))
 AND ppac.APPOINT_TABLE_CODE = $P{APPOIN_TABLE_CODE}
 --
 ORDER BY ppac.START_DATE]]>
@@ -176,13 +179,10 @@ ORDER BY ppac.START_DATE]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="20" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[IF($P{PERIOD}.equals("1"),
-"เช้า",
-IF($P{PERIOD}.equals("2"),
-"บ่าย",
-IF($P{PERIOD}.equals("%"),
-"รวม",
-" ")))]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{PERIOD}==null?"รวม":
+$P{PERIOD}.equals("%")?"รวม":
+$P{PERIOD}.equals("1")?"เช้า":
+$P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>

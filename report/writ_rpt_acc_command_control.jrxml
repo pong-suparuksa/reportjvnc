@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="writ_rpt_acc_command_control" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="5f59f5d6-72e8-4213-a4bd-9da4a38ca818">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB210"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -12,13 +12,15 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/writ_rpt_acc_command_control"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.report.description" value=""/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/writ_rpt_acc_command_control_files/main_jrxml"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="528"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="462"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/03/2021"]]></defaultValueExpression>
 	</parameter>
@@ -33,6 +35,8 @@
 	NVL(plc.COURT_NAME_TH,'-') COURT_NAME_TH,
     pn.PRINT_DATE,
     THAISDATE(pn.PRINT_DATE)              PRINT_DATE_TEXT,
+    pn.NOTICE_DATE,
+    THAISDATE(pn.NOTICE_DATE)             NOTICE_DATE_TEXT,
     pn.NOTICE_CODE_NO ||'/'|| NOTICE_CODE_YEAR	NOTICE_NO,
       CASE WHEN pc.BLACK_IDNUM IS NOT NULL 
 		     THEN pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR 
@@ -69,15 +73,21 @@ AND pc.CASE_ID IS NOT NULL
 AND (pn.NOTICE_TYPE_CODE = $P{NOTICE_TYPE_CODE} OR $P{NOTICE_TYPE_CODE} IS NULL)
 AND pn.NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
                                               AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
-ORDER BY pn.PRINT_DATE]]>
+ORDER BY pn.NOTICE_DATE]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
 	</field>
-	<field name="PRINT_DATE" class="java.sql.Date">
-		<property name="com.jaspersoft.studio.field.label" value="NOTICE_DATE"/>
+	<field name="PRINT_DATE" class="java.util.Date">
+		<property name="com.jaspersoft.studio.field.label" value="PRINT_DATE"/>
 	</field>
 	<field name="PRINT_DATE_TEXT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PRINT_DATE_TEXT"/>
+	</field>
+	<field name="NOTICE_DATE" class="java.util.Date">
+		<property name="com.jaspersoft.studio.field.label" value="NOTICE_DATE"/>
+	</field>
+	<field name="NOTICE_DATE_TEXT" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="NOTICE_DATE_TEXT"/>
 	</field>
 	<field name="NOTICE_NO" class="java.lang.String">
@@ -279,7 +289,7 @@ ORDER BY pn.PRINT_DATE]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{PRINT_DATE_TEXT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{NOTICE_DATE_TEXT}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="190" y="0" width="100" height="25" uuid="35477818-151c-4229-8e87-2fd66c0d56e5">

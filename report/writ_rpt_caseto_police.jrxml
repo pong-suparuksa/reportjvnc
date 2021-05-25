@@ -18,7 +18,7 @@
 	<property name="ireport.jasperserver.reportUnit" value="/reports/writ_rpt_caseto_police"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<parameter name="NEXT_POST_DATE" class="java.lang.String">
+	<parameter name="SELECT_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["20-04-2020"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
@@ -39,7 +39,7 @@ JOIN PC_DETENTION_POST_DATE pdpd ON pdpd.CASE_ID = pc.CASE_ID AND NVL(pdpd.REMOV
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.COURT_ID = pc.COURT_ID AND pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND NVL(pltc_b.REMOVED_BY,0) = 0
 LEFT JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND NVL(plcc.REMOVED_BY,0) = 0
 WHERE pc.REMOVED_BY = 0
-AND TO_CHAR(NEXT_POST_DATE,'DD-MM-YYYY') = $P{NEXT_POST_DATE}
+AND TO_CHAR(NEXT_POST_DATE,'DD-MM-YYYY') = $P{SELECT_DATE}
 ORDER BY plcc.CASE_CATE_NAME]]>
 	</queryString>
 	<field name="CASE_BLACK_NO" class="java.lang.String">
@@ -105,9 +105,7 @@ ORDER BY plcc.CASE_CATE_NAME]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[" สำนวนที่จะต้องยื่นคำร้องแยกตามสถานีตำรวจ วันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd-MM-yyyy",new Locale("th_TH")).parse($P{NEXT_POST_DATE}))
-
-]]></textFieldExpression>
+				<textFieldExpression><![CDATA[" สำนวนที่จะต้องยื่นคำร้องแยกตามสถานีตำรวจ วันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd-MM-yyyy",new Locale("th_TH")).parse($P{SELECT_DATE}))]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>
