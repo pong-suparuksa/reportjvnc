@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="proceed_rpt_appoint_givecase" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="871b3d7a-e863-40ac-9c7e-093a9c67ce47">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="proceed_rpt_appoint_givecase" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="871b3d7a-e863-40ac-9c7e-093a9c67ce47">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
@@ -29,101 +29,107 @@
 		<defaultValueExpression><![CDATA["001"]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
-		<![CDATA[SELECT DISTINCT
-       pc.CASE_ID,
-       ppac.START_DATE,
-       THAILDATE(ppac.START_DATE,1,0,0) APPOINT_DATE,
-       ppac.CHOICE_TIME APPOINT_TIME,
-       CASE WHEN pc.BLACK_IDNUM IS NOT NULL  THEN pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR  ELSE '-' END CASE_BLACE_NO, 
-       NVL(pltc.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || CASE WHEN pj.RED_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pj.RED_YEAR)     CASE_RED_NO,
-       NVL(cl.LITIGANT_NAME,' ')   CLAIMANT,
-       NVL(de.LITIGANT_NAME,' ')   DEFENDANT,
-       CASE WHEN pb.CASE_ID IS NOT NULL THEN 'ประกัน' ELSE ' ' END BAIL,
-       NVL(pc.ALLE_DESC,' ')   TOPIC,
-       plar.APPOINT_REASON_NAME  APPOINT_REASON,
-       plac.APPOINT_CASE_NAME,
-       NVL(lyc.LITIGANT_NAME,' ')  CLAIMANT_PART,
-       NVL(lyd.LITIGANT_NAME,' ')  DEFENDANT_PART,
-       jud.JUDGE_NAME,
-       NVL(pljr.JUDGE_ROOM_NAME,' ') ROOM,
-       (CASE 
-	       WHEN $P{APPOIN_TABLE_CODE} = '003' THEN 'เสนอจ่ายสำนวน' 
+		<![CDATA[SELECT (CASE  
 	       WHEN $P{APPOIN_TABLE_CODE} = '001' THEN 'เสนอจ่ายสำนวนเข้าศูนย์ไกล่เกลี่ย' 
 	       WHEN $P{APPOIN_TABLE_CODE} = '004' THEN 'เสนอจ่ายสำนวนเข้าจัดการพิเศษ'
-       END) APPOINT_TITLE
+	       WHEN $P{APPOIN_TABLE_CODE} IS NULL THEN 'เสนอจ่ายสำนวน'
+        END) APPOINT_TITLE
+		,NVL(pltc_b.TITLE_CASE_NAME,' ')  || TO_CHAR(pc.BLACK_IDNUM) || CASE WHEN pc.BLACK_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pc.BLACK_YEAR) CASE_BLACK_NO
+        ,NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || CASE WHEN pj.RED_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pj.RED_YEAR)       CASE_RED_NO
+        ,ppac.START_DATE APPOINT_DATE
+        ,ppac.CHOICE 
+        ,ppac.CHOICE_TIME APPOINT_TIME
+        ,NVL(cl.LITIGANT_NAME,' ')   CLAIMANT
+        ,NVL(de.LITIGANT_NAME,' ')   DEFENDANT
+        ,CASE WHEN de.ACCU_STATUS_CODE IN ('01','06','07') THEN 'ขัง'
+              WHEN de.ACCU_STATUS_CODE IN ('02','03','04') THEN 'ประกัน'
+              ELSE ' ' END BAIL
+        ,plar.APPOINT_REASON_NAME 
+        ,plct.CASE_TYPE_NAME
+        ,wc.WITNESS_NAME WITNESS_CLAIMANT
+        ,wd.WITNESS_NAME WITNESS_DEFENDANT
+        ,ppac.LEVEL_ROOM_CODE 
+        ,j.JUDGE_NAME
+        ,NVL(pc.ALLE_DESC,' ')   TOPIC
 --
 FROM PC_PROCEED_APPOINT ppa 
 JOIN PC_PROCEED_APPOINT_CONTINUE ppac ON ppac.APPOINT_ID = ppa.APPOINT_ID AND ppac.REMOVED_BY = 0
---
-LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = ppa.CASE_ID AND pj.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc.REMOVED_BY = 0
---โจทก์
+--procced lookup
+LEFT JOIN PC_LOOKUP_APPOINT_REASON plar ON plar.APPOINT_REASON_ID = ppac.REASON_APPOINT_ID AND plar.REMOVED_BY = 0 
+--witness cliamant
+LEFT JOIN (SELECT ppawa.APPOINT_CON_ID 
+			       ,ppaw.WITNESS_OF 
+			       ,LISTAGG(ppaw.SEND_TO_NAME, '\n') WITHIN GROUP(ORDER BY ppaw.ORDER_NO) WITNESS_NAME 
+			FROM PC_PROCEED_ALERT_WITNESS_APPOINT ppawa 
+			LEFT JOIN PC_PROCEED_ALERT_WITNESS ppaw ON ppaw.ALERT_WITNESS_ID = ppawa.ALERT_WITNESS_ID AND ppaw.REMOVED_BY = 0
+			WHERE ppawa.REMOVED_BY = 0
+			AND ppawa.IS_CONFIRM = 1
+			AND ppaw.WITNESS_OF = 1
+			GROUP BY ppawa.APPOINT_CON_ID ,ppaw.WITNESS_OF) wc ON wc.APPOINT_CON_ID = ppac.APPOINT_CON_ID 
+--witness defendant
+LEFT JOIN (SELECT ppawa.APPOINT_CON_ID 
+			       ,ppaw.WITNESS_OF 
+			       ,LISTAGG(ppaw.SEND_TO_NAME, '\n') WITHIN GROUP(ORDER BY ppaw.ORDER_NO) WITNESS_NAME 
+			FROM PC_PROCEED_ALERT_WITNESS_APPOINT ppawa 
+			LEFT JOIN PC_PROCEED_ALERT_WITNESS ppaw ON ppaw.ALERT_WITNESS_ID = ppawa.ALERT_WITNESS_ID AND ppaw.REMOVED_BY = 0
+			WHERE ppawa.REMOVED_BY = 0
+			AND ppawa.IS_CONFIRM = 1
+			AND ppaw.WITNESS_OF = 2
+			GROUP BY ppawa.APPOINT_CON_ID ,ppaw.WITNESS_OF) wd ON wd.APPOINT_CON_ID = ppac.APPOINT_CON_ID 
+--case
+LEFT JOIN PC_CASE pc ON pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_CASE_TYPE plct ON plct.CASE_TYPE_ID = pc.CASE_TYPE_ID AND plct.REMOVED_BY = 0
+--claimant
 LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME 
 			FROM PC_CASE_LIT pcl 
 			JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID 
 			                            AND pllt.REMOVED_BY = 0
 			WHERE pcl.REMOVED_BY = 0
 			AND pllt.LIT_TYPE_CODE = '01') cl ON cl.CASE_ID = ppa.CASE_ID
---จำเลย
-LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME 
+--defendant
+LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME, plas.ACCU_STATUS_CODE 
 			FROM PC_CASE_LIT pcl 
 			JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID 
 			                             AND pllt.REMOVED_BY = 0
+			LEFT JOIN PC_LOOKUP_ACCU_STATUS plas ON plas.ACCU_STATUS_ID = pcl.LITIGANT_STATUS_ID 
+			                                     AND plas.REMOVED_BY = 0
 			WHERE pcl.REMOVED_BY = 0
 			AND pllt.LIT_TYPE_CODE = '03'
 			AND pcl.ORDER_NO = 1) de ON de.CASE_ID = ppa.CASE_ID
---ฝ่ายโจทก์ (ทนายความ?)
-LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME 
-			FROM PC_CASE_LIT pcl 
-			JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID 
-			                             AND pllt.REMOVED_BY = 0
-			WHERE pcl.REMOVED_BY = 0
-			AND pllt.LIT_TYPE_CODE = '16') lyc ON lyc.CASE_ID = ppa.CASE_ID
---ฝ่ายจำเลย (ทนายความ)
-LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME 
-			FROM PC_CASE_LIT pcl 
-			JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID 
-			                             AND pllt.REMOVED_BY = 0
-			WHERE pcl.REMOVED_BY = 0
-			AND pllt.LIT_TYPE_CODE = '17') lyd ON lyd.CASE_ID = ppa.CASE_ID
---
-LEFT JOIN PC_CASE pc ON pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
---
-LEFT JOIN PC_BAIL pb ON pb.CASE_ID = ppa.CASE_ID AND pb.REMOVED_BY = 0
-LEFT JOIN PC_CASE pc ON pc.CASE_ID = ppa.CASE_ID AND ppa.REMOVED_BY = 0
---
-LEFT JOIN PC_LOOKUP_APPOINT_REASON plar ON plar.APPOINT_REASON_ID = ppa.REASON_APPOINT_ID AND plar.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_APPOINT_CASE plac ON plac.APPOINT_CASE_ID = ppa.APPOINT_BY_ID AND plac.REMOVED_BY = 0
---ห้องพิจารณา
-LEFT JOIN PC_LOOKUP_JUDGE_ROOM pljr ON pljr.JUDGE_ROOM_ID = ppa.ROOM_ID AND pljr.REMOVED_BY = 0
---เจ้าของสำนวน
-LEFT JOIN (SELECT pcj.CASE_ID, plj.JUDGE_NAME
-            FROM PC_CASE_JUDGE pcj
-            JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID
-            JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID 
-                                          AND pljt.JUDGE_TYPE_CODE = '01'
-                                          AND pljt.REMOVED_BY = 0
-            WHERE pcj.REMOVED_BY = 0) jud ON jud.CASE_ID = ppa.CASE_ID
---
+--judgement
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = ppa.CASE_ID AND pj.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
+--responsible judge
+LEFT JOIN (SELECT pcj.CASE_ID, plj.JUDGE_NAME 
+			FROM PC_CASE_JUDGE pcj 
+			LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID AND plj.REMOVED_BY = 0
+			LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+			WHERE pcj.REMOVED_BY = 0
+			AND pljt.JUDGE_TYPE_CODE = '01') j ON j.CASE_Id = ppa.CASE_ID 
 WHERE ppa.REMOVED_BY = 0
 AND ppac.START_DATE BETWEEN TO_DATE( $P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
 AND (($P{PERIOD}IS NULL)OR($P{PERIOD} = '%')OR(ppac.CHOICE = $P{PERIOD}))
-AND ppac.APPOINT_TABLE_CODE = $P{APPOIN_TABLE_CODE}
---
-ORDER BY ppac.START_DATE]]>
+AND (($P{APPOIN_TABLE_CODE} IS NULL)OR(ppac.APPOINT_TABLE_CODE = $P{APPOIN_TABLE_CODE}))
+ORDER BY APPOINT_DATE, CHOICE]]>
 	</queryString>
-	<field name="START_DATE" class="java.util.Date">
-		<property name="com.jaspersoft.studio.field.label" value="START_DATE"/>
+	<field name="APPOINT_TITLE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="APPOINT_TITLE"/>
 	</field>
-	<field name="APPOINT_DATE" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="APPOINT_DATE"/>
-	</field>
-	<field name="APPOINT_TIME" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="APPOINT_TIME"/>
+	<field name="CASE_BLACK_NO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CASE_BLACK_NO"/>
 	</field>
 	<field name="CASE_RED_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="CASE_RED_NO"/>
+	</field>
+	<field name="APPOINT_DATE" class="java.util.Date">
+		<property name="com.jaspersoft.studio.field.label" value="APPOINT_DATE"/>
+	</field>
+	<field name="CHOICE" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="CHOICE"/>
+	</field>
+	<field name="APPOINT_TIME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="APPOINT_TIME"/>
 	</field>
 	<field name="CLAIMANT" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="CLAIMANT"/>
@@ -134,31 +140,27 @@ ORDER BY ppac.START_DATE]]>
 	<field name="BAIL" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="BAIL"/>
 	</field>
-	<field name="TOPIC" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="TOPIC"/>
+	<field name="APPOINT_REASON_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="APPOINT_REASON_NAME"/>
 	</field>
-	<field name="APPOINT_REASON" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="APPOINT_REASON"/>
+	<field name="CASE_TYPE_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CASE_TYPE_NAME"/>
 	</field>
-	<field name="APPOINT_CASE_NAME" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="APPOINT_CASE_NAME"/>
+	<field name="WITNESS_CLAIMANT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="WITNESS_CLAIMANT"/>
 	</field>
-	<field name="CLAIMANT_PART" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="CLAIMANT_PART"/>
+	<field name="WITNESS_DEFENDANT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="WITNESS_DEFENDANT"/>
 	</field>
-	<field name="DEFENDANT_PART" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="DEFENDANT_PART"/>
+	<field name="LEVEL_ROOM_CODE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="LEVEL_ROOM_CODE"/>
 	</field>
 	<field name="JUDGE_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="JUDGE_NAME"/>
 	</field>
-	<field name="ROOM" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="ROOM"/>
+	<field name="TOPIC" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TOPIC"/>
 	</field>
-	<field name="CASE_BLACE_NO" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="CASE_BLACE_NO"/>
-	</field>
-	<field name="APPOINT_TITLE" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -362,7 +364,7 @@ $P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="25" splitType="Stretch">
+		<band height="25" splitType="Prevent">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
 				<reportElement stretchType="ContainerHeight" x="30" y="0" width="50" height="25" isPrintWhenDetailOverflows="true" uuid="8640b73e-863e-462c-86c2-9e1d7352360c">
@@ -372,10 +374,10 @@ $P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 				<box>
 					<pen lineWidth="0.75"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CASE_BLACE_NO}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
 				<reportElement stretchType="ContainerHeight" x="130" y="0" width="40" height="25" isPrintWhenDetailOverflows="true" uuid="7ae07162-fd3c-4755-bd1b-606087f750f2">
@@ -385,7 +387,7 @@ $P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 				<box>
 					<pen lineWidth="0.75"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{APPOINT_TIME}]]></textFieldExpression>
@@ -398,7 +400,7 @@ $P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 				<box>
 					<pen lineWidth="0.75"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CLAIMANT}]]></textFieldExpression>
@@ -411,7 +413,7 @@ $P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 				<box>
 					<pen lineWidth="0.75"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{DEFENDANT}]]></textFieldExpression>
@@ -425,7 +427,7 @@ $P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 				<box>
 					<pen lineWidth="0.75"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BAIL}]]></textFieldExpression>
@@ -438,10 +440,10 @@ $P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 				<box>
 					<pen lineWidth="0.75"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{APPOINT_REASON}==null?" ":$F{APPOINT_REASON}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{APPOINT_REASON_NAME}==null?" ":$F{APPOINT_REASON_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
 				<reportElement stretchType="ContainerHeight" x="460" y="0" width="80" height="25" isPrintWhenDetailOverflows="true" uuid="eb7da744-7d4d-42b5-add7-c39e72c9ccd0">
@@ -451,10 +453,10 @@ $P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 				<box>
 					<pen lineWidth="0.75"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{APPOINT_CASE_NAME}==null?"-":$F{APPOINT_CASE_NAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{CASE_TYPE_NAME}==null?"-":$F{CASE_TYPE_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
 				<reportElement stretchType="ContainerHeight" x="540" y="0" width="70" height="25" isPrintWhenDetailOverflows="true" uuid="93223b64-2546-476f-8842-784e9fe453e4">
@@ -464,10 +466,10 @@ $P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 				<box>
 					<pen lineWidth="0.75"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CLAIMANT_PART}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{WITNESS_CLAIMANT}==null?" ":$F{WITNESS_CLAIMANT}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
 				<reportElement stretchType="ContainerHeight" x="610" y="0" width="70" height="25" isPrintWhenDetailOverflows="true" uuid="d2b129a2-6b5a-41f9-9005-397352ce4411">
@@ -477,10 +479,10 @@ $P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 				<box>
 					<pen lineWidth="0.75"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{DEFENDANT_PART}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{WITNESS_DEFENDANT}==null?" ":$F{WITNESS_DEFENDANT}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
 				<reportElement stretchType="ContainerHeight" x="680" y="0" width="47" height="25" isPrintWhenDetailOverflows="true" uuid="f5706367-ee82-447b-b66c-edd0ec5c33d7">
@@ -490,10 +492,10 @@ $P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 				<box>
 					<pen lineWidth="0.75"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ROOM}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{LEVEL_ROOM_CODE}==null?" ":$F{LEVEL_ROOM_CODE}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
 				<reportElement stretchType="ContainerHeight" x="727" y="0" width="73" height="25" isPrintWhenDetailOverflows="true" uuid="b1d1cc5c-06ce-4155-8fe3-f0adae0a297e">
@@ -503,7 +505,7 @@ $P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 				<box>
 					<pen lineWidth="0.75"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{JUDGE_NAME}==null ? "" : $F{JUDGE_NAME}]]></textFieldExpression>
@@ -516,7 +518,7 @@ $P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 				<box>
 					<pen lineWidth="0.75"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_RED_NO}]]></textFieldExpression>
@@ -530,15 +532,15 @@ $P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 					<pen lineWidth="0.75"/>
 					<bottomPen lineWidth="0.0"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{COLUMN_COUNT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
 		</band>
-		<band height="25">
+		<band height="25" splitType="Prevent">
 			<staticText>
-				<reportElement x="30" y="0" width="50" height="25" uuid="aee80f9f-aa2f-485a-a8b7-453e612325c4">
+				<reportElement stretchType="ContainerHeight" x="30" y="0" width="50" height="25" uuid="aee80f9f-aa2f-485a-a8b7-453e612325c4">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1b6d92b4-cc4e-4f1f-9f18-f0692b2deb5d"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -564,7 +566,7 @@ $P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 				<textFieldExpression><![CDATA[$F{TOPIC}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="0" y="0" width="30" height="25" uuid="23581073-a747-4b21-bffc-e01447bafb14"/>
+				<reportElement stretchType="ContainerHeight" x="0" y="0" width="30" height="25" uuid="23581073-a747-4b21-bffc-e01447bafb14"/>
 				<box>
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
