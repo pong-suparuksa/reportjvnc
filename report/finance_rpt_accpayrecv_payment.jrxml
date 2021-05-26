@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="finance_rpt_accpayrecv_cent" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="d03f7ede-1ea2-4619-9ec3-f39b8e97e467">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="finance_rpt_accpayrecv_payment" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="d03f7ede-1ea2-4619-9ec3-f39b8e97e467">
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -15,10 +15,11 @@
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="612"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="377"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_rpt_accpayrecv_payment"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-229"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/finance_rpt_accpayrecv_payment_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/02/2021"]]></defaultValueExpression>
 	</parameter>
@@ -88,7 +89,6 @@ WHERE pfp.REMOVED_BY = 0
 AND pfp.PAYMENT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
                          AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
 AND (plct.CASE_TYPE_CODE = $P{CASE_TYPE} OR $P{CASE_TYPE} IS NULL) 
-AND (plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} OR $P{RECEIPT_TYPE} IS NULL) 
 AND (pfpc.CHEQUE_CODE = $P{CHEQUE_CODE} OR $P{CHEQUE_CODE} IS NULL) 
 AND (pc.CASE_ID = $P{CASE_ID} OR $P{CASE_ID} IS NULL)
 ORDER BY pfp.PAYMENT_DATE]]>
@@ -420,7 +420,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="25" splitType="Stretch">
+		<band height="25" splitType="Prevent">
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="26" y="0" width="60" height="25" uuid="ebb41c74-4730-4049-b7f7-b2514e7ee03b">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d652a191-64ee-46ee-ade8-888c40a7a5ca"/>
@@ -429,7 +429,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="16" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIVED_DATE_TEXT}]]></textFieldExpression>
@@ -442,7 +442,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="16" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}]]></textFieldExpression>
@@ -456,7 +456,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="16" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIPT_BOOK_NO}==null?" ":$F{RECEIPT_BOOK_NO}]]></textFieldExpression>
@@ -470,7 +470,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="16" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIPT_NO}==null?" ":$F{RECEIPT_NO}]]></textFieldExpression>
@@ -483,7 +483,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
+				<textElement textAlignment="Left" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="16" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PAYER_NAME}==null?" ":$F{PAYER_NAME}]]></textFieldExpression>
@@ -496,7 +496,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="16" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PAID_DESCRIPTION}]]></textFieldExpression>
@@ -509,7 +509,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				<box rightPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="16" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{TOTAL_RECEIVED_AMOUNT}==null?" ":new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{TOTAL_RECEIVED_AMOUNT}))]]></textFieldExpression>
@@ -522,7 +522,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
+				<textElement textAlignment="Left" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="16" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PAYEE}]]></textFieldExpression>
@@ -535,7 +535,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				<box rightPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="16" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{TOTAL_PAY_AMOUNT}))]]></textFieldExpression>
@@ -548,7 +548,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				<box rightPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="16" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BALANCE}==null?" ":new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{BALANCE}))]]></textFieldExpression>
@@ -561,7 +561,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="16" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ACCOUNT_NO}]]></textFieldExpression>
@@ -578,7 +578,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="16" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
@@ -591,7 +591,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="16" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_RED_NO}]]></textFieldExpression>
@@ -604,13 +604,13 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="16" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIPT_TYPE_NAME}==null?" ":$F{RECEIPT_TYPE_NAME}]]></textFieldExpression>
 			</textField>
 		</band>
-		<band height="25">
+		<band height="25" splitType="Prevent">
 			<staticText>
 				<reportElement stretchType="ContainerHeight" x="26" y="0" width="114" height="25" uuid="50e7941b-8684-4d51-969a-0b00d3b93eff">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="50a9a217-613a-4403-b129-54542c41053c"/>
@@ -646,7 +646,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
+				<textElement textAlignment="Left" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="16" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ACCU_DESC}]]></textFieldExpression>
@@ -674,7 +674,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="16" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PAYMENT_DATE_TEXT}]]></textFieldExpression>
@@ -688,7 +688,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
+				<textElement textAlignment="Left" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="16" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PROS_DESC}]]></textFieldExpression>
@@ -711,7 +711,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				<text><![CDATA[]]></text>
 			</staticText>
 		</band>
-		<band height="25">
+		<band height="25" splitType="Prevent">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<staticText>
 				<reportElement stretchType="ContainerHeight" x="0" y="0" width="26" height="25" uuid="ee9a55ec-d4f6-4eb1-8dff-99f9785372b6">
@@ -752,7 +752,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
+				<textElement textAlignment="Left" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="16" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{REMARK}]]></textFieldExpression>
