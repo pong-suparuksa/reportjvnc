@@ -7,6 +7,9 @@
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/bail_frm_accprop_position"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/bail_frm_accprop_position_files/main_jrxml"/>
 	<parameter name="SEC_ID" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[SELECT 
@@ -23,7 +26,8 @@ THAINUMSTR(pbb.NATIONAL_ID) NATIONAL_ID,
 --
 plov.NAME POSITION_TYPE_NAME,
 pbsp."POSITION" ,
-('กรม '|| NVL(pbsp.DEPARTMENT,'-') || ' กระทรวง  '|| NVL(pbsp.MINISTRY,'-')) DIVISION
+('กรม '|| NVL(pbsp.DEPARTMENT,'-') || ' กระทรวง  '|| NVL(pbsp.MINISTRY,'-')) DIVISION,
+pbsp.POSITION_LEVEL 
 --
 FROM PC_BAIL_SEC_POSITION pbsp
 LEFT JOIN PC_BAIL_SEC pbs ON pbs.SEC_ID = pbsp.SEC_ID 
@@ -67,6 +71,9 @@ FETCH FIRST 1 ROWS ONLY]]>
 	</field>
 	<field name="DIVISION" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="DIVISION"/>
+	</field>
+	<field name="POSITION_LEVEL" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="POSITION_LEVEL"/>
 	</field>
 	<background>
 		<band splitType="Stretch"/>
@@ -130,7 +137,7 @@ FETCH FIRST 1 ROWS ONLY]]>
 				<textElement>
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{POSITION_LEVEL}==null?" ":$F{POSITION_LEVEL}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="85" y="177" width="70" height="25" uuid="32701bb1-e842-40b2-8e62-608383eb67ba">

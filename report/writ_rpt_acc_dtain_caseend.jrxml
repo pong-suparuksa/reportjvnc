@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="writ_rpt_acc_dtimpr_appsup" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="5f59f5d6-72e8-4213-a4bd-9da4a38ca818">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="writ_rpt_acc_dtain_caseend" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="5f59f5d6-72e8-4213-a4bd-9da4a38ca818">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
@@ -31,7 +31,7 @@
 		,THAISDATE(pn.NOTICE_DATE) NOTICE_DATE_TEXT
 		,pn.NOTICE_CODE_NO || '/' || pn.NOTICE_CODE_YEAR  NOTICE_NO
 		,NVL(pltc_b.TITLE_CASE_NAME || TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR),'-')   CASE_BLACK_NO
-		,plt.TITLE_NAME || pcl.LITIGANT_NAME || ' ' || pcl.LITIGANT_LAST_NAME DETAINEE
+		,plt.TITLE_NAME || pcl.LITIGANT_NAME DETAINEE
 		,NVL(alle.ALLEGATION_NAME,' ') ALLEGATION_NAME
 		,NVL(pnl.PENALTY_NAME,' ') PENALTY_NAME
 FROM PC_NOTICE pn 
@@ -58,7 +58,7 @@ LEFT JOIN (SELECT pjap.CASE_LIT_ID
 			GROUP BY pjap.CASE_LIT_ID) pnl ON pnl.CASE_LIT_ID = pn.LITIGANT_ID 
 --condition
 WHERE pn.REMOVED_BY = 0
-AND plnt.NOTICE_TYPE_CODE = '209'
+AND pn.NOTICE_TYPE_CODE = '209'
 AND pn.NOTICE_DATE BETWEEN TO_DATE($P{STRAT_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
                        AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 ORDER BY pn.NOTICE_DATE]]>
@@ -252,7 +252,7 @@ ORDER BY pn.NOTICE_DATE]]>
 	<detail>
 		<band height="25" splitType="Stretch">
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="50" y="0" width="140" height="25" uuid="97ba85c0-c372-4584-a56f-a47aae0f475c">
+				<reportElement stretchType="ContainerHeight" x="50" y="0" width="140" height="25" isPrintWhenDetailOverflows="true" uuid="97ba85c0-c372-4584-a56f-a47aae0f475c">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="191985ee-2f1a-4caa-ac26-c37c654e63be"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -268,7 +268,7 @@ ORDER BY pn.NOTICE_DATE]]>
 				<textFieldExpression><![CDATA[$F{NOTICE_DATE_TEXT}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="190" y="0" width="100" height="25" uuid="35477818-151c-4229-8e87-2fd66c0d56e5">
+				<reportElement stretchType="ContainerHeight" x="190" y="0" width="100" height="25" isPrintWhenDetailOverflows="true" uuid="35477818-151c-4229-8e87-2fd66c0d56e5">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="652c384b-2efa-44b7-8052-b976211bb5e6"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -284,7 +284,7 @@ ORDER BY pn.NOTICE_DATE]]>
 				<textFieldExpression><![CDATA[$F{NOTICE_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="290" y="0" width="90" height="25" uuid="749cf918-5c73-4a61-8418-25e5ff1c488e">
+				<reportElement stretchType="ContainerHeight" x="290" y="0" width="90" height="25" isPrintWhenDetailOverflows="true" uuid="749cf918-5c73-4a61-8418-25e5ff1c488e">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="29e86f08-08a6-432c-8928-43e1be5013d2"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -300,7 +300,7 @@ ORDER BY pn.NOTICE_DATE]]>
 				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="380" y="0" width="156" height="25" uuid="5093611d-f38f-4fea-bf65-ce35355b41e8">
+				<reportElement stretchType="ContainerHeight" x="380" y="0" width="156" height="25" isPrintWhenDetailOverflows="true" uuid="5093611d-f38f-4fea-bf65-ce35355b41e8">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6f77547b-c399-41ff-a80a-48ee556d0f64"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -316,7 +316,7 @@ ORDER BY pn.NOTICE_DATE]]>
 				<textFieldExpression><![CDATA[$F{DETAINEE}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="536" y="0" width="133" height="25" uuid="5cb18e9d-8f0c-42c8-906a-9c21a1598715">
+				<reportElement stretchType="ContainerHeight" x="536" y="0" width="133" height="25" isPrintWhenDetailOverflows="true" uuid="5cb18e9d-8f0c-42c8-906a-9c21a1598715">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1f72e456-3158-4051-bcbd-a6d3fa8fdd80"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -332,7 +332,7 @@ ORDER BY pn.NOTICE_DATE]]>
 				<textFieldExpression><![CDATA[$F{ALLEGATION_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="669" y="0" width="133" height="25" uuid="19adbd13-0910-4ae6-91e2-4152e5e96c7a">
+				<reportElement stretchType="ContainerHeight" x="669" y="0" width="133" height="25" isPrintWhenDetailOverflows="true" uuid="19adbd13-0910-4ae6-91e2-4152e5e96c7a">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="c2ae4962-a8f4-4449-a3d4-8df47c02fd0c"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -348,7 +348,7 @@ ORDER BY pn.NOTICE_DATE]]>
 				<textFieldExpression><![CDATA[$F{PENALTY_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="0" y="0" width="50" height="25" uuid="b3d05781-1d5c-4c0f-bc63-1068d301ce87">
+				<reportElement stretchType="ContainerHeight" x="0" y="0" width="50" height="25" isPrintWhenDetailOverflows="true" uuid="b3d05781-1d5c-4c0f-bc63-1068d301ce87">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="191985ee-2f1a-4caa-ac26-c37c654e63be"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>

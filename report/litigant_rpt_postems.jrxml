@@ -16,6 +16,8 @@
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_postems"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_postems_files/main_jrxml"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/03/2021"]]></defaultValueExpression>
 	</parameter>
@@ -24,38 +26,39 @@
 	</parameter>
 	<queryString>
 		<![CDATA[SELECT
- 			pni.SEND_NOTICE_DATE,
-			THAILDATE(NVL(pni.SEND_NOTICE_DATE,CURRENT_DATE))                                                               SEND_NOTICE_DATE_TEXT,
-			
-            pni.ISSUED_ID																												ISSUED_ID,
-            NVL(plc.COURT_NAME_TH, '-') 																		            COURT_NAME_TH, 
-            NVL(plc.POST_LICENCE,'-')                                                                                                             POST_LICENCE,
-  		    NVL(pn.RECEIVED_BY,'-')	                                       													TO_NAME,
-            pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR  												CASE_BLACK_NO,
-			pn.CURRENT_POST_CODE,    
-			'ขนาดซอง N/A'                                                     																		       ENVELOP_SIZE,
-			pn.SEND_FEE,
-			NVL(pni.EMS_CODE,'-')         								   																			   EMS_CODE
-
+		pni.SEND_NOTICE_DATE,
+		THAILDATE(NVL(pni.SEND_NOTICE_DATE,CURRENT_DATE))                    SEND_NOTICE_DATE_TEXT,
+        pni.ISSUED_ID													       ISSUED_ID,
+        NVL(plc.COURT_NAME_TH, '-') 					                       COURT_NAME_TH, 
+        NVL(plc.POST_LICENCE,'-')                                              POST_LICENCE,
+	    NVL(pn.LITIGANT_NAME,'-')	                                  		   TO_NAME,
+        pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR         CASE_BLACK_NO,
+		pn.CURRENT_POST_CODE,    
+		'ขนาดซอง N/A'                                                     	   ENVELOP_SIZE,
+		pn.SEND_FEE,
+		NVL(pni.EMS_CODE,' ')         								   	       EMS_CODE
 
 FROM PC_NOTICE pn
-
+--
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN PC_NOTICE_ISSUED pni ON pn.NOTICE_ID = pni.NOTICE_ID AND pn.REMOVED_BY = 0
 --
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID
 LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pn.COURT_ID AND plc.REMOVED_BY = 0
-
-WHERE pn.SEND_METHOD = 2 AND NVL(pni.HAS_MONEY,1) = 1 AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+--
+WHERE pn.SEND_METHOD = 1 
+AND NVL(pni.HAS_MONEY,1) = 1 
+AND pn.SEND_FEE > 0
+AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
                               AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')]]>
 	</queryString>
-	<field name="SEND_NOTICE_DATE" class="java.sql.Date">
+	<field name="SEND_NOTICE_DATE" class="java.util.Date">
 		<property name="com.jaspersoft.studio.field.label" value="SEND_NOTICE_DATE"/>
 	</field>
 	<field name="SEND_NOTICE_DATE_TEXT" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="SEND_NOTICE_DATE_TEXT"/>
 	</field>
-	<field name="ISSUED_ID" class="java.math.BigDecimal">
+	<field name="ISSUED_ID" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="ISSUED_ID"/>
 	</field>
 	<field name="COURT_NAME_TH" class="java.lang.String">

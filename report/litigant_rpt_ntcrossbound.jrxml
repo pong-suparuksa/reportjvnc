@@ -27,35 +27,41 @@
 	<queryString>
 		<![CDATA[SELECT 
 		pni.SEND_NOTICE_DATE,
-		THAILDATE(NVL(pni.SEND_NOTICE_DATE,CURRENT_DATE))                                                               SEND_NOTICE_DATE_TEXT,
-        
-        NVL(plc.COURT_NAME_TH, '-') 	     																           		COURT_NAME_TH,                        
-        pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR  												CASE_BLACK_NO,    
-		pltc_red.TITLE_CASE_NAME || pj.RED_IDNUM || '/' || pj.RED_YEAR  												CASE_RED_NO,
-
-        NVL(pup.USER_PROFILE_FULL_NAME,'-')																				PAYER_NAME,
-	    NVL(pn.RECEIVED_BY,'-')	                                       													TO_NAME,
-        NVL(plnt.NOTICE_TYPE_NAME,'-')																					NOTICE_TYPE_NAME,            
+		THAILDATE(NVL(pni.SEND_NOTICE_DATE,CURRENT_DATE))                                   SEND_NOTICE_DATE_TEXT,
+        --
+        NVL(cou.COURT_NAME_TH, '-') 	     												  COURT_NAME_TH,                        
+        pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR  					  CASE_BLACK_NO,    
+		CASE WHEN pj.RED_IDNUM IS NULL THEN ' '
+		     ELSE pltc_red.TITLE_CASE_NAME || pj.RED_IDNUM || '/' || pj.RED_YEAR END		  CASE_RED_NO,
+        --
+        NVL(pfr.PAYER_NAME ,'-')															  PAYER_NAME,
+	    NVL(pn.LITIGANT_NAME ,'-')	                                    					  TO_NAME,
+        NVL(plnt.NOTICE_TYPE_NAME,'-')														  NOTICE_TYPE_NAME, 
+        NVL(plc.COURT_NAME_TH, '-') 	     												  TO_COURT,
         pn.SEND_FEE
 --            
 FROM PC_NOTICE pn
-LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID AND pc.REMOVED_BY = 0
-LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pn.CASE_ID AND pj.REMOVED_BY = 0
-
 LEFT JOIN PC_NOTICE_ISSUED pni ON pn.NOTICE_ID = pni.NOTICE_ID AND pn.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pn.COURT_ID AND plc.REMOVED_BY = 0
-
-LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID
-LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_red ON pltc_red.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_red.REMOVED_BY = 0
-
 LEFT JOIN PC_NOTICE_SEND_RESULT pnsr ON pn.NOTICE_ID = pnsr.NOTICE_ID AND pn.REMOVED_BY = 0
-LEFT JOIN PC_USER_PROFILE pup ON pnsr.SEND_FEE_PAYER = pup.USER_PROFILE_ID
-
+--lookup relate notice
+LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pn.COURT_ID AND plc.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_NOTICE_TYPE plnt ON plnt.NOTICE_TYPE_ID = pn.NOTICE_TYPE_ID AND plnt.REMOVED_BY = 0
-
+--case
+LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID AND pc.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID
+--judgement
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pn.CASE_ID AND pj.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_red ON pltc_red.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_red.REMOVED_BY = 0
+--finance
+LEFT JOIN PC_FIN_RECEIPT pfr ON pfr.RECEIPT_ID = pni.RECEIPT_ID AND pfr.REMOVED_BY = 0
+--
+LEFT JOIN (SELECT plc.COURT_NAME_TH
+			FROM PC_PARAM pp
+			JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 = 1
 WHERE pn.SEND_METHOD = 2 
 AND NVL(pni.HAS_MONEY,1) = 1 
-AND pn.IS_COURT_AREA = 2
+AND pn.IS_COURT_AREA = 0
 AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
                               AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')]]>
 	</queryString>
@@ -82,6 +88,9 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYY
 	</field>
 	<field name="NOTICE_TYPE_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="NOTICE_TYPE_NAME"/>
+	</field>
+	<field name="TO_COURT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TO_COURT"/>
 	</field>
 	<field name="SEND_FEE" class="java.lang.Double">
 		<property name="com.jaspersoft.studio.field.label" value="SEND_FEE"/>
@@ -120,8 +129,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYY
 					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["ตั้งแต่วันที่  " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +
-" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))
-]]></textFieldExpression>
+" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>
