@@ -13,10 +13,10 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080//jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/ReportFeature/report_litigant_court"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="229"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="461"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="529"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/ReportFeature/report_litigant_court_files/main_jrxml"/>
@@ -44,7 +44,7 @@
        ,cou.COURT_NAME_TH
 --
 FROM PC_NOTICE_ISSUED pni 
-LEFT JOIN PC_NOTICE pn ON pn.NOTICE_ID = pni.NOTICE_ID AND pn.REMOVED_BY = 0
+LEFT JOIN PC_NOTICE pn ON pn.NOTICE_ID = pni.NOTICE_ID AND pn.IS_COURT_AREA = 0 AND pn.REMOVED_BY = 0
 -- case
 LEFT JOIN PC_CASE pc ON pc.CASE_ID  = pn.CASE_ID AND pn.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
@@ -175,13 +175,13 @@ ORDER BY pni.SEND_NOTICE_DATE]]>
 				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}==null?" ":$F{COURT_NAME_TH}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="0" y="12" width="200" height="25" uuid="f33bb2d3-d296-47ef-8760-964e815172b9">
+				<reportElement x="0" y="12" width="200" height="50" uuid="f33bb2d3-d296-47ef-8760-964e815172b9">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Left">
 					<font fontName="THSarabunNew" size="17" isBold="true"/>
 				</textElement>
-				<text><![CDATA[บัญชีส่งคำคู่ความ(นำส่งโดยพนักงานศาล)]]></text>
+				<text><![CDATA[บัญชีส่งคำคู่ความโดยเจ้าพนักงานศาล (หมายนอกเขต)]]></text>
 			</staticText>
 			<textField>
 				<reportElement x="138" y="37" width="527" height="25" uuid="76731707-0eda-4749-9379-bc56dc5e92a0">
