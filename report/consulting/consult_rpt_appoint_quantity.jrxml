@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="consult_rpt_appoint_quantity" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="13c8d4b9-b713-403f-b6b2-53093486fecc">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[210]"/>
 	<property name="ireport.jasperserver.url" value="http://119.59.126.229/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/consulting/consult_rpt_appoint_quantity"/>
@@ -36,7 +36,8 @@ LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pa.COURT_ID AND plc.REMOVED_BY =
 WHERE pap.CREATED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS')
                     AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 	AND pap.REMOVED_BY = 0 AND pa.REMOVED_BY = 0
-GROUP BY pa.CHILD_AGE, pa.CHILD_PREFIX, plc.COURT_NAME_TH]]>
+	AND pa.CHILD_AGE IS NOT NULL 
+GROUP BY pa.CHILD_AGE, pa.CHILD_PREFIX, plc.COURT_NAME_TH,  pa.CHILD_AGE]]>
 	</queryString>
 	<field name="ROW_NUM" class="java.math.BigDecimal">
 		<property name="com.jaspersoft.studio.field.label" value="ROW_NUM"/>
