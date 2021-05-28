@@ -2,7 +2,7 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="litigant_rpt_deliver" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="7a90d5ae-5cde-4464-a8a0-33a95febdb4f">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -22,7 +22,7 @@
 		<defaultValueExpression><![CDATA["01/07/2020"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="END_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["14/07/2020"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["14/07/2021"]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
 		<![CDATA[SELECT * FROM (
@@ -35,29 +35,30 @@
   			pltc_red.TITLE_CASE_NAME || pj.RED_IDNUM || '/' || pj.RED_YEAR  												CASE_RED_NO,
             NVL(pc.PROS_DESC,'-')	      													          						CLAIMANT, 
   			NVL(pc.ACCU_DESC,'-')																        					DEFENDANT,
-            NVL(pup.USER_PROFILE_FULL_NAME,'-')																				PAYER_NAME,
-  		    NVL(pn.RECEIVED_BY,'-')	                                       													TO_NAME,
+            NVL(pfr.PAYER_NAME,'-')																				PAYER_NAME,
+  		    NVL(pn.LITIGANT_NAME,'-')	                                       													TO_NAME,
             NVL(plnt.NOTICE_TYPE_NAME,'-')																					NOTICE_TYPE_NAME,            
             
             NVL(pls.SUBDISTRICT_NAME,'-')																					SUBDISTRICT_NAME,
             NVL(pld.DISTRICT_NAME,'-')																						DISTRICT_NAME,
             pn.SEND_FEE,																																	   
-		    NVL(pup1.USER_PROFILE_FULL_NAME,'-')																	   		USER_PROFILE_FULL_NAME
+		    NVL(pn.SEND_METHOD_BY_NAME,'-')																	   		USER_PROFILE_FULL_NAME
             
 FROM PC_NOTICE pn
-LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID AND pc.REMOVED_BY = 0
-LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pn.CASE_ID AND pj.REMOVED_BY = 0
+JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID AND pc.REMOVED_BY = 0
+JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pn.CASE_ID AND pj.REMOVED_BY = 0
 
 LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pn.COURT_ID AND plc.REMOVED_BY = 0
 
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_red ON pltc_red.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_red.REMOVED_BY = 0
 
-LEFT JOIN PC_NOTICE_SEND_RESULT pnsr ON pn.NOTICE_ID = pnsr.NOTICE_ID AND pn.REMOVED_BY = 0
+JOIN PC_NOTICE_SEND_RESULT pnsr ON pn.NOTICE_ID = pnsr.NOTICE_ID AND pn.REMOVED_BY = 0
 LEFT JOIN PC_USER_PROFILE pup ON pnsr.SEND_FEE_PAYER = pup.USER_PROFILE_ID
 ----
-LEFT JOIN PC_NOTICE_ISSUED pni ON pn.NOTICE_ID = pni.NOTICE_ID AND pn.REMOVED_BY = 0
-LEFT JOIN PC_USER_PROFILE pup1 ON pni.CREATED_BY = pup.USER_PROFILE_ID
+JOIN PC_NOTICE_ISSUED pni ON pn.NOTICE_ID = pni.NOTICE_ID AND pn.REMOVED_BY = 0
+JOIN PC_FIN_RECEIPT pfr ON pfr.RECEIPT_ID = pni.RECEIPT_ID 
+--JOIN PC_USER_PROFILE pup1 ON pni.CREATED_BY = pup.USER_PROFILE_ID
 --
 LEFT JOIN PC_LOOKUP_NOTICE_TYPE plnt ON plnt.NOTICE_TYPE_ID = pn.NOTICE_TYPE_ID AND plnt.REMOVED_BY = 0
 ----
@@ -163,9 +164,7 @@ WHERE SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"
 					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["ตั้งแต่วันที่  " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +
-" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))
-
-]]></textFieldExpression>
+" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>
