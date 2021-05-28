@@ -14,15 +14,14 @@
 	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_send_othercourt"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_send_othercourt_files/main_jrxml"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<parameter name="START_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["01/03/2021"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["01/03/2020"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="END_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["31/03/2021"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["31/07/2021"]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
 		<![CDATA[SELECT  DISTINCT
@@ -34,13 +33,12 @@
   ELSE NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || '/' || TO_CHAR(pj.RED_YEAR) END  CASE_RED_NO,
   NVL(pc.PROS_DESC,' ')	      						CLAIMANT, 
   NVL(pc.ACCU_DESC,' ')		   						DEFENDANT, 
-  NVL(pnld.TO_NAME,' ')								TO_NAME,
+  NVL(pn.LITIGANT_NAME,' ')								TO_NAME,
   pfr.RECEIPT_BOOK_NO || '/' || pfr.RECEIPT_NO      RECEIPT_REF,
   NVL(pfrc.CHEQUE_CODE,' ')                         CHEQUE_CODE,
   NVL(pn.SEND_FEE, 0 )                                SEND_FEE,
   NVL(pfr.PAYER_NAME,' ')							PAYER_NAME,
   NVL(plc1.COURT_NAME_TH, ' ') 	                    TO_COURT, 
-  NVL(plp.PROVINCE_NAME,' ')                        TO_COURT_PROVINCE,
   pup.USER_PROFILE_FIRST_NAME || ' ' || pup.USER_PROFILE_FIRST_NAME     NOTICE_SENDER,
   --                 
   pfpd.PAYMENT_ID,
@@ -67,7 +65,6 @@ LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID 
 --
 LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pn.COURT_ID AND plc.REMOVED_BY = 0 
 LEFT JOIN PC_LOOKUP_COURT plc1 ON plc1.COURT_ID = pn.SEND_TO_COURT AND plc1.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_PROVINCE plp ON plp.PROVINCE_ID = plc1.PROVINCE_ID AND plp.REMOVED_BY = 0
 --
 LEFT JOIN PC_LOOKUP_NOTICE_TYPE plnt ON plnt.NOTICE_TYPE_ID = pn.NOTICE_TYPE_ID AND plnt.REMOVED_BY = 0
 --
@@ -84,7 +81,7 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
 			JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
 			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0)cou
 --
-WHERE NVL(pn.SEND_METHOD,1) = 1
+WHERE pn.IS_COURT_AREA = 0
 AND pfp.PAYMENT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
                          AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')]]>
 	</queryString>
@@ -126,9 +123,6 @@ AND pfp.PAYMENT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"
 	</field>
 	<field name="TO_COURT" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="TO_COURT"/>
-	</field>
-	<field name="TO_COURT_PROVINCE" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="TO_COURT_PROVINCE"/>
 	</field>
 	<field name="NOTICE_SENDER" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="NOTICE_SENDER"/>
@@ -256,7 +250,7 @@ AND pfp.PAYMENT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"
 				<text><![CDATA[จำเลย]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="430" y="0" width="88" height="25" uuid="2cc840ac-9682-4a44-8ace-8a44ebd69134">
+				<reportElement x="460" y="0" width="150" height="25" uuid="2cc840ac-9682-4a44-8ace-8a44ebd69134">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="232a3959-e118-432c-b568-f9c88fb425a8"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -269,33 +263,7 @@ AND pfp.PAYMENT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"
 				<text><![CDATA[หมายถึงใคร]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="518" y="0" width="68" height="25" uuid="157e74d7-db28-4b18-aa02-ba449a68ed3d">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e5a431d-ad40-4073-81e9-7e6399ae90d3"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<box>
-					<pen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
-				</textElement>
-				<text><![CDATA[จังหวัด]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="586" y="0" width="68" height="25" uuid="4ea4668d-3ebe-4315-ad00-4aa5b10095f9">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7b12ef6e-6139-4dad-b389-8a982c6f495a"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<box>
-					<pen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
-				</textElement>
-				<text><![CDATA[เลขที่เช็ค]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="654" y="0" width="52" height="25" uuid="acffd833-685c-4e3d-b8e1-8785067e09de">
+				<reportElement x="610" y="0" width="76" height="25" uuid="acffd833-685c-4e3d-b8e1-8785067e09de">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="250a77d4-40a6-4356-bb66-8b40c1bba297"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -308,7 +276,7 @@ AND pfp.PAYMENT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"
 				<text><![CDATA[ราคา]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="706" y="0" width="96" height="25" uuid="a8e4ca27-9ebf-4040-a539-dfb7cdb43e09">
+				<reportElement x="686" y="0" width="116" height="25" uuid="a8e4ca27-9ebf-4040-a539-dfb7cdb43e09">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="eb81ec2d-c8d1-4a6c-b22e-871e3ba7c66b"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -334,7 +302,7 @@ AND pfp.PAYMENT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"
 				<text><![CDATA[ที่]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="340" y="0" width="90" height="25" uuid="44745d23-2a5c-4bae-bad3-749786e05536">
+				<reportElement x="340" y="0" width="120" height="25" uuid="44745d23-2a5c-4bae-bad3-749786e05536">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="232a3959-e118-432c-b568-f9c88fb425a8"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -403,7 +371,7 @@ AND pfp.PAYMENT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"
 				<textFieldExpression><![CDATA[$F{DEFENDANT}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="430" y="0" width="88" height="25" uuid="1b6be6b3-932b-4d86-9182-31011913e3ec">
+				<reportElement stretchType="ContainerHeight" x="460" y="0" width="150" height="25" uuid="1b6be6b3-932b-4d86-9182-31011913e3ec">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="232a3959-e118-432c-b568-f9c88fb425a8"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -416,33 +384,7 @@ AND pfp.PAYMENT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"
 				<textFieldExpression><![CDATA[$F{TO_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="518" y="0" width="68" height="25" uuid="7fb97607-dc5a-409f-9b5b-9d954ac1989b">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e5a431d-ad40-4073-81e9-7e6399ae90d3"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<box>
-					<pen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{TO_COURT_PROVINCE}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="586" y="0" width="68" height="25" uuid="3d34313d-2a9d-4560-bd17-0263a8ef973b">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7b12ef6e-6139-4dad-b389-8a982c6f495a"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<box leftPadding="3">
-					<pen lineWidth="0.5"/>
-				</box>
-				<textElement>
-					<font fontName="THSarabunNew" size="17"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{CHEQUE_CODE}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="654" y="0" width="52" height="25" uuid="5a15b967-9e01-433a-9e9d-6d6bf9cb5408">
+				<reportElement stretchType="ContainerHeight" x="610" y="0" width="76" height="25" uuid="5a15b967-9e01-433a-9e9d-6d6bf9cb5408">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="250a77d4-40a6-4356-bb66-8b40c1bba297"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -455,7 +397,7 @@ AND pfp.PAYMENT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"
 				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format($F{SEND_FEE})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="706" y="0" width="96" height="25" uuid="65cee6c8-7e8c-437d-93f9-9891b21c35d1">
+				<reportElement stretchType="ContainerHeight" x="686" y="0" width="116" height="25" uuid="65cee6c8-7e8c-437d-93f9-9891b21c35d1">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="eb81ec2d-c8d1-4a6c-b22e-871e3ba7c66b"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -481,7 +423,7 @@ AND pfp.PAYMENT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="340" y="0" width="90" height="25" uuid="dcfc8b44-f8f3-44ef-aa83-1fd4a396c71a">
+				<reportElement stretchType="ContainerHeight" x="340" y="0" width="120" height="25" uuid="dcfc8b44-f8f3-44ef-aa83-1fd4a396c71a">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d6f3be46-ebd3-4944-a418-026b02c2ef0f"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
