@@ -114,8 +114,9 @@ FROM (SELECT  EXTRACT(DAY FROM A.DT) A_DATE
 			  WHERE ROWNUM <= TO_DATE($P{TO_DATE},'DD/MM/YYYY')-TO_DATE($P{FROM_DATE},'DD/MM/YYYY')+1) A	  
 		WHERE TO_CHAR(A.DT,'D') IN (2,3,4,5,6)) A
 --crosstab measure
-LEFT JOIN (SELECT ppac.START_DATE APPOINT_DATE
-				   ,pltc.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR||CHR(10)||pc.ALLE_DESC APPOINT_DESC
+LEFT JOIN (SELECT DISTINCT
+                   ppac.START_DATE APPOINT_DATE
+				   ,pltc.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR APPOINT_DESC
 			       ,plj.JUDGE_NAME JUDGE
 			FROM PC_PROCEED_APPOINT_CONTINUE ppac 
 			--appoint
@@ -207,15 +208,28 @@ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
 						</datasetRun>
 					</dataset>
 				</crosstabDataset>
-				<rowGroup name="JUDGE" width="100">
+				<crosstabHeaderCell>
+					<cellContents>
+						<staticText>
+							<reportElement style="Crosstab_CH" x="0" y="0" width="150" height="50" uuid="a0677a0d-01db-4e12-884f-c46f281e34a4"/>
+							<textElement textAlignment="Center" verticalAlignment="Middle">
+								<font fontName="THSarabunNew" size="16"/>
+							</textElement>
+							<text><![CDATA[ผู้พิพากษา]]></text>
+						</staticText>
+					</cellContents>
+				</crosstabHeaderCell>
+				<rowGroup name="JUDGE" width="150">
 					<bucket class="java.lang.String">
 						<bucketExpression><![CDATA[$F{JUDGE}]]></bucketExpression>
 					</bucket>
 					<crosstabRowHeader>
 						<cellContents mode="Opaque" style="Crosstab 1_CH">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<textField>
-								<reportElement x="0" y="0" width="100" height="50" uuid="dacc1842-1866-45f2-954c-75ab4a3d4d20"/>
-								<textElement textAlignment="Center" verticalAlignment="Middle">
+								<reportElement x="0" y="0" width="150" height="50" uuid="dacc1842-1866-45f2-954c-75ab4a3d4d20"/>
+								<box leftPadding="3"/>
+								<textElement textAlignment="Left" verticalAlignment="Middle">
 									<font fontName="THSarabunNew" size="16"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$V{JUDGE}==null?' ':$V{JUDGE}]]></textFieldExpression>
@@ -238,7 +252,7 @@ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
 					<crosstabColumnHeader>
 						<cellContents mode="Opaque" style="Crosstab 1_CH">
 							<textField>
-								<reportElement x="0" y="0" width="60" height="25" uuid="0dc78ab8-b6ac-49c9-9d7c-ce77bfa4eb98"/>
+								<reportElement x="0" y="0" width="120" height="25" uuid="0dc78ab8-b6ac-49c9-9d7c-ce77bfa4eb98"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font fontName="THSarabunNew" size="16"/>
 								</textElement>
@@ -262,7 +276,7 @@ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
 					<crosstabColumnHeader>
 						<cellContents mode="Opaque" style="Crosstab 1_CH">
 							<textField>
-								<reportElement x="0" y="0" width="60" height="25" uuid="620c35e5-c83d-4e07-9424-1a45bb3a86da"/>
+								<reportElement x="0" y="0" width="120" height="25" uuid="620c35e5-c83d-4e07-9424-1a45bb3a86da"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font fontName="THSarabunNew" size="16"/>
 								</textElement>
@@ -282,10 +296,11 @@ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
 				<measure name="APPOINT_DESC_MEASURE" class="java.lang.String">
 					<measureExpression><![CDATA[$F{APPOINT_DESC}]]></measureExpression>
 				</measure>
-				<crosstabCell width="60" height="50">
+				<crosstabCell width="120" height="50">
 					<cellContents mode="Opaque" style="Crosstab 1_CD">
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
 						<textField isStretchWithOverflow="true">
-							<reportElement stretchType="ContainerHeight" x="0" y="0" width="60" height="50" uuid="90361f2b-0618-44e1-b117-3a2f28b12634"/>
+							<reportElement stretchType="ContainerHeight" x="0" y="0" width="120" height="50" uuid="90361f2b-0618-44e1-b117-3a2f28b12634"/>
 							<textElement textAlignment="Center" verticalAlignment="Middle">
 								<font fontName="THSarabunNew" size="16"/>
 							</textElement>

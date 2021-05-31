@@ -24,7 +24,7 @@
 	</parameter>
 	<queryString language="SQL">
 		<![CDATA[SELECT 
-plc.COURT_NAME_TH,
+cou.COURT_NAME_TH,
 THAISDATE(pb.BAIL_DATE) THAIDATE ,
 THAIMONTH(EXTRACT(MONTH FROM pb.BAIL_DATE)) MONTH_STR,
 THAIMONTH(EXTRACT(YEAR FROM pb.BAIL_DATE) +543) YEAR_STR,
@@ -48,7 +48,10 @@ LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_I
 --
 LEFT JOIN PC_LOOKUP_BANK plb ON plb.BANK_ID = pbsb.BANK_ID AND plb.REMOVED_BY = 0
 --
-LEFT JOIN PC_LOOKUP_COURT plc ON(plc.COURT_ID=pb.COURT_ID AND plc.REMOVED_BY = 0)
+LEFT JOIN (SELECT plc.COURT_NAME_TH
+			FROM PC_PARAM pp
+			JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 = 1
 --
 WHERE pbsb.REMOVED_BY = 0 
 AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONTH}, 'MM-YYYY')]]>
@@ -291,7 +294,7 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
@@ -308,7 +311,7 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{THAIDATE} == null ? " " : $F{THAIDATE}]]></textFieldExpression>
@@ -325,7 +328,7 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_BLACE_NO}==null?" ":$F{CASE_BLACE_NO}]]></textFieldExpression>
@@ -341,7 +344,7 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BANK_NAME}==null?" ":$F{BANK_NAME}]]></textFieldExpression>
@@ -357,7 +360,7 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BANKGUARANTEE_NO}==null?" ":$F{BANKGUARANTEE_NO}]]></textFieldExpression>
@@ -373,7 +376,7 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BANKGUARANTEE_DATE}==null?" ":$F{BANKGUARANTEE_DATE}]]></textFieldExpression>
@@ -389,7 +392,7 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{LIMIT_AMOUNT} == null ? "" : NumberFormat.getInstance().format(Double.parseDouble(String.format("%.2f", (double)$F{LIMIT_AMOUNT})))]]></textFieldExpression>
@@ -405,7 +408,7 @@ AND TO_DATE(TO_CHAR(pb.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONT
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
