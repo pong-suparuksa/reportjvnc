@@ -44,11 +44,14 @@
         ,CASE WHEN de.ACCU_STATUS_CODE IN ('01','06','07') THEN 'ขัง'
               WHEN de.ACCU_STATUS_CODE IN ('02','03','04') THEN 'ประกัน'
               ELSE ' ' END BAIL
-        ,plar.APPOINT_REASON_NAME 
-        ,plct.CASE_TYPE_NAME
+        ,plar.APPOINT_REASON_NAME
+        ,plct.CASE_TYPE_NAME 
+        ,plcc.CASE_CATE_NAME
+        ,plck.CASE_KIND_NAME 
         ,wc.WITNESS_NAME WITNESS_CLAIMANT
         ,wd.WITNESS_NAME WITNESS_DEFENDANT
-        ,ppac.LEVEL_ROOM_CODE 
+        ,ppac.LEVEL_ROOM_CODE
+        ,ppac.LEVEL_ROOM_DESC 
         ,j.JUDGE_NAME
         ,NVL(pc.ALLE_DESC,' ')   TOPIC
 --
@@ -80,6 +83,8 @@ LEFT JOIN (SELECT ppawa.APPOINT_CON_ID
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_CASE_TYPE plct ON plct.CASE_TYPE_ID = pc.CASE_TYPE_ID AND plct.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_CASE_KIND plck ON plck.CASE_KIND_ID = plcc.CASE_KIND_ID AND plck.REMOVED_BY = 0
 --claimant
 LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME 
 			FROM PC_CASE_LIT pcl 
@@ -146,6 +151,12 @@ ORDER BY APPOINT_DATE, CHOICE]]>
 	<field name="CASE_TYPE_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="CASE_TYPE_NAME"/>
 	</field>
+	<field name="CASE_CATE_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CASE_CATE_NAME"/>
+	</field>
+	<field name="CASE_KIND_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CASE_KIND_NAME"/>
+	</field>
 	<field name="WITNESS_CLAIMANT" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="WITNESS_CLAIMANT"/>
 	</field>
@@ -154,6 +165,9 @@ ORDER BY APPOINT_DATE, CHOICE]]>
 	</field>
 	<field name="LEVEL_ROOM_CODE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="LEVEL_ROOM_CODE"/>
+	</field>
+	<field name="LEVEL_ROOM_DESC" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="LEVEL_ROOM_DESC"/>
 	</field>
 	<field name="JUDGE_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="JUDGE_NAME"/>
@@ -244,21 +258,7 @@ $P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 				<text><![CDATA[จำเลย]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="330" y="0" width="50" height="25" uuid="a44915b0-5979-4c55-9134-56e8df83274a">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1b6d92b4-cc4e-4f1f-9f18-f0692b2deb5d"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<box>
-					<pen lineWidth="0.75"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="16"/>
-				</textElement>
-				<text><![CDATA[ขัง/ประกัน]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="380" y="0" width="80" height="25" uuid="6e8847bb-d232-45c2-abe5-51bd9a9d4b87">
+				<reportElement x="330" y="0" width="149" height="25" uuid="6e8847bb-d232-45c2-abe5-51bd9a9d4b87">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1b6d92b4-cc4e-4f1f-9f18-f0692b2deb5d"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -271,7 +271,7 @@ $P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 				<text><![CDATA[นัดมาทำไม]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="460" y="0" width="80" height="25" uuid="c66cae1a-ec61-4c20-913f-083e497b2422">
+				<reportElement x="479" y="0" width="80" height="25" uuid="c66cae1a-ec61-4c20-913f-083e497b2422">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1b6d92b4-cc4e-4f1f-9f18-f0692b2deb5d"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -284,35 +284,10 @@ $P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 				<text><![CDATA[ประเภทคดี]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="540" y="0" width="70" height="25" uuid="ea60b921-feb3-41fc-88cd-386ac18f50cd">
+				<reportElement x="559" y="0" width="120" height="25" uuid="850c0ba9-d875-4931-b68d-892ebc1a9621">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1b6d92b4-cc4e-4f1f-9f18-f0692b2deb5d"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<box>
-					<pen lineWidth="0.75"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
-				</textElement>
-				<text><![CDATA[ฝ่ายโจทก์]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="610" y="0" width="70" height="25" uuid="911e642d-8fc5-4d75-a4aa-5701e42bfcd8">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1b6d92b4-cc4e-4f1f-9f18-f0692b2deb5d"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<box>
-					<pen lineWidth="0.75"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
-				</textElement>
-				<text><![CDATA[ฝ่ายจำเลย]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="680" y="0" width="47" height="25" uuid="850c0ba9-d875-4931-b68d-892ebc1a9621">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1b6d92b4-cc4e-4f1f-9f18-f0692b2deb5d"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.75"/>
@@ -323,7 +298,7 @@ $P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 				<text><![CDATA[บัลลังก์]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="727" y="0" width="73" height="25" uuid="a4a461d8-ea87-48d6-aaea-1ad62f0bb6e1">
+				<reportElement x="679" y="0" width="121" height="25" uuid="a4a461d8-ea87-48d6-aaea-1ad62f0bb6e1">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1b6d92b4-cc4e-4f1f-9f18-f0692b2deb5d"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -419,21 +394,7 @@ $P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 				<textFieldExpression><![CDATA[$F{DEFENDANT}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
-				<reportElement stretchType="ContainerHeight" x="330" y="0" width="50" height="25" isPrintWhenDetailOverflows="true" uuid="f018c2ae-7cf9-4040-a542-6cb730ac2dfa">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1b6d92b4-cc4e-4f1f-9f18-f0692b2deb5d"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<box>
-					<pen lineWidth="0.75"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{BAIL}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
-				<reportElement stretchType="ContainerHeight" x="380" y="0" width="80" height="25" isPrintWhenDetailOverflows="true" uuid="bc99cea3-f903-4eb0-850d-d3063f39bb14">
+				<reportElement stretchType="ContainerHeight" x="330" y="0" width="149" height="25" isPrintWhenDetailOverflows="true" uuid="bc99cea3-f903-4eb0-850d-d3063f39bb14">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1b6d92b4-cc4e-4f1f-9f18-f0692b2deb5d"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -446,7 +407,7 @@ $P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 				<textFieldExpression><![CDATA[$F{APPOINT_REASON_NAME}==null?" ":$F{APPOINT_REASON_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
-				<reportElement stretchType="ContainerHeight" x="460" y="0" width="80" height="25" isPrintWhenDetailOverflows="true" uuid="eb7da744-7d4d-42b5-add7-c39e72c9ccd0">
+				<reportElement stretchType="ContainerHeight" x="479" y="0" width="80" height="25" isPrintWhenDetailOverflows="true" uuid="eb7da744-7d4d-42b5-add7-c39e72c9ccd0">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1b6d92b4-cc4e-4f1f-9f18-f0692b2deb5d"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -456,12 +417,13 @@ $P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CASE_TYPE_NAME}==null?"-":$F{CASE_TYPE_NAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{CASE_CATE_NAME}==null?"-":$F{CASE_CATE_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
-				<reportElement stretchType="ContainerHeight" x="540" y="0" width="70" height="25" isPrintWhenDetailOverflows="true" uuid="93223b64-2546-476f-8842-784e9fe453e4">
+				<reportElement stretchType="ContainerHeight" x="559" y="0" width="120" height="25" isPrintWhenDetailOverflows="true" uuid="f5706367-ee82-447b-b66c-edd0ec5c33d7">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1b6d92b4-cc4e-4f1f-9f18-f0692b2deb5d"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.75"/>
@@ -469,36 +431,10 @@ $P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{WITNESS_CLAIMANT}==null?" ":$F{WITNESS_CLAIMANT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{LEVEL_ROOM_DESC}==null?" ":$F{LEVEL_ROOM_DESC}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
-				<reportElement stretchType="ContainerHeight" x="610" y="0" width="70" height="25" isPrintWhenDetailOverflows="true" uuid="d2b129a2-6b5a-41f9-9005-397352ce4411">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1b6d92b4-cc4e-4f1f-9f18-f0692b2deb5d"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<box>
-					<pen lineWidth="0.75"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{WITNESS_DEFENDANT}==null?" ":$F{WITNESS_DEFENDANT}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
-				<reportElement stretchType="ContainerHeight" x="680" y="0" width="47" height="25" isPrintWhenDetailOverflows="true" uuid="f5706367-ee82-447b-b66c-edd0ec5c33d7">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1b6d92b4-cc4e-4f1f-9f18-f0692b2deb5d"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<box>
-					<pen lineWidth="0.75"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{LEVEL_ROOM_CODE}==null?" ":$F{LEVEL_ROOM_CODE}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
-				<reportElement stretchType="ContainerHeight" x="727" y="0" width="73" height="25" isPrintWhenDetailOverflows="true" uuid="b1d1cc5c-06ce-4155-8fe3-f0adae0a297e">
+				<reportElement stretchType="ContainerHeight" x="679" y="0" width="121" height="25" isPrintWhenDetailOverflows="true" uuid="b1d1cc5c-06ce-4155-8fe3-f0adae0a297e">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1b6d92b4-cc4e-4f1f-9f18-f0692b2deb5d"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
