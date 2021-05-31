@@ -14,9 +14,10 @@
 	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_send_othercourt"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[210]"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_send_othercourt_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/03/2020"]]></defaultValueExpression>
 	</parameter>
@@ -48,9 +49,9 @@
 --LEFT JOIN PC_FIN_PAYMENT pfp ON pfp.PAYMENT_ID = pfpd.PAYMENT_ID AND pfp.REMOVED_BY = 0
 ----
 --LEFT JOIN 
-FROM PC_FIN_RECEIPT pfr 
+FROM PC_NOTICE_ISSUED pni
 
-LEFT JOIN PC_NOTICE_ISSUED pni ON pni.RECEIPT_ID = pfr.RECEIPT_ID AND pni.REMOVED_BY = 0
+LEFT JOIN PC_FIN_RECEIPT pfr ON pni.RECEIPT_ID = pfr.RECEIPT_ID AND pni.REMOVED_BY = 0
 LEFT JOIN PC_NOTICE_LIT_DETAIL pnld ON pnld.NOTICE_ID = pni.NOTICE_ID AND pnld.REMOVED_BY = 0
 LEFT JOIN PC_NOTICE pn ON pn.NOTICE_ID = pni.NOTICE_ID AND pn.REMOVED_BY = 0
 --
@@ -81,6 +82,8 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
 			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0)cou
 --
 WHERE pn.IS_COURT_AREA = 0
+AND pn.SEND_METHOD IS NOT NULL 
+AND pn.SEND_METHOD_BY_NAME IS NOT NULL 
 AND pn.SEND_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
                          AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')]]>
 	</queryString>
