@@ -27,8 +27,8 @@
 	<queryString language="SQL">
 		<![CDATA[SELECT  DISTINCT
   NVL(cou.COURT_NAME_TH, ' ') 	                                                           COURT_NAME_TH, 
-  pfp.PAYMENT_DATE,
-  THAISDATE(NVL(pfp.PAYMENT_DATE,TO_TIMESTAMP('01/01/1900','DD/MM/YYYY')))                PAYMENT_DATE_TEXT,
+  pn.SEND_DATE                                                                                           PAYMENT_DATE,
+  THAISDATE(NVL(pn.SEND_DATE,TO_TIMESTAMP('01/01/1900','DD/MM/YYYY')))                PAYMENT_DATE_TEXT,
   NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR)           CASE_BLACK_NO,    
   CASE WHEN pj.RED_IDNUM IS NULL THEN ' '
        ELSE NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || '/' || TO_CHAR(pj.RED_YEAR) END CASE_RED_NO,
@@ -37,26 +37,20 @@
   NVL(pc.ACCU_DESC,' ')		   						DEFENDANT, 
   NVL(pn.LITIGANT_NAME,' ')								TO_NAME,
   pfr.RECEIPT_BOOK_NO || '/' || pfr.RECEIPT_NO      RECEIPT_REF,
-  NVL(pfrc.CHEQUE_CODE,' ')                         CHEQUE_CODE,
   NVL(pn.SEND_FEE ,0)                                SEND_FEE,
   NVL(pn.LITIGANT_NAME, ' ')							PAYER_NAME,
   --  
-  pfpd.PAYMENT_ID,
-  pfpd.RECEIPT_ID,
+--  pfpd.PAYMENT_ID,
+  pni.RECEIPT_ID,
   NVL(pn.SEND_METHOD,0)                            SEND_METHOD
   
-FROM PC_FIN_PAYMENT_DETAIL pfpd
-LEFT JOIN PC_FIN_PAYMENT pfp ON pfp.PAYMENT_ID = pfpd.PAYMENT_ID AND pfp.REMOVED_BY = 0
---
-LEFT JOIN PC_FIN_RECEIPT pfr ON pfr.RECEIPT_ID = pfpd.RECEIPT_ID AND pfr.REMOVED_BY = 0
-LEFT JOIN PC_FIN_RECEIPT_CHEQUE pfrc ON pfrc.RECEIPT_ID = pfpd.RECEIPT_ID AND pfrc.REMOVED_BY = 0
---
-LEFT JOIN PC_NOTICE_ISSUED pni ON pni.RECEIPT_ID = pfr.RECEIPT_ID AND pni.REMOVED_BY = 0
+FROM PC_NOTICE pn
+LEFT JOIN PC_NOTICE_ISSUED pni ON pni.NOTICE_ID = pn.NOTICE_ID AND pni.REMOVED_BY = 0
 LEFT JOIN PC_NOTICE_LIT_DETAIL pnld ON pnld.NOTICE_ID = pni.NOTICE_ID AND pnld.REMOVED_BY = 0
-LEFT JOIN PC_NOTICE pn ON pn.NOTICE_ID = pni.NOTICE_ID AND pni.REMOVED_BY = 0
+LEFT JOIN PC_FIN_RECEIPT pfr ON pfr.RECEIPT_ID = pni.RECEIPT_ID AND pfr.REMOVED_BY = 0
 --
-LEFT JOIN PC_CASE pc ON pc.CASE_ID = pfpd.CASE_ID AND pc.REMOVED_BY = 0
-LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pfpd.CASE_ID AND pj.REMOVED_BY = 0
+LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID AND pc.REMOVED_BY = 0
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pn.CASE_ID AND pj.REMOVED_BY = 0
 --
 LEFT JOIN PC_USER_PROFILE pup ON pup.USER_ID = pn.SEND_BY AND pup.REMOVED_BY = 0
 --
@@ -77,8 +71,8 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
 			 JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
 			 WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
 --			 
-WHERE pfpd.REMOVED_BY = 0
-AND pfp.PAYMENT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
+WHERE pn.REMOVED_BY = 0
+AND pn.SEND_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
                          AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
 AND NVL(pn.SEND_METHOD,1) = 1]]>
 	</queryString>
@@ -109,17 +103,11 @@ AND NVL(pn.SEND_METHOD,1) = 1]]>
 	<field name="RECEIPT_REF" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_REF"/>
 	</field>
-	<field name="CHEQUE_CODE" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="CHEQUE_CODE"/>
-	</field>
 	<field name="SEND_FEE" class="java.math.BigDecimal">
 		<property name="com.jaspersoft.studio.field.label" value="SEND_FEE"/>
 	</field>
 	<field name="PAYER_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="PAYER_NAME"/>
-	</field>
-	<field name="PAYMENT_ID" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="PAYMENT_ID"/>
 	</field>
 	<field name="RECEIPT_ID" class="java.math.BigDecimal">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_ID"/>
