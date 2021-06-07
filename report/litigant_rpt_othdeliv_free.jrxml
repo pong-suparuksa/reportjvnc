@@ -17,10 +17,10 @@
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_othdeliv_free_files/main_jrxml"/>
 	<property name="com.jaspersoft.studio.report.description" value=""/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="468"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="518"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_othdeliv_free_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/03/2021"]]></defaultValueExpression>
 	</parameter>
@@ -60,7 +60,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYY
                              AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
 AND pn.IS_COURT_AREA = 0  
 AND NVL(pn.SEND_FEE,0) = 0
-AND pn.SEND_TO_COURT IS NOT NULL]]>
+ORDER BY pn.SEND_TO_COURT]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
@@ -207,7 +207,7 @@ AND pn.SEND_TO_COURT IS NOT NULL]]>
 			<textField>
 				<reportElement x="228" y="0" width="347" height="30" uuid="ae53b763-6b3e-4b83-bcf8-65ac2038d85c"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="18"/>
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}==null?" ":$F{COURT_NAME_TH}]]></textFieldExpression>
 			</textField>
@@ -377,7 +377,7 @@ AND pn.SEND_TO_COURT IS NOT NULL]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CASE_RED_NO}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{CASE_RED_NO}==null?" ":$F{CASE_RED_NO}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="260" y="0" width="127" height="25" uuid="835b9425-b76d-49e9-9e0e-2d14cb4270e2">
