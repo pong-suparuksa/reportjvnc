@@ -18,8 +18,7 @@
 	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/CaseStat/m4_MonthlyCriminal"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[210]"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/CaseStat/m4_MonthlyCriminal_files/main_jrxml"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#FFFFFF">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
@@ -1589,6 +1588,98 @@ FROM
 			<property name="com.jaspersoft.studio.field.label" value="TOTAL_REVIEW_FLAG_NOT_0"/>
 		</field>
 	</subDataset>
+	<subDataset name="SUBDATASET_CRIMESTAT1_01" uuid="49f163f8-acdd-4881-86ff-7b7c81aa8858">
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<parameter name="MONTH" class="java.lang.String">
+			<defaultValueExpression><![CDATA["04-2021"]]></defaultValueExpression>
+		</parameter>
+		<queryString>
+			<![CDATA[with count1 as ( 
+SELECT COUNT(DISTINCT C1.CASE_ID) AS CASE_COUNT_FROM_LAST_YEAR
+FROM
+	PC_CASE C1
+INNER JOIN PC_JUDGEMENT C2
+ON C2.CASE_ID = C1.CASE_ID
+WHERE 
+	C1.REMOVED_BY = 0
+	AND 
+	C2.JUDGE_DATE is null
+    AND 
+	EXTRACT (YEAR FROM C1.CASE_DATE) <= EXTRACT (YEAR FROM TO_DATE($P{MONTH},'MM-YYYY'))
+), 
+count2 as (
+SELECT COUNT(DISTINCT C1.CASE_ID) AS CASE_COUNT_FROM_THIS_YEAR
+FROM
+	PC_CASE C1
+WHERE 
+	C1.REMOVED_BY = 0
+    AND 
+	EXTRACT (YEAR FROM C1.CASE_DATE) = EXTRACT (YEAR FROM TO_DATE($P{MONTH},'MM-YYYY'))
+), 
+count3 as (
+SELECT COUNT(DISTINCT C1.CASE_ID) AS CASE_COUNT_FINISH_THIS_YEAR
+FROM
+	PC_CASE C1
+INNER JOIN PC_JUDGEMENT C2
+ON C2.CASE_ID = C1.CASE_ID
+WHERE 
+	C1.REMOVED_BY = 0
+	AND 
+	EXTRACT (YEAR FROM C2.JUDGE_DATE) = EXTRACT (YEAR FROM TO_DATE($P{MONTH},'MM-YYYY'))
+), 
+count4 as (
+   SELECT (
+        SELECT COUNT(DISTINCT C1.CASE_ID) AS CASE_COUNT_FROM_LAST_YEAR
+        FROM
+            PC_CASE C1
+        INNER JOIN PC_JUDGEMENT C2
+        ON C2.CASE_ID = C1.CASE_ID
+        WHERE 
+            C1.REMOVED_BY = 0
+            AND 
+            C2.JUDGE_DATE is null
+            AND 
+            EXTRACT (YEAR FROM C1.CASE_DATE) <= EXTRACT (YEAR FROM TO_DATE($P{MONTH},'MM-YYYY'))
+        ) 
+        +
+        (   
+        SELECT COUNT(DISTINCT C1.CASE_ID) AS CASE_COUNT_FROM_THIS_YEAR
+            FROM
+                PC_CASE C1
+            WHERE 
+                C1.REMOVED_BY = 0
+                AND 
+                EXTRACT (YEAR FROM C1.CASE_DATE) = EXTRACT (YEAR FROM TO_DATE($P{MONTH},'MM-YYYY'))
+        ) 
+        - 
+        (
+         SELECT COUNT(DISTINCT C1.CASE_ID) AS CASE_COUNT_FINISH_THIS_YEAR
+            FROM
+                PC_CASE C1
+            INNER JOIN PC_JUDGEMENT C2
+            ON C2.CASE_ID = C1.CASE_ID
+            WHERE 
+                C1.REMOVED_BY = 0
+                AND 
+                EXTRACT (YEAR FROM C2.JUDGE_DATE) = EXTRACT (YEAR FROM TO_DATE($P{MONTH},'MM-YYYY'))   
+        ) AS CASE_LESS 
+        FROM DUAL)
+select * from count1, count2, count3, count4]]>
+		</queryString>
+		<field name="CASE_COUNT_FROM_LAST_YEAR" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_COUNT_FROM_LAST_YEAR"/>
+		</field>
+		<field name="CASE_COUNT_FROM_THIS_YEAR" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_COUNT_FROM_THIS_YEAR"/>
+		</field>
+		<field name="CASE_COUNT_FINISH_THIS_YEAR" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_COUNT_FINISH_THIS_YEAR"/>
+		</field>
+		<field name="CASE_LESS" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_LESS"/>
+		</field>
+	</subDataset>
 	<parameter name="MONTH" class="java.lang.String">
 		<defaultValueExpression><![CDATA["04-2021"]]></defaultValueExpression>
 	</parameter>
@@ -1611,6 +1702,7 @@ FROM
 	<queryString language="SQL">
 		<![CDATA[select * from DUAL]]>
 	</queryString>
+	<variable name="TEST1" class="java.lang.String"/>
 	<detail>
 		<band splitType="Stretch">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
