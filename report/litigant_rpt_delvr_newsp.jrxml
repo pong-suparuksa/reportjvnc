@@ -2,7 +2,7 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="litigant_rpt_deliver" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="7a90d5ae-5cde-4464-a8a0-33a95febdb4f">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_delvr_newsp"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -85,33 +85,65 @@ ORDER BY pn.NOTICE_DATE]]>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
-	<pageHeader>
-		<band height="97" splitType="Stretch">
+	<title>
+		<band height="130">
 			<staticText>
-				<reportElement x="5" y="35" width="208" height="30" uuid="f6d92439-79fd-4647-b9e4-94e4a54378e8"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="18" isBold="true"/>
-				</textElement>
-				<text><![CDATA[บัญชีส่งคำคู่ความ]]></text>
-			</staticText>
-			<textField>
-				<reportElement x="226" y="30" width="350" height="30" uuid="ae53b763-6b3e-4b83-bcf8-65ac2038d85c">
+				<reportElement x="356" y="10" width="90" height="30" uuid="29ef6266-3709-4a46-8ce5-bd8ad4812820">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="18" isBold="true"/>
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ประกาศจาก]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="226" y="70" width="350" height="30" uuid="ae53b763-6b3e-4b83-bcf8-65ac2038d85c">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}==null?" ":$F{COURT_NAME_TH}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="741" y="65" width="40" height="30" uuid="ba2cc59d-7ca9-48bc-ad04-715136df475d"/>
+				<reportElement x="5" y="40" width="208" height="30" uuid="f6d92439-79fd-4647-b9e4-94e4a54378e8"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="18" isBold="true"/>
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[บัญชีส่งคำคู่ความ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="5" y="100" width="145" height="30" uuid="3eb02673-d608-46b2-9aea-bb46dcd4565a">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[(ประกาศหนังสือพิมพ์)]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="161" y="100" width="480" height="30" uuid="4a3d67f0-c550-401f-bdce-70ff6d5c26aa">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["ตั้งแต่วันที่  " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +
+" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="30" splitType="Stretch">
+			<staticText>
+				<reportElement x="740" y="0" width="40" height="30" uuid="ba2cc59d-7ca9-48bc-ad04-715136df475d"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
 				</textElement>
 				<text><![CDATA[แผ่นที่]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="781" y="65" width="20" height="30" uuid="138fd1a3-f097-4d52-9943-866c1ad674ef"/>
+				<reportElement x="780" y="0" width="20" height="30" uuid="138fd1a3-f097-4d52-9943-866c1ad674ef"/>
 				<box rightPadding="3">
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -119,39 +151,10 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="18"/>
+					<font fontName="TH Sarabun New" size="18"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
-			<staticText>
-				<reportElement x="5" y="67" width="208" height="30" uuid="3eb02673-d608-46b2-9aea-bb46dcd4565a">
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="18" isBold="true"/>
-				</textElement>
-				<text><![CDATA[(ประกาศหนังสือพิมพ์)]]></text>
-			</staticText>
-			<textField>
-				<reportElement x="161" y="67" width="480" height="25" uuid="4a3d67f0-c550-401f-bdce-70ff6d5c26aa">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="18" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA["ตั้งแต่วันที่  " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +
-" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))
-]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement x="356" y="0" width="90" height="30" uuid="29ef6266-3709-4a46-8ce5-bd8ad4812820">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="18" isBold="true"/>
-				</textElement>
-				<text><![CDATA[ประกาศจาก]]></text>
-			</staticText>
 		</band>
 	</pageHeader>
 	<columnHeader>
@@ -169,7 +172,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[จำเลย]]></text>
 			</staticText>
@@ -186,7 +189,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[เรื่อง]]></text>
 			</staticText>
@@ -202,7 +205,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[เลขดำที่]]></text>
 			</staticText>
@@ -218,7 +221,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[หมายเหตุ]]></text>
 			</staticText>
@@ -234,7 +237,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[ประเภท]]></text>
 			</staticText>
@@ -250,7 +253,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[รายละเอียด]]></text>
 			</staticText>
@@ -265,7 +268,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[ที่]]></text>
 			</staticText>
@@ -281,7 +284,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[โจทก์]]></text>
 			</staticText>
@@ -298,7 +301,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[วันที่ประกาศ]]></text>
 			</staticText>
@@ -314,7 +317,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[เลขแดงที่]]></text>
 			</staticText>
@@ -335,7 +338,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Right">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{NOTICE_DATE}]]></textFieldExpression>
 			</textField>
@@ -351,7 +354,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_RED_NO}]]></textFieldExpression>
 			</textField>
@@ -367,7 +370,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ADDRESS_PLACE}]]></textFieldExpression>
 			</textField>
@@ -384,7 +387,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{NOTICE_REASON}]]></textFieldExpression>
 			</textField>
@@ -400,7 +403,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}]]></textFieldExpression>
 			</textField>
@@ -417,7 +420,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement>
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ACCU_DESC}]]></textFieldExpression>
 			</textField>
@@ -433,7 +436,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
@@ -449,7 +452,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement>
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{NOTICE_TYPE_NAME}]]></textFieldExpression>
 			</textField>
@@ -465,7 +468,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement>
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PROS_DESC}]]></textFieldExpression>
 			</textField>
@@ -481,7 +484,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement>
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
 			</textField>
@@ -502,7 +505,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[วันที่ออกใบเสร็จ...........................................................................]]></text>
 			</staticText>
@@ -519,7 +522,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[ลงชื่อ]]></text>
 			</staticText>
@@ -536,7 +539,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[ผู่้ตรวจสอบ]]></text>
 			</staticText>
@@ -559,7 +562,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[ตรวจสอบแล้วว่าถูกต้อง]]></text>
 			</staticText>
@@ -583,7 +586,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[เลขที่ในใบเสร็จ................................................................................]]></text>
 			</staticText>
@@ -600,7 +603,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[ราคา.............................................................................บาท]]></text>
 			</staticText>
@@ -617,7 +620,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[รวมทั้งสิ้น]]></text>
 			</staticText>
@@ -634,7 +637,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[เรื่อง]]></text>
 			</staticText>
@@ -651,7 +654,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>

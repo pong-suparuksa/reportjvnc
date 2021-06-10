@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB210"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_rpt_accpay_fine"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -120,44 +120,48 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
-	<pageHeader>
-		<band height="70" splitType="Stretch">
-			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+	<title>
+		<band height="85">
+			<textField>
+				<reportElement x="199" y="10" width="430" height="25" uuid="aac865be-3750-49cf-a87e-874c13008238">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}==null?" ": $F{COURT_NAME_TH}]]></textFieldExpression>
+			</textField>
 			<staticText>
-				<reportElement x="13" y="27" width="120" height="25" uuid="5dda042e-fb55-4650-8ca6-2e0b9265a72f">
+				<reportElement x="10" y="35" width="120" height="25" uuid="5dda042e-fb55-4650-8ca6-2e0b9265a72f">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="18" isBold="true"/>
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
 				</textElement>
 				<text><![CDATA[บัญชีการจ่ายเงินค่าปรับ]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="186" y="1" width="430" height="25" uuid="aac865be-3750-49cf-a87e-874c13008238">
+				<reportElement x="251" y="60" width="300" height="25" uuid="f7b88c51-ee79-4c3a-a808-4db80815a5a0">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="18" isBold="true"/>
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}==null?" ": $F{COURT_NAME_TH}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("ตั้งแต่วันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{START_DATE})) + new SimpleDateFormat(" ถึงวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="25" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<textField>
-				<reportElement x="690" y="30" width="70" height="25" uuid="72119b28-ee82-4c90-8552-d697f8e0254b">
+				<reportElement x="730" y="0" width="70" height="25" uuid="72119b28-ee82-4c90-8552-d697f8e0254b">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA["แผ่นที่ "+$V{PAGE_NUMBER}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="260" y="36" width="300" height="25" uuid="f7b88c51-ee79-4c3a-a808-4db80815a5a0">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="18" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[new SimpleDateFormat("ตั้งแต่วันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{START_DATE})) + new SimpleDateFormat(" ถึงวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>
@@ -177,7 +181,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[ที่]]></text>
 			</staticText>
@@ -194,7 +198,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[วันจ่ายคืน]]></text>
 			</staticText>
@@ -211,7 +215,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[เลขดำที่]]></text>
 			</staticText>
@@ -229,7 +233,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[เลขแดงที่]]></text>
 			</staticText>
@@ -246,7 +250,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[โจทก์]]></text>
 			</staticText>
@@ -263,7 +267,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[จำเลย]]></text>
 			</staticText>
@@ -280,7 +284,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[จ่ายคืนให้ใคร]]></text>
 			</staticText>
@@ -297,7 +301,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[เลขที่เช็ค/เงินสด]]></text>
 			</staticText>
@@ -315,7 +319,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[ค่าอะไร]]></text>
 			</staticText>
@@ -332,7 +336,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[จำนวนเงิน]]></text>
 			</staticText>
@@ -353,7 +357,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
@@ -370,7 +374,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PAYMENT_DATE_TEXT}]]></textFieldExpression>
 			</textField>
@@ -387,7 +391,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}]]></textFieldExpression>
 			</textField>
@@ -403,7 +407,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_RED_NO}]]></textFieldExpression>
 			</textField>
@@ -420,7 +424,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PROS_DESC}]]></textFieldExpression>
 			</textField>
@@ -437,7 +441,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ACCU_DESC}]]></textFieldExpression>
 			</textField>
@@ -454,7 +458,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PAYEE}]]></textFieldExpression>
 			</textField>
@@ -471,7 +475,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ACCOUNT_NO}]]></textFieldExpression>
 			</textField>
@@ -488,7 +492,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PAID_DESCRIPTION}]]></textFieldExpression>
 			</textField>
@@ -505,7 +509,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format($F{TOTAL_AMOUNT})]]></textFieldExpression>
 			</textField>
@@ -525,7 +529,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA["รวมออกใบเสร็จทั้งสิ้น "+$V{REPORT_COUNT}+" ฉบับ"]]></textFieldExpression>
 			</textField>
@@ -541,7 +545,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA["ยกเลิกแก้ไขทั้งสิ้น 0 ฉบับ"]]></textFieldExpression>
 			</textField>
@@ -557,7 +561,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{TOTAL_AMOUNT}==null 
 ? "รวมเป็นเงินทั้งสิ้น  0 บาท"
@@ -576,7 +580,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[ตรวจสอบแล้วถูกต้อง]]></text>
 			</staticText>
@@ -593,7 +597,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[ลงชื่อ                                ผู้ตรวจสอบ]]></text>
 			</staticText>
@@ -612,7 +616,7 @@ AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3']]>
 				</reportElement>
 				<box leftPadding="3"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="THSarabunNew"/>
+					<font fontName="TH Sarabun New"/>
 				</textElement>
 				<text><![CDATA[finance_rpt_accpay_fine : version.2020.08.17.001]]></text>
 			</staticText>
