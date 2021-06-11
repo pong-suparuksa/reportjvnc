@@ -8,10 +8,9 @@
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_frm_receipt"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="CojDB[193]"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="593"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="396"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/finance_frm_receipt_files/main_jrxml"/>
 	<parameter name="IS_PREPRINT" class="java.lang.Integer">
 		<parameterDescription><![CDATA[select for use pre-print papaer or not]]></parameterDescription>
 		<defaultValueExpression><![CDATA[0]]></defaultValueExpression>
@@ -260,17 +259,17 @@ LEFT JOIN (SELECT ROW_NUMBER() OVER (ORDER BY r.RECEIPT_ID) REF_NO,
 				LEFT JOIN PC_LOOKUP_BANK plb ON plb.BANK_CODE = pfrc.BANK_CODE AND plb.REMOVED_BY = 0
 				WHERE pfrc.REMOVED_BY = 0
 				UNION ALL
-				SELECT pfrd.RECEIPT_ID,
-				       pfrd.TRANSFER_TYPE_NAME REF_CODE,
-				       THAISDATE(pfrd.TRANSFER_DATE)  REF_DESC,
-				       pfrd.TRANSFER_AMOUNT REF_AMOUNT,
-				       pfrd.TRANSFER_TYPE_NAME REF_NAME
-				FROM PC_FIN_RECEIPT_DETAIL pfrd 
-				LEFT JOIN PC_LOOKUP_BANK plb ON plb.BANK_ID = pfrd.TRANSFER_BANK_ID AND plb.REMOVED_BY = 0
-				WHERE pfrd.TRANSFER_AMOUNT > 0
+				SELECT pfrt.RECEIPT_ID,
+					   pfrt.ACCOUNT_NO                 REF_CODE,
+					   plb.BANK_NAME||' '||pfrt.BRANCH REF_DESC,
+					   pfrt.AMOUNT 					   REF_AMOUNT,
+					   pfrt.ACCOUNT_NAME 			   REF_NAME
+				FROM PC_FIN_RECEIPT_TRANSFER pfrt
+				LEFT JOIN PC_LOOKUP_BANK plb ON plb.BANK_ID = pfrt.BANK_ID AND plb.REMOVED_BY = 0
+				WHERE pfrt.REMOVED_BY = 0
 				UNION ALL
-				SELECT pfrcra.RECEIPT_DETAIL_ID, 
-				       pfrcra.CREDIT_NO        REF_NO,
+				SELECT pfrcra.RECEIPT_ID, 
+				       pfrcra.CREDIT_NO        REF_CODE,
 				       plb.BANK_NAME           REF_DESC,
 				       pfrcra.AMOUNT           REF_AMOUNT,
 				       pfrcra.CARD_HOLDER_NAME REF_NAME
@@ -294,24 +293,24 @@ LEFT JOIN (SELECT ROW_NUMBER() OVER (ORDER BY r.RECEIPT_ID) REF_NO,
 				LEFT JOIN PC_LOOKUP_BANK plb ON plb.BANK_CODE = pfrc.BANK_CODE AND plb.REMOVED_BY = 0
 				WHERE pfrc.REMOVED_BY = 0
 				UNION ALL
-				SELECT pfrd.RECEIPT_ID,
-				       pfrd.TRANSFER_TYPE_NAME REF_CODE,
-				       THAISDATE(pfrd.TRANSFER_DATE)  REF_DESC,
-				       pfrd.TRANSFER_AMOUNT REF_AMOUNT,
-				       pfrd.TRANSFER_TYPE_NAME REF_NAME
-				FROM PC_FIN_RECEIPT_DETAIL pfrd 
-				LEFT JOIN PC_LOOKUP_BANK plb ON plb.BANK_ID = pfrd.TRANSFER_BANK_ID AND plb.REMOVED_BY = 0
-				WHERE pfrd.TRANSFER_AMOUNT > 0
+				SELECT pfrt.RECEIPT_ID,
+					   pfrt.ACCOUNT_NO                 REF_CODE,
+					   plb.BANK_NAME||' '||pfrt.BRANCH REF_DESC,
+					   pfrt.AMOUNT 					   REF_AMOUNT,
+					   pfrt.ACCOUNT_NAME 			   REF_NAME
+				FROM PC_FIN_RECEIPT_TRANSFER pfrt
+				LEFT JOIN PC_LOOKUP_BANK plb ON plb.BANK_ID = pfrt.BANK_ID AND plb.REMOVED_BY = 0
+				WHERE pfrt.REMOVED_BY = 0
 				UNION ALL
-				SELECT pfrcra.RECEIPT_DETAIL_ID, 
-				       pfrcra.CREDIT_NO        REF_NO,
+				SELECT pfrcra.RECEIPT_ID, 
+				       pfrcra.CREDIT_NO        REF_CODE,
 				       plb.BANK_NAME           REF_DESC,
 				       pfrcra.AMOUNT           REF_AMOUNT,
 				       pfrcra.CARD_HOLDER_NAME REF_NAME
 				FROM PC_FIN_RECEIPT_CREDIT pfrcra
 				LEFT JOIN PC_LOOKUP_BANK plb ON plb.BANK_CODE = pfrcra.BANK_CODE AND plb.REMOVED_BY = 0
 				WHERE pfrcra.REMOVED_BY = 0) r
-			WHERE r.RECEIPT_ID = $P{RECEIPT_ID})R2 ON R2.RECEIPT_ID = pfr.RECEIPT_ID AND R1.REF_NO = 2
+			WHERE r.RECEIPT_ID = $P{RECEIPT_ID})R2 ON R2.RECEIPT_ID = pfr.RECEIPT_ID AND R2.REF_NO = 2
 --------------------------------------------------------------เจ้าหน้าที่------------------------------------------------------------
 LEFT JOIN PC_USER_PROFILE pup_r ON pup_r.USER_PROFILE_ID = pfr.RECEIVED_BY AND pup_r.REMOVED_BY = 0
 LEFT JOIN PC_USER_PROFILE pup_d ON pup_d.USER_PROFILE_ID = pfr.DIRECTOR_BY AND pup_d.REMOVED_BY = 0
@@ -566,17 +565,6 @@ AND pfr.RECEIPT_ID = $P{RECEIPT_ID}]]>
 				<textFieldExpression><![CDATA[$F{NO_IN_DATE_NOW}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="221" y="91" width="14" height="16" uuid="5fe172b3-4ebb-452d-b1ba-cd59873dab50">
-					<property name="com.jaspersoft.studio.unit.x" value="cm"/>
-					<property name="com.jaspersoft.studio.unit.y" value="cm"/>
-					<printWhenExpression><![CDATA[$P{IS_PREPRINT}==1]]></printWhenExpression>
-				</reportElement>
-				<textElement>
-					<font fontName="THSarabunNew" size="12"/>
-				</textElement>
-				<text><![CDATA[ศาล]]></text>
-			</staticText>
-			<staticText>
 				<reportElement x="5" y="77" width="385" height="16" uuid="06943e91-e36a-42a4-9da7-80ec0574bbe2">
 					<property name="com.jaspersoft.studio.unit.x" value="cm"/>
 					<printWhenExpression><![CDATA[$P{IS_PREPRINT}==1]]></printWhenExpression>
@@ -587,7 +575,7 @@ AND pfr.RECEIPT_ID = $P{RECEIPT_ID}]]>
 				<text><![CDATA[ใบรับเงินในราชการศาลยุติธรรม]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="235" y="91" width="154" height="16" uuid="3f40516d-4b23-43c6-9554-1565572a0f95"/>
+				<reportElement x="221" y="91" width="168" height="16" uuid="3f40516d-4b23-43c6-9554-1565572a0f95"/>
 				<textElement textAlignment="Left">
 					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
@@ -1737,7 +1725,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{COURTFEE_CASEENDDO
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="12"/>
+					<font fontName="THSarabunNew" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{REVCODE1}]]></textFieldExpression>
 			</textField>
@@ -1754,7 +1742,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{COURTFEE_CASEENDDO
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="12"/>
+					<font fontName="THSarabunNew" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{REFDESC1}]]></textFieldExpression>
 			</textField>
@@ -1771,7 +1759,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{COURTFEE_CASEENDDO
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="12"/>
+					<font fontName="THSarabunNew" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{REFAMOUNT1}==0?" ":new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{REFAMOUNT1}))]]></textFieldExpression>
 			</textField>
@@ -1788,7 +1776,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{COURTFEE_CASEENDDO
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="12"/>
+					<font fontName="THSarabunNew" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{REFAMOUNT2}==0?" ":new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{REFAMOUNT2}))]]></textFieldExpression>
 			</textField>
@@ -1805,7 +1793,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{COURTFEE_CASEENDDO
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="12"/>
+					<font fontName="THSarabunNew" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{REVCODE2}]]></textFieldExpression>
 			</textField>
@@ -1822,7 +1810,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{COURTFEE_CASEENDDO
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="12"/>
+					<font fontName="THSarabunNew" size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{REFDESC2}]]></textFieldExpression>
 			</textField>

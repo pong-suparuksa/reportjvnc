@@ -29,11 +29,10 @@
 		<![CDATA[SELECT DISTINCT
         pc.CASE_DATE,
         TO_CHAR(pc.CASE_DATE , 'yyyy', 'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI') CASE_YEAR,  
-        --pltc.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR  CASE_BLACK_NO,
         NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR)  CASE_BLACK_NO ,
 		NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || CASE WHEN pj.RED_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pj.RED_YEAR)     CASE_RED_NO,
-        plaintiff.LITIGANT_NAME CLAIMANT,
-        dfd.LITIGANT_NAME DEFENDANT,
+        pc.PROS_DESC CLAIMANT,
+        pc.ACCU_DESC DEFENDANT,
         alle.ALLEGATiON,
         THAISDATE(pc.CASE_DATE) CASE_DATE_TEXT,
         jud.JUDGE_NAME,
@@ -82,7 +81,7 @@ LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON
 WHERE pc.REMOVED_BY = 0
 AND pc.CASE_DATE IS NOT NULL 
 AND pc.CASE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
-                         AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                         AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 AND pj.CASE_ID IS NULL
 ORDER BY EXTRACT(YEAR FROM pc.CASE_DATE)]]>
 	</queryString>
@@ -303,7 +302,7 @@ ORDER BY EXTRACT(YEAR FROM pc.CASE_DATE)]]>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}]]></textFieldExpression>
@@ -316,7 +315,7 @@ ORDER BY EXTRACT(YEAR FROM pc.CASE_DATE)]]>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CLAIMANT}==null?" ":$F{CLAIMANT}]]></textFieldExpression>
@@ -329,7 +328,7 @@ ORDER BY EXTRACT(YEAR FROM pc.CASE_DATE)]]>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{DEFENDANT}==null?" ":$F{DEFENDANT}]]></textFieldExpression>
@@ -342,7 +341,7 @@ ORDER BY EXTRACT(YEAR FROM pc.CASE_DATE)]]>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ALLEGATION}==null?" ":$F{ALLEGATION}]]></textFieldExpression>
@@ -355,7 +354,7 @@ ORDER BY EXTRACT(YEAR FROM pc.CASE_DATE)]]>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_DATE_TEXT}]]></textFieldExpression>
@@ -368,7 +367,7 @@ ORDER BY EXTRACT(YEAR FROM pc.CASE_DATE)]]>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{JUDGE_NAME}==null?" ":$F{JUDGE_NAME}]]></textFieldExpression>
@@ -381,7 +380,7 @@ ORDER BY EXTRACT(YEAR FROM pc.CASE_DATE)]]>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
+				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
