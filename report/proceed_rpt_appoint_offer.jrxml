@@ -17,8 +17,9 @@
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="433"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="556"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="621"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="368"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_offer_files/main_jrxml"/>
 	<parameter name="SELECT_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["31/05/2021"]]></defaultValueExpression>
 	</parameter>
@@ -37,16 +38,25 @@
 	   --
 	   ,pllr.LEVEL_ROOM_DESC LEVEL_ROOM
 	   ,jj.JUDGE_NAME
-	   ,NVL(ppa.INVESTIGATE_ACCUSER,0) +  NVL(ppa.INVESTIGATE_DEFENDANT,0) +  NVL(ppa.INVESTIGATE_OTHER,0) WITNESS   
-	   ,NVL(ppa.INVESTIGATE_ACCUSER_DATE,0) + NVL(ppa.INVESTIGATE_DEFENDANT_DATE,0) + NVL(ppa.INVESTIGATE_OTHER_DATE,0) PAGES
+	   ,apd.WITNESS
+	   ,apd.PAGES
 	   ,CASE WHEN ap_next.START_DATE IS NULL THEN '0' ELSE THAISDATE(ap_next.START_DATE) END NEXT_DATE
+	   --
 FROM PC_PROCEED_APPOINT_CONTINUE ppac 
 LEFT JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID AND ppa.REMOVED_BY = 0
-LEFT JOIN (SELECT ppac.APPOINT_ID, MIN(ppac.START_DATE) START_DATE 
+LEFT JOIN (SELECT ppcd.APPOINT_CON_ID 
+				  ,SUM(NVL(ppcd.WITNESS_DEFENDANT_COUNT,0) + NVL(ppcd.WITNESS_PLAINTIFF_COUNT,0) + NVL(ppcd.WITNESS_OTHER_COUNT,0))  WITNESS
+				  ,SUM(NVL(ppcd.WITNESS_DEFENDANT_PAGE,0) + NVL(ppcd.WITNESS_PLAINTIFF_PAGE,0) + NVL(ppcd.WITNESS_OTHER_DAY,0))      PAGES
+			FROM PC_PROCEED_CASE_DETAIL ppcd 
+			WHERE ppcd.REMOVED_BY = 0
+			GROUP BY ppcd.APPOINT_CON_ID) apd ON apd.APPOINT_CON_ID = ppac.APPOINT_CON_ID
+--next appoint
+LEFT JOIN (SELECT ppa.CASE_ID, MIN(ppac.START_DATE) START_DATE 
 			FROM PC_PROCEED_APPOINT_CONTINUE ppac 
+			JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID AND ppac.REMOVED_BY = 0
 			WHERE ppac.REMOVED_BY = 0
 			AND ppac.START_DATE > TO_DATE($P{SELECT_DATE}, 'DD/MM/YYYY')
-			GROUP BY ppac.APPOINT_ID) ap_next ON ap_next.APPOINT_ID = ppac.APPOINT_ID 
+			GROUP BY ppa.CASE_ID) ap_next ON ap_next.CASE_ID = ppa.CASE_ID  
 --lookup proceed
 LEFT JOIN PC_LOOKUP_APPOINT_REASON plar ON plar.APPOINT_REASON_ID = ppac.REASON_APPOINT_ID AND plar.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_LEVEL_ROOM pllr ON pllr.LEVEL_ROOM_ID = ppa.ROOM_ID AND pllr.REMOVED_BY = 0
