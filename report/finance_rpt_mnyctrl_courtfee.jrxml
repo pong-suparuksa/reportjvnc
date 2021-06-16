@@ -10,9 +10,9 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB210"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_rpt_mnyctrl_courtfee"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -142,6 +142,12 @@ ORDER BY pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 	</variable>
 	<variable name="CNT_CANCEL" class="java.lang.Long" calculation="Sum">
 		<variableExpression><![CDATA[$F{CANCEL_ID}==null?0:1]]></variableExpression>
+	</variable>
+	<variable name="TOTAL_PAYAMOUNT" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{PAY_AMOUNT}]]></variableExpression>
+	</variable>
+	<variable name="TOTAL_BALANCE" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{BALANCE}]]></variableExpression>
 	</variable>
 	<group name="GR_BOOKNO">
 		<groupExpression><![CDATA[$F{RECEIPT_BOOK_NO}]]></groupExpression>
@@ -786,40 +792,6 @@ ORDER BY pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 				</textElement>
 				<textFieldExpression><![CDATA["รวมออกใบเสร็จทั้งสิ้น "+$V{REPORT_COUNT}+" ฉบับ"]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="396" y="0" width="130" height="25" uuid="234ac9f6-1bc1-428f-92f2-b17cbd290096">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
-				</textElement>
-				<textFieldExpression><![CDATA["ยกเลิกแก้ไขทั้งสิ้น "+($V{CNT_CANCEL}==null?0:$V{CNT_CANCEL})+" ฉบับ"]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="546" y="0" width="148" height="25" uuid="73ec404d-4d3e-4a61-a712-72aa98c06b7c">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$V{TOTAL_AMOUNT}==null
-?"รวมเป็นเงินทั้งสิ้น 0 บาท"
-:"รวมเป็นเงินทั้งสิ้น "+new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{TOTAL_AMOUNT}))+" บาท"]]></textFieldExpression>
-			</textField>
 			<staticText>
 				<reportElement x="694" y="0" width="100" height="25" uuid="3d2a9534-0b01-4780-86fa-44a2383bb8cb">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
@@ -859,6 +831,42 @@ ORDER BY pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 			</line>
+			<textField>
+				<reportElement x="541" y="0" width="148" height="25" uuid="0ad5f041-193e-4ac2-a25e-7fb81ab09aae">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOTAL_BALANCE}==null
+?"รวมเงินคงเหลือทั้งสิ้น 0 บาท"
+:"รวมเงินคงเหลือทั้งสิ้น "+ new java.text.DecimalFormat("#,##0").format($V{TOTAL_BALANCE})+" บาท"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="388" y="0" width="148" height="25" uuid="708ab656-e841-4cdd-b98f-7640ea367d62">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{TOTAL_PAYAMOUNT}==null
+?"รวมจ่ายเงินทั้งสิ้น 0 บาท"
+:"รวมจ่ายเงินทั้งสิ้น "+ new java.text.DecimalFormat("#,##0").format($V{TOTAL_PAYAMOUNT})+" บาท"]]></textFieldExpression>
+			</textField>
 		</band>
 	</summary>
 </jasperReport>

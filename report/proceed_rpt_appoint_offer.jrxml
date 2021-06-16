@@ -14,11 +14,11 @@
 	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_offer"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
-	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="137"/>
-	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="857"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="532"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="455"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="621"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="368"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_offer_files/main_jrxml"/>
 	<parameter name="SELECT_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["31/05/2021"]]></defaultValueExpression>
@@ -27,40 +27,36 @@
 		<defaultValueExpression><![CDATA[0]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
-		<![CDATA[SELECT	cou.COURT_NAME_TH
-		,NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR) 	BLACK_CASE_NO              
-		,NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || CASE WHEN pj.RED_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pj.RED_YEAR) RED_CASE_NO
-		,THAISDATE(ppac.START_DATE) APPOINT_DATE
-		,ppac.CHOICE_TIME APPOINT_TIME
-		,pc.PROS_DESC 
-		,pc.ACCU_DESC 
-		,plar.APPOINT_REASON_NAME 
-		,NVL(ppac.LEVEL_ROOM_DESC, pllr.LEVEL_ROOM_DESC) LEVEL_ROOM
-		,j.JUDGE_NAME
-		,t1.WITNESS_MOUTH
-		,t1.WITNESS_PAGE
-		,t1.APPOINT_DELAY_NAME
-		,t1.HOLD_REASON
+		<![CDATA[SELECT cou.COURT_NAME_TH
+	   ,NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR) 	BLACK_CASE_NO              
+	   ,NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || CASE WHEN pj.RED_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pj.RED_YEAR) RED_CASE_NO
+	   ,THAISDATE(ppac.START_DATE) APPOINT_DATE
+	   ,ppac.CHOICE_TIME APPOINT_TIME
+	   ,pc.PROS_DESC
+	   ,pc.ACCU_DESC 
+	   ,plar.APPOINT_REASON_NAME 
+	   --
+	   ,pllr.LEVEL_ROOM_DESC LEVEL_ROOM
+	   ,jj.JUDGE_NAME
+	   ,apd.WITNESS
+	   ,apd.PAGES
+	   ,CASE WHEN ap_next.START_DATE IS NULL THEN '0' ELSE THAISDATE(ap_next.START_DATE) END NEXT_DATE
+	   --
 FROM PC_PROCEED_APPOINT_CONTINUE ppac 
 LEFT JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID AND ppa.REMOVED_BY = 0
---appoint result
-LEFT JOIN (SELECT ppar.APPOINT_ID 
-			       ,plad.APPOINT_DELAY_NAME
-			       ,pphr.HOLD_REASON 
-			       ,NVL(SUM(ppar.INVESTIGATE_ACCUSER),0)+NVL(SUM(ppar.INVESTIGATE_DEFENDANT),0)+NVL(SUM(ppar.INVESTIGATE_OTHER),0)  WITNESS_MOUTH
-			       ,NVL(SUM(ppar.INVESTIGATE_ACCUSER_DATE),0)+NVL(SUM(ppar.INVESTIGATE_DEFENDANT_DATE),0)+NVL(SUM(ppar.INVESTIGATE_OTHER_DATE),0) WITNESS_PAGE
-			FROM PC_PROCEED_APPOINT_RESULT ppar 
-			LEFT JOIN PC_LOOKUP_APPOINT_DELAY plad ON plad.APPOINT_DELAY_ID = ppar.APPOINT_DELAY_ID AND plad.REMOVED_BY = 0
-			LEFT JOIN PC_PROCEED_HOLD_REASON pphr ON pphr.HOLD_REASON_ID = ppar.HOLD_REASON_ID AND pphr.REMOVED_BY = 0
-			WHERE ppar.REMOVED_BY = 0
-			GROUP BY ppar.APPOINT_ID, plad.APPOINT_DELAY_NAME, pphr.HOLD_REASON 
-			) t1 ON t1.APPOINT_ID = ppa.APPOINT_ID 
---judge
-LEFT JOIN (SELECT ppacj.APPOINT_ID, 
-			       LISTAGG(plj.JUDGE_NAME , ',') WITHIN GROUP(ORDER BY plj.JUDGE_NAME ) JUDGE_NAME
-			FROM PC_PROCEED_APPOINT_CASE_JUDGE ppacj 
-			LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = ppacj.JUDGE_ID AND plj.REMOVED_BY = 0
-			GROUP BY ppacj.APPOINT_ID )	j ON j.APPOINT_ID = ppac.APPOINT_ID 
+LEFT JOIN (SELECT ppcd.APPOINT_CON_ID 
+				  ,SUM(NVL(ppcd.WITNESS_DEFENDANT_COUNT,0) + NVL(ppcd.WITNESS_PLAINTIFF_COUNT,0) + NVL(ppcd.WITNESS_OTHER_COUNT,0))  WITNESS
+				  ,SUM(NVL(ppcd.WITNESS_DEFENDANT_PAGE,0) + NVL(ppcd.WITNESS_PLAINTIFF_PAGE,0) + NVL(ppcd.WITNESS_OTHER_DAY,0))      PAGES
+			FROM PC_PROCEED_CASE_DETAIL ppcd 
+			WHERE ppcd.REMOVED_BY = 0
+			GROUP BY ppcd.APPOINT_CON_ID) apd ON apd.APPOINT_CON_ID = ppac.APPOINT_CON_ID
+--next appoint
+LEFT JOIN (SELECT ppa.CASE_ID, MIN(ppac.START_DATE) START_DATE 
+			FROM PC_PROCEED_APPOINT_CONTINUE ppac 
+			JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID AND ppac.REMOVED_BY = 0
+			WHERE ppac.REMOVED_BY = 0
+			AND ppac.START_DATE > TO_DATE($P{SELECT_DATE}, 'DD/MM/YYYY')
+			GROUP BY ppa.CASE_ID) ap_next ON ap_next.CASE_ID = ppa.CASE_ID  
 --lookup proceed
 LEFT JOIN PC_LOOKUP_APPOINT_REASON plar ON plar.APPOINT_REASON_ID = ppac.REASON_APPOINT_ID AND plar.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_LEVEL_ROOM pllr ON pllr.LEVEL_ROOM_ID = ppa.ROOM_ID AND pllr.REMOVED_BY = 0
@@ -70,6 +66,18 @@ LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_I
 --judgement
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
+--judge
+LEFT JOIN (SELECT j.CASE_ID, LISTAGG(j.JUDGE_NAME , ',') WITHIN GROUP(ORDER BY j.JUDGE_NAME ) JUDGE_NAME
+		   FROM
+		   (
+			SELECT DISTINCT pcj.CASE_ID, plj.JUDGE_NAME 
+			FROM PC_CASE_JUDGE pcj 
+			JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+			JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID 
+			WHERE pcj.REMOVED_BY = 0
+			AND pljt.JUDGE_TYPE_CODE = '01'
+		   ) j 
+			GROUP BY j.CASE_ID) jj ON jj.CASE_ID = ppa.CASE_ID 
 --court
 LEFT JOIN (SELECT plc.COURT_NAME_TH
 			FROM PC_PARAM pp
@@ -109,17 +117,14 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 	<field name="JUDGE_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="JUDGE_NAME"/>
 	</field>
-	<field name="WITNESS_MOUTH" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="WITNESS_MOUTH"/>
+	<field name="WITNESS" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="WITNESS"/>
 	</field>
-	<field name="WITNESS_PAGE" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="WITNESS_PAGE"/>
+	<field name="PAGES" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="PAGES"/>
 	</field>
-	<field name="APPOINT_DELAY_NAME" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="APPOINT_DELAY_NAME"/>
-	</field>
-	<field name="HOLD_REASON" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="HOLD_REASON"/>
+	<field name="NEXT_DATE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="NEXT_DATE"/>
 	</field>
 	<variable name="VAR_CNTCASE" class="java.lang.Long" incrementType="Report" calculation="Count"/>
 	<variable name="TEMP_START_DATE" class="java.lang.String">
@@ -531,7 +536,7 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{WITNESS_MOUTH}==null?0:$F{WITNESS_MOUTH}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{WITNESS}==null?0:$F{WITNESS}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="611" y="0" width="30" height="25" uuid="562435a7-57ff-4ba3-a6a7-a403f33dd7c5">
@@ -546,7 +551,7 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{WITNESS_PAGE}==null?0:$F{WITNESS_PAGE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{PAGES}==null?0:$F{PAGES}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="641" y="0" width="50" height="25" uuid="e2194e19-1f53-4e26-b1fd-f496740684dc">
@@ -563,7 +568,7 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{APPOINT_DATE}== null ?  "เสร็จการพิจารณา"  :  "พิจารณาต่อนัดหน้า"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{NEXT_DATE}== null||$F{NEXT_DATE}.equals("0")?  "-"  :  "พิจารณาต่อนัดหน้า"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="691" y="0" width="65" height="25" uuid="46907b13-f8a8-4c91-aaa8-a89300837c05">
@@ -581,7 +586,7 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($F{APPOINT_DELAY_NAME}==null?" ":$F{APPOINT_DELAY_NAME})  +" "+($F{HOLD_REASON}==null?" ":$F{HOLD_REASON})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="755" y="0" width="52" height="25" uuid="07fbce9d-022b-4f02-b65d-1c0426bdc468">
@@ -598,7 +603,7 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{APPOINT_DATE}  == null ?  " "  :  $F{APPOINT_DATE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{NEXT_DATE} == null||$F{NEXT_DATE}.equals("0")?  " "  :  $F{NEXT_DATE}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="0" y="0" width="45" height="25" uuid="a53f59f1-673b-4754-adea-c84307940feb">

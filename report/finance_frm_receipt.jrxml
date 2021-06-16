@@ -3,14 +3,14 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="finance_frm_receipt" pageWidth="420" pageHeight="595" whenNoDataType="AllSectionsNoDetail" columnWidth="385" leftMargin="14" rightMargin="21" topMargin="14" bottomMargin="20" uuid="91ef4741-a901-4bf3-8b94-8304dcb4486b">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.193:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_frm_receipt"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="593"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="396"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="417"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="576"/>
 	<parameter name="IS_PREPRINT" class="java.lang.Integer">
 		<parameterDescription><![CDATA[select for use pre-print papaer or not]]></parameterDescription>
 		<defaultValueExpression><![CDATA[0]]></defaultValueExpression>
@@ -76,6 +76,9 @@
        --วิธีการชำระเงิน
        NVL(R1.REF_CODE,' ')REVCODE1, NVL(R1.REF_DESC,' ') REFDESC1, NVL(R1.REF_AMOUNT,0) REFAMOUNT1, NVL(R1.REF_NAME,' ') REFNAME1,
        NVL(R2.REF_CODE,' ')REVCODE2, NVL(R2.REF_DESC,' ') REFDESC2, NVL(R2.REF_AMOUNT,0) REFAMOUNT2, NVL(R2.REF_NAME,' ') REFNAME2,
+       NVL(R3.REF_CODE,' ')REVCODE3, NVL(R3.REF_DESC,' ') REFDESC3, NVL(R3.REF_AMOUNT,0) REFAMOUNT3, NVL(R3.REF_NAME,' ') REFNAME3,
+       --ตรวจสอบวิธีชำระด้วยบัตรเครดิต
+       NVL(R1.IS_CREDIT,0) IS_CREDIT1, NVL(R2.IS_CREDIT,0) IS_CREDIT2, NVL(R3.IS_CREDIT,0) IS_CREDIT_3,
        --จำนวนเงิน
        TRUNC(NVL(pfr.TOTAL_AMOUNT,0))	TOTAL_AMOUNT,
        REPLACE(TO_CHAR((NVL(pfr.TOTAL_AMOUNT,0))-TRUNC(NVL(pfr.TOTAL_AMOUNT,0)),'999D99MI'),'.','') TOTAL_STANG,
@@ -249,21 +252,14 @@ LEFT JOIN (SELECT ROW_NUMBER() OVER (ORDER BY r.RECEIPT_ID) REF_NO,
 			       r.REF_CODE,
 			       r.REF_DESC,
 			       r.REF_AMOUNT,
-			       r.REF_NAME
-			FROM(SELECT pfrc.RECEIPT_ID, 
-				        pfrc.CHEQUE_CODE                 REF_CODE,
-				        plb.BANK_NAME||' '|| pfrc.BRANCH REF_DESC,
-				        pfrc.AMOUNT                      REF_AMOUNT,
-				        ' '								 REF_NAME
-				FROM PC_FIN_RECEIPT_CHEQUE pfrc
-				LEFT JOIN PC_LOOKUP_BANK plb ON plb.BANK_CODE = pfrc.BANK_CODE AND plb.REMOVED_BY = 0
-				WHERE pfrc.REMOVED_BY = 0
-				UNION ALL
-				SELECT pfrt.RECEIPT_ID,
+			       r.REF_NAME,
+			       r.IS_CREDIT
+			FROM(SELECT pfrt.RECEIPT_ID,
 					   pfrt.ACCOUNT_NO                 REF_CODE,
 					   plb.BANK_NAME||' '||pfrt.BRANCH REF_DESC,
 					   pfrt.AMOUNT 					   REF_AMOUNT,
-					   pfrt.ACCOUNT_NAME 			   REF_NAME
+					   pfrt.ACCOUNT_NAME 			   REF_NAME,
+					   0                               IS_CREDIT
 				FROM PC_FIN_RECEIPT_TRANSFER pfrt
 				LEFT JOIN PC_LOOKUP_BANK plb ON plb.BANK_ID = pfrt.BANK_ID AND plb.REMOVED_BY = 0
 				WHERE pfrt.REMOVED_BY = 0
@@ -272,10 +268,21 @@ LEFT JOIN (SELECT ROW_NUMBER() OVER (ORDER BY r.RECEIPT_ID) REF_NO,
 				       pfrcra.CREDIT_NO        REF_CODE,
 				       plb.BANK_NAME           REF_DESC,
 				       pfrcra.AMOUNT           REF_AMOUNT,
-				       pfrcra.CARD_HOLDER_NAME REF_NAME
+				       pfrcra.CARD_HOLDER_NAME REF_NAME,
+				       1                       IS_CREDIT
 				FROM PC_FIN_RECEIPT_CREDIT pfrcra
 				LEFT JOIN PC_LOOKUP_BANK plb ON plb.BANK_CODE = pfrcra.BANK_CODE AND plb.REMOVED_BY = 0
-				WHERE pfrcra.REMOVED_BY = 0) r
+				WHERE pfrcra.REMOVED_BY = 0
+				UNION ALL
+				SELECT pfrc.RECEIPT_ID, 
+				        pfrc.CHEQUE_CODE                 REF_CODE,
+				        plb.BANK_NAME||' '|| pfrc.BRANCH REF_DESC,
+				        pfrc.AMOUNT                      REF_AMOUNT,
+				        pfrc.CHEQUE_ACCOUNT_NAME		 REF_NAME,
+				        0                                IS_CREDIT
+				FROM PC_FIN_RECEIPT_CHEQUE pfrc
+				LEFT JOIN PC_LOOKUP_BANK plb ON plb.BANK_CODE = pfrc.BANK_CODE AND plb.REMOVED_BY = 0
+				WHERE pfrc.REMOVED_BY = 0) r
 			WHERE r.RECEIPT_ID = $P{RECEIPT_ID})R1 ON R1.RECEIPT_ID = pfr.RECEIPT_ID AND R1.REF_NO = 1 
 --ชำระวิธีที่สอง
 LEFT JOIN (SELECT ROW_NUMBER() OVER (ORDER BY r.RECEIPT_ID) REF_NO,
@@ -283,21 +290,14 @@ LEFT JOIN (SELECT ROW_NUMBER() OVER (ORDER BY r.RECEIPT_ID) REF_NO,
 			       r.REF_CODE,
 			       r.REF_DESC,
 			       r.REF_AMOUNT,
-			       r.REF_NAME
-			FROM(SELECT pfrc.RECEIPT_ID, 
-				        pfrc.CHEQUE_CODE                 REF_CODE,
-				        plb.BANK_NAME||' '|| pfrc.BRANCH REF_DESC,
-				        pfrc.AMOUNT                      REF_AMOUNT,
-				        ' '								 REF_NAME
-				FROM PC_FIN_RECEIPT_CHEQUE pfrc
-				LEFT JOIN PC_LOOKUP_BANK plb ON plb.BANK_CODE = pfrc.BANK_CODE AND plb.REMOVED_BY = 0
-				WHERE pfrc.REMOVED_BY = 0
-				UNION ALL
-				SELECT pfrt.RECEIPT_ID,
+			       r.REF_NAME,
+			       r.IS_CREDIT
+			FROM(SELECT pfrt.RECEIPT_ID,
 					   pfrt.ACCOUNT_NO                 REF_CODE,
 					   plb.BANK_NAME||' '||pfrt.BRANCH REF_DESC,
 					   pfrt.AMOUNT 					   REF_AMOUNT,
-					   pfrt.ACCOUNT_NAME 			   REF_NAME
+					   pfrt.ACCOUNT_NAME 			   REF_NAME,
+					   0                               IS_CREDIT
 				FROM PC_FIN_RECEIPT_TRANSFER pfrt
 				LEFT JOIN PC_LOOKUP_BANK plb ON plb.BANK_ID = pfrt.BANK_ID AND plb.REMOVED_BY = 0
 				WHERE pfrt.REMOVED_BY = 0
@@ -306,11 +306,60 @@ LEFT JOIN (SELECT ROW_NUMBER() OVER (ORDER BY r.RECEIPT_ID) REF_NO,
 				       pfrcra.CREDIT_NO        REF_CODE,
 				       plb.BANK_NAME           REF_DESC,
 				       pfrcra.AMOUNT           REF_AMOUNT,
-				       pfrcra.CARD_HOLDER_NAME REF_NAME
+				       pfrcra.CARD_HOLDER_NAME REF_NAME,
+				       1                       IS_CREDIT
 				FROM PC_FIN_RECEIPT_CREDIT pfrcra
 				LEFT JOIN PC_LOOKUP_BANK plb ON plb.BANK_CODE = pfrcra.BANK_CODE AND plb.REMOVED_BY = 0
-				WHERE pfrcra.REMOVED_BY = 0) r
+				WHERE pfrcra.REMOVED_BY = 0
+				UNION ALL
+				SELECT pfrc.RECEIPT_ID, 
+				        pfrc.CHEQUE_CODE                 REF_CODE,
+				        plb.BANK_NAME||' '|| pfrc.BRANCH REF_DESC,
+				        pfrc.AMOUNT                      REF_AMOUNT,
+				        pfrc.CHEQUE_ACCOUNT_NAME		 REF_NAME,
+				        0                                IS_CREDIT
+				FROM PC_FIN_RECEIPT_CHEQUE pfrc
+				LEFT JOIN PC_LOOKUP_BANK plb ON plb.BANK_CODE = pfrc.BANK_CODE AND plb.REMOVED_BY = 0
+				WHERE pfrc.REMOVED_BY = 0) r
 			WHERE r.RECEIPT_ID = $P{RECEIPT_ID})R2 ON R2.RECEIPT_ID = pfr.RECEIPT_ID AND R2.REF_NO = 2
+--ชำระวิธีที่สาม
+LEFT JOIN (SELECT ROW_NUMBER() OVER (ORDER BY r.RECEIPT_ID) REF_NO,
+			       r.RECEIPT_ID, 
+			       r.REF_CODE,
+			       r.REF_DESC,
+			       r.REF_AMOUNT,
+			       r.REF_NAME,
+			       r.IS_CREDIT
+			FROM(SELECT pfrt.RECEIPT_ID,
+					   pfrt.ACCOUNT_NO                 REF_CODE,
+					   plb.BANK_NAME||' '||pfrt.BRANCH REF_DESC,
+					   pfrt.AMOUNT 					   REF_AMOUNT,
+					   pfrt.ACCOUNT_NAME 			   REF_NAME,
+					   0                               IS_CREDIT
+				FROM PC_FIN_RECEIPT_TRANSFER pfrt
+				LEFT JOIN PC_LOOKUP_BANK plb ON plb.BANK_ID = pfrt.BANK_ID AND plb.REMOVED_BY = 0
+				WHERE pfrt.REMOVED_BY = 0
+				UNION ALL
+				SELECT pfrcra.RECEIPT_ID, 
+				       pfrcra.CREDIT_NO        REF_CODE,
+				       plb.BANK_NAME           REF_DESC,
+				       pfrcra.AMOUNT           REF_AMOUNT,
+				       pfrcra.CARD_HOLDER_NAME REF_NAME,
+				       1                       IS_CREDIT
+				FROM PC_FIN_RECEIPT_CREDIT pfrcra
+				LEFT JOIN PC_LOOKUP_BANK plb ON plb.BANK_CODE = pfrcra.BANK_CODE AND plb.REMOVED_BY = 0
+				WHERE pfrcra.REMOVED_BY = 0
+				UNION ALL
+				SELECT pfrc.RECEIPT_ID, 
+				        pfrc.CHEQUE_CODE                 REF_CODE,
+				        plb.BANK_NAME||' '|| pfrc.BRANCH REF_DESC,
+				        pfrc.AMOUNT                      REF_AMOUNT,
+				        pfrc.CHEQUE_ACCOUNT_NAME		 REF_NAME,
+				        0                                IS_CREDIT
+				FROM PC_FIN_RECEIPT_CHEQUE pfrc
+				LEFT JOIN PC_LOOKUP_BANK plb ON plb.BANK_CODE = pfrc.BANK_CODE AND plb.REMOVED_BY = 0
+				WHERE pfrc.REMOVED_BY = 0) r
+			WHERE r.RECEIPT_ID = $P{RECEIPT_ID})R3 ON R3.RECEIPT_ID = pfr.RECEIPT_ID AND R3.REF_NO = 3
 --------------------------------------------------------------เจ้าหน้าที่------------------------------------------------------------
 LEFT JOIN PC_USER_PROFILE pup_r ON pup_r.USER_PROFILE_ID = pfr.RECEIVED_BY AND pup_r.REMOVED_BY = 0
 LEFT JOIN PC_USER_PROFILE pup_d ON pup_d.USER_PROFILE_ID = pfr.DIRECTOR_BY AND pup_d.REMOVED_BY = 0
@@ -322,7 +371,7 @@ AND pfr.RECEIPT_ID = $P{RECEIPT_ID}]]>
 	<field name="RECEIPT_BOOK_NO" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_BOOK_NO"/>
 	</field>
-	<field name="RECEIPT_NO" class="java.lang.Long">
+	<field name="RECEIPT_NO" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_NO"/>
 	</field>
 	<field name="NO_IN_DATE_NOW" class="java.lang.Integer">
@@ -343,7 +392,7 @@ AND pfr.RECEIPT_ID = $P{RECEIPT_ID}]]>
 	<field name="RED_TITLE_CASE_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="RED_TITLE_CASE_NAME"/>
 	</field>
-	<field name="RED_IDNUM" class="java.lang.Long">
+	<field name="RED_IDNUM" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="RED_IDNUM"/>
 	</field>
 	<field name="RED_YEAR" class="java.lang.Integer">
@@ -472,7 +521,28 @@ AND pfr.RECEIPT_ID = $P{RECEIPT_ID}]]>
 	<field name="REFNAME2" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="REFNAME2"/>
 	</field>
-	<field name="TOTAL_AMOUNT" class="java.lang.Double">
+	<field name="REVCODE3" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="REVCODE3"/>
+	</field>
+	<field name="REFDESC3" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="REFDESC3"/>
+	</field>
+	<field name="REFAMOUNT3" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.label" value="REFAMOUNT3"/>
+	</field>
+	<field name="REFNAME3" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="REFNAME3"/>
+	</field>
+	<field name="IS_CREDIT1" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="IS_CREDIT1"/>
+	</field>
+	<field name="IS_CREDIT2" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="IS_CREDIT2"/>
+	</field>
+	<field name="IS_CREDIT_3" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="IS_CREDIT_3"/>
+	</field>
+	<field name="TOTAL_AMOUNT" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="TOTAL_AMOUNT"/>
 	</field>
 	<field name="TOTAL_STANG" class="java.lang.String">
@@ -487,7 +557,9 @@ AND pfr.RECEIPT_ID = $P{RECEIPT_ID}]]>
 	<field name="DIRECTOR" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="DIRECTOR"/>
 	</field>
-	<field name="POSITION_NAME" class="java.lang.String"/>
+	<field name="POSITION_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="POSITION_NAME"/>
+	</field>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -1879,7 +1951,10 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{COURTFEE_CASEENDDO
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{REFNAME1}.equals(" ")?$F{REFNAME2}:$F{REFNAME1}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{IS_CREDIT1}==1?$F{REFNAME1}
+:$F{IS_CREDIT2}==1?$F{REFNAME2}
+:$F{IS_CREDIT_3}==1?$F{REFNAME2}
+:" "]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="240" width="52" height="16" uuid="ed1a3a97-a837-494f-9ec6-c22f04dd8caf">

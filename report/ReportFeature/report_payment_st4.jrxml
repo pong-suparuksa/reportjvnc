@@ -17,10 +17,10 @@
 		<![CDATA[SELECT distinct NVL(cou.COURT_NAME_TH, '') COURT_NAME_TH,
 c.case_id, NVL(tcb.TITLE_CASE_NAME,' ') ||  TO_CHAR(c.BLACK_IDNUM) || '/' || TO_CHAR(c.BLACK_YEAR)  BLACK_CASE_NO ,
 bb.AMOUNT , ba.INSTALLMENT_COUNT , ba.INSTALLMENT_AMOUNT ,bb.REMAIN_AMOUNT , pbb.FULLNAME ,
-CASE WHEN ba.INSTALLMENT_COUNT = 1 THEN  'ขอลด' ELSE 'ขอผ่อน'END COURT_ORDER 
+CASE WHEN ba.INSTALLMENT_COUNT = 1 THEN  'ขอลด' ELSE 'ขอผ่อน'END COURT_ORDER, bb.AMOUNT - bb.REMAIN_AMOUNT  PAID_AMOUNT 
 FROM PC_BAIL_BAILSMAN_BREACH bb
 JOIN PC_BAIL_BREACH_ADJUST ba ON (bb.BREACH_ID = ba.BREACH_ID AND ba.REQUEST_TYPE = 1 AND ba.REMOVED_BY = 0 AND ba.IS_ALLOWED = 1)
-JOIN PC_BAIL b ON (b.BAIL_ID = bb.BAIL_ID AND b.IS_PRINTED = 1 AND b.REMOVED_BY = 0)
+JOIN PC_BAIL b ON (b.BAIL_ID = bb.BAIL_ID AND b.REMOVED_BY = 0)
 LEFT JOIN PC_CASE c ON (c.CASE_ID = b.CASE_ID AND c.REMOVED_BY = 0)
 LEFT JOIN PC_LOOKUP_TITLE_CASE tcb ON (c.black_title_id = tcb.title_case_id  AND tcb.REMOVED_BY = 0)
 LEFT JOIN PC_BAIL_BAILSMAN pbb ON pbb.BAIL_ID = bb.BAIL_ID AND pbb.REMOVED_BY = 0
@@ -38,28 +38,33 @@ ORDER BY
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
 	</field>
-	<field name="CASE_ID" class="java.lang.String">
+	<field name="CASE_ID" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="CASE_ID"/>
 	</field>
 	<field name="BLACK_CASE_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="BLACK_CASE_NO"/>
 	</field>
-	<field name="AMOUNT" class="java.lang.String">
+	<field name="AMOUNT" class="java.lang.Double">
 		<property name="com.jaspersoft.studio.field.label" value="AMOUNT"/>
 	</field>
-	<field name="INSTALLMENT_COUNT" class="java.lang.String">
+	<field name="INSTALLMENT_COUNT" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="INSTALLMENT_COUNT"/>
 	</field>
-	<field name="INSTALLMENT_AMOUNT" class="java.lang.String">
+	<field name="INSTALLMENT_AMOUNT" class="java.lang.Double">
 		<property name="com.jaspersoft.studio.field.label" value="INSTALLMENT_AMOUNT"/>
 	</field>
-	<field name="REMAIN_AMOUNT" class="java.lang.String">
+	<field name="REMAIN_AMOUNT" class="java.lang.Double">
 		<property name="com.jaspersoft.studio.field.label" value="REMAIN_AMOUNT"/>
 	</field>
 	<field name="FULLNAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="FULLNAME"/>
 	</field>
-	<field name="COURT_ORDER" class="java.lang.String"/>
+	<field name="COURT_ORDER" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="COURT_ORDER"/>
+	</field>
+	<field name="PAID_AMOUNT" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.label" value="PAID_AMOUNT"/>
+	</field>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -375,7 +380,7 @@ ORDER BY
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{PAID_AMOUNT}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="629" y="0" width="70" height="30" uuid="1860a072-9807-4bfb-89a9-64ad17b3bf5b">
