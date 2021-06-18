@@ -11,14 +11,14 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_writres_sender"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="486"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="505"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_writres_sender_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/05/2020"]]></defaultValueExpression>
@@ -34,7 +34,7 @@
             ELSE NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR) END	 CASE_BLACK_NO, 
        CASE WHEN pj.RED_IDNUM IS NULL THEN ' '
             ELSE NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || '/' || TO_CHAR(pj.RED_YEAR) END	 CASE_RED_NO,
-       plt.TITLE_NAME||pcl.LITIGANT_NAME TO_NAME, 
+       pcl.LITIGANT_NAME TO_NAME, 
        pnsr.SEND_NOTICE_DATE,
        plnsr.NOTICE_SEND_RESULT_NAME,
        pn.SEND_FEE,
@@ -51,7 +51,6 @@ LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pn.CASE_ID AND pj.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
 --
 LEFT JOIN PC_CASE_LIT pcl ON pcl.CASE_LIT_ID = pn.LITIGANT_ID AND pcl.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_TITLE plt ON plt.TITLE_ID = pcl.LITIGANT_TITLE_ID AND plt.REMOVED_BY = 0
 --
 LEFT JOIN PC_LOOKUP_NOTICE_SEND_RESULT plnsr ON plnsr.NOTICE_SEND_RESULT_ID = pnsr.POST_SEND_RESULT AND plnsr.REMOVED_BY = 0
 LEFT JOIN PC_USER_PROFILE pup ON pup.USER_ID = pn.SEND_BY AND pup.REMOVED_BY = 0
