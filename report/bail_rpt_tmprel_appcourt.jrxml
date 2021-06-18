@@ -2,7 +2,7 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="bail_rpt_tmprel_appcourt" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="21e58027-36f9-4d26-bcd5-4608c14b782d">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -31,7 +31,7 @@
 	<queryString language="SQL">
 		<![CDATA[SELECT pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR  BLACK_CASE_NO,
 CASE WHEN pb.COURT_ORDER  = 1 THEN 'อนุญาต' ELSE 'ไม่อนุญาต' END COURT_ORDER_TEXT,
-pbb.NAME || ' ' ||pbb.LASTNAME BAILSMAN,
+plt.TITLE_NAME || pbb.NAME || ' ' ||pbb.LASTNAME BAILSMAN,
 NVL(pbs.TOTAL_AMOUNT ,0)   BAIL_COST,
 pc.PROS_DESC,
 pc.ACCU_DESC,
@@ -69,11 +69,12 @@ LEFT JOIN PC_BAIL_SEC_CASH pspc ON pspc.SEC_ID = pbs.SEC_ID AND pspc.REMOVED_BY 
 LEFT JOIN PC_BAIL_SEC_AFFILIATE_CERTIFICATE pbsac ON pbsac.SEC_ID = pbs.SEC_ID AND pbsac.REMOVED_BY = 0
 LEFT JOIN PC_BAIL_BOND_TYPE plbt ON plbt.BOND_TYPE_ID=pbsb.BOND_TYPE_ID AND plbt.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_ALLEGATION pla ON pla.ALLEGATION_ID = pca.ALLEGATION_ID
+LEFT JOIN PC_LOOKUP_TITLE plt ON plt.TITLE_ID = pbb.NAME_TITLE_ID AND plt.REMOVED_BY = 0
 WHERE (pb.BAIL_PERIOD = $P!{BAIL_PERIOD} OR 99 = $P!{BAIL_PERIOD}) AND pb.REMOVED_BY = 0 AND pbb.BAILSMAN_ID > 0
 AND pb.BAIL_DATE BETWEEN TO_DATE( $P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 GROUP BY pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR,
     CASE WHEN pb.COURT_ORDER  = 1 THEN 'อนุญาต' ELSE 'ไม่อนุญาต' END,
-    pbb.NAME || ' ' ||pbb.LASTNAME,
+    plt.TITLE_NAME || pbb.NAME || ' ' ||pbb.LASTNAME,
     NVL(pbs.TOTAL_AMOUNT,0),
     pc.PROS_DESC,
     pc.ACCU_DESC,
