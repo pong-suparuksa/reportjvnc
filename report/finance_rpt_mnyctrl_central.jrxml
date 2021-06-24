@@ -53,6 +53,7 @@
          WHEN NVL(pfrt.AMOUNT,0) > 0 THEN pfrt.ACCOUNT_NO
     ELSE '-' END REF_NO,
     plrt.RECEIPT_TYPE_NAME,
+    plrst.RECEIPT_SUB_TYPE_NAME, 
   	pfrca.CANCEL_ID 
 FROM PC_FIN_RECEIPT pfr 
 LEFT JOIN PC_FIN_RECEIPT_DETAIL pfrd ON pfrd.RECEIPT_ID = pfr.RECEIPT_ID
@@ -74,6 +75,7 @@ LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID 
 --
 LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pc.COURT_ID AND pc.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE  AND plrt.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_RECEIPT_SUB_TYPE plrst ON plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE AND plrst.REMOVED_BY = 0
 --
 CROSS JOIN (SELECT plc.COURT_NAME_TH
 				      FROM PC_PARAM pp
@@ -136,6 +138,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 	<field name="RECEIPT_TYPE_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_TYPE_NAME"/>
 	</field>
+	<field name="RECEIPT_SUB_TYPE_NAME" class="java.lang.String"/>
 	<field name="CANCEL_ID" class="java.lang.Long">
 		<property name="com.jaspersoft.studio.field.label" value="CANCEL_ID"/>
 	</field>
@@ -624,7 +627,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{RECEIPT_TYPE_NAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{RECEIPT_SUB_TYPE_NAME}==null?" ":$F{RECEIPT_SUB_TYPE_NAME}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="640" y="0" width="50" height="50" uuid="a221f09b-3a1d-4f1d-99d6-9391349f4b33">
