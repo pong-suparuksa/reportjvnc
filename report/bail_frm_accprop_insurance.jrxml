@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="bail_frm_accprop_insurance" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="515" leftMargin="40" rightMargin="40" topMargin="50" bottomMargin="50" uuid="d763bc96-3428-4229-bb24-06f19286e23f">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-210"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/bail_frm_accprop_insurance"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="354"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="641"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/bail_frm_accprop_insurance_files/main_jrxml"/>
 	<parameter name="SEC_ID" class="java.lang.Integer"/>
 	<queryString>
 		<![CDATA[SELECT DISTINCT
@@ -17,7 +18,7 @@ CASE WHEN pc.BLACK_IDNUM IS NOT NULL
      ELSE '-' END CASE_BLACE_NO, 
 THAINUMSTR(TO_CHAR(TRUNC(pbsi.VALUE_AMOUNT),'FM99G999G999G999', 'NLS_NUMERIC_CHARACTERS=",."'))  		AMOUNT,
 BAHT(pbsi.VALUE_AMOUNT)  AMOUNT_TEXT,
-plt.TITLE_NAME || pbb.FULLNAME  BAILMAN_NAME,
+pbb.FULLNAME  BAILMAN_NAME,
 THAINUMSTR(pbb.NATIONAL_ID) NATIONAL_ID,
 THAINUMSTR(pbsi.INSURANCE_NO) INSURANCE_NO,
 THAINUMSTR(pbsi.CERTIFICATE_NUMBER) CERTIFICATE_NUMBER,
@@ -27,7 +28,6 @@ FROM PC_BAIL_SEC_INSURANCE pbsi
 LEFT JOIN PC_BAIL_SEC pbs ON pbs.SEC_ID = pbsi.SEC_ID 
 LEFT JOIN PC_BAIL pb ON pb.BAIL_ID = pbs.BAIL_ID 
 LEFT JOIN PC_BAIL_BAILSMAN pbb ON pbb.BAILSMAN_ID = pbs.BAILSMAN_ID 
-LEFT JOIN PC_LOOKUP_TITLE plt ON(plt.TITLE_ID=pbb.NAME_TITLE_ID AND plt.REMOVED_BY = 0)
 --	  
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pb.CASE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
