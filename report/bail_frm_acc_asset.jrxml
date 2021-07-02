@@ -60,7 +60,7 @@ AND ( pbs.SEC_ID IS NOT NULL)]]>
 		<field name="TYPE_NAME" class="java.lang.String">
 			<property name="com.jaspersoft.studio.field.label" value="TYPE_NAME"/>
 		</field>
-		<field name="TOTAL_AMOUNT" class="java.math.BigDecimal">
+		<field name="TOTAL_AMOUNT" class="java.lang.Double">
 			<property name="com.jaspersoft.studio.field.label" value="TOTAL_AMOUNT"/>
 		</field>
 		<variable name="Variable_1" class="java.lang.Integer" calculation="Sum">
@@ -90,7 +90,7 @@ LEFT JOIN PC_BAIL_SEC pbs ON pbs.BAIL_ID = pb.BAIL_ID AND pbs.REMOVED_BY = 0
 WHERE pb.REMOVED_BY = 0
 AND ( $P{BAIL_DATE} IS NULL or pb.BAIL_DATE = TO_DATE(  $P{BAIL_DATE} || 'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') )
 AND ( $P{BAIL_ID} = 0 or pb.BAIL_ID = $P{BAIL_ID})
-AND pbs.SEC_ID IS NOT NULL ]]>
+AND pbs.SEC_ID IS NOT NULL]]>
 	</queryString>
 	<field name="BLACK_CASE_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="BLACK_CASE_NO"/>
@@ -283,7 +283,7 @@ AND pbs.SEC_ID IS NOT NULL ]]>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font fontName="TH Sarabun New" size="16"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{Variable_1}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format(Double.valueOf( $V{Variable_1}))]]></textFieldExpression>
 							</textField>
 						</jr:columnFooter>
 						<jr:column width="97" uuid="534a9e7e-7205-4857-9f6b-88e6b786e008">
@@ -303,7 +303,7 @@ AND pbs.SEC_ID IS NOT NULL ]]>
 									<textElement textAlignment="Center" verticalAlignment="Middle">
 										<font fontName="TH Sarabun New" size="16" isBold="false"/>
 									</textElement>
-									<textFieldExpression><![CDATA[$F{TOTAL_AMOUNT}]]></textFieldExpression>
+									<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{TOTAL_AMOUNT}))]]></textFieldExpression>
 								</textField>
 							</jr:detailCell>
 						</jr:column>

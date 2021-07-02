@@ -2,7 +2,7 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="bail_rpt_acc_position" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="21e58027-36f9-4d26-bcd5-4608c14b782d">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -31,7 +31,8 @@ CASE BSP.POSITION_TYPE
     WHEN 2 THEN 'รัฐวิสาหกิจ'
     ELSE 'อื่น ๆ'
 END,
-BSP.POSITION, BSP.VALUE_AMOUNT, BSP.NOTES, LC.COURT_NAME_TH,
+BSP.POSITION, BSP.VALUE_AMOUNT, BSP.NOTES, 
+cou.COURT_NAME_TH,
 CASE B.COURT_ORDER
 	WHEN 1 THEN 'อนุญาต'
     ELSE 'ไม่อนุญาต'
@@ -46,6 +47,11 @@ LEFT JOIN PC_LOOKUP_TITLE_CASE LTC ON(LTC.TITLE_CASE_ID=C.BLACK_TITLE_ID)
 LEFT JOIN PC_LOOKUP_COURT LC ON(LC.COURT_ID=B.COURT_ID)
 LEFT JOIN PC_LOOKUP_TITLE LT ON(LT.TITLE_ID=BB.NAME_TITLE_ID)
 --
+--court name join
+LEFT JOIN (SELECT plc.COURT_NAME_TH
+			FROM PC_PARAM pp
+			JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 = 1
 WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONTH}, 'MM-YYYY')]]>
 	</queryString>
 	<field name="BLACK_CASE_NO" class="java.lang.String">

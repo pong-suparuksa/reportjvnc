@@ -52,6 +52,7 @@
          ELSE '-' END PAYMENT_DATE_TEXT,
     CASE WHEN pfp.CHEQUE_AMOUNT > 0 THEN NVL(pfpc.CHEQUE_CODE ,'-') ELSE ' ' END    ACCOUNT_NO,
     plrt.RECEIPT_TYPE_NAME,
+    plrst.RECEIPT_SUB_TYPE_NAME, 
     pfrc.CANCEL_ID     
 --  
 FROM PC_FIN_RECEIPT pfr
@@ -134,6 +135,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 	<field name="RECEIPT_TYPE_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_TYPE_NAME"/>
 	</field>
+	<field name="RECEIPT_SUB_TYPE_NAME" class="java.lang.String"/>
 	<field name="CANCEL_ID" class="java.lang.String"/>
 	<variable name="GRAND_TOTAL_RECVAMOUNT" class="java.lang.Double" calculation="Sum">
 		<variableExpression><![CDATA[$F{TOTAL_RECEIVED_AMOUNT}]]></variableExpression>
@@ -555,7 +557,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				<textElement verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="16"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{RECEIPT_TYPE_NAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{RECEIPT_SUB_TYPE_NAME}==null?" ":$F{RECEIPT_SUB_TYPE_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="484" y="0" width="53" height="25" uuid="b030985c-15bd-40c8-bd48-367537c42036">

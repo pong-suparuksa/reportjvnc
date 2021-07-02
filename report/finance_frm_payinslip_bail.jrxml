@@ -2,10 +2,10 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="finance_frm_payinslip" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="6a214b07-32da-4750-b45b-f3010d720d1d">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.137:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_frm_payinslip_bail"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/finance_frm_payinslip_bail_files/main_jrxml"/>
@@ -13,54 +13,29 @@
 		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT * 
-FROM
-(SELECT 
-  NVL(plc.COURT_ID,'-')                         		COURT_ID,
-  NVL(plc.COURT_NAME_TH,'-')                    COURT_NAME_TH,
-  NVL(plc.TAX_ID,'-')                           		    TAX_ID,
-  NVL(pfcc.COMP_CODE,'-')                         COMP_CODE,
-  NVL(pfibf.CASE_ID,'-')                                CASE_ID,
-  NVL(pfibf.INVOICE_FORFEIT_ID,0)             INVOICE_ID,
-  NVL(pfibf.PAYER_NAME,'-')                        PAYER_NAME,
-  NVL(pfibf.REF1,'0')                                     REF1,
-  NVL(pfibf.REF2,'0')                                     REF2,
-  TO_CHAR(pcbf.DUE_DATE ,'DD/MM/YYYY')      DUE_DATE,
-  TO_CHAR(pcbf.DUE_DATE ,'DD/MM/YYYY')      CREATED_DATE,
-  NVL(pcbf.PAID_PERIOD_AMOUNT,0)                TOTAL_PAID_AMOUNT,
-  BAHT(pcbf.PAID_PERIOD_AMOUNT)                 TOTAL_PAID_AMOUNT_TEXT 
+		<![CDATA[SELECT  NVL(plc.COURT_ID, 0)                        COURT_ID
+ 	   ,NVL(plc.COURT_NAME_TH,'-')                  COURT_NAME_TH
+ 	   ,NVL(plc.TAX_ID,'0')                         TAX_ID
+ 	    --
+ 	   ,NVL(pfibf.CASE_ID,0)                        CASE_ID
+ 	   ,NVL(pfibf.INVOICE_FORFEIT_ID,0)             INVOICE_ID
+       ,NVL(pfibf.PAYER_NAME,'-')                   PAYER_NAME
+       ,NVL(pfibf.REF1,'0')                         REF1
+       ,NVL(pfibf.REF2,'0')                         REF2
+       --
+       ,THAILDATE(pfibf.DUE_DATE,1,0,0)             DUE_DATE
+       ,TO_CHAR(pfibf.PAYIN_DATE,'DD/MM/YYYY')      CREATED_DATE
+  	   ,NVL(pfibf.TOTAL_PAID_AMOUNT,0)              TOTAL_PAID_AMOUNT
+       ,BAHT(pfibf.TOTAL_PAID_AMOUNT)               TOTAL_PAID_AMOUNT_TEXT 
+       --
+       ,pfcc.COMP_CODE 
 FROM PC_FIN_INVOICE_BAILING_FORFEIT pfibf 
+LEFT JOIN PC_BAIL_BAILSMAN pbb ON pbb.BAILSMAN_ID = pfibf.BAILSMAN_ID AND pbb.REMOVED_BY = 0
+--
+LEFT JOIN PC_LOOKUP_TITLE plt ON plt.TITLE_ID = pbb.NAME_TITLE_ID AND plt.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pfibf.COURT_ID AND plc.REMOVED_BY = 0
---
-LEFT JOIN PC_BAIL pb ON pb.CASE_ID = pfibf.CASE_ID AND pb.REMOVED_BY = 0
-LEFT JOIN PC_BAIL_DETAIL pbd ON pbd.BAIL_ID = pb.BAIL_ID AND pbd.REMOVED_BY = 0
-LEFT JOIN PC_BAIL_SEC_BAIL pbsb ON pbsb.BAIL_ID = pb.BAIL_ID AND pbsb.REMOVED_BY = 0
-LEFT JOIN PC_BAIL_SEC_BAILSMAN pbsbm ON pbsbm.SEC_ID = pbsbm.SEC_ID AND pbsbm.REMOVED_BY = 0
---
-LEFT JOIN PC_BAIL_BAILSMAN_FORFEIT pcbf ON pcbf.BAIL_ID = pb.BAIL_ID 
-                                       AND pcbf.BAILSMAN_ID = pbsbm.BAILSMAN_ID
-                                       AND pcbf.DEFENDANT_ID  = pbd.DEFENDANT_ID 
-                                       AND pcbf.REMOVED_BY = 0
-CROSS JOIN PC_FIN_COMP_CODE pfcc
-WHERE pfibf.REMOVED_BY = 0
-UNION
-SELECT 
-   1                                           COURT_ID,
-  'สำนักงานศาลยุติธรรม'               COURT_NAME_TH,
-  '1234567890123'                   TAX_ID,
-  '909533'                                 COMP_CODE,
-   19                                          CASE_ID,  
-   1 									  	     INVOICE_ID,
-  'นายปรีดีพงษ์ สมัครใจ'				 PAYER_NAME,
-  '100162'                                 REF1,
-  '0201200901050001'             REF2,
-  '02/01/2019'                           DUE_DATE,
-  '02/01/2562'                           CREATED_DATE,
-  5000                                       TOTAL_PAID_AMOUNT,
-  BAHT(5000)                             TOTAL_PAID_AMOUNT_TEXT  
-FROM DUAL) A
-WHERE ROWNUM = 1
-AND INVOICE_ID = $P{INVOICE_ID}]]>
+LEFT JOIN PC_FIN_COMP_CODE pfcc ON pfcc.MONEY_TYPE_BY = pfibf.MONEY_TYPE_BY AND pfcc.REMOVED_BY = 0
+WHERE pfibf.INVOICE_FORFEIT_ID = $P{INVOICE_ID}]]>
 	</queryString>
 	<field name="COURT_ID" class="java.lang.Long">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_ID"/>
@@ -135,8 +110,9 @@ AND INVOICE_ID = $P{INVOICE_ID}]]>
 				<imageExpression><![CDATA["/images/court_logo.png"]]></imageExpression>
 			</image>
 			<textField>
-				<reportElement x="184" y="20" width="186" height="25" uuid="7ecce848-66f6-4f4a-b90d-00d5c27cc0dd">
+				<reportElement x="127" y="20" width="300" height="25" uuid="7ecce848-66f6-4f4a-b90d-00d5c27cc0dd">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="18" isBold="true"/>
@@ -199,7 +175,7 @@ AND INVOICE_ID = $P{INVOICE_ID}]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{DUE_DATE}+"-"+$F{DUE_DATE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{DUE_DATE}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="345" y="88" width="160" height="25" uuid="0d2d1129-ad5e-4397-8baa-31353fe847bf">
@@ -263,7 +239,7 @@ AND INVOICE_ID = $P{INVOICE_ID}]]>
 				</textElement>
 				<text><![CDATA[ช้อแนะนำในการชำระเงินผ่านระบบธนาคาร
 1.ใบแจ้งการชำระเงินฉบับนี้ สามารถชำระผ่านเครื่องฝากถอนเงินสดอัตโนมัติ (ATM), ผ่านธนาคาร และทางอินเตอร์เน็ตของธนาคารกรุงไทย
-2.กรณีผู้ชำระเงินไม่อาจชำระเงินได้ภายในวันที่คาลยุติธรรมหรือสำนักงานกำหนดไว้ ให้ถือว่าผู้ชำระเงินไม่ประสงค์ที่จะดำเนินการนั้นๆ ต่อไป
+2.กรณีผู้ชำระเงินไม่อาจชำระเงินได้ภายในวันที่ศาลยุติธรรมหรือสำนักงานกำหนดไว้ ให้ถือว่าผู้ชำระเงินไม่ประสงค์ที่จะดำเนินการนั้นๆ ต่อไป
 3.ให้นำหลักฐานการชำระเงินพร้อมใบแจ้งการชำระเงิน มาแสดงต่อเจ้าหน้าที่ของหน่วยงานในสังกัดสำนักงานศาลยุติธรรม เพื่อตรวจสอบความถูกต้องและขอรับ ต้นฉบับใบรับเงินต่อไป
 4.การชำระเงินผ่านธนาคาร ผู้ชำระเงินเป็นผู้เสียค่าธรรมเนียมที่ธนาคารเรียกเก็บตามอัตราของธนาคาร
 5.การชำระเงินผ่านระบบธนาคารจะสมบูรณ์เมื่อธนาคารได้โอนเงินเข้าบัญชีของหน่วยงานในสังกัดสำนักงานศาลยุติธรรมเรียบร้อยแล้ว]]></text>
@@ -299,8 +275,9 @@ AND INVOICE_ID = $P{INVOICE_ID}]]>
 				<imageExpression><![CDATA["/images/court_logo.png"]]></imageExpression>
 			</image>
 			<textField>
-				<reportElement x="183" y="410" width="186" height="25" uuid="623207de-139b-4906-b702-7e2a07e44529">
+				<reportElement x="127" y="410" width="300" height="25" uuid="623207de-139b-4906-b702-7e2a07e44529">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="18" isBold="true"/>
@@ -363,7 +340,7 @@ AND INVOICE_ID = $P{INVOICE_ID}]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{DUE_DATE}+"-"+$F{DUE_DATE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{DUE_DATE}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="344" y="478" width="160" height="25" uuid="0d90040d-2c60-41d2-970b-05f23acc38c9">
