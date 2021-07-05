@@ -3,14 +3,14 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="finance_frm_receipt" pageWidth="420" pageHeight="595" whenNoDataType="AllSectionsNoDetail" columnWidth="385" leftMargin="14" rightMargin="21" topMargin="14" bottomMargin="20" uuid="91ef4741-a901-4bf3-8b94-8304dcb4486b">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_frm_receipt"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="704"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="289"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="524"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="469"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/finance_frm_receipt_files/main_jrxml"/>
 	<parameter name="IS_PREPRINT" class="java.lang.Integer">
 		<parameterDescription><![CDATA[select for use pre-print papaer or not]]></parameterDescription>
@@ -71,6 +71,7 @@
        NVL(E.RECEIPT_SUB_TYPE_NAME,' ')   OTHER_FEE_DESC,
        TRUNC(NVL(E.AMOUNT,0))             OTHER_FEE_BAHT,
        REPLACE(TO_CHAR((NVL(E.AMOUNT,0))-TRUNC(NVL(E.AMOUNT,0)),'999D99MI'),'.','') OTHER_FEE_STANG, 
+       E.OTHER_DETAIL,
        --
        F.CASH,
        F.CHQCREDIT,
@@ -230,7 +231,8 @@ LEFT JOIN (SELECT pfrd.RECEIPT_ID,
 LEFT JOIN (SELECT pfrd.RECEIPT_ID,
                    plrst.RECEIPT_SUB_TYPE_NAME,
 			       NVL(pfrd.CASH_AMOUNT,0)+NVL(pfrd.CHEQUE_AMOUNT,0)+NVL(pfrd.TRANSFER_AMOUNT,0)+NVL(pfrd.CREDIT_AMOUNT,0) AMOUNT,
-			       plrt.RECEIPT_TYPE_CODE 
+			       plrt.RECEIPT_TYPE_CODE,
+			       pfrd.OTHER_DETAIL 
 			FROM PC_FIN_RECEIPT_DETAIL pfrd 
 			LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE
 			                                      AND plrt.REMOVED_BY = 0
@@ -492,6 +494,7 @@ AND pfr.RECEIPT_ID = $P{RECEIPT_ID}]]>
 	<field name="OTHER_FEE_STANG" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="OTHER_FEE_STANG"/>
 	</field>
+	<field name="OTHER_DETAIL" class="java.lang.String"/>
 	<field name="CASH" class="java.lang.Double">
 		<property name="com.jaspersoft.studio.field.label" value="CASH"/>
 	</field>
@@ -1549,7 +1552,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{COURTFEE_CASEENDDO
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{OTHER_FEE_DESC}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{OTHER_FEE_DESC}+($F{OTHER_DETAIL}==null?" ":$F{OTHER_DETAIL})]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="335" y="160" width="49" height="16" uuid="d2f2da02-94b1-4ea9-b912-b55ca50391d7"/>

@@ -2,10 +2,11 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report_temporary_release_statistics" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="d93cc675-dd20-4d59-988c-94ec80508898">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
 	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/ReportFeature/report_temporary_release_statistics"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/ReportFeature/report_temporary_release_statistics_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/01/2021"]]></defaultValueExpression>
 	</parameter>
@@ -13,162 +14,54 @@
 		<defaultValueExpression><![CDATA["10/10/2021"]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
-		<![CDATA[select distinct NVL(cou.COURT_NAME_TH, '') COURT_NAME_TH ,c.case_date , tc.title_case_name || ' ' || c.black_idnum || '/' || c.black_year case_no , al.allegation_name ,
-(
-    select count(distinct cl1.case_lit_id) 
-    from pc_case_lit cl1
-    join pc_lookup_lit_type lt1 ON (lt1.lit_type_id = cl1.litigant_type_id and lt1.lit_type_flag = '02') -- จำเลย
-    join pc_lookup_gender g1 on (g1.gender_id = cl1.litigant_sex and g1.gender_code = '001') -- 001 ชาย 002 หญิง
-    join pc_lookup_inter i1 on (i1.inter_id = cl1.inter_id and i1.inter_code = '10303') --  = '10303' ไทย, <> '10303' สัญชาติอื่น
-    where cl1.case_id = c.case_id 
-    and cl1.removed_by = 0
-) AS COL_1
-,
-(
-    select count(distinct cl1.case_lit_id) 
-    from pc_case_lit cl1
-    join pc_lookup_lit_type lt1 ON (lt1.lit_type_id = cl1.litigant_type_id and lt1.lit_type_flag = '02') -- จำเลย
-    join pc_lookup_gender g1 on (g1.gender_id = cl1.litigant_sex and g1.gender_code = '002') -- 001 ชาย 002 หญิง
-    join pc_lookup_inter i1 on (i1.inter_id = cl1.inter_id and i1.inter_code = '10303') --  = '10303' ไทย, <> '10303' สัญชาติอื่น
-    where cl1.case_id = c.case_id 
-    and cl1.removed_by = 0
-) AS COL_2
-,
-(
-    select count(distinct cl1.case_lit_id) 
-    from pc_case_lit cl1
-    join pc_lookup_lit_type lt1 ON (lt1.lit_type_id = cl1.litigant_type_id and lt1.lit_type_flag = '02') -- จำเลย
-    join pc_lookup_gender g1 on (g1.gender_id = cl1.litigant_sex and g1.gender_code = '001') -- 001 ชาย 002 หญิง
-    join pc_lookup_inter i1 on (i1.inter_id = cl1.inter_id and i1.inter_code <> '10303') --  = '10303' ไทย, <> '10303' สัญชาติอื่น
-    where cl1.case_id = c.case_id 
-    and cl1.removed_by = 0
-) AS COL_3
-,
-(
-    select count(distinct cl1.case_lit_id) 
-    from pc_case_lit cl1
-    join pc_lookup_lit_type lt1 ON (lt1.lit_type_id = cl1.litigant_type_id and lt1.lit_type_flag = '02') -- จำเลย
-    join pc_lookup_gender g1 on (g1.gender_id = cl1.litigant_sex and g1.gender_code = '002') -- 001 ชาย 002 หญิง
-    join pc_lookup_inter i1 on (i1.inter_id = cl1.inter_id and i1.inter_code <> '10303') --  = '10303' ไทย, <> '10303' สัญชาติอื่น
-    where cl1.case_id = c.case_id 
-    and cl1.removed_by = 0
-) AS COL_4
-,
-(
-    select count(distinct cl1.case_lit_id) 
-    from pc_case_lit cl1
-    join pc_bail b ON (b.case_id = c.case_id and b.removed_by = 0)
-    join pc_bail_defendant bd1 ON (bd1.bail_id = b.bail_id and bd1.defendant_id = cl1.case_lit_id)
-    join pc_lookup_lit_type lt1 ON (lt1.lit_type_id = cl1.litigant_type_id and lt1.lit_type_flag = '02') -- จำเลย
-    join pc_lookup_gender g1 on (g1.gender_id = cl1.litigant_sex and g1.gender_code = '001') -- 001 ชาย 002 หญิง
-    join pc_lookup_inter i1 on (i1.inter_id = cl1.inter_id and i1.inter_code = '10303') --  = '10303' ไทย, <> '10303' สัญชาติอื่น
-    where cl1.case_id = c.case_id 
-    AND b.court_order = 1 -- 1 = อนุญาติปล่อยตัวชั่วคราว
-    and cl1.removed_by = 0
-) AS COL_5
-,
-(
-    select count(distinct cl1.case_lit_id) 
-    from pc_case_lit cl1
-    join pc_bail b ON (b.case_id = c.case_id and b.removed_by = 0)
-    join pc_bail_defendant bd1 ON (bd1.bail_id = b.bail_id and bd1.defendant_id = cl1.case_lit_id)
-    join pc_lookup_lit_type lt1 ON (lt1.lit_type_id = cl1.litigant_type_id and lt1.lit_type_flag = '02') -- จำเลย
-    join pc_lookup_gender g1 on (g1.gender_id = cl1.litigant_sex and g1.gender_code = '002') -- 001 ชาย 002 หญิง
-    join pc_lookup_inter i1 on (i1.inter_id = cl1.inter_id and i1.inter_code = '10303') --  = '10303' ไทย, <> '10303' สัญชาติอื่น
-    where cl1.case_id = c.case_id 
-    AND b.court_order = 1 -- 1 = อนุญาติปล่อยตัวชั่วคราว
-    and cl1.removed_by = 0
-) AS COL_6
-,
-(
-    select count(distinct cl1.case_lit_id) 
-    from pc_case_lit cl1
-    join pc_bail b ON (b.case_id = c.case_id and b.removed_by = 0)
-    join pc_bail_defendant bd1 ON (bd1.bail_id = b.bail_id and bd1.defendant_id = cl1.case_lit_id)
-    join pc_lookup_lit_type lt1 ON (lt1.lit_type_id = cl1.litigant_type_id and lt1.lit_type_flag = '02') -- จำเลย
-    join pc_lookup_gender g1 on (g1.gender_id = cl1.litigant_sex and g1.gender_code = '001') -- 001 ชาย 002 หญิง
-    join pc_lookup_inter i1 on (i1.inter_id = cl1.inter_id and i1.inter_code <> '10303') --  = '10303' ไทย, <> '10303' สัญชาติอื่น
-    where cl1.case_id = c.case_id 
-    AND b.court_order = 1 -- 1 = อนุญาติปล่อยตัวชั่วคราว
-    and cl1.removed_by = 0
-) AS COL_7
-,
-(
-    select count(distinct cl1.case_lit_id) 
-    from pc_case_lit cl1
-    join pc_bail b ON (b.case_id = c.case_id and b.removed_by = 0)
-    join pc_bail_defendant bd1 ON (bd1.bail_id = b.bail_id and bd1.defendant_id = cl1.case_lit_id)
-    join pc_lookup_lit_type lt1 ON (lt1.lit_type_id = cl1.litigant_type_id and lt1.lit_type_flag = '02') -- จำเลย
-    join pc_lookup_gender g1 on (g1.gender_id = cl1.litigant_sex and g1.gender_code = '002') -- 001 ชาย 002 หญิง
-    join pc_lookup_inter i1 on (i1.inter_id = cl1.inter_id and i1.inter_code <> '10303') --  = '10303' ไทย, <> '10303' สัญชาติอื่น
-    where cl1.case_id = c.case_id 
-    AND b.court_order = 1 -- 1 = อนุญาติปล่อยตัวชั่วคราว
-    and cl1.removed_by = 0
-) AS COL_8
-,
-(
-    select count(distinct cl1.case_lit_id) 
-    from pc_case_lit cl1
-    join pc_bail b ON (b.case_id = c.case_id and b.removed_by = 0)
-    join pc_bail_defendant bd1 ON (bd1.bail_id = b.bail_id and bd1.defendant_id = cl1.case_lit_id)
-    join pc_lookup_lit_type lt1 ON (lt1.lit_type_id = cl1.litigant_type_id and lt1.lit_type_flag = '02') -- จำเลย
-    join pc_lookup_gender g1 on (g1.gender_id = cl1.litigant_sex and g1.gender_code = '001') -- 001 ชาย 002 หญิง
-    join pc_lookup_inter i1 on (i1.inter_id = cl1.inter_id and i1.inter_code = '10303') --  = '10303' ไทย, <> '10303' สัญชาติอื่น
-    where cl1.case_id = c.case_id 
-    AND (b.court_order <> 1 or b.court_order is null) -- 1 = อนุญาติปล่อยตัวชั่วคราว
-    and cl1.removed_by = 0
-) AS COL_9
-,
-(
-    select count(distinct cl1.case_lit_id) 
-    from pc_case_lit cl1
-    join pc_bail b ON (b.case_id = c.case_id and b.removed_by = 0)
-    join pc_bail_defendant bd1 ON (bd1.bail_id = b.bail_id and bd1.defendant_id = cl1.case_lit_id)
-    join pc_lookup_lit_type lt1 ON (lt1.lit_type_id = cl1.litigant_type_id and lt1.lit_type_flag = '02') -- จำเลย
-    join pc_lookup_gender g1 on (g1.gender_id = cl1.litigant_sex and g1.gender_code = '002') -- 001 ชาย 002 หญิง
-    join pc_lookup_inter i1 on (i1.inter_id = cl1.inter_id and i1.inter_code = '10303') --  = '10303' ไทย, <> '10303' สัญชาติอื่น
-    where cl1.case_id = c.case_id 
-    AND (b.court_order <> 1 or b.court_order is null) -- 1 = อนุญาติปล่อยตัวชั่วคราว
-    and cl1.removed_by = 0
-) AS COL_10
-,
-(
-    select count(distinct cl1.case_lit_id) 
-    from pc_case_lit cl1
-    join pc_bail b ON (b.case_id = c.case_id and b.removed_by = 0)
-    join pc_bail_defendant bd1 ON (bd1.bail_id = b.bail_id and bd1.defendant_id = cl1.case_lit_id)
-    join pc_lookup_lit_type lt1 ON (lt1.lit_type_id = cl1.litigant_type_id and lt1.lit_type_flag = '02') -- จำเลย
-    join pc_lookup_gender g1 on (g1.gender_id = cl1.litigant_sex and g1.gender_code = '001') -- 001 ชาย 002 หญิง
-    join pc_lookup_inter i1 on (i1.inter_id = cl1.inter_id and i1.inter_code <> '10303') --  = '10303' ไทย, <> '10303' สัญชาติอื่น
-    where cl1.case_id = c.case_id 
-    AND (b.court_order <> 1 or b.court_order is null) -- 1 = อนุญาติปล่อยตัวชั่วคราว
-    and cl1.removed_by = 0
-) AS COL_11
-,
-(
-    select count(distinct cl1.case_lit_id) 
-    from pc_case_lit cl1
-    join pc_bail b ON (b.case_id = c.case_id and b.removed_by = 0)
-    join pc_bail_defendant bd1 ON (bd1.bail_id = b.bail_id and bd1.defendant_id = cl1.case_lit_id)
-    join pc_lookup_lit_type lt1 ON (lt1.lit_type_id = cl1.litigant_type_id and lt1.lit_type_flag = '02') -- จำเลย
-    join pc_lookup_gender g1 on (g1.gender_id = cl1.litigant_sex and g1.gender_code = '002') -- 001 ชาย 002 หญิง
-    join pc_lookup_inter i1 on (i1.inter_id = cl1.inter_id and i1.inter_code <> '10303') --  = '10303' ไทย, <> '10303' สัญชาติอื่น
-    where cl1.case_id = c.case_id 
-    AND (b.court_order <> 1 or b.court_order is null) -- 1 = อนุญาติปล่อยตัวชั่วคราว
-    and cl1.removed_by = 0
-) AS COL_12
-from pc_case c
-join pc_lookup_title_case tc ON (tc.title_case_id = c.black_title_id)
-join pc_case_alle ca ON (ca.case_id = c.case_id and ca.removed_by = 0)
-join pc_lookup_allegation al ON (ca.allegation_id = al.allegation_id)
---ชื่อศาล
-CROSS JOIN (SELECT plc.COURT_NAME_TH
-             FROM PC_PARAM pp
-             JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
-             WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
-where c.removed_by = 0
-AND c.CREATED_DATE BETWEEN TO_DATE( $P{START_DATE}  || 'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') AND TO_DATE(  $P{END_DATE}  || 'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
-ORDER BY CASE_NO]]>
+		<![CDATA[SELECT cou.COURT_NAME_TH
+      ,pc.CASE_DATE
+      ,pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR CASE_NO
+	  ,NVL(pc.ALLE_DESC,alle.ALLE_NAME) ALLEGATION_NAME
+	  --thai nation
+	  ,SUM(CASE WHEN lit.INTER_CODE = 10303 AND lit.LITIGANT_SEX = 1 THEN 1 ELSE 0 END) OVER (PARTITION BY pb.CASE_ID ORDER BY pb.CASE_ID)  COL_1
+	  ,SUM(CASE WHEN lit.INTER_CODE = 10303 AND lit.LITIGANT_SEX = 2 THEN 1 ELSE 0 END) OVER (PARTITION BY pb.CASE_ID ORDER BY pb.CASE_ID)  COL_2
+	  --other nation
+	  ,SUM(CASE WHEN lit.INTER_CODE <> 10303 AND lit.LITIGANT_SEX = 1 THEN 1 ELSE 0 END) OVER (PARTITION BY pb.CASE_ID ORDER BY pb.CASE_ID)  COL_3
+	  ,SUM(CASE WHEN lit.INTER_CODE <> 10303 AND lit.LITIGANT_SEX = 2 THEN 1 ELSE 0 END) OVER (PARTITION BY pb.CASE_ID ORDER BY pb.CASE_ID)  COL_4
+	  --thai nation allow
+	  ,SUM(CASE WHEN NVL(pb.COURT_ORDER,0) = 1 AND lit.INTER_CODE = 10303 AND lit.LITIGANT_SEX = 1 THEN 1 ELSE 0 END) OVER (PARTITION BY pb.CASE_ID ORDER BY pb.CASE_ID)  COL_5
+	  ,SUM(CASE WHEN NVL(pb.COURT_ORDER,0) = 1 AND lit.INTER_CODE = 10303 AND lit.LITIGANT_SEX = 2 THEN 1 ELSE 0 END) OVER (PARTITION BY pb.CASE_ID ORDER BY pb.CASE_ID)  COL_6
+	  --other nation allow
+	  ,SUM(CASE WHEN NVL(pb.COURT_ORDER,0) = 1 AND lit.INTER_CODE <> 10303 AND lit.LITIGANT_SEX = 1 THEN 1 ELSE 0 END) OVER (PARTITION BY pb.CASE_ID ORDER BY pb.CASE_ID)  COL_7
+	  ,SUM(CASE WHEN NVL(pb.COURT_ORDER,0) = 1 AND lit.INTER_CODE <> 10303 AND lit.LITIGANT_SEX = 2 THEN 1 ELSE 0 END) OVER (PARTITION BY pb.CASE_ID ORDER BY pb.CASE_ID)  COL_8
+	   --thai nation not allow
+	  ,SUM(CASE WHEN NVL(pb.COURT_ORDER,0) <> 1 AND lit.INTER_CODE = 10303 AND lit.LITIGANT_SEX = 1 THEN 1 ELSE 0 END) OVER (PARTITION BY pb.CASE_ID ORDER BY pb.CASE_ID)  COL_9
+	  ,SUM(CASE WHEN NVL(pb.COURT_ORDER,0) <> 1 AND lit.INTER_CODE = 10303 AND lit.LITIGANT_SEX = 2 THEN 1 ELSE 0 END) OVER (PARTITION BY pb.CASE_ID ORDER BY pb.CASE_ID)  COL_10
+	  --other nation allow
+	  ,SUM(CASE WHEN NVL(pb.COURT_ORDER,0) <> 1 AND lit.INTER_CODE <> 10303 AND lit.LITIGANT_SEX = 1 THEN 1 ELSE 0 END) OVER (PARTITION BY pb.CASE_ID ORDER BY pb.CASE_ID)  COL_11
+	  ,SUM(CASE WHEN NVL(pb.COURT_ORDER,0) <> 1 AND lit.INTER_CODE <> 10303 AND lit.LITIGANT_SEX = 2 THEN 1 ELSE 0 END) OVER (PARTITION BY pb.CASE_ID ORDER BY pb.CASE_ID)  COL_12
+FROM PC_BAIL pb 
+--case
+LEFT JOIN PC_CASE pc ON pc.CASE_ID = pb.CASE_ID AND pc.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
+--allegation
+LEFT JOIN (SELECT pca.CASE_ID, LISTAGG(pla.ALLEGATION_NAME, ',') WITHIN GROUP(ORDER BY pla.ALLEGATION_NAME) ALLE_NAME
+		   FROM PC_CASE_ALLE pca
+		   LEFT JOIN PC_LOOKUP_ALLEGATION pla ON pla.ALLEGATION_ID = pca.ALLEGATION_ID AND pla.REMOVED_BY = 0
+		   WHERE pca.REMOVED_BY = 0
+		   GROUP BY pca.CASE_ID) alle ON alle.CASE_ID = pb.CASE_ID 
+--litigant
+LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_SEX, pli.INTER_CODE
+		   FROM PC_CASE_LIT pcl 
+		   LEFT JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0
+		   LEFT JOIN PC_LOOKUP_INTER pli ON pli.INTER_ID = pcl.INTER_ID AND pli.REMOVED_BY = 0
+		   WHERE pcl.REMOVED_BY = 0
+		   AND pllt.LIT_TYPE_CODE IN ('03','04')) lit ON lit.CASE_ID = pb.CASE_ID 
+--court name
+LEFT JOIN (SELECT plc.COURT_NAME_TH
+			FROM PC_PARAM pp
+			JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 = 1
+WHERE pb.REMOVED_BY = 0
+AND pb.CREATED_DATE BETWEEN TO_DATE( $P{START_DATE}  || 'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                     AND TO_DATE( $P{END_DATE}  || 'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
