@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="consult_rpt_appoint_account" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="beef715e-ef4f-4f72-9e92-17f2da6339ac">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-229"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/consulting/consult_rpt_appoint_account"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/consulting/consult_rpt_appoint_account_files/main_jrxml"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="342"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="651"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/12/2020"]]></defaultValueExpression>
 	</parameter>
@@ -28,6 +30,9 @@
 	pa.CHILD_PREFIX ,
 	pa.CHILD_FIRSTNAME ,
 	pa.CHILD_LASTNAME,
+	pap.PARENT_PREFIX,
+	pap.PARENT_FIRSTNAME,
+	pap.PARENT_LASTNAME,
 	MIN(paa.APPOINT_REASON) AS APPOINT_REASON,
 	MIN(paa.APPOINT_DESC) AS APPOINT_DESC,
 	NVL(plc.COURT_NAME_TH, '') COURT_NAME_TH
@@ -35,6 +40,8 @@ FROM
 	PC_ADVICE pa
 JOIN PC_ADVICE_APPOINT paa ON
 	pa.ADVICE_ID = paa.ADVICE_ID
+JOIN PC_ADVICE_PARENT pap ON 
+	pap.ADVICE_ID = pa.ADVICE_ID 
 --
 LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pa.COURT_ID AND plc.REMOVED_BY = 0	
 --
@@ -50,24 +57,27 @@ GROUP BY
 	pa.CHILD_PREFIX ,
 	pa.CHILD_FIRSTNAME ,
 	pa.CHILD_LASTNAME,
+    pap.PARENT_PREFIX,
+	pap.PARENT_FIRSTNAME,
+	pap.PARENT_LASTNAME,
 	COURT_NAME_TH]]>
 	</queryString>
-	<field name="ROW_NUM" class="java.math.BigDecimal">
+	<field name="ROW_NUM" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="ROW_NUM"/>
 	</field>
-	<field name="ADVICE_ID" class="java.math.BigDecimal">
+	<field name="ADVICE_ID" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="ADVICE_ID"/>
 	</field>
-	<field name="SP_CASE_ID" class="java.math.BigDecimal">
+	<field name="SP_CASE_ID" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="SP_CASE_ID"/>
 	</field>
-	<field name="SP_CASE_YEAR" class="java.math.BigDecimal">
+	<field name="SP_CASE_YEAR" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="SP_CASE_YEAR"/>
 	</field>
-	<field name="CASE_ID" class="java.math.BigDecimal">
+	<field name="CASE_ID" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="CASE_ID"/>
 	</field>
-	<field name="CASE_YEAR" class="java.math.BigDecimal">
+	<field name="CASE_YEAR" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="CASE_YEAR"/>
 	</field>
 	<field name="CHILD_PREFIX" class="java.lang.String">
@@ -78,6 +88,15 @@ GROUP BY
 	</field>
 	<field name="CHILD_LASTNAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="CHILD_LASTNAME"/>
+	</field>
+	<field name="PARENT_PREFIX" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PARENT_PREFIX"/>
+	</field>
+	<field name="PARENT_FIRSTNAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PARENT_FIRSTNAME"/>
+	</field>
+	<field name="PARENT_LASTNAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PARENT_LASTNAME"/>
 	</field>
 	<field name="APPOINT_REASON" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="APPOINT_REASON"/>
@@ -258,7 +277,7 @@ GROUP BY
 				<textElement verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{APPOINT_REASON}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{PARENT_PREFIX}+$F{PARENT_FIRSTNAME}+" "+$F{PARENT_LASTNAME}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="320" y="0" width="150" height="30" uuid="e25c98ed-abe1-41ca-b5e4-95e3e2ea9ea8">
@@ -273,7 +292,7 @@ GROUP BY
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CHILD_PREFIX}  + $F{CHILD_FIRSTNAME} + $F{CHILD_LASTNAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{CHILD_PREFIX}  + $F{CHILD_FIRSTNAME} +" " +  $F{CHILD_LASTNAME}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="150" y="0" width="80" height="30" uuid="872dde1d-172a-4cd2-b0aa-d74aeabcf40b"/>
