@@ -29,83 +29,40 @@
 		<defaultValueExpression><![CDATA[99]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
-		<![CDATA[SELECT pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR  BLACK_CASE_NO,
-CASE WHEN pb.COURT_ORDER  = 1 THEN 'อนุญาต' ELSE 'ไม่อนุญาต' END COURT_ORDER_TEXT,
-plt.TITLE_NAME || pbb.NAME || ' ' ||pbb.LASTNAME BAILSMAN,
-NVL(pbs.TOTAL_AMOUNT ,0)   BAIL_COST,
-pc.PROS_DESC,
-pc.ACCU_DESC,
-pc.ALLE_DESC,
-plj.JUDGE_NAME,
-CASE
-    WHEN pbsa.SEC_ID > 0 THEN 'บัญชีประกันด้วยสมุดเงินฝาก'
-    WHEN pbsl.SEC_ID > 0 THEN 'บัญชีประกันด้วยที่ดิน'
-    WHEN pbsb.SEC_ID > 0 AND pbsb.BOND_TYPE_ID = 1 THEN 'บัญชีประกันด้วยพันธบัตร'
-    WHEN pbsb.SEC_ID > 0 AND pbsb.BOND_TYPE_ID = 2 THEN 'บัญชีประกันด้วยสลากออมทรัพย์'
-    WHEN pbsbgt.SEC_ID > 0 THEN  'บัญชีประกันด้วยหลักทรัพย์หนังสือรับรองของธนาคาร'
-    WHEN pbsi.SEC_ID > 0 THEN 'บัญชีประกันด้วยกรมธรรม์'
-    WHEN pbscd.SEC_ID > 0 THEN 'บัญชีประกันด้วยห้องชุด'
-    WHEN pbsp.SEC_ID > 0 THEN 'บัญชีประกันด้วยตำแหน่ง'
-    WHEN pspc.SEC_ID > 0 THEN 'บัญชีประกันด้วยเงินสด'
-    WHEN pbsac.SEC_ID > 0 THEN 'หนังสือรับรองโดยต้นสังกัด'
-    ELSE ''
-END "TYPE_NAME",
-LISTAGG(pla.ALLEGATION_NAME, ', ') WITHIN GROUP (ORDER BY pla.ALLEGATION_NAME) "ALLE"
+		<![CDATA[SELECT pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR  BLACK_CASE_NO
+       ,pc.PROS_DESC 
+       ,pc.ACCU_DESC
+       ,pbb.FULLNAME
+       ,NVL(pc.ALLE_DESC,alle.ALLE_NAME) ALLE_DESC 
+       ,pbs.TOTAL_AMOUNT BAIL_COST
+       ,pbst.TYPE_NAME 
+       ,pb.COURT_ORDER 
+       ,CASE WHEN pb.COURT_ORDER  = 1 THEN 'อนุญาต' ELSE 'ไม่อนุญาต' END COURT_ORDER_TEXT
+       ,plj.JUDGE_NAME 
 FROM PC_BAIL pb 
-LEFT JOIN PC_BAIL_BAILSMAN pbb ON pbb.BAIL_ID = pb.BAIL_ID AND pbb.REMOVED_BY = 0
+LEFT JOIN PC_BAIL_SEC pbs ON pbs.BAIL_ID = pb.BAIL_ID AND pbs.REMOVED_BY = 0
+LEFT JOIN PC_BAIL_BAILSMAN pbb ON pbb.BAILSMAN_ID = pbs.BAILSMAN_ID AND pbb.REMOVED_BY = 0
+LEFT JOIN PC_BAIL_SEC_TYPE pbst ON pbst.TYPE_CODE = pbs.SEC_TYPE_CODE AND pbst.REMOVED_BY = 0
+--case
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pb.CASE_ID AND pc.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID
-LEFT JOIN PC_CASE_ALLE pca ON pca.CASE_ID = pc.CASE_ID 
-LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pb.JUDGE_ID AND plj.REMOVED_BY = 0
-LEFT JOIN PC_BAIL_SEC pbs ON pbs.BAILSMAN_ID = pbb.BAILSMAN_ID AND pbs.REMOVED_BY = 0
-LEFT JOIN PC_BAIL_SEC_ACCOUNT pbsa ON pbsa.SEC_ID = pbs.SEC_ID AND pbsa.REMOVED_BY = 0
-LEFT JOIN PC_BAIL_SEC_LAND pbsl ON pbsl.SEC_ID = pbs.SEC_ID AND pbsl.REMOVED_BY = 0
-LEFT JOIN PC_BAIL_SEC_BOND pbsb ON pbsb.SEC_ID = pbs.SEC_ID AND pbsb.REMOVED_BY = 0
-LEFT JOIN PC_BAIL_SEC_BANKGUARANTEE pbsbgt ON pbsbgt.SEC_ID = pbs.SEC_ID AND pbsbgt.REMOVED_BY = 0
-LEFT JOIN PC_BAIL_SEC_INSURANCE pbsi ON pbsi.SEC_ID = pbs.SEC_ID AND pbsi.REMOVED_BY = 0
-LEFT JOIN PC_BAIL_SEC_CONDO pbscd ON pbscd.SEC_ID = pbs.SEC_ID AND pbscd.REMOVED_BY = 0
-LEFT JOIN PC_BAIL_SEC_POSITION pbsp ON pbsp.SEC_ID = pbs.SEC_ID AND pbsp.REMOVED_BY = 0
-LEFT JOIN PC_BAIL_SEC_CASH pspc ON pspc.SEC_ID = pbs.SEC_ID AND pspc.REMOVED_BY = 0
-LEFT JOIN PC_BAIL_SEC_AFFILIATE_CERTIFICATE pbsac ON pbsac.SEC_ID = pbs.SEC_ID AND pbsac.REMOVED_BY = 0
-LEFT JOIN PC_BAIL_BOND_TYPE plbt ON plbt.BOND_TYPE_ID=pbsb.BOND_TYPE_ID AND plbt.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_ALLEGATION pla ON pla.ALLEGATION_ID = pca.ALLEGATION_ID
-LEFT JOIN PC_LOOKUP_TITLE plt ON plt.TITLE_ID = pbb.NAME_TITLE_ID AND plt.REMOVED_BY = 0
-WHERE (pb.BAIL_PERIOD = $P!{BAIL_PERIOD} OR 99 = $P!{BAIL_PERIOD}) AND pb.REMOVED_BY = 0
-AND pb.BAIL_DATE BETWEEN TO_DATE( $P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
-GROUP BY pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR,
-    CASE WHEN pb.COURT_ORDER  = 1 THEN 'อนุญาต' ELSE 'ไม่อนุญาต' END,
-    plt.TITLE_NAME || pbb.NAME || ' ' ||pbb.LASTNAME,
-    NVL(pbs.TOTAL_AMOUNT,0),
-    pc.PROS_DESC,
-    pc.ACCU_DESC,
-    pc.ALLE_DESC,
-    plj.JUDGE_NAME,
-    CASE
-        WHEN pbsa.SEC_ID > 0 THEN 'บัญชีประกันด้วยสมุดเงินฝาก'
-        WHEN pbsl.SEC_ID > 0 THEN 'บัญชีประกันด้วยที่ดิน'
-        WHEN pbsb.SEC_ID > 0 AND pbsb.BOND_TYPE_ID = 1 THEN 'บัญชีประกันด้วยพันธบัตร'
-        WHEN pbsb.SEC_ID > 0 AND pbsb.BOND_TYPE_ID = 2 THEN 'บัญชีประกันด้วยสลากออมทรัพย์'
-        WHEN pbsbgt.SEC_ID > 0 THEN  'บัญชีประกันด้วยหลักทรัพย์หนังสือรับรองของธนาคาร'
-        WHEN pbsi.SEC_ID > 0 THEN 'บัญชีประกันด้วยกรมธรรม์'
-        WHEN pbscd.SEC_ID > 0 THEN 'บัญชีประกันด้วยห้องชุด'
-        WHEN pbsp.SEC_ID > 0 THEN 'บัญชีประกันด้วยตำแหน่ง'
-        WHEN pspc.SEC_ID > 0 THEN 'บัญชีประกันด้วยเงินสด'
-        WHEN pbsac.SEC_ID > 0 THEN 'หนังสือรับรองโดยต้นสังกัด'
-        ELSE ''
-    END
-ORDER BY CASE WHEN pb.COURT_ORDER  = 1 THEN 'อนุญาต' ELSE 'ไม่อนุญาต' END]]>
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc.REMOVED_BY = 0
+--allegation
+LEFT JOIN (SELECT pca.CASE_ID, LISTAGG(pla.ALLEGATION_NAME, ',') WITHIN GROUP(ORDER BY pla.ALLEGATION_NAME) ALLE_NAME
+		   FROM PC_CASE_ALLE pca
+		   LEFT JOIN PC_LOOKUP_ALLEGATION pla ON pla.ALLEGATION_ID = pca.ALLEGATION_ID
+		   WHERE pca.REMOVED_BY = 0
+		   GROUP BY pca.CASE_ID) alle ON alle.CASE_ID = pb.CASE_ID 
+--judge
+LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pb.JUDGE_ID AND plj.REMOVED_BY = 0 AND plj.FLAG_JUDGE = 1
+WHERE pb.REMOVED_BY = 0 
+AND (pb.BAIL_PERIOD = $P!{BAIL_PERIOD} OR 99 = $P!{BAIL_PERIOD}) 
+AND pb.BAIL_DATE BETWEEN TO_DATE( $P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                     AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+ORDER BY pb.COURT_ORDER 
+]]>
 	</queryString>
 	<field name="BLACK_CASE_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="BLACK_CASE_NO"/>
-	</field>
-	<field name="COURT_ORDER_TEXT" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="COURT_ORDER_TEXT"/>
-	</field>
-	<field name="BAILSMAN" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="BAILSMAN"/>
-	</field>
-	<field name="BAIL_COST" class="java.lang.Double">
-		<property name="com.jaspersoft.studio.field.label" value="BAIL_COST"/>
 	</field>
 	<field name="PROS_DESC" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="PROS_DESC"/>
@@ -113,17 +70,26 @@ ORDER BY CASE WHEN pb.COURT_ORDER  = 1 THEN 'อนุญาต' ELSE 'ไม่
 	<field name="ACCU_DESC" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="ACCU_DESC"/>
 	</field>
+	<field name="FULLNAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="FULLNAME"/>
+	</field>
 	<field name="ALLE_DESC" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="ALLE_DESC"/>
 	</field>
-	<field name="JUDGE_NAME" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="JUDGE_NAME"/>
+	<field name="BAIL_COST" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.label" value="BAIL_COST"/>
 	</field>
 	<field name="TYPE_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="TYPE_NAME"/>
 	</field>
-	<field name="ALLE" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="ALLE"/>
+	<field name="COURT_ORDER" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="COURT_ORDER"/>
+	</field>
+	<field name="COURT_ORDER_TEXT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="COURT_ORDER_TEXT"/>
+	</field>
+	<field name="JUDGE_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="JUDGE_NAME"/>
 	</field>
 	<variable name="VAR_CNTCASE" class="java.lang.Long" calculation="Count"/>
 	<group name="GRP_ALLOW"/>
@@ -440,7 +406,7 @@ ORDER BY CASE WHEN pb.COURT_ORDER  = 1 THEN 'อนุญาต' ELSE 'ไม่
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{BAILSMAN}  == null ?  ""  :  $F{BAILSMAN}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{FULLNAME}  == null ?  ""  :  $F{FULLNAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="404" y="0" width="90" height="25" uuid="47c8eb35-8a66-4392-ad23-2e4d280bd699">
