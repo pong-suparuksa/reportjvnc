@@ -11,13 +11,14 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/bail_rpt_bailman_breach"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="169"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="826"/>
 	<property name="com.jaspersoft.studio.report.description" value="44.รายงานผิดสัญญาประกัน"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/bail_rpt_bailman_breach_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/05/2021"]]></defaultValueExpression>
 	</parameter>
@@ -94,7 +95,7 @@ AND pbbb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T
 						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font fontName="TH Sarabun New" size="14"/>
+						<font fontName="TH Sarabun New" size="12"/>
 					</textElement>
 					<textFieldExpression><![CDATA["รวม "]]></textFieldExpression>
 				</textField>
@@ -111,7 +112,7 @@ AND pbbb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T
 						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font fontName="TH Sarabun New" size="14"/>
+						<font fontName="TH Sarabun New" size="12"/>
 					</textElement>
 					<textFieldExpression><![CDATA[" "]]></textFieldExpression>
 				</textField>
@@ -128,7 +129,7 @@ AND pbbb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T
 						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font fontName="TH Sarabun New" size="14"/>
+						<font fontName="TH Sarabun New" size="12"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$V{SUM_AMOUNT}==null?"0":new java.text.DecimalFormat("#,##0.##").format($V{SUM_AMOUNT})]]></textFieldExpression>
 				</textField>
@@ -146,7 +147,7 @@ AND pbbb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T
 						<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					</box>
 					<textElement textAlignment="Right" verticalAlignment="Middle">
-						<font fontName="TH Sarabun New" size="14"/>
+						<font fontName="TH Sarabun New" size="12"/>
 					</textElement>
 					<textFieldExpression><![CDATA[" "]]></textFieldExpression>
 				</textField>
@@ -156,10 +157,10 @@ AND pbbb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T
 	<background>
 		<band splitType="Stretch"/>
 	</background>
-	<pageHeader>
-		<band height="65" splitType="Stretch">
+	<title>
+		<band height="50">
 			<textField>
-				<reportElement x="180" y="0" width="400" height="25" uuid="3eb5cb52-88d0-4d5a-a66e-b936442ba1d9">
+				<reportElement x="0" y="0" width="801" height="25" uuid="3eb5cb52-88d0-4d5a-a66e-b936442ba1d9">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -168,22 +169,26 @@ AND pbbb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T
 				<textFieldExpression><![CDATA["บัญชีนายประกันผิดสัญญา"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="730" y="30" width="70" height="25" uuid="1e7fc211-95b6-4a07-8b14-e284f28345ea">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
-				</textElement>
-				<textFieldExpression><![CDATA["แผ่นที่ "+$V{PAGE_NUMBER}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="80" y="25" width="600" height="25" uuid="9f5b695c-51a9-4a74-9a37-1d10ce45fdcf">
+				<reportElement x="0" y="25" width="801" height="25" uuid="9f5b695c-51a9-4a74-9a37-1d10ce45fdcf">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="16" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["ระหว่างวันที่ " + new java.text.SimpleDateFormat("d MMM yy", new Locale("TH","th")).format(DATE(Integer.valueOf($P{START_DATE}.substring(6,10)),Integer.valueOf($P{START_DATE}.substring(3,5)),Integer.valueOf($P{START_DATE}.substring(0,2))))  + " ถึงวันที่ " + new java.text.SimpleDateFormat("d MMM yy", new Locale("TH","th")).format(DATE(Integer.valueOf($P{END_DATE}.substring(6,10)),Integer.valueOf($P{END_DATE}.substring(3,5)),Integer.valueOf($P{END_DATE}.substring(0,2))))]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="25" splitType="Stretch">
+			<textField>
+				<reportElement x="680" y="0" width="121" height="25" uuid="1e7fc211-95b6-4a07-8b14-e284f28345ea">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA["แผ่นที่ "+$V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>
@@ -202,7 +207,7 @@ AND pbbb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="TH Sarabun New" size="15" isBold="true"/>
 				</textElement>
 				<text><![CDATA[หมายเลขดำที่]]></text>
 			</staticText>
@@ -218,7 +223,7 @@ AND pbbb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="TH Sarabun New" size="15" isBold="true"/>
 				</textElement>
 				<text><![CDATA[วันที่ผิดสัญญา]]></text>
 			</staticText>
@@ -234,7 +239,7 @@ AND pbbb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="TH Sarabun New" size="15" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ชื่อ และ นามสกุล นายประกัน]]></text>
 			</staticText>
@@ -250,7 +255,7 @@ AND pbbb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="TH Sarabun New" size="15" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ประเภททรัพย์]]></text>
 			</staticText>
@@ -266,7 +271,7 @@ AND pbbb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="TH Sarabun New" size="15" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ค่าปรับ]]></text>
 			</staticText>
@@ -282,7 +287,7 @@ AND pbbb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="TH Sarabun New" size="15" isBold="true"/>
 				</textElement>
 				<text><![CDATA[หมายเหตุ]]></text>
 			</staticText>
@@ -302,7 +307,7 @@ AND pbbb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BLACK_CASE_NO} == null ?  "-"  : $F{BLACK_CASE_NO}]]></textFieldExpression>
 			</textField>
@@ -317,7 +322,7 @@ AND pbbb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BREACH_START_DATE}== null ?  "-"  :  $F{BREACH_START_DATE}]]></textFieldExpression>
 			</textField>
@@ -332,7 +337,7 @@ AND pbbb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BAILMAN_FULL_NAME} == null ?  "-"  :  $F{BAILMAN_FULL_NAME}]]></textFieldExpression>
 			</textField>
@@ -347,7 +352,7 @@ AND pbbb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{SEC_TYPE}==null?" ":$F{SEC_TYPE}]]></textFieldExpression>
 			</textField>
@@ -362,7 +367,7 @@ AND pbbb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{AMOUNT}==null?0: new java.text.DecimalFormat("#,##0.##").format($F{AMOUNT})]]></textFieldExpression>
 			</textField>
@@ -377,13 +382,10 @@ AND pbbb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BREACH_DESCRIPTION}==null ? " " : $F{BREACH_DESCRIPTION}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
-	<columnFooter>
-		<band height="27" splitType="Stretch"/>
-	</columnFooter>
 </jasperReport>
