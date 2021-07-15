@@ -11,6 +11,7 @@
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="524"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="469"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/finance_frm_receipt_files/main_jrxml"/>
 	<parameter name="IS_PREPRINT" class="java.lang.Integer">
 		<parameterDescription><![CDATA[select for use pre-print papaer or not]]></parameterDescription>
 		<defaultValueExpression><![CDATA[0]]></defaultValueExpression>
@@ -88,7 +89,9 @@
   	   NVL(pup_r.USER_PROFILE_FULL_NAME,' ')  RECEIVER,
        NVL(pup_d.USER_PROFILE_FULL_NAME,' ')  DIRECTOR,
        --ตำแหน่ง
-       pp.POSITION_NAME 
+       pp.POSITION_NAME,
+       pfr.COURT_LEVEL_NAME,
+       pfr.ISSUE_COUNT
 --
 FROM PC_FIN_RECEIPT pfr 
 --------------------------------------------------------------หมายเลขดำ------------------------------------------------------------
@@ -129,7 +132,7 @@ LEFT JOIN (SELECT pfrd.RECEIPT_ID,
 			                                           AND plrst.REMOVED_BY = 0 
 			WHERE pfrd.REMOVED_BY = 0
 			AND plrt.RECEIPT_TYPE_CODE = 2 
-			AND plrst.RECEIPT_SUB_TYPE_CODE ='001') B1 ON B1.RECEIPT_ID = pfr.RECEIPT_ID	
+			AND plrst.RECEIPT_SUB_TYPE_CODE ='017') B1 ON B1.RECEIPT_ID = pfr.RECEIPT_ID	
 --ค่าขึ้นศาลอนาคต
 LEFT JOIN (SELECT pfrd.RECEIPT_ID,
                    plrst.RECEIPT_SUB_TYPE_NAME,
@@ -199,7 +202,7 @@ LEFT JOIN (SELECT pfrd.RECEIPT_ID,
 			                                           AND plrst.REMOVED_BY = 0 
 			WHERE pfrd.REMOVED_BY = 0
 			AND plrt.RECEIPT_TYPE_CODE = 2 
-			AND plrst.RECEIPT_SUB_TYPE_CODE ='004') B5 ON B5.RECEIPT_ID = pfr.RECEIPT_ID
+			AND plrst.RECEIPT_SUB_TYPE_CODE ='020') B5 ON B5.RECEIPT_ID = pfr.RECEIPT_ID
 ------------------------------------------------------------ค่าปรับ------------------------------------------------------------
 LEFT JOIN (SELECT pfrd.RECEIPT_ID,
                    plrst.RECEIPT_SUB_TYPE_NAME,
@@ -563,6 +566,8 @@ AND pfr.RECEIPT_ID = $P{RECEIPT_ID}]]>
 	<field name="POSITION_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="POSITION_NAME"/>
 	</field>
+	<field name="COURT_LEVEL_NAME" class="java.lang.String"/>
+	<field name="ISSUE_COUNT" class="java.lang.Integer"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -1203,7 +1208,7 @@ AND pfr.RECEIPT_ID = $P{RECEIPT_ID}]]>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA["ระดับขึ้นศาล"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{COURT_LEVEL_NAME}==null?" ": $F{COURTFEE_BAHT}==0?" ":$F{COURT_LEVEL_NAME}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="250" y="48" width="85" height="16" uuid="f7edad0f-b27c-46bf-bba0-2cb3816f1058"/>
@@ -2308,8 +2313,8 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{COURTFEE_CASEENDDO
 					<pen lineStyle="Dotted"/>
 				</graphicElement>
 			</line>
-			<staticText>
-				<reportElement x="120" y="96" width="130" height="16" uuid="a51d2a5e-b212-4d5c-8907-dd3474322a0c">
+			<textField>
+				<reportElement x="120" y="96" width="130" height="16" uuid="d654b1e6-50b6-4942-9017-3d5b478d247e">
 					<property name="com.jaspersoft.studio.unit.x" value="cm"/>
 				</reportElement>
 				<box leftPadding="5">
@@ -2322,8 +2327,8 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{COURTFEE_CASEENDDO
 				<textElement textAlignment="Left" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
-				<text><![CDATA[1 ฉบับ]]></text>
-			</staticText>
+				<textFieldExpression><![CDATA[$F{ISSUE_COUNT}==null?" ": $F{COURTFEE_COPYAPPRV_BAHT}==0?" ":$F{ISSUE_COUNT}+" ฉบับ"]]></textFieldExpression>
+			</textField>
 		</band>
 	</detail>
 	<summary>
