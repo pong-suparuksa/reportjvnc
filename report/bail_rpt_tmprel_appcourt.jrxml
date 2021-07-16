@@ -2,7 +2,7 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="bail_rpt_tmprel_appcourt" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="21e58027-36f9-4d26-bcd5-4608c14b782d">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/bail_rpt_tmprel_appcourt"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="196"/>
@@ -58,8 +58,7 @@ WHERE pb.REMOVED_BY = 0
 AND (pb.BAIL_PERIOD = $P!{BAIL_PERIOD} OR 99 = $P!{BAIL_PERIOD}) 
 AND pb.BAIL_DATE BETWEEN TO_DATE( $P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
                      AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
-ORDER BY pb.COURT_ORDER 
-]]>
+ORDER BY pb.COURT_ORDER]]>
 	</queryString>
 	<field name="BLACK_CASE_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="BLACK_CASE_NO"/>
@@ -111,7 +110,7 @@ ORDER BY pb.COURT_ORDER
 						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font fontName="THSarabunNew" size="17"/>
+						<font fontName="THSarabunNew" size="14"/>
 					</textElement>
 					<textFieldExpression><![CDATA[$F{COURT_ORDER_TEXT}]]></textFieldExpression>
 				</textField>
@@ -128,7 +127,7 @@ ORDER BY pb.COURT_ORDER
 						<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font fontName="THSarabunNew" size="17"/>
+						<font fontName="THSarabunNew" size="14"/>
 					</textElement>
 					<text><![CDATA[]]></text>
 				</staticText>
@@ -150,7 +149,7 @@ ORDER BY pb.COURT_ORDER
 						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font fontName="THSarabunNew" size="17"/>
+						<font fontName="THSarabunNew" size="14"/>
 					</textElement>
 					<textFieldExpression><![CDATA["รวม "+$V{GRP_ALLOWS_COUNT}+" เรื่อง"]]></textFieldExpression>
 				</textField>
@@ -167,7 +166,7 @@ ORDER BY pb.COURT_ORDER
 						<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font fontName="THSarabunNew" size="17"/>
+						<font fontName="THSarabunNew" size="14"/>
 					</textElement>
 					<text><![CDATA[]]></text>
 				</staticText>
@@ -177,10 +176,10 @@ ORDER BY pb.COURT_ORDER
 	<background>
 		<band splitType="Stretch"/>
 	</background>
-	<pageHeader>
-		<band height="32" splitType="Stretch">
+	<title>
+		<band height="26">
 			<textField>
-				<reportElement x="80" y="1" width="600" height="25" uuid="3eb5cb52-88d0-4d5a-a66e-b936442ba1d9">
+				<reportElement x="0" y="1" width="801" height="25" uuid="3eb5cb52-88d0-4d5a-a66e-b936442ba1d9">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -188,8 +187,12 @@ ORDER BY pb.COURT_ORDER
 				</textElement>
 				<textFieldExpression><![CDATA["บัญชีการปล่อยตัวชั่วคราว" +new SimpleDateFormat(" ระหว่างวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd-MM-yyyy").parse($P{START_DATE})) + new SimpleDateFormat(" ถึงวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd-MM-yyyy").parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="25" splitType="Stretch">
 			<textField>
-				<reportElement x="730" y="7" width="70" height="25" uuid="1e7fc211-95b6-4a07-8b14-e284f28345ea">
+				<reportElement x="690" y="0" width="111" height="25" uuid="1e7fc211-95b6-4a07-8b14-e284f28345ea">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
@@ -215,7 +218,7 @@ ORDER BY pb.COURT_ORDER
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="15" isBold="true"/>
 				</textElement>
 				<text><![CDATA[เลขดำที่]]></text>
 			</staticText>
@@ -232,7 +235,7 @@ ORDER BY pb.COURT_ORDER
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="15" isBold="true"/>
 				</textElement>
 				<text><![CDATA[โจทก์]]></text>
 			</staticText>
@@ -249,7 +252,7 @@ ORDER BY pb.COURT_ORDER
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="15" isBold="true"/>
 				</textElement>
 				<text><![CDATA[นายประกัน]]></text>
 			</staticText>
@@ -266,7 +269,7 @@ ORDER BY pb.COURT_ORDER
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="15" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ข้อหา]]></text>
 			</staticText>
@@ -283,7 +286,7 @@ ORDER BY pb.COURT_ORDER
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="15" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ราคาประกัน]]></text>
 			</staticText>
@@ -300,7 +303,7 @@ ORDER BY pb.COURT_ORDER
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="15" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ขอประกันด้วย]]></text>
 			</staticText>
@@ -317,7 +320,7 @@ ORDER BY pb.COURT_ORDER
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="15" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ผู้พิพากษา]]></text>
 			</staticText>
@@ -334,7 +337,7 @@ ORDER BY pb.COURT_ORDER
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="15" isBold="true"/>
 				</textElement>
 				<text><![CDATA[จำเลย]]></text>
 			</staticText>
@@ -356,7 +359,7 @@ ORDER BY pb.COURT_ORDER
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BLACK_CASE_NO} == null ?  ""  :  $F{BLACK_CASE_NO}]]></textFieldExpression>
 			</textField>
@@ -372,7 +375,7 @@ ORDER BY pb.COURT_ORDER
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PROS_DESC} == null ?  ""  :  $F{PROS_DESC}]]></textFieldExpression>
 			</textField>
@@ -388,7 +391,7 @@ ORDER BY pb.COURT_ORDER
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ACCU_DESC}  == null ?  ""  :  $F{ACCU_DESC}]]></textFieldExpression>
 			</textField>
@@ -404,7 +407,7 @@ ORDER BY pb.COURT_ORDER
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{FULLNAME}  == null ?  ""  :  $F{FULLNAME}]]></textFieldExpression>
 			</textField>
@@ -420,7 +423,7 @@ ORDER BY pb.COURT_ORDER
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ALLE_DESC}  == null ?  ""  :  $F{ALLE_DESC}]]></textFieldExpression>
 			</textField>
@@ -436,7 +439,7 @@ ORDER BY pb.COURT_ORDER
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format(Double.valueOf($F{BAIL_COST}))]]></textFieldExpression>
 			</textField>
@@ -452,7 +455,7 @@ ORDER BY pb.COURT_ORDER
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{TYPE_NAME}==null?" ":$F{TYPE_NAME}]]></textFieldExpression>
 			</textField>
@@ -468,15 +471,12 @@ ORDER BY pb.COURT_ORDER
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{JUDGE_NAME}  == null ?  ""  :   $F{JUDGE_NAME}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
-	<columnFooter>
-		<band height="25" splitType="Stretch"/>
-	</columnFooter>
 	<summary>
 		<band height="30">
 			<textField>
@@ -493,7 +493,7 @@ ORDER BY pb.COURT_ORDER
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="18" isBold="true"/>
+					<font fontName="THSarabunNew" size="15" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["รวม "+$V{REPORT_COUNT}+" เรื่อง"]]></textFieldExpression>
 			</textField>
