@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="finance_frm_payorder_fine" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="511" leftMargin="42" rightMargin="42" topMargin="42" bottomMargin="42" uuid="7ea5f4e4-e512-4ffb-9bf7-cf2fd2c37890">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
@@ -18,7 +18,6 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/finance_frm_payorder_fine_files/main_jrxml"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
@@ -132,9 +131,9 @@ WHERE pfpd.PAYMENT_ID = $P{TABLE_PAYID}]]>
 	   NVL(pfp.CASH_AMOUNT,0)+NVL(pfp.CHEQUE_AMOUNT,0)+NVL(pfp.TRANSFER_AMOUNT,0)   TOTAL_AMOUNT,	  
   	   BAHT(NVL(pfp.CASH_AMOUNT,0)+NVL(pfp.CHEQUE_AMOUNT,0)+NVL(pfp.TRANSFER_AMOUNT,0)) TOTAL_AMOUNT_TEXT,
    	   --
-   	   NVL(plj.JUDGE_NAME,'..................................')    JUDGE_NAME,	    
-       pfpd.CASE_LIT_NAME										   PAYER_NAME,
-  	   NVL(pfp.CASH_AMOUNT,0)     CASH_AMOUNT,
+   	   NVL(plj.JUDGE_NAME,' ')              JUDGE_NAME,	    
+       NVL(pfpd.CASE_LIT_NAME,' ')	   PAYER_NAME,
+  	   NVL(pfp.CASH_AMOUNT,0)        CASH_AMOUNT,
 	   NVL(pfp.CHEQUE_AMOUNT,0)   CHEQUE_AMOUNT,
 	   NVL(pfp.TRANSFER_AMOUNT,0) TRANSFER_AMOUNT,
   	   --????
@@ -147,11 +146,12 @@ WHERE pfpd.PAYMENT_ID = $P{TABLE_PAYID}]]>
        CASE WHEN NVL(pfp.TRANSFER_AMOUNT,0) > 0 THEN NVL(trf.TRANSFER_YEAR,0) ELSE 0 END TRANSFER_YEAR,
   	   --
 	   pfpd.CASE_ID,
+	   plrt.RECEIPT_TYPE_CODE,
 	   pfp.TRANSFER_NUMBER,
-  	   trf.BANK_NAME TRANSFER_BANKNAME,
+  	   trf.BANK_NAME TRANSFER_BANKNAME,	   
 	   NVL(pup1.USER_PROFILE_FULL_NAME, pfpd.PAYER1_NAME) PAYER1,
-	   NVL(plj2.JUDGE_NAME,'..................................') PAYER2,
-	   pup.USER_PROFILE_FULL_NAME  USER_PAY
+	   NVL(plj2.JUDGE_NAME, pfpd.PAYER2_NAME) PAYER2,
+	   pup.USER_PROFILE_FULL_NAME USER_PAY
 FROM PC_FIN_PAYMENT pfp 
 LEFT JOIN PC_FIN_PAYMENT_DETAIL pfpd ON pfpd.PAYMENT_ID = pfp.PAYMENT_ID AND pfpd.REMOVED_BY = 0
 LEFT JOIN PC_FIN_RECEIPT_BALANCE_HISTORY pfrbh ON pfrbh.PAYMENT_DETAIL_ID = pfpd.DETAIL_ID AND pfrbh.REMOVED_BY = 0
@@ -173,17 +173,17 @@ LEFT JOIN (SELECT ROW_NUMBER() OVER(ORDER BY pfp.PAYMENT_ID) ROW_NUM,
 			       pfp.TRANSFER_AMOUNT,
 			       plb.BANK_NAME
 			FROM PC_FIN_PAYMENT pfp 
-			LEFT JOIN PC_FIN_PAYMENT_DETAIL pfpd ON pfpd.PAYMENT_ID  = pfp.PAYMENT_ID
-		    LEFT JOIN PC_LOOKUP_BANK plb ON plb.BANK_ID = pfp.TRANSFER_BANK_ID AND plb.REMOVED_BY = 0
+			LEFT JOIN PC_FIN_PAYMENT_DETAIL pfpd ON pfpd.PAYMENT_ID  = pfp.PAYMENT_ID 
+		    LEFT JOIN PC_LOOKUP_BANK plb ON plb.BANK_ID = pfp.TRANSFER_BANK_ID AND plb.REMOVED_BY = 0			
 			WHERE  pfp.REMOVED_BY = 0
 			AND NVL(pfp.TRANSFER_AMOUNT,0) > 0
 			AND pfp.PAYMENT_ID =$P{PAYID}) trf ON trf.PAYMENT_ID = pfp.PAYMENT_ID
 --
-LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pfp.JUDGE_ID AND plj.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pfp.JUDGE_ID AND pfp.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE AND plrt.REMOVED_BY = 0
 LEFT JOIN PC_USER_PROFILE pup1 ON pup1.USER_PROFILE_ID = pfpd.PAYER1 AND pup1.REMOVED_BY = 0
+LEFT JOIN PC_USER_PROFILE pup ON pup.USER_PROFILE_ID = pfpd.CREATED_BY AND pup.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_JUDGE plj2 ON plj2.JUDGE_ID = pfpd.PAYER2 AND plj2.REMOVED_BY = 0
-LEFT JOIN PC_USER_PROFILE pup ON pup.USER_PROFILE_ID = pfp.CREATED_BY AND pup.REMOVED_BY = 0
 --
 LEFT JOIN (SELECT plc.COURT_NAME_TH 
 			FROM PC_PARAM pp
