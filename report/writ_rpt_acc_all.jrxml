@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="writ_rpt_acc_dtimpr_appsup" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="5f59f5d6-72e8-4213-a4bd-9da4a38ca818">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="writ_rpt_acc_all" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="5f59f5d6-72e8-4213-a4bd-9da4a38ca818">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/writ_rpt_acc_all"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -31,36 +31,23 @@
     THAISDATE(pn.NOTICE_DATE)               NOTICE_DATE_TEXT,
     pn.NOTICE_CODE_NO || '/' || NOTICE_CODE_YEAR	NOTICE_NO,
     NVL(pltc_b.TITLE_CASE_NAME || TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR),' ')   CASE_BLACK_NO,
-    NVL(lit.LITIGANT_NAME,' ') DETAINEE,
+    NVL(pn.LITIGANT_NAME,' ') DETAINEE,
+    NVL(pn.LITIGANT_LOV_NAME,' ') LITIGANT_LOV_NAME,
     NVL(alle.ALLEGATION_NAME,' ') ALLEGATION_NAME,
     NVL(pn.LAW_NUMBER,' ') PENALTY_NAME,
-    NVL(plnt.NOTICE_TYPE_NAME,' ')  NOTICE_TYPE_NAME ,
-    plnt.NOTICE_TYPE_CODE,    
-    plnt.NOTICE_TYPE_ID
+    NVL(pn.NOTICE_TYPE_NAME,' ')  NOTICE_TYPE_NAME ,
+    pn.NOTICE_TYPE_CODE
 --หมายประกาศ
 FROM PC_NOTICE pn 
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID
---
-LEFT JOIN PC_LOOKUP_NOTICE_TYPE plnt ON plnt.NOTICE_TYPE_ID = pn.NOTICE_TYPE_ID AND plnt.REMOVED_BY = 0  --[ประเภทหมาย]
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0 --[คำนำหน้าเลขคดี]
-LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pn.COURT_ID AND plc.REMOVED_BY = 0 --[ชื่อศาล]
 --[ฐานความผิด]
 LEFT JOIN (SELECT pca.CASE_ID,
                    LISTAGG(pla.ALLEGATION_NAME, ', ') WITHIN GROUP (ORDER BY pla.ALLEGATION_NAME)  ALLEGATION_NAME
            FROM PC_CASE_ALLE pca
            JOIN PC_LOOKUP_ALLEGATION pla ON pla.ALLEGATION_ID = pca.ALLEGATION_ID AND pca.REMOVED_BY = 0
            WHERE pca.REMOVED_BY = 0
-           GROUP BY pca.CASE_ID) alle ON alle.CASE_ID = pn.CASE_ID
---[จำเลย, ประเภทโทษที่ได้รับหลังการตัดสินคดี]
-LEFT JOIN (SELECT pcl.CASE_LIT_ID, pcl.LITIGANT_NAME, pcl.LITIGANT_TITLE_ID, plt.TITLE_NAME,
-                   LISTAGG(plp.PENALTY_NAME, ', ') WITHIN GROUP (ORDER BY plp.PENALTY_NAME)  PENALTY_NAME
-           	FROM PC_CASE_LIT pcl 
-   		   	LEFT JOIN PC_JUDGEMENT_ACCU_PENALTY pjap ON pjap.CASE_LIT_ID = pcl.CASE_LIT_ID AND pjap.REMOVED_BY = 0
-   			LEFT JOIN PC_LOOKUP_PENALTY plp ON plp.PENALTY_ID = pjap.PENALTY_ID AND plp.REMOVED_BY = 0
-   			LEFT JOIN PC_LOOKUP_TITLE plt ON plt.TITLE_ID  = pcl.LITIGANT_TITLE_ID AND plt.REMOVED_BY  = 0
-   			WHERE pcl.REMOVED_BY = 0
-   			GROUP BY pcl.CASE_LIT_ID, pcl.LITIGANT_TITLE_ID, pcl.LITIGANT_NAME, plt.TITLE_NAME) lit ON lit.CASE_LIT_ID = pn.LITIGANT_ID
---
+           GROUP BY pca.CASE_ID) alle ON alle.CASE_ID = pn.CASE_ID--
 CROSS JOIN (SELECT plc.COURT_NAME_TH 
 			 FROM PC_PARAM pp
 			 JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
@@ -70,7 +57,7 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
 WHERE pn.REMOVED_BY = 0
 AND pn.NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
                         AND TO_DATE( $P{END_DATE} ||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS') 
-ORDER BY plnt.NOTICE_TYPE_CODE, pn.NOTICE_DATE]]>
+ORDER BY pn.NOTICE_TYPE_CODE, pn.NOTICE_DATE]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
@@ -90,20 +77,23 @@ ORDER BY plnt.NOTICE_TYPE_CODE, pn.NOTICE_DATE]]>
 	<field name="DETAINEE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="DETAINEE"/>
 	</field>
+	<field name="LITIGANT_LOV_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="LITIGANT_LOV_NAME"/>
+	</field>
 	<field name="ALLEGATION_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="ALLEGATION_NAME"/>
 	</field>
 	<field name="PENALTY_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="PENALTY_NAME"/>
 	</field>
-	<field name="NOTICE_TYPE_ID" class="java.lang.Long">
-		<property name="com.jaspersoft.studio.field.label" value="NOTICE_TYPE_ID"/>
-	</field>
 	<field name="NOTICE_TYPE_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="NOTICE_TYPE_NAME"/>
 	</field>
+	<field name="NOTICE_TYPE_CODE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="NOTICE_TYPE_CODE"/>
+	</field>
 	<group name="GR_NOTICE_TYPEID">
-		<groupExpression><![CDATA[$F{NOTICE_TYPE_ID}]]></groupExpression>
+		<groupExpression><![CDATA[$F{NOTICE_TYPE_CODE}]]></groupExpression>
 		<groupHeader>
 			<band height="30">
 				<textField evaluationTime="Group" evaluationGroup="GR_NOTICE_TYPEID">
@@ -329,7 +319,7 @@ ORDER BY plnt.NOTICE_TYPE_CODE, pn.NOTICE_DATE]]>
 				<textElement verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{DETAINEE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{DETAINEE}+"("+$F{LITIGANT_LOV_NAME}+")"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ElementGroupBottom" x="536" y="0" width="133" height="30" isPrintWhenDetailOverflows="true" uuid="5cb18e9d-8f0c-42c8-906a-9c21a1598715">

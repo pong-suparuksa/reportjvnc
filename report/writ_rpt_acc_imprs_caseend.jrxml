@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/writ_rpt_acc_imprs_caseend"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -29,16 +29,14 @@
 		,THAISDATE(pn.NOTICE_DATE) NOTICE_DATE_TEXT
 		,pn.NOTICE_CODE_NO || '/' || pn.NOTICE_CODE_YEAR  NOTICE_NO
 		,NVL(pltc_b.TITLE_CASE_NAME || TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR),'-')   CASE_BLACK_NO
-		,pcl.LITIGANT_NAME  DETAINEE
+		,pn.LITIGANT_NAME DETAINEE
+		,pn.LITIGANT_LOV_NAME 
 		,NVL(alle.ALLEGATION_NAME,' ') ALLEGATION_NAME
 		,NVL(pn.LAW_NUMBER,' ') PENALTY_NAME
 FROM PC_NOTICE pn 
-LEFT JOIN PC_LOOKUP_NOTICE_TYPE plnt ON plnt.NOTICE_TYPE_ID = pn.NOTICE_TYPE_ID AND plnt.REMOVED_BY = 0
 --case 
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.COURT_ID = pc.COURT_ID AND pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
---litigant
-LEFT JOIN PC_CASE_LIT pcl ON pcl.CASE_LIT_ID = pn.LITIGANT_ID AND pcl.REMOVED_BY = 0
 --allegation
 LEFT JOIN (SELECT pca.CASE_ID,
                    LISTAGG(pla.ALLEGATION_NAME, ', ') WITHIN GROUP (ORDER BY pla.ALLEGATION_NAME)  ALLEGATION_NAME
@@ -46,16 +44,8 @@ LEFT JOIN (SELECT pca.CASE_ID,
             JOIN PC_LOOKUP_ALLEGATION pla ON pla.ALLEGATION_ID = pca.ALLEGATION_ID AND pca.REMOVED_BY = 0
             WHERE pca.REMOVED_BY = 0
             GROUP BY pca.CASE_ID) alle ON alle.CASE_ID = pn.CASE_ID
---penalty
-LEFT JOIN (SELECT pjap.CASE_LIT_ID
-				   ,LISTAGG(plp.PENALTY_NAME, ', ') WITHIN GROUP (ORDER BY plp.PENALTY_NAME)  PENALTY_NAME
-			FROM PC_JUDGEMENT_ACCU_PENALTY pjap 
-			LEFT JOIN PC_LOOKUP_PENALTY plp ON plp.PENALTY_ID = pjap.ACCU_PENALTY_ID AND plp.REMOVED_BY = 0
-			WHERE pjap.REMOVED_BY = 0
-			GROUP BY pjap.CASE_LIT_ID) pnl ON pnl.CASE_LIT_ID = pn.LITIGANT_ID 
---condition
 WHERE pn.REMOVED_BY = 0
-AND plnt.NOTICE_TYPE_CODE = '210'
+AND pn.NOTICE_TYPE_CODE = '210'
 AND pn.NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
                        AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 ORDER BY pn.NOTICE_DATE]]>
@@ -74,6 +64,9 @@ ORDER BY pn.NOTICE_DATE]]>
 	</field>
 	<field name="DETAINEE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="DETAINEE"/>
+	</field>
+	<field name="LITIGANT_LOV_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="LITIGANT_LOV_NAME"/>
 	</field>
 	<field name="ALLEGATION_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="ALLEGATION_NAME"/>
@@ -314,7 +307,7 @@ ORDER BY pn.NOTICE_DATE]]>
 				<textElement verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{DETAINEE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{DETAINEE}+"("+$F{LITIGANT_LOV_NAME}+")"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="536" y="0" width="133" height="25" isPrintWhenDetailOverflows="true" uuid="5cb18e9d-8f0c-42c8-906a-9c21a1598715">
