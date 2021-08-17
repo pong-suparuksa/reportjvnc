@@ -14,7 +14,7 @@
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="336"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="658"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_files/main_jrxml"/>
@@ -43,7 +43,7 @@
 	pc.PROS_DESC ,
     pc.ACCU_DESC ,
     pc.ALLE_DESC ,   
-	plar.APPOINT_REASON_NAME  ,
+	plal.APPOINT_LIST_NAME AS APPOINT_REASON_NAME  ,
 	pllr.LEVEL_ROOM_DESC ,
 	idiom_owner.JUDGE_NAME, ppa.CASE_ID,
  	(select listagg(plj1.JUDGE_NAME ,', ') within group (order by plj1.JUDGE_NAME) 
@@ -71,9 +71,7 @@ FROM
 	PC_PROCEED_APPOINT ppa	
 -- Join วันที่นัดเหตุที่นัด
 LEFT JOIN PC_PROCEED_APPOINT_CONTINUE ppac ON
-	ppac.APPOINT_ID = ppa.APPOINT_ID AND ppac.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_APPOINT_REASON plar ON
-	plar.APPOINT_REASON_ID = ppac.REASON_APPOINT_ID AND plar.REMOVED_BY =0	
+	ppac.APPOINT_ID = ppa.APPOINT_ID AND ppac.REMOVED_BY = 0	
 -- Join Case
 LEFT JOIN PC_CASE pc ON
     pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
@@ -101,7 +99,7 @@ LEFT JOIN (SELECT DISTINCT pcl.CASE_ID, plas.ACCU_STATUS_NAME
            LEFT JOIN PC_LOOKUP_ACCU_STATUS plas ON plas.ACCU_STATUS_ID = pcl.LITIGANT_OLD_STATUS_ID AND plas.REMOVED_BY = 0
            WHERE pcl.REMOVED_BY = 0) plas ON plas.CASE_ID = pc.CASE_ID
 -- เอาอันนี้
-LEFT JOIN PC_LOOKUP_APPOINT_REASON plar ON plar.APPOINT_REASON_ID = ppa.REASON_APPOINT_ID AND plar.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_APPOINT_LIST plal ON plal.APPOINT_LIST_ID = ppac.REASON_APPOINT_ID AND plal.REMOVED_BY = 0      
 -- Join ห้อง
 LEFT JOIN PC_LOOKUP_LEVEL_ROOM pllr ON pllr.LEVEL_ROOM_ID = ppac.LEVEL_ROOM_CODE AND pllr.REMOVED_BY = 0          
 CROSS JOIN (SELECT plc.COURT_NAME_TH

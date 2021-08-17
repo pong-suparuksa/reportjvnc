@@ -2,60 +2,39 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="finance_frm_payinslip" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="6a214b07-32da-4750-b45b-f3010d720d1d">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_frm_payinslip"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN121"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="619"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="371"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/finance_frm_payinslip_files/main_jrxml"/>
 	<parameter name="INVOICE_ID" class="java.lang.Integer">
 		<defaultValueExpression><![CDATA[5003]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT * 
-FROM
-(SELECT 
-  NVL(plc.COURT_ID, 0)                    COURT_ID,
-  NVL(plc.COURT_NAME_TH,'-')        COURT_NAME_TH,
-  NVL(plc.TAX_ID,'-')                         TAX_ID,
-  NVL(pfcc.COMP_CODE,'-')             COMP_CODE,
-  NVL(pfi.CASE_ID, 0)                       CASE_ID,
-  NVL(pfi.INVOICE_ID,0) 				    INVOICE_ID,
-  NVL(pfi.PAYER_NAME,'-')               PAYER_NAME,
-  NVL(pfi.REF1,'0')                            REF1,
-  NVL(pfi.REF2,'0')                            REF2,
-  TO_CHAR(pfi.DUE_DATE,'DD/MM/YYYY')          DUE_DATE,
-  TO_CHAR(pfi.CREATED_DATE,'DD/MM/YYYY')  CREATED_DATE,
-  NVL(pfi.TOTAL_PAID_AMOUNT,0)                      TOTAL_PAID_AMOUNT,
-  BAHT(TOTAL_PAID_AMOUNT)                           TOTAL_PAID_AMOUNT_TEXT 
-FROM PC_FIN_INVOICE pfi
+		<![CDATA[SELECT   
+  plc.COURT_NAME_TH
+  ,plc.TAX_ID
+  ,pfcc.COMP_CODE
+  ,pfi.CASE_ID
+  ,pfi.INVOICE_ID
+  ,pfi.PAYER_NAME
+  ,pfi.REF1
+  ,pfi.REF2
+  ,TO_CHAR(pfi.DUE_DATE,'DD/MM/YYYY')      DUE_DATE
+  ,TO_CHAR(pfi.CREATED_DATE,'DD/MM/YYYY')  CREATED_DATE
+  ,pfi.TOTAL_PAID_AMOUNT
+  ,BAHT(TOTAL_PAID_AMOUNT)                 TOTAL_PAID_AMOUNT_TEXT 
+FROM PC_FIN_INVOICE pfi 
 LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pfi.COURT_ID AND plc.REMOVED_BY = 0
-CROSS JOIN PC_FIN_COMP_CODE pfcc
+LEFT JOIN PC_FIN_COMP_CODE pfcc ON pfcc.MONEY_TYPE_BY = pfi.MONEY_TYPE_BY  AND pfcc.REMOVED_BY = 0
 WHERE pfi.REMOVED_BY = 0
-UNION
-SELECT 
-   1                                           COURT_ID,
-  'สำนักงานศาลยุติธรรม'               COURT_NAME_TH,
-  '1234567890123'                   TAX_ID,
-  '909533'                                 COMP_CODE,
-   19                                          CASE_ID,  
-   1 										     INVOICE_ID,
-  'นายปรีดีพงษ์ สมัครใจ'				 PAYER_NAME,
-  '100162'                                  REF1,
-  '0201200901050001'              REF2,
-  '02/01/2019'                           DUE_DATE,
-  '02/01/2562'                           CREATED_DATE,
-  5000                                        TOTAL_PAID_AMOUNT,
-  BAHT(5000)                             TOTAL_PAID_AMOUNT_TEXT  
-FROM DUAL
-) A
-WHERE ROWNUM = 1
-AND INVOICE_ID = $P{INVOICE_ID}]]>
+AND ROWNUM = 1
+AND pfi.INVOICE_ID = $P{INVOICE_ID}]]>
 	</queryString>
-	<field name="COURT_ID" class="java.lang.Long">
-		<property name="com.jaspersoft.studio.field.label" value="COURT_ID"/>
-	</field>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
 	</field>
@@ -65,10 +44,10 @@ AND INVOICE_ID = $P{INVOICE_ID}]]>
 	<field name="COMP_CODE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COMP_CODE"/>
 	</field>
-	<field name="CASE_ID" class="java.lang.Long">
+	<field name="CASE_ID" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="CASE_ID"/>
 	</field>
-	<field name="INVOICE_ID" class="java.lang.Long">
+	<field name="INVOICE_ID" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="INVOICE_ID"/>
 	</field>
 	<field name="PAYER_NAME" class="java.lang.String">
@@ -190,7 +169,7 @@ AND INVOICE_ID = $P{INVOICE_ID}]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="18" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{DUE_DATE} == null ? "" : new SimpleDateFormat("d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($F{DUE_DATE}.substring(0,2) + "/" + $F{CREATED_DATE}.substring(3,5) + "/" +  (Integer.parseInt($F{CREATED_DATE}.substring(6,10)) < 2500 ?  (Integer.parseInt($F{DUE_DATE}.substring(6,10)) ) : (Integer.parseInt($F{DUE_DATE}.substring(6,10))))))]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{DUE_DATE} == null ? "" :  DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($F{DUE_DATE}))]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="345" y="88" width="160" height="25" uuid="0d2d1129-ad5e-4397-8baa-31353fe847bf">
@@ -208,7 +187,7 @@ AND INVOICE_ID = $P{INVOICE_ID}]]>
 				<textElement textAlignment="Center">
 					<font fontName="TH Sarabun New" size="17" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["วันที่ : " + new SimpleDateFormat("d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($F{CREATED_DATE}.substring(0,2) + "/" + $F{CREATED_DATE}.substring(3,5) + "/" +  (Integer.parseInt($F{CREATED_DATE}.substring(6,10)) < 2500 ?  (Integer.parseInt($F{CREATED_DATE}.substring(6,10))  ) : (Integer.parseInt($F{CREATED_DATE}.substring(6,10))))))]]></textFieldExpression>
+				<textFieldExpression><![CDATA["วันที่ : " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($F{CREATED_DATE}))]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="308" y="161" width="232" height="25" uuid="2cc32bcd-995e-4922-aaf6-7f5c5fdf36ce">
@@ -354,7 +333,7 @@ AND INVOICE_ID = $P{INVOICE_ID}]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="18" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{DUE_DATE} == null ? "" : new SimpleDateFormat("d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($F{DUE_DATE}.substring(0,2) + "/" + $F{CREATED_DATE}.substring(3,5) + "/" +  (Integer.parseInt($F{CREATED_DATE}.substring(6,10)) < 2500 ?  (Integer.parseInt($F{DUE_DATE}.substring(6,10))  ) : (Integer.parseInt($F{DUE_DATE}.substring(6,10))))))]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{DUE_DATE} == null ? "" :  DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($F{DUE_DATE}))]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="344" y="478" width="160" height="25" uuid="0d90040d-2c60-41d2-970b-05f23acc38c9">
@@ -372,7 +351,7 @@ AND INVOICE_ID = $P{INVOICE_ID}]]>
 				<textElement textAlignment="Center">
 					<font fontName="TH Sarabun New" size="17" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["วันที่ : " + new SimpleDateFormat("d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($F{CREATED_DATE}.substring(0,2) + "/" + $F{CREATED_DATE}.substring(3,5) + "/" +  (Integer.parseInt($F{CREATED_DATE}.substring(6,10)) < 2500 ?  (Integer.parseInt($F{CREATED_DATE}.substring(6,10))  ) : (Integer.parseInt($F{CREATED_DATE}.substring(6,10))))))]]></textFieldExpression>
+				<textFieldExpression><![CDATA["วันที่ : " +  DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($F{CREATED_DATE}))]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="307" y="551" width="232" height="25" uuid="a7df948f-94d4-4b17-ac56-599875eb614b">
