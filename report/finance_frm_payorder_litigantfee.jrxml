@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="finance_frm_payorder_litigantfee" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="511" leftMargin="42" rightMargin="42" topMargin="42" bottomMargin="42" uuid="7ea5f4e4-e512-4ffb-9bf7-cf2fd2c37890">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
@@ -151,9 +151,8 @@ WHERE pfpd.PAYMENT_ID = $P{TABLE_PAYID}]]>
 	   pfp.TRANSFER_NUMBER,
   	   trf.BANK_NAME TRANSFER_BANKNAME,	   
 	   NVL(pup1.USER_PROFILE_FULL_NAME, pfpd.PAYER1_NAME) PAYER1,
-	   NVL(plj2.JUDGE_NAME,'..................................') PAYER2,
+	   NVL(plj2.JUDGE_NAME, pfpd.PAYER2_NAME) PAYER2,
 	   pup.USER_PROFILE_FULL_NAME USER_PAY
-	   
 FROM PC_FIN_PAYMENT pfp 
 LEFT JOIN PC_FIN_PAYMENT_DETAIL pfpd ON pfpd.PAYMENT_ID = pfp.PAYMENT_ID AND pfpd.REMOVED_BY = 0
 LEFT JOIN PC_FIN_RECEIPT_BALANCE_HISTORY pfrbh ON pfrbh.PAYMENT_DETAIL_ID = pfpd.DETAIL_ID AND pfrbh.REMOVED_BY = 0
@@ -184,13 +183,13 @@ LEFT JOIN (SELECT ROW_NUMBER() OVER(ORDER BY pfp.PAYMENT_ID) ROW_NUM,
 LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pfp.JUDGE_ID AND pfp.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE AND plrt.REMOVED_BY = 0
 LEFT JOIN PC_USER_PROFILE pup1 ON pup1.USER_PROFILE_ID = pfpd.PAYER1 AND pup1.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_JUDGE plj2 ON plj2.JUDGE_ID = pfpd.PAYER2 AND plj2.REMOVED_BY = 0
 LEFT JOIN PC_USER_PROFILE pup ON pup.USER_PROFILE_ID = pfpd.CREATED_BY AND pup.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_JUDGE plj2 ON plj2.JUDGE_ID = pfpd.PAYER2 AND plj2.REMOVED_BY = 0
 --
 LEFT JOIN (SELECT plc.COURT_NAME_TH 
-			 FROM PC_PARAM pp
-			 JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
-             WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 =1 
+			FROM PC_PARAM pp
+			JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+            WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 = 1
 --             
 WHERE pfp.REMOVED_BY = 0
 AND pfp.PAYMENT_ID = $P{PAYID}]]>

@@ -11,14 +11,14 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_offer"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
-	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="137"/>
-	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="857"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="532"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="455"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="621"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="368"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_offer_files/main_jrxml"/>
 	<parameter name="SELECT_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["31/05/2021"]]></defaultValueExpression>
@@ -27,40 +27,36 @@
 		<defaultValueExpression><![CDATA[0]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
-		<![CDATA[SELECT	cou.COURT_NAME_TH
-		,NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR) 	BLACK_CASE_NO              
-		,NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || CASE WHEN pj.RED_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pj.RED_YEAR) RED_CASE_NO
-		,THAISDATE(ppac.START_DATE) APPOINT_DATE
-		,ppac.CHOICE_TIME APPOINT_TIME
-		,pc.PROS_DESC 
-		,pc.ACCU_DESC 
-		,plar.APPOINT_REASON_NAME 
-		,NVL(ppac.LEVEL_ROOM_DESC, pllr.LEVEL_ROOM_DESC) LEVEL_ROOM
-		,j.JUDGE_NAME
-		,t1.WITNESS_MOUTH
-		,t1.WITNESS_PAGE
-		,t1.APPOINT_DELAY_NAME
-		,t1.HOLD_REASON
+		<![CDATA[SELECT cou.COURT_NAME_TH
+	   ,NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR) 	BLACK_CASE_NO              
+	   ,NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || CASE WHEN pj.RED_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pj.RED_YEAR) RED_CASE_NO
+	   ,THAISDATE(ppac.START_DATE) APPOINT_DATE
+	   ,ppac.CHOICE_TIME APPOINT_TIME
+	   ,pc.PROS_DESC
+	   ,pc.ACCU_DESC 
+	   ,plar.APPOINT_REASON_NAME 
+	   --
+	   ,pllr.LEVEL_ROOM_DESC LEVEL_ROOM
+	   ,jj.JUDGE_NAME
+	   ,apd.WITNESS
+	   ,apd.PAGES
+	   ,CASE WHEN ap_next.START_DATE IS NULL THEN '0' ELSE THAISDATE(ap_next.START_DATE) END NEXT_DATE
+	   --
 FROM PC_PROCEED_APPOINT_CONTINUE ppac 
 LEFT JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID AND ppa.REMOVED_BY = 0
---appoint result
-LEFT JOIN (SELECT ppar.APPOINT_ID 
-			       ,plad.APPOINT_DELAY_NAME
-			       ,pphr.HOLD_REASON 
-			       ,NVL(SUM(ppar.INVESTIGATE_ACCUSER),0)+NVL(SUM(ppar.INVESTIGATE_DEFENDANT),0)+NVL(SUM(ppar.INVESTIGATE_OTHER),0)  WITNESS_MOUTH
-			       ,NVL(SUM(ppar.INVESTIGATE_ACCUSER_DATE),0)+NVL(SUM(ppar.INVESTIGATE_DEFENDANT_DATE),0)+NVL(SUM(ppar.INVESTIGATE_OTHER_DATE),0) WITNESS_PAGE
-			FROM PC_PROCEED_APPOINT_RESULT ppar 
-			LEFT JOIN PC_LOOKUP_APPOINT_DELAY plad ON plad.APPOINT_DELAY_ID = ppar.APPOINT_DELAY_ID AND plad.REMOVED_BY = 0
-			LEFT JOIN PC_PROCEED_HOLD_REASON pphr ON pphr.HOLD_REASON_ID = ppar.HOLD_REASON_ID AND pphr.REMOVED_BY = 0
-			WHERE ppar.REMOVED_BY = 0
-			GROUP BY ppar.APPOINT_ID, plad.APPOINT_DELAY_NAME, pphr.HOLD_REASON 
-			) t1 ON t1.APPOINT_ID = ppa.APPOINT_ID 
---judge
-LEFT JOIN (SELECT ppacj.APPOINT_ID, 
-			       LISTAGG(plj.JUDGE_NAME , ',') WITHIN GROUP(ORDER BY plj.JUDGE_NAME ) JUDGE_NAME
-			FROM PC_PROCEED_APPOINT_CASE_JUDGE ppacj 
-			LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = ppacj.JUDGE_ID AND plj.REMOVED_BY = 0
-			GROUP BY ppacj.APPOINT_ID )	j ON j.APPOINT_ID = ppac.APPOINT_ID 
+LEFT JOIN (SELECT ppcd.APPOINT_CON_ID 
+				  ,SUM(NVL(ppcd.WITNESS_DEFENDANT_COUNT,0) + NVL(ppcd.WITNESS_PLAINTIFF_COUNT,0) + NVL(ppcd.WITNESS_OTHER_COUNT,0))  WITNESS
+				  ,SUM(NVL(ppcd.WITNESS_DEFENDANT_PAGE,0) + NVL(ppcd.WITNESS_PLAINTIFF_PAGE,0) + NVL(ppcd.WITNESS_OTHER_DAY,0))      PAGES
+			FROM PC_PROCEED_CASE_DETAIL ppcd 
+			WHERE ppcd.REMOVED_BY = 0
+			GROUP BY ppcd.APPOINT_CON_ID) apd ON apd.APPOINT_CON_ID = ppac.APPOINT_CON_ID
+--next appoint
+LEFT JOIN (SELECT ppa.CASE_ID, MIN(ppac.START_DATE) START_DATE 
+			FROM PC_PROCEED_APPOINT_CONTINUE ppac 
+			JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID AND ppac.REMOVED_BY = 0
+			WHERE ppac.REMOVED_BY = 0
+			AND ppac.START_DATE > TO_DATE($P{SELECT_DATE}, 'DD/MM/YYYY')
+			GROUP BY ppa.CASE_ID) ap_next ON ap_next.CASE_ID = ppa.CASE_ID  
 --lookup proceed
 LEFT JOIN PC_LOOKUP_APPOINT_REASON plar ON plar.APPOINT_REASON_ID = ppac.REASON_APPOINT_ID AND plar.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_LEVEL_ROOM pllr ON pllr.LEVEL_ROOM_ID = ppa.ROOM_ID AND pllr.REMOVED_BY = 0
@@ -70,6 +66,18 @@ LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_I
 --judgement
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
+--judge
+LEFT JOIN (SELECT j.CASE_ID, LISTAGG(j.JUDGE_NAME , ',') WITHIN GROUP(ORDER BY j.JUDGE_NAME ) JUDGE_NAME
+		   FROM
+		   (
+			SELECT DISTINCT pcj.CASE_ID, plj.JUDGE_NAME 
+			FROM PC_CASE_JUDGE pcj 
+			JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+			JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID 
+			WHERE pcj.REMOVED_BY = 0
+			AND pljt.JUDGE_TYPE_CODE = '01'
+		   ) j 
+			GROUP BY j.CASE_ID) jj ON jj.CASE_ID = ppa.CASE_ID 
 --court
 LEFT JOIN (SELECT plc.COURT_NAME_TH
 			FROM PC_PARAM pp
@@ -109,17 +117,14 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 	<field name="JUDGE_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="JUDGE_NAME"/>
 	</field>
-	<field name="WITNESS_MOUTH" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="WITNESS_MOUTH"/>
+	<field name="WITNESS" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="WITNESS"/>
 	</field>
-	<field name="WITNESS_PAGE" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="WITNESS_PAGE"/>
+	<field name="PAGES" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="PAGES"/>
 	</field>
-	<field name="APPOINT_DELAY_NAME" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="APPOINT_DELAY_NAME"/>
-	</field>
-	<field name="HOLD_REASON" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="HOLD_REASON"/>
+	<field name="NEXT_DATE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="NEXT_DATE"/>
 	</field>
 	<variable name="VAR_CNTCASE" class="java.lang.Long" incrementType="Report" calculation="Count"/>
 	<variable name="TEMP_START_DATE" class="java.lang.String">
@@ -139,7 +144,7 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 						<pen lineWidth="1.0" lineStyle="Solid"/>
 					</box>
 					<textElement textAlignment="Center" verticalAlignment="Middle">
-						<font fontName="THSarabunNew" size="14"/>
+						<font fontName="TH Sarabun New" size="14"/>
 					</textElement>
 					<textFieldExpression><![CDATA["รวม "+$V{REPORT_COUNT}+" เรื่อง"]]></textFieldExpression>
 				</textField>
@@ -152,35 +157,39 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
-	<pageHeader>
-		<band height="60" splitType="Stretch">
-			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+	<title>
+		<band height="64">
 			<textField>
-				<reportElement x="250" y="0" width="360" height="25" uuid="3eb5cb52-88d0-4d5a-a66e-b936442ba1d9">
+				<reportElement x="249" y="11" width="360" height="25" uuid="3eb5cb52-88d0-4d5a-a66e-b936442ba1d9">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="18" isBold="true"/>
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}  == null ?  "รายการเสนอตรวจความประจำวัน (หลังการพิจารณา) "   : "รายการเสนอตรวจความประจำวัน (หลังการพิจารณา) "  + $F{COURT_NAME_TH}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="737" y="31" width="70" height="25" uuid="1e7fc211-95b6-4a07-8b14-e284f28345ea">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
-				</textElement>
-				<textFieldExpression><![CDATA["แผ่นที่ "+$V{PAGE_NUMBER}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="250" y="28" width="360" height="25" uuid="39f4739e-429b-446c-a0e3-980d82085e07">
+				<reportElement x="249" y="39" width="360" height="25" uuid="39f4739e-429b-446c-a0e3-980d82085e07">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="16" isBold="true"/>
+					<font fontName="TH Sarabun New" size="16" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new SimpleDateFormat("วันนัดพิจารณา วันที่ d เดือน MMMM พ.ศ. yyyy", new Locale("th","TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{SELECT_DATE}))]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="35" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<textField>
+				<reportElement x="730" y="10" width="70" height="25" uuid="1e7fc211-95b6-4a07-8b14-e284f28345ea">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["แผ่นที่ "+$V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>
@@ -201,7 +210,7 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="10"/>
+					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
 				<text><![CDATA[เลขดำที่]]></text>
 			</staticText>
@@ -217,12 +226,12 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="10"/>
+					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
 				<text><![CDATA[เลขที่แดง]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="125" y="0" width="110" height="25" uuid="e2bc0900-4379-45bf-8d91-ea52b73f9677">
+				<reportElement x="139" y="0" width="110" height="25" uuid="e2bc0900-4379-45bf-8d91-ea52b73f9677">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -233,12 +242,12 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="10"/>
+					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
 				<text><![CDATA[โจทก์]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="95" y="0" width="30" height="25" uuid="b6492b02-b48c-48b4-9ba5-68400df1a225">
+				<reportElement x="95" y="0" width="44" height="25" uuid="b6492b02-b48c-48b4-9ba5-68400df1a225">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -250,12 +259,12 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="10"/>
+					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
 				<text><![CDATA[เวลา]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="346" y="0" width="70" height="25" uuid="57b5d4a2-fd75-437c-9d5c-db1a2f49ccae">
+				<reportElement x="360" y="0" width="70" height="25" uuid="57b5d4a2-fd75-437c-9d5c-db1a2f49ccae">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -267,14 +276,15 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="10"/>
+					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
 				<text><![CDATA[นัดมาทำไม]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="416" y="0" width="54" height="25" uuid="81d003a8-647a-4c89-8df4-4ea498293ad8">
+				<reportElement x="430" y="0" width="65" height="25" uuid="81d003a8-647a-4c89-8df4-4ea498293ad8">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -283,12 +293,12 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="10"/>
+					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
 				<text><![CDATA[บัลลังก์]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="470" y="0" width="99" height="25" uuid="954dd237-42fe-46d3-ab87-c6ed84193d78">
+				<reportElement x="495" y="0" width="85" height="25" uuid="954dd237-42fe-46d3-ab87-c6ed84193d78">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -301,12 +311,12 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="10"/>
+					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
 				<text><![CDATA[ท่านออกนั่งบัลลังก์]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="235" y="0" width="111" height="25" uuid="e1862af0-d0bc-4337-9501-034211db1b82">
+				<reportElement x="249" y="0" width="111" height="25" uuid="e1862af0-d0bc-4337-9501-034211db1b82">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -317,12 +327,12 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="10"/>
+					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
 				<text><![CDATA[จำเลย]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="569" y="0" width="61" height="25" uuid="72ec20b3-eb60-4a45-a615-381e251be0fe">
+				<reportElement x="580" y="0" width="61" height="25" uuid="72ec20b3-eb60-4a45-a615-381e251be0fe">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -333,12 +343,12 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="10"/>
+					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
 				<text><![CDATA[ปาก / หน้า]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="630" y="0" width="50" height="25" uuid="883d1188-b537-47e2-86a9-2c31dc83dee4">
+				<reportElement x="641" y="0" width="50" height="25" uuid="883d1188-b537-47e2-86a9-2c31dc83dee4">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -350,14 +360,15 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="10"/>
+					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
 				<text><![CDATA[คดีเสร็จหรือไม่]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="680" y="0" width="75" height="25" uuid="43959e61-31a3-432e-beae-3d759de31894">
+				<reportElement x="691" y="0" width="64" height="25" uuid="43959e61-31a3-432e-beae-3d759de31894">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -366,7 +377,7 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="10"/>
+					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
 				<text><![CDATA[หมายเหตุ]]></text>
 			</staticText>
@@ -383,7 +394,7 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="10"/>
+					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
 				<text><![CDATA[วันนัดหน้า]]></text>
 			</staticText>
@@ -404,15 +415,16 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="10"/>
+					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RED_CASE_NO}.equals("/") ? "-" :$F{RED_CASE_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="416" y="0" width="54" height="25" uuid="57235835-5b6f-4420-9069-0e1f3a6c8e8a">
+				<reportElement stretchType="ContainerHeight" x="430" y="0" width="65" height="25" uuid="57235835-5b6f-4420-9069-0e1f3a6c8e8a">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -421,12 +433,12 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="10"/>
+					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{LEVEL_ROOM}==null?" ":$F{LEVEL_ROOM}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="125" y="0" width="110" height="25" uuid="f9b0e44d-d0e8-49f2-b72e-e9c919fc0040">
+				<reportElement stretchType="ContainerHeight" x="139" y="0" width="110" height="25" uuid="f9b0e44d-d0e8-49f2-b72e-e9c919fc0040">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -438,12 +450,12 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="10"/>
+					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PROS_DESC} == null ?  "-"  :  $F{PROS_DESC}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="235" y="0" width="111" height="25" uuid="47c8eb35-8a66-4392-ad23-2e4d280bd699">
+				<reportElement stretchType="ContainerHeight" x="249" y="0" width="111" height="25" uuid="47c8eb35-8a66-4392-ad23-2e4d280bd699">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -455,12 +467,12 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="10"/>
+					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ACCU_DESC}  == null ?  "-"  :  $F{ACCU_DESC}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="346" y="0" width="70" height="25" uuid="a1c0fc17-8c5b-4d74-ae7b-994a31f5ca62">
+				<reportElement stretchType="ContainerHeight" x="360" y="0" width="70" height="25" uuid="a1c0fc17-8c5b-4d74-ae7b-994a31f5ca62">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -472,12 +484,12 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="10"/>
+					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{APPOINT_REASON_NAME}  == null ?  "-"  :  $F{APPOINT_REASON_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="95" y="0" width="30" height="25" uuid="705440ac-a128-48b0-b97c-3a4fa1d288fe">
+				<reportElement stretchType="ContainerHeight" x="95" y="0" width="44" height="25" uuid="705440ac-a128-48b0-b97c-3a4fa1d288fe">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -489,16 +501,16 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="10"/>
+					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{APPOINT_TIME}  == null ?  "-"  :  $F{APPOINT_TIME}.substring( 0, 5 )]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{APPOINT_TIME}  == null ?  " "  :  $F{APPOINT_TIME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="470" y="0" width="99" height="25" uuid="14561a8d-97a8-4e3b-80c4-d55bfb4900cc">
+				<reportElement stretchType="ContainerHeight" x="495" y="0" width="85" height="25" uuid="14561a8d-97a8-4e3b-80c4-d55bfb4900cc">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -507,12 +519,12 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="10"/>
+					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{JUDGE_NAME}  == null ?  "-"  :   $F{JUDGE_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="569" y="0" width="31" height="25" uuid="7cd319b6-92d4-4711-bc08-1114403378b5">
+				<reportElement stretchType="ContainerHeight" x="580" y="0" width="31" height="25" uuid="7cd319b6-92d4-4711-bc08-1114403378b5">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -522,12 +534,12 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 					<pen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="10"/>
+					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{WITNESS_MOUTH}==null?0:$F{WITNESS_MOUTH}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{WITNESS}==null?0:$F{WITNESS}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="600" y="0" width="30" height="25" uuid="562435a7-57ff-4ba3-a6a7-a403f33dd7c5">
+				<reportElement stretchType="ContainerHeight" x="611" y="0" width="30" height="25" uuid="562435a7-57ff-4ba3-a6a7-a403f33dd7c5">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -537,12 +549,12 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 					<pen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="10"/>
+					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{WITNESS_PAGE}==null?0:$F{WITNESS_PAGE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{PAGES}==null?0:$F{PAGES}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="630" y="0" width="50" height="25" uuid="e2194e19-1f53-4e26-b1fd-f496740684dc">
+				<reportElement stretchType="ContainerHeight" x="641" y="0" width="50" height="25" uuid="e2194e19-1f53-4e26-b1fd-f496740684dc">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -554,27 +566,9 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="10"/>
+					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{APPOINT_DATE}== null ?  "เสร็จการพิจารณา"  :  "พิจารณาต่อนัดหน้า"]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="680" y="0" width="75" height="25" uuid="46907b13-f8a8-4c91-aaa8-a89300837c05">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="10"/>
-				</textElement>
-				<textFieldExpression><![CDATA[($F{APPOINT_DELAY_NAME}==null?" ":$F{APPOINT_DELAY_NAME})  +" "+($F{HOLD_REASON}==null?" ":$F{HOLD_REASON})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{NEXT_DATE}== null||$F{NEXT_DATE}.equals("0")?  "-"  :  "พิจารณาต่อนัดหน้า"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="755" y="0" width="52" height="25" uuid="07fbce9d-022b-4f02-b65d-1c0426bdc468">
@@ -589,9 +583,9 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="10"/>
+					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{APPOINT_DATE}  == null ?  " "  :  $F{APPOINT_DATE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{NEXT_DATE} == null||$F{NEXT_DATE}.equals("0")?  " "  :  $F{NEXT_DATE}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="0" y="0" width="45" height="25" uuid="a53f59f1-673b-4754-adea-c84307940feb">
@@ -605,9 +599,26 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew"/>
+					<font fontName="TH Sarabun New"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BLACK_CASE_NO}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="ContainerHeight" x="691" y="0" width="64" height="25" uuid="46907b13-f8a8-4c91-aaa8-a89300837c05">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="TH Sarabun New" size="10"/>
+				</textElement>
 			</textField>
 		</band>
 	</detail>

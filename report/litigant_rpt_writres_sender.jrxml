@@ -18,7 +18,7 @@
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="486"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="505"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_writres_sender_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/05/2020"]]></defaultValueExpression>
@@ -34,7 +34,7 @@
             ELSE NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR) END	 CASE_BLACK_NO, 
        CASE WHEN pj.RED_IDNUM IS NULL THEN ' '
             ELSE NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || '/' || TO_CHAR(pj.RED_YEAR) END	 CASE_RED_NO,
-       plt.TITLE_NAME||pcl.LITIGANT_NAME TO_NAME, 
+       pcl.LITIGANT_NAME TO_NAME, 
        pnsr.SEND_NOTICE_DATE,
        plnsr.NOTICE_SEND_RESULT_NAME,
        pn.SEND_FEE,
@@ -51,7 +51,6 @@ LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pn.CASE_ID AND pj.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
 --
 LEFT JOIN PC_CASE_LIT pcl ON pcl.CASE_LIT_ID = pn.LITIGANT_ID AND pcl.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_TITLE plt ON plt.TITLE_ID = pcl.LITIGANT_TITLE_ID AND plt.REMOVED_BY = 0
 --
 LEFT JOIN PC_LOOKUP_NOTICE_SEND_RESULT plnsr ON plnsr.NOTICE_SEND_RESULT_ID = pnsr.POST_SEND_RESULT AND plnsr.REMOVED_BY = 0
 LEFT JOIN PC_USER_PROFILE pup ON pup.USER_ID = pn.SEND_BY AND pup.REMOVED_BY = 0
@@ -104,36 +103,36 @@ ORDER BY pnsr.CREATED_DATE]]>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
-	<pageHeader>
-		<band height="62" splitType="Stretch">
+	<title>
+		<band height="105">
 			<textField>
-				<reportElement x="176" y="0" width="450" height="30" uuid="1f35dd4b-0652-418f-b53f-610e8cc42925"/>
+				<reportElement x="170" y="10" width="450" height="30" uuid="1f35dd4b-0652-418f-b53f-610e8cc42925"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="18" isBold="true"/>
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}==null?" ":$F{COURT_NAME_TH}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="0" y="30" width="190" height="30" uuid="a5e8e65b-3887-4ab8-b52d-a3552931ae0d"/>
+				<reportElement x="0" y="50" width="190" height="30" uuid="a5e8e65b-3887-4ab8-b52d-a3552931ae0d"/>
 				<box leftPadding="3"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="18" isBold="true"/>
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
 				</textElement>
 				<text><![CDATA[บัญชีรายงานผลหมาย]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="230" y="37" width="342" height="25" uuid="5c896844-d692-4b7e-b405-608ec80e92b8">
+				<reportElement x="230" y="80" width="342" height="25" uuid="5c896844-d692-4b7e-b405-608ec80e92b8">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17" isBold="true"/>
+					<font fontName="TH Sarabun New" size="17" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new SimpleDateFormat("ตั้งแต่วันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{START_DATE})) + new SimpleDateFormat(" ถึงวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
 		</band>
-	</pageHeader>
+	</title>
 	<columnHeader>
-		<band height="30" splitType="Stretch">
+		<band height="25" splitType="Stretch">
 			<staticText>
 				<reportElement x="40" y="0" width="70" height="25" uuid="45cf3754-107c-4c52-958d-8d4299a12e75">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e9edaf2-10e0-4218-afbf-20e85ac4711c"/>
@@ -144,7 +143,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[วันที่รายงาน]]></text>
 			</staticText>
@@ -158,7 +157,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[เลขดำที่]]></text>
 			</staticText>
@@ -172,7 +171,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[เลขแดงที่]]></text>
 			</staticText>
@@ -185,7 +184,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[ส่งหมายให้ใคร]]></text>
 			</staticText>
@@ -199,7 +198,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[วันที่ส่งหมาย]]></text>
 			</staticText>
@@ -212,7 +211,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[ผลการส่งหมาย]]></text>
 			</staticText>
@@ -225,7 +224,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[ราคาหมาย]]></text>
 			</staticText>
@@ -239,7 +238,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[ดำเนินการต่ออย่างไร]]></text>
 			</staticText>
@@ -253,7 +252,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[ที่]]></text>
 			</staticText>
@@ -266,7 +265,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[ผู้ส่งหมาย]]></text>
 			</staticText>
@@ -284,7 +283,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CREATED_DATE}==null?" ":new SimpleDateFormat("d MMM yyyy", new Locale("th", "TH")).format($F{CREATED_DATE})]]></textFieldExpression>
 			</textField>
@@ -298,7 +297,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}==null?" ":$F{CASE_BLACK_NO}]]></textFieldExpression>
 			</textField>
@@ -312,7 +311,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_RED_NO}==null?" ":$F{CASE_RED_NO}]]></textFieldExpression>
 			</textField>
@@ -325,7 +324,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{TO_NAME}==null?" ":$F{TO_NAME}]]></textFieldExpression>
 			</textField>
@@ -339,7 +338,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{SEND_NOTICE_DATE}==null?" ":new SimpleDateFormat("d MMM yyyy", new Locale("th", "TH")).format($F{SEND_NOTICE_DATE})]]></textFieldExpression>
 			</textField>
@@ -352,7 +351,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{NOTICE_SEND_RESULT_NAME}==null?" ":$F{NOTICE_SEND_RESULT_NAME} + $F{UNSEND_DETAIL}]]></textFieldExpression>
 			</textField>
@@ -365,7 +364,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{SEND_FEE}==null?" ":new java.text.DecimalFormat("#,##0").format($F{SEND_FEE})]]></textFieldExpression>
 			</textField>
@@ -379,7 +378,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{NOTICE_SEND_TYPE_RESULT_NAME}]]></textFieldExpression>
 			</textField>
@@ -393,7 +392,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
@@ -406,7 +405,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{SENDER}==null?" ":$F{SENDER}]]></textFieldExpression>
 			</textField>
@@ -427,7 +426,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
+					<font fontName="TH Sarabun New" size="14"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
@@ -444,7 +443,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
+					<font fontName="TH Sarabun New" size="14"/>
 				</textElement>
 				<text><![CDATA[รวมทั้งสิ้น]]></text>
 			</staticText>
@@ -461,7 +460,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
+					<font fontName="TH Sarabun New" size="14"/>
 				</textElement>
 				<text><![CDATA[รวมเป็นเงินทั้งสิ้น]]></text>
 			</staticText>
@@ -478,7 +477,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
+					<font fontName="TH Sarabun New" size="14"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{TOTAL}==null?0:new java.text.DecimalFormat("#,##0").format($V{TOTAL})]]></textFieldExpression>
 			</textField>
@@ -495,7 +494,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
+					<font fontName="TH Sarabun New" size="14"/>
 				</textElement>
 				<text><![CDATA[บาท]]></text>
 			</staticText>
@@ -512,7 +511,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
+					<font fontName="TH Sarabun New" size="14"/>
 				</textElement>
 				<text><![CDATA[เรื่อง]]></text>
 			</staticText>
@@ -535,7 +534,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="12"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[ข้อมูลจะแสดงเฉพาะ มีการกรอกผลการส่งหมาย และ ผลการดำเนินการ แล้วเท่านั้น]]></text>
 			</staticText>

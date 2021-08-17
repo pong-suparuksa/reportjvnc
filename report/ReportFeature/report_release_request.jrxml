@@ -6,7 +6,8 @@
 	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/ReportFeature/report_release_request"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/ReportFeature/report_release_request_files/main_jrxml"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["10/03/2020"]]></defaultValueExpression>
 	</parameter>
@@ -20,7 +21,7 @@
 	NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || CASE WHEN pj.RED_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pj.RED_YEAR)     RED_CASE_NO ,
     pc.ACCU_DESC ,
 	pbb.FULLNAME ,
-	pb.BAIL_CODE_NO ,
+	pb.BAIL_CODE_NO||'/'||pb.BAIL_CODE_YEAR BAIL_CODE_NO ,
 	CASE WHEN pb.BAIL_TYPE = '1'  THEN  '(ป.๑) คำร้องขอปล่อยตัวชั่วคราวตลอดชั้นสอบสวนและชั้นพิจรณา' ELSE 
 	CASE WHEN pb.BAIL_TYPE = '2'  THEN  '(๕๗) คำร้องขอปล่อยตัวชั่วคราว' ELSE 
 	CASE WHEN pb.BAIL_TYPE = '3'  THEN  '(๗) คำร้องขอปล่อยตัวชั่วคราวโดยไม่มีประกัน  (สาบานตน)' END END END   BAIL_TYPE ,
@@ -356,7 +357,7 @@ ORDER BY
 				<textElement verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ACCU_DESC}==null? "-": $F{ACCU_DESC}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{FULLNAME}==null? "-": $F{FULLNAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="90" y="0" width="60" height="30" uuid="a6485ab1-7916-4e54-82a9-092bdfd1f7c2"/>
@@ -382,7 +383,7 @@ ORDER BY
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{TOTAL_AMOUNT}==null? "-" :$F{TOTAL_AMOUNT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{TOTAL_AMOUNT}==null? "-" :new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{TOTAL_AMOUNT}))]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

@@ -2,7 +2,7 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="proceed_rpt_appoint" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryNewPage="true" uuid="1bfda7a9-ad46-4cbf-9696-758bf76ec1e6">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="210"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -46,12 +46,12 @@
 	plar.APPOINT_REASON_NAME  ,
 	pllr.LEVEL_ROOM_DESC ,
 	idiom_owner.JUDGE_NAME, ppa.CASE_ID,
- 	(select listagg(plj1.judge_first_name || ' '  || plj1.judge_last_name,', ') within group (order by plj1.judge_first_name) 
+ 	(select listagg(plj1.JUDGE_NAME ,', ') within group (order by plj1.JUDGE_NAME) 
         from PC_CASE_JUDGE pcj1, PC_LOOKUP_JUDGE plj1, PC_LOOKUP_JUDGE_TYPE pjt1 
         where pcj1.CASE_ID = ppa.CASE_ID AND pcj1.REMOVED_BY = 0 AND plj1.JUDGE_ID = pcj1.JUDGE_ID
         AND plj1.REMOVED_BY = 0 AND pcj1.judge_type_id = pjt1.judge_type_id 
         and pjt1.judge_type_code = '02') ONG_1 ,
-	(select listagg(plj1.judge_first_name || ' '  || plj1.judge_last_name,', ') within group (order by plj1.judge_first_name) 
+	(select listagg(plj1.JUDGE_NAME ,', ') within group (order by plj1.JUDGE_NAME) 
         from PC_CASE_JUDGE pcj1, PC_LOOKUP_JUDGE plj1, PC_LOOKUP_JUDGE_TYPE pjt1 
         where pcj1.CASE_ID = ppa.CASE_ID 
         AND pcj1.REMOVED_BY = 0 
@@ -59,7 +59,7 @@
         AND plj1.REMOVED_BY = 0 
         AND pcj1.judge_type_id = pjt1.judge_type_id 
         and pjt1.judge_type_code = '03') ONG_2 ,
-	(select listagg(plj1.judge_first_name || ' '  || plj1.judge_last_name,', ') within group (order by plj1.judge_first_name) 
+	(select listagg(plj1.JUDGE_NAME,', ') within group (order by plj1.JUDGE_NAME) 
         from PC_CASE_JUDGE pcj1, PC_LOOKUP_JUDGE plj1, PC_LOOKUP_JUDGE_TYPE pjt1 
         where pcj1.CASE_ID = ppa.CASE_ID 
         AND pcj1.REMOVED_BY = 0 

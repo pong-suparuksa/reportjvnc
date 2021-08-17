@@ -2,7 +2,7 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report_surrendering_parents" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="9978d201-1d2d-4351-b64e-4b21d5ae9429">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/ReportFeature/report_surrendering_parents"/>
@@ -24,7 +24,8 @@ c.case_id, NVL(tcb.TITLE_CASE_NAME,' ') ||  TO_CHAR(c.BLACK_IDNUM) || '/' || TO_
     JOIN PC_BAIL_SEC_TYPE st ON (st.TYPE_CODE = sc.sec_type_code)
     WHERE sc.bail_id = bm.bail_id
     AND sc.BAILSMAN_ID = bm.BAILSMAN_ID 
-    AND sc.REMOVED_BY = 0 ),'([^,]+)(,\1)+', '\1') SEC_LAND_ID
+    AND sc.REMOVED_BY = 0 ),'([^,]+)(,\1)+', '\1') SEC_LAND_ID,
+bm.FULLNAME 
 FROM PC_BAIL_BAILSMAN bm 
 JOIN PC_BAIL b ON (b.BAIL_ID = bm.BAIL_ID AND IS_PRINTED = 1 AND b.REMOVED_BY = 0)
 JOIN PC_BAIL_DEFENDANT d ON (bm.BAIL_ID = d.BAIL_ID AND d.REMOVED_BY = 0)
@@ -67,6 +68,7 @@ ORDER BY
 	<field name="SEC_LAND_ID" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="SEC_LAND_ID"/>
 	</field>
+	<field name="FULLNAME" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -148,7 +150,7 @@ ORDER BY
 				<text><![CDATA[เลขคดีแดง]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="159" y="17" width="150" height="30" uuid="17717608-0d5b-49f7-a972-eb9f3515c56c"/>
+				<reportElement x="159" y="17" width="121" height="30" uuid="17717608-0d5b-49f7-a972-eb9f3515c56c"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -161,7 +163,7 @@ ORDER BY
 				<text><![CDATA[ชื่อ - นามสกุล]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="309" y="17" width="111" height="30" uuid="b70a957b-2081-4e7f-87e6-3d889386f3a6"/>
+				<reportElement x="280" y="17" width="80" height="30" uuid="b70a957b-2081-4e7f-87e6-3d889386f3a6"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -174,7 +176,7 @@ ORDER BY
 				<text><![CDATA[เบอร์โทร]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="420" y="17" width="150" height="30" uuid="08781afa-c4fa-4f52-8d36-1efff7f0635d"/>
+				<reportElement x="360" y="17" width="150" height="30" uuid="08781afa-c4fa-4f52-8d36-1efff7f0635d"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -187,7 +189,7 @@ ORDER BY
 				<text><![CDATA[ผู้ต้องหา/จำเลย]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="570" y="17" width="100" height="30" uuid="e7fae548-2bd5-4fe5-b5d5-0c74f2d0e194"/>
+				<reportElement x="600" y="17" width="100" height="30" uuid="e7fae548-2bd5-4fe5-b5d5-0c74f2d0e194"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -200,7 +202,7 @@ ORDER BY
 				<text><![CDATA[หลักประกัน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="670" y="17" width="138" height="30" uuid="3611e0b8-9572-4ada-9b74-a3139c43444d"/>
+				<reportElement x="700" y="17" width="108" height="30" uuid="3611e0b8-9572-4ada-9b74-a3139c43444d"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -212,12 +214,27 @@ ORDER BY
 				</textElement>
 				<text><![CDATA[หมายเหตุ]]></text>
 			</staticText>
+			<staticText>
+				<reportElement x="510" y="17" width="90" height="30" uuid="476c6985-65b8-4c68-a7e0-65dd501b6f69">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ผู้ประกัน]]></text>
+			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
 		<band height="20" splitType="Prevent">
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="570" y="0" width="100" height="20" uuid="e34b7ce9-c3bc-4be1-a0bc-176be55a4bb1"/>
+				<reportElement stretchType="ContainerHeight" x="600" y="0" width="100" height="20" uuid="e34b7ce9-c3bc-4be1-a0bc-176be55a4bb1"/>
 				<box leftPadding="5">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -258,7 +275,7 @@ ORDER BY
 				<textFieldExpression><![CDATA[$F{RED_CASE_NO}==null? "-":$F{RED_CASE_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="670" y="0" width="138" height="20" uuid="cf2dce7f-3ded-41e2-8b6c-1f26b42441b8"/>
+				<reportElement stretchType="ContainerHeight" x="700" y="0" width="108" height="20" uuid="cf2dce7f-3ded-41e2-8b6c-1f26b42441b8"/>
 				<box leftPadding="5">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -271,7 +288,7 @@ ORDER BY
 				<textFieldExpression><![CDATA[""]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="309" y="0" width="111" height="20" uuid="cf533e81-09ad-446c-8110-08fa89d52f86"/>
+				<reportElement stretchType="ContainerHeight" x="280" y="0" width="80" height="20" uuid="cf533e81-09ad-446c-8110-08fa89d52f86"/>
 				<box leftPadding="5">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -284,7 +301,7 @@ ORDER BY
 				<textFieldExpression><![CDATA[$F{CONTACT_PHONE_NO}==null? "-":$F{CONTACT_PHONE_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="159" y="0" width="150" height="20" uuid="eaa320de-ce6d-4ce2-a85c-54b13c63665a"/>
+				<reportElement stretchType="ContainerHeight" x="159" y="0" width="121" height="20" uuid="eaa320de-ce6d-4ce2-a85c-54b13c63665a"/>
 				<box leftPadding="5">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -312,7 +329,7 @@ ORDER BY
 				<textFieldExpression><![CDATA[$F{BLACK_CASE_NO}==null? "-":$F{BLACK_CASE_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="420" y="0" width="150" height="20" uuid="688f29dc-82c6-4a99-8fe9-2ad2630305ad"/>
+				<reportElement stretchType="ContainerHeight" x="360" y="0" width="150" height="20" uuid="688f29dc-82c6-4a99-8fe9-2ad2630305ad"/>
 				<box leftPadding="5">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -323,6 +340,21 @@ ORDER BY
 					<font fontName="THSarabunNew"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{LITIGANT_NAME}==null? "-":$F{LITIGANT_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="510" y="0" width="90" height="20" uuid="f715df78-431a-46a7-89e7-9062d616fba2">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box leftPadding="5">
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{FULLNAME}==null?"-":$F{FULLNAME}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

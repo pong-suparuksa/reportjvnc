@@ -17,7 +17,9 @@
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/writ_rpt_acc_dtimpr_appsup"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/writ_rpt_acc_dtimpr_appsup_files/main_jrxml"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="426"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="564"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/07/2020"]]></defaultValueExpression>
 	</parameter>
@@ -29,17 +31,14 @@
 		,THAISDATE(pn.NOTICE_DATE) NOTICE_DATE_TEXT
 		,pn.NOTICE_CODE_NO || '/' || pn.NOTICE_CODE_YEAR  NOTICE_NO
 		,NVL(pltc_b.TITLE_CASE_NAME || TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR),'-')   CASE_BLACK_NO
-		,plt.TITLE_NAME || pcl.LITIGANT_NAME DETAINEE
+		,pn.LITIGANT_NAME DETAINEE
+		,pn.LITIGANT_LOV_NAME 
 		,NVL(alle.ALLEGATION_NAME,' ') ALLEGATION_NAME
-		,NVL(pn.LAW_NUMBER ,' ') PENALTY_NAME		
+		,NVL(pn.LAW_NUMBER,' ') PENALTY_NAME
 FROM PC_NOTICE pn 
-LEFT JOIN PC_LOOKUP_NOTICE_TYPE plnt ON plnt.NOTICE_TYPE_ID = pn.NOTICE_TYPE_ID AND plnt.REMOVED_BY = 0
 --case 
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.COURT_ID = pc.COURT_ID AND pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
---litigant
-LEFT JOIN PC_CASE_LIT pcl ON pcl.CASE_LIT_ID = pn.LITIGANT_ID AND pcl.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_TITLE plt ON plt.TITLE_ID = pcl.LITIGANT_TITLE_ID AND plt.REMOVED_BY = 0
 --allegation
 LEFT JOIN (SELECT pca.CASE_ID,
                    LISTAGG(pla.ALLEGATION_NAME, ', ') WITHIN GROUP (ORDER BY pla.ALLEGATION_NAME)  ALLEGATION_NAME
@@ -47,16 +46,8 @@ LEFT JOIN (SELECT pca.CASE_ID,
             JOIN PC_LOOKUP_ALLEGATION pla ON pla.ALLEGATION_ID = pca.ALLEGATION_ID AND pca.REMOVED_BY = 0
             WHERE pca.REMOVED_BY = 0
             GROUP BY pca.CASE_ID) alle ON alle.CASE_ID = pn.CASE_ID
---penalty
-LEFT JOIN (SELECT pjap.CASE_LIT_ID
-				   ,LISTAGG(plp.PENALTY_NAME, ', ') WITHIN GROUP (ORDER BY plp.PENALTY_NAME)  PENALTY_NAME
-			FROM PC_JUDGEMENT_ACCU_PENALTY pjap 
-			LEFT JOIN PC_LOOKUP_PENALTY plp ON plp.PENALTY_ID = pjap.ACCU_PENALTY_ID AND plp.REMOVED_BY = 0
-			WHERE pjap.REMOVED_BY = 0
-			GROUP BY pjap.CASE_LIT_ID) pnl ON pnl.CASE_LIT_ID = pn.LITIGANT_ID 
---condition
 WHERE pn.REMOVED_BY = 0
-AND plnt.NOTICE_TYPE_CODE = '205'
+AND pn.NOTICE_TYPE_CODE = '205'
 AND pn.NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
                        AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 ORDER BY pn.NOTICE_DATE]]>
@@ -76,6 +67,9 @@ ORDER BY pn.NOTICE_DATE]]>
 	<field name="DETAINEE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="DETAINEE"/>
 	</field>
+	<field name="LITIGANT_LOV_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="LITIGANT_LOV_NAME"/>
+	</field>
 	<field name="ALLEGATION_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="ALLEGATION_NAME"/>
 	</field>
@@ -85,35 +79,35 @@ ORDER BY pn.NOTICE_DATE]]>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
-	<pageHeader>
-		<band height="67" splitType="Stretch">
+	<title>
+		<band height="113">
 			<staticText>
-				<reportElement x="239" y="0" width="325" height="30" uuid="7a9fd87e-2688-44ad-9027-6cd28b1fe0bc"/>
+				<reportElement x="239" y="14" width="325" height="30" uuid="7a9fd87e-2688-44ad-9027-6cd28b1fe0bc"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="18" isBold="true"/>
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
 				</textElement>
 				<text><![CDATA[บัญชีหมายจำคุกและกักขัง ระหว่างอุทธรณ์ฎีกา]]></text>
 			</staticText>
 			<textField evaluationTime="Report">
-				<reportElement x="0" y="10" width="140" height="30" uuid="1d30ab97-2e7d-4559-9f81-ed7c0ea912c3"/>
+				<reportElement x="0" y="44" width="140" height="30" uuid="1d30ab97-2e7d-4559-9f81-ed7c0ea912c3"/>
 				<box leftPadding="3"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="18" isBold="true"/>
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["รวมทั้งสิ้น "+ $V{REPORT_COUNT}+ " ฉบับ"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="156" y="37" width="490" height="30" uuid="8104f6c1-389a-4ec8-ab2b-67055b0a563d">
+				<reportElement x="156" y="74" width="490" height="30" uuid="8104f6c1-389a-4ec8-ab2b-67055b0a563d">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="18" isBold="true"/>
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["ระหว่างวันที่  " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +
 " ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
 		</band>
-	</pageHeader>
+	</title>
 	<columnHeader>
 		<band height="30" splitType="Stretch">
 			<staticText>
@@ -128,7 +122,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[วันเดือนปีที่ออกหมาย]]></text>
 			</staticText>
@@ -144,7 +138,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[เลขที่หมาย]]></text>
 			</staticText>
@@ -160,7 +154,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[หมายเลขดำที่]]></text>
 			</staticText>
@@ -176,7 +170,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[ชื่อและนามสกุลผู้ต้องขัง]]></text>
 			</staticText>
@@ -192,7 +186,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[ข้อหา]]></text>
 			</staticText>
@@ -208,7 +202,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[กำหนดโทษ]]></text>
 			</staticText>
@@ -224,14 +218,14 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[ลำดับ]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="30" splitType="Stretch">
+		<band height="30" splitType="Prevent">
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="50" y="0" width="140" height="30" isPrintWhenDetailOverflows="true" uuid="97ba85c0-c372-4584-a56f-a47aae0f475c">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="191985ee-2f1a-4caa-ac26-c37c654e63be"/>
@@ -243,7 +237,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{NOTICE_DATE_TEXT}]]></textFieldExpression>
 			</textField>
@@ -258,7 +252,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{NOTICE_NO}]]></textFieldExpression>
 			</textField>
@@ -273,7 +267,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}]]></textFieldExpression>
 			</textField>
@@ -288,9 +282,9 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{DETAINEE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{DETAINEE}+"("+$F{LITIGANT_LOV_NAME}+")"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="536" y="0" width="133" height="30" isPrintWhenDetailOverflows="true" uuid="5cb18e9d-8f0c-42c8-906a-9c21a1598715">
@@ -303,7 +297,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ALLEGATION_NAME}]]></textFieldExpression>
 			</textField>
@@ -318,7 +312,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PENALTY_NAME}]]></textFieldExpression>
 			</textField>
@@ -333,7 +327,7 @@ ORDER BY pn.NOTICE_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
