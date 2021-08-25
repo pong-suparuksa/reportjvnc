@@ -16,9 +16,9 @@
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_writres_sender"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="486"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="505"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="305"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="684"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN121"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_writres_sender_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/05/2020"]]></defaultValueExpression>
@@ -27,20 +27,21 @@
 		<defaultValueExpression><![CDATA["31/05/2021"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT 
+		<![CDATA[SELECT DISTINCT
 	   cou.COURT_NAME_TH,
-	   pnsr.CREATED_DATE,
        CASE WHEN pc.BLACK_IDNUM IS NULL THEN ' ' 
             ELSE NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR) END	 CASE_BLACK_NO, 
        CASE WHEN pj.RED_IDNUM IS NULL THEN ' '
             ELSE NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || '/' || TO_CHAR(pj.RED_YEAR) END	 CASE_RED_NO,
-       pcl.LITIGANT_NAME TO_NAME, 
+       NVL(pn.LITIGANT_NAME,pcl.LITIGANT_NAME) TO_NAME, 
+	   pnsr.REPORT_DATE,
        pnsr.SEND_NOTICE_DATE,
        plnsr.NOTICE_SEND_RESULT_NAME,
        pn.SEND_FEE,
        NVL(pn.SEND_METHOD_BY_NAME,' ')	SENDER,
        NVL(pn.UNSEND_DETAIL, ' ')		UNSEND_DETAIL,
-	   plnstr.NOTICE_SEND_TYPE_RESULT_NAME 
+	   plnstr.NOTICE_SEND_TYPE_RESULT_NAME        
+       
 FROM PC_NOTICE_SEND_RESULT pnsr
 LEFT JOIN PC_NOTICE pn ON pn.NOTICE_ID = pnsr.NOTICE_ID AND pn.REMOVED_BY = 0
 --
@@ -62,13 +63,10 @@ LEFT JOIN (SELECT plc.COURT_NAME_TH
 --
 WHERE pnsr.REMOVED_BY = 0
 AND pnsr.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS')  AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
-ORDER BY pnsr.CREATED_DATE]]>
+ORDER BY pnsr.REPORT_DATE ]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
-	</field>
-	<field name="CREATED_DATE" class="java.util.Date">
-		<property name="com.jaspersoft.studio.field.label" value="CREATED_DATE"/>
 	</field>
 	<field name="CASE_BLACK_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="CASE_BLACK_NO"/>
@@ -78,6 +76,9 @@ ORDER BY pnsr.CREATED_DATE]]>
 	</field>
 	<field name="TO_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="TO_NAME"/>
+	</field>
+	<field name="REPORT_DATE" class="java.util.Date">
+		<property name="com.jaspersoft.studio.field.label" value="REPORT_DATE"/>
 	</field>
 	<field name="SEND_NOTICE_DATE" class="java.util.Date">
 		<property name="com.jaspersoft.studio.field.label" value="SEND_NOTICE_DATE"/>
@@ -285,7 +286,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CREATED_DATE}==null?" ":new SimpleDateFormat("d MMM yyyy", new Locale("th", "TH")).format($F{CREATED_DATE})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{REPORT_DATE}==null?" ":new SimpleDateFormat("d MMM yyyy", new Locale("th", "TH")).format($F{REPORT_DATE})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="110" y="0" width="70" height="25" uuid="8ae2f465-399f-45a1-9a91-578b5cf30aa4">
@@ -380,7 +381,7 @@ ORDER BY pnsr.CREATED_DATE]]>
 				<textElement verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{NOTICE_SEND_TYPE_RESULT_NAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{NOTICE_SEND_TYPE_RESULT_NAME}==null?" ":$F{NOTICE_SEND_TYPE_RESULT_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="0" y="0" width="40" height="25" uuid="4621e121-fdd6-4bee-a148-661960cf7b08">

@@ -2,14 +2,15 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="finance_frm_payinslip" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="6a214b07-32da-4750-b45b-f3010d720d1d">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_frm_payinslip"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN121"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="619"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="371"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="424"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="565"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/finance_frm_payinslip_files/main_jrxml"/>
 	<parameter name="INVOICE_ID" class="java.lang.Integer">
 		<defaultValueExpression><![CDATA[5003]]></defaultValueExpression>
@@ -19,6 +20,7 @@
   plc.COURT_NAME_TH
   ,plc.TAX_ID
   ,pfcc.COMP_CODE
+  ,pfcc.SERVICE_CODE
   ,pfi.CASE_ID
   ,pfi.INVOICE_ID
   ,pfi.PAYER_NAME
@@ -27,7 +29,8 @@
   ,TO_CHAR(pfi.DUE_DATE,'DD/MM/YYYY')      DUE_DATE
   ,TO_CHAR(pfi.CREATED_DATE,'DD/MM/YYYY')  CREATED_DATE
   ,pfi.TOTAL_PAID_AMOUNT
-  ,BAHT(TOTAL_PAID_AMOUNT)                 TOTAL_PAID_AMOUNT_TEXT 
+  ,BAHT(TOTAL_PAID_AMOUNT)                 TOTAL_PAID_AMOUNT_TEXT
+  ,'|'||plc.TAX_ID ||pfcc.SERVICE_CODE||chr(13)||pfi.REF1||chr(13)||pfi.REF2||chr(13)||pfi.TOTAL_PAID_AMOUNT||'00'  AS BARCODE
 FROM PC_FIN_INVOICE pfi 
 LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pfi.COURT_ID AND plc.REMOVED_BY = 0
 LEFT JOIN PC_FIN_COMP_CODE pfcc ON pfcc.MONEY_TYPE_BY = pfi.MONEY_TYPE_BY  AND pfcc.REMOVED_BY = 0
@@ -43,6 +46,9 @@ AND pfi.INVOICE_ID = $P{INVOICE_ID}]]>
 	</field>
 	<field name="COMP_CODE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COMP_CODE"/>
+	</field>
+	<field name="SERVICE_CODE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="SERVICE_CODE"/>
 	</field>
 	<field name="CASE_ID" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="CASE_ID"/>
@@ -70,6 +76,9 @@ AND pfi.INVOICE_ID = $P{INVOICE_ID}]]>
 	</field>
 	<field name="TOTAL_PAID_AMOUNT_TEXT" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="TOTAL_PAID_AMOUNT_TEXT"/>
+	</field>
+	<field name="BARCODE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="BARCODE"/>
 	</field>
 	<background>
 		<band splitType="Stretch"/>
@@ -105,7 +114,7 @@ AND pfi.INVOICE_ID = $P{INVOICE_ID}]]>
 				<imageExpression><![CDATA["/images/court_logo.png"]]></imageExpression>
 			</image>
 			<textField>
-				<reportElement x="98" y="20" width="360" height="25" uuid="7ecce848-66f6-4f4a-b90d-00d5c27cc0dd">
+				<reportElement x="98" y="20" width="230" height="25" uuid="7ecce848-66f6-4f4a-b90d-00d5c27cc0dd">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -210,9 +219,11 @@ AND pfi.INVOICE_ID = $P{INVOICE_ID}]]>
 				<textFieldExpression><![CDATA["จำนวนเงินที่ต้องชำระ : "+new java.text.DecimalFormat("#,##0").format($F{TOTAL_PAID_AMOUNT})+" บาท"]]></textFieldExpression>
 			</textField>
 			<componentElement>
-				<reportElement x="300" y="201" width="255" height="45" uuid="1e38057a-9b7b-4a47-82f2-e97d8f48e185"/>
-				<jr:Code128 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
-					<jr:codeExpression><![CDATA["|"+$F{TAX_ID}+"00"+"\r\n"+$F{REF1}+"\r\n"+$F{REF2}+"\r\n"+$F{TOTAL_PAID_AMOUNT}+"00"]]></jr:codeExpression>
+				<reportElement x="204" y="201" width="350" height="45" uuid="1e38057a-9b7b-4a47-82f2-e97d8f48e185">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<jr:Code128 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" moduleWidth="1.0">
+					<jr:codeExpression><![CDATA[$F{BARCODE}]]></jr:codeExpression>
 				</jr:Code128>
 			</componentElement>
 			<staticText>
@@ -269,7 +280,7 @@ AND pfi.INVOICE_ID = $P{INVOICE_ID}]]>
 				<imageExpression><![CDATA["/images/court_logo.png"]]></imageExpression>
 			</image>
 			<textField>
-				<reportElement x="98" y="410" width="360" height="25" uuid="623207de-139b-4906-b702-7e2a07e44529">
+				<reportElement x="98" y="410" width="230" height="25" uuid="623207de-139b-4906-b702-7e2a07e44529">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -373,12 +384,6 @@ AND pfi.INVOICE_ID = $P{INVOICE_ID}]]>
 				</textElement>
 				<textFieldExpression><![CDATA["จำนวนเงินที่ต้องชำระ : "+new java.text.DecimalFormat("#,##0").format($F{TOTAL_PAID_AMOUNT})+" บาท"]]></textFieldExpression>
 			</textField>
-			<componentElement>
-				<reportElement x="299" y="591" width="255" height="45" uuid="4934e271-9804-4dcb-8655-2591744b332b"/>
-				<jr:Code128 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
-					<jr:codeExpression><![CDATA["|"+$F{TAX_ID}+"00"+"\r\n"+$F{REF1}+"\r\n"+$F{REF2}+"\r\n"+$F{TOTAL_PAID_AMOUNT}+"00"]]></jr:codeExpression>
-				</jr:Code128>
-			</componentElement>
 			<staticText>
 				<reportElement x="399" y="390" width="154" height="25" uuid="4820e055-014e-48a6-aadf-adf716868be2">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -455,6 +460,14 @@ AND pfi.INVOICE_ID = $P{INVOICE_ID}]]>
 				</textElement>
 				<text><![CDATA[ผู้รับมอบอำนาจ]]></text>
 			</staticText>
+			<componentElement>
+				<reportElement x="204" y="591" width="350" height="45" uuid="e6939b4f-bd4f-4527-ba8b-c45315b20079">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<jr:Code128 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" moduleWidth="1.0">
+					<jr:codeExpression><![CDATA[$F{BARCODE}]]></jr:codeExpression>
+				</jr:Code128>
+			</componentElement>
 		</band>
 	</detail>
 </jasperReport>
