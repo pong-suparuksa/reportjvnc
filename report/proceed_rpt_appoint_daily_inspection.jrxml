@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_daily_inspection"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="315"/>
@@ -47,6 +47,7 @@ PCC.CASE_ID,
     (COALESCE(PCPA.INVESTIGATE_ACCUSER_CONFESSION_DATE,0)+ COALESCE(PCPA.INVESTIGATE_ACCUSER_DATE,0) + COALESCE(PCPA.INVESTIGATE_DEFENDANT_DATE,0) + COALESCE(PCPA.INVESTIGATE_OTHER_DATE,0)) AS INVESTIGATE_DATE
     ,PCPACNT.APPOINT_NEXT_DATE
     ,PCPACNT.APPOINT_NEXT_REASON
+    ,cou.COURT_NAME_TH
     --
 	FROM PC_PROCEED_APPOINT PCPA
     JOIN PC_PROCEED_APPOINT_CONTINUE PCPAC ON PCPA.APPOINT_ID = PCPAC.APPOINT_ID AND PCPAC.REMOVED_BY = 0 
@@ -99,6 +100,10 @@ PCC.CASE_ID,
 	  --FETCH FIRST 1 ROWS ONLY	  
 	  ) PCPACNT ON PCPACNT.APPOINT_ID = PCPA.APPOINT_ID AND PCPACNT.rn = 1
 	  --
+	LEFT JOIN (SELECT plc.COURT_NAME_TH
+			FROM PC_PARAM pp
+			JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 = 1
 	WHERE PCPA.REMOVED_BY = 0 AND PCC.CASE_ID IS NOT NULL 
 	AND PCPAC.START_DATE = TO_DATE($P{SELECT_DATE} ||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS')
 	AND ($P{ROOM_COD} IS NULL OR pllr.LEVEL_ROOM_CODE = $P{ROOM_COD})]]>
@@ -154,6 +159,7 @@ PCC.CASE_ID,
 	<field name="APPOINT_NEXT_REASON" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="APPOINT_NEXT_REASON"/>
 	</field>
+	<field name="COURT_NAME_TH" class="java.lang.String"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -168,13 +174,13 @@ PCC.CASE_ID,
 				</textElement>
 				<textFieldExpression><![CDATA["วันนัดพิจารณา  " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{SELECT_DATE}))]]></textFieldExpression>
 			</textField>
-			<staticText>
-				<reportElement x="229" y="0" width="337" height="24" uuid="9a7b53d1-8348-4c84-8488-4f3b4e87bffd"/>
+			<textField>
+				<reportElement x="0" y="0" width="802" height="24" uuid="37fd3b27-5679-4d1a-a50d-8353c2c082a9"/>
 				<textElement textAlignment="Center">
 					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
-				<text><![CDATA[บัญชีนัดความ เสนอผู้พิพากษาหัวหน้าศาลฯ ตรวจ]]></text>
-			</staticText>
+				<textFieldExpression><![CDATA["บัญชีนัดความ เสนอผู้พิพากษาหัวหน้า"+($F{COURT_NAME_TH}==null?"ศาล":$F{COURT_NAME_TH} )+"ตรวจ"]]></textFieldExpression>
+			</textField>
 		</band>
 	</title>
 	<columnHeader>

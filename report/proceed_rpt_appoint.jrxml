@@ -12,11 +12,13 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="336"/>
-	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="658"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="614"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="376"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["10/03/2021"]]></defaultValueExpression>
@@ -167,14 +169,14 @@ ORDER BY pc.CASE_ID]]>
 	<title>
 		<band height="92" splitType="Stretch">
 			<textField isBlankWhenNull="true">
-				<reportElement x="-10" y="30" width="820" height="30" uuid="bf5c355f-9ec4-4505-8212-03703cf0b4b9"/>
+				<reportElement x="191" y="30" width="420" height="30" uuid="bf5c355f-9ec4-4505-8212-03703cf0b4b9"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="16" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="-10" y="0" width="819" height="30" uuid="e2c04854-7fd2-4683-baad-3817db5aa832"/>
+				<reportElement x="-5" y="0" width="812" height="30" uuid="e2c04854-7fd2-4683-baad-3817db5aa832"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="16" isBold="true"/>
 				</textElement>
@@ -187,6 +189,15 @@ ORDER BY pc.CASE_ID]]>
 				</textElement>
 				<textFieldExpression><![CDATA["วันนัดพิจารณา : " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))]]></textFieldExpression>
 				<patternExpression><![CDATA[new java.text.SimpleDateFormat("d MMMM y", new Locale("TH","th")).format(new SimpleDateFormat("dd/MM/yyyy", new Locale("TH","th")).parse($P{START_DATE} ))]]></patternExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="611" y="30" width="190" height="30" uuid="dbb367be-037c-412c-947d-932cda6261a5"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="16" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{LEVEL_ROOM_ID}==null ? " " :
+$P{LEVEL_ROOM_ID}.equals("0")?" ":
+$F{LEVEL_ROOM_DESC}]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>

@@ -16,8 +16,7 @@
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_rpt_accpay_central"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/finance_rpt_accpay_central_files/main_jrxml"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="620"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="369"/>
 	<parameter name="RECEIVETYPE" class="java.lang.String" isForPrompting="false">
@@ -47,7 +46,9 @@
         NVL(pc.ACCU_DESC,' ' ) ACCU_DESC,
         NVL(pfpd.CASE_LIT_NAME,' ')  PAYEE,
         pfrd.PAID_DESCRIPTION,
-        CASE WHEN pfp.CHEQUE_AMOUNT > 0 THEN  pfpc.CHEQUE_CODE ELSE ' ' END ACCOUNT_NO,
+        CASE WHEN pfp.CHEQUE_AMOUNT > 0 THEN  pfpc.CHEQUE_CODE 
+        	 WHEN pfp.TRANSFER_AMOUNT > 0 THEN pfp.TRANSFER_ACCOUNT_NO 
+          ELSE ' ' END ACCOUNT_NO,              
         pfp.TOTAL_AMOUNT,
         NVL(pup.USER_PROFILE_FULL_NAME,' ') OFFICER,
         THAISDATE(pup.CREATED_DATE) CREATED_DATE_TEXT,
@@ -167,7 +168,7 @@ ORDER BY pfp.PAYMENT_DATE]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="18" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new SimpleDateFormat("ระหว่างวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{START_DATE})) + new SimpleDateFormat(" ถึงวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{END_DATE}))]]></textFieldExpression>
+				<textFieldExpression><![CDATA["ระหว่างวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>
@@ -220,7 +221,7 @@ ORDER BY pfp.PAYMENT_DATE]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<text><![CDATA[เช็คลงวันที่]]></text>
+				<text><![CDATA[วันที่จ่ายคืน]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="90" y="0" width="60" height="25" uuid="a811c802-d468-424a-b76b-55e2fe0ce1ef">
@@ -321,9 +322,9 @@ ORDER BY pfp.PAYMENT_DATE]]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="14"/>
 				</textElement>
-				<text><![CDATA[เลขที่เช็คเงินสด]]></text>
+				<text><![CDATA[เลขที่บัญชี/เลขที่เช็ค]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="440" y="0" width="100" height="25" uuid="9c5024d7-1156-4791-aa9e-396777fd7915">

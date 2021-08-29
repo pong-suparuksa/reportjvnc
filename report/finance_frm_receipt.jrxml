@@ -3,7 +3,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="finance_frm_receipt" pageWidth="420" pageHeight="595" whenNoDataType="AllSectionsNoDetail" columnWidth="385" leftMargin="14" rightMargin="21" topMargin="14" bottomMargin="20" uuid="91ef4741-a901-4bf3-8b94-8304dcb4486b">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_frm_receipt"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -11,7 +11,6 @@
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="524"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="469"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/finance_frm_receipt_files/main_jrxml"/>
 	<parameter name="IS_PREPRINT" class="java.lang.Integer">
 		<parameterDescription><![CDATA[select for use pre-print papaer or not]]></parameterDescription>
 		<defaultValueExpression><![CDATA[0]]></defaultValueExpression>
@@ -34,11 +33,14 @@
        pfr.RECEIVED_DATE,
        TO_CHAR(pfr.RECEIVED_DATE, 'MONTH', 'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI') TH_MONTH,
        TO_CHAR(pfr.RECEIVED_DATE, 'YYYY', 'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI') TH_YEAR,
-       pfr.PAYER_NAME, 
+       pfr.PAYER_NAME,
+       --รวมเงินกลาง กับคำคู่ความ
+       TRUNC(NVL(A.AMOUNT,0)+NVL(D.AMOUNT,0))	ALL_CENTRALFEE_BAHT,
+       REPLACE(TO_CHAR((NVL(A.AMOUNT,0)+NVL(D.AMOUNT,0))-TRUNC(NVL(A.AMOUNT,0)+NVL(D.AMOUNT,0)),'999D99MI'),'.','') ALL_CENTRAFEE_STANG,
        --เงินกลาง
        NVL(A.RECEIPT_SUB_TYPE_NAME,' ')    CENTRALFEE_DESC,
        TRUNC(NVL(A.AMOUNT,0))              CENTRALFEE_BAHT,
-       REPLACE(TO_CHAR((NVL(A.AMOUNT,0))-TRUNC(NVL(A.AMOUNT,0)),'999D99MI'),'.','') CENTRALFEE_STANG, 
+       REPLACE(TO_CHAR((NVL(A.AMOUNT,0))-TRUNC(NVL(A.AMOUNT,0)),'999D99MI'),'.','') CENTRALFEE_STANG,
        --ค่าธรรมเนียม:ค่าขึ้นศาล
        NVL(B1.RECEIPT_SUB_TYPE_NAME,' ')   COURTFEE_DESC,
        TRUNC(NVL(B1.AMOUNT,0))             COURTFEE_BAHT,
@@ -68,7 +70,7 @@
        TRUNC(NVL(D.AMOUNT,0))             LITIGANT_FEE_BAHT,
        REPLACE(TO_CHAR((NVL(D.AMOUNT,0))-TRUNC(NVL(D.AMOUNT,0)),'999D99MI'),'.','') LITIGANT_FEE_STANG, 
        --ค่าอื่นๆ
-       NVL(E.RECEIPT_SUB_TYPE_NAME,' ')   OTHER_FEE_DESC,
+       ' '   OTHER_FEE_DESC,
        TRUNC(NVL(E.AMOUNT,0))             OTHER_FEE_BAHT,
        REPLACE(TO_CHAR((NVL(E.AMOUNT,0))-TRUNC(NVL(E.AMOUNT,0)),'999D99MI'),'.','') OTHER_FEE_STANG, 
        E.OTHER_DETAIL,
@@ -105,11 +107,12 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
 			 FROM PC_PARAM pp
 			 JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
 			 WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0)cou
-------------------------------------------------------------เงินกลาง------------------------------------------------------------
-LEFT JOIN (SELECT pfrd.RECEIPT_ID,
-                   plrst.RECEIPT_SUB_TYPE_NAME,
-			       NVL(pfrd.CASH_AMOUNT,0)+NVL(pfrd.CHEQUE_AMOUNT,0)+NVL(pfrd.TRANSFER_AMOUNT,0)+NVL(pfrd.CREDIT_AMOUNT,0) AMOUNT,
-			       plrt.RECEIPT_TYPE_CODE 
+------------------------------------------------------------เงินกลาง-----------------------------------------------------------------
+--เงินกลาง
+LEFT JOIN (SELECT pfrd.RECEIPT_ID
+			      ,LISTAGG(plrst.RECEIPT_SUB_TYPE_NAME, ',') WITHIN GROUP(ORDER BY plrst.RECEIPT_SUB_TYPE_NAME) RECEIPT_SUB_TYPE_NAME
+			      ,SUM(NVL(pfrd.CASH_AMOUNT,0)+NVL(pfrd.CHEQUE_AMOUNT,0)+NVL(pfrd.TRANSFER_AMOUNT,0)+NVL(pfrd.CREDIT_AMOUNT,0)) AMOUNT
+			      ,plrt.RECEIPT_TYPE_CODE 
 			FROM PC_FIN_RECEIPT_DETAIL pfrd 
 			LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE
 			                                      AND plrt.REMOVED_BY = 0
@@ -117,7 +120,8 @@ LEFT JOIN (SELECT pfrd.RECEIPT_ID,
 			                                           AND plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE 
 			                                           AND plrst.REMOVED_BY = 0 
 			WHERE pfrd.REMOVED_BY = 0
-			AND plrt.RECEIPT_TYPE_CODE = 1 ) A ON A.RECEIPT_ID = pfr.RECEIPT_ID
+			AND plrt.RECEIPT_TYPE_CODE = '1' 
+			GROUP BY pfrd.RECEIPT_ID, plrt.RECEIPT_TYPE_CODE) A ON A.RECEIPT_ID = pfr.RECEIPT_ID
 -------------------------------------------------------ค่าธรรมเนียม----------------------------------------------------------------------
 --ค่าขึ้นศาล
 LEFT JOIN (SELECT pfrd.RECEIPT_ID,
@@ -131,7 +135,7 @@ LEFT JOIN (SELECT pfrd.RECEIPT_ID,
 			                                           AND plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE 
 			                                           AND plrst.REMOVED_BY = 0 
 			WHERE pfrd.REMOVED_BY = 0
-			AND plrt.RECEIPT_TYPE_CODE = 2 
+			AND plrt.RECEIPT_TYPE_CODE = '2' 
 			AND plrst.RECEIPT_SUB_TYPE_CODE ='017') B1 ON B1.RECEIPT_ID = pfr.RECEIPT_ID	
 --ค่าขึ้นศาลอนาคต
 LEFT JOIN (SELECT pfrd.RECEIPT_ID,
@@ -145,8 +149,8 @@ LEFT JOIN (SELECT pfrd.RECEIPT_ID,
 			                                           AND plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE 
 			                                           AND plrst.REMOVED_BY = 0 
 			WHERE pfrd.REMOVED_BY = 0
-			AND plrt.RECEIPT_TYPE_CODE = 2 
-			AND plrst.RECEIPT_SUB_TYPE_CODE ='002') B2 ON B2.RECEIPT_ID = pfr.RECEIPT_ID
+			AND plrt.RECEIPT_TYPE_CODE = '2' 
+			AND plrst.RECEIPT_SUB_TYPE_CODE ='018') B2 ON B2.RECEIPT_ID = pfr.RECEIPT_ID
 --ค่าสืบพยานล่วงหน้า
 LEFT JOIN (SELECT pfrd.RECEIPT_ID,
                    plrst.RECEIPT_SUB_TYPE_NAME,
@@ -159,7 +163,7 @@ LEFT JOIN (SELECT pfrd.RECEIPT_ID,
 			                                           AND plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE 
 			                                           AND plrst.REMOVED_BY = 0 
 			WHERE pfrd.REMOVED_BY = 0
-			AND plrt.RECEIPT_TYPE_CODE = 2 
+			AND plrt.RECEIPT_TYPE_CODE = '2'
 			AND plrst.RECEIPT_SUB_TYPE_CODE ='005') B3 ON B3.RECEIPT_ID = pfr.RECEIPT_ID
 --ค่าสืบพยานล่วงหน้า
 LEFT JOIN (SELECT pfrd.RECEIPT_ID,
@@ -173,7 +177,7 @@ LEFT JOIN (SELECT pfrd.RECEIPT_ID,
 			                                           AND plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE 
 			                                           AND plrst.REMOVED_BY = 0 
 			WHERE pfrd.REMOVED_BY = 0
-			AND plrt.RECEIPT_TYPE_CODE = 2 
+			AND plrt.RECEIPT_TYPE_CODE = '2' 
 			AND plrst.RECEIPT_SUB_TYPE_CODE ='005') B3 ON B3.RECEIPT_ID = pfr.RECEIPT_ID
 --ค่ารับรองสำเนาเอกสาร
 LEFT JOIN (SELECT pfrd.RECEIPT_ID,
@@ -187,7 +191,7 @@ LEFT JOIN (SELECT pfrd.RECEIPT_ID,
 			                                           AND plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE 
 			                                           AND plrst.REMOVED_BY = 0 
 			WHERE pfrd.REMOVED_BY = 0
-			AND plrt.RECEIPT_TYPE_CODE = 2 
+			AND plrt.RECEIPT_TYPE_CODE = '2' 
 			AND plrst.RECEIPT_SUB_TYPE_CODE ='019') B4 ON B4.RECEIPT_ID = pfr.RECEIPT_ID
 --ค่าใบสำคัญรับรองคดีถึงที่สุด
 LEFT JOIN (SELECT pfrd.RECEIPT_ID,
@@ -201,13 +205,13 @@ LEFT JOIN (SELECT pfrd.RECEIPT_ID,
 			                                           AND plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE 
 			                                           AND plrst.REMOVED_BY = 0 
 			WHERE pfrd.REMOVED_BY = 0
-			AND plrt.RECEIPT_TYPE_CODE = 2 
+			AND plrt.RECEIPT_TYPE_CODE = '2'
 			AND plrst.RECEIPT_SUB_TYPE_CODE ='020') B5 ON B5.RECEIPT_ID = pfr.RECEIPT_ID
 ------------------------------------------------------------ค่าปรับ------------------------------------------------------------
-LEFT JOIN (SELECT pfrd.RECEIPT_ID,
-                   plrst.RECEIPT_SUB_TYPE_NAME,
-			       NVL(pfrd.CASH_AMOUNT,0)+NVL(pfrd.CHEQUE_AMOUNT,0)+NVL(pfrd.TRANSFER_AMOUNT,0)+NVL(pfrd.CREDIT_AMOUNT,0) AMOUNT,
-			       plrt.RECEIPT_TYPE_CODE 
+LEFT JOIN (SELECT pfrd.RECEIPT_ID
+			      ,LISTAGG(plrst.RECEIPT_SUB_TYPE_NAME, ',') WITHIN GROUP(ORDER BY plrst.RECEIPT_SUB_TYPE_NAME) RECEIPT_SUB_TYPE_NAME
+			      ,SUM(NVL(pfrd.CASH_AMOUNT,0)+NVL(pfrd.CHEQUE_AMOUNT,0)+NVL(pfrd.TRANSFER_AMOUNT,0)+NVL(pfrd.CREDIT_AMOUNT,0)) AMOUNT
+			      ,plrt.RECEIPT_TYPE_CODE 
 			FROM PC_FIN_RECEIPT_DETAIL pfrd 
 			LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE
 			                                      AND plrt.REMOVED_BY = 0
@@ -215,12 +219,13 @@ LEFT JOIN (SELECT pfrd.RECEIPT_ID,
 			                                           AND plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE 
 			                                           AND plrst.REMOVED_BY = 0 
 			WHERE pfrd.REMOVED_BY = 0
-			AND plrt.RECEIPT_TYPE_CODE = 3 ) C ON C.RECEIPT_ID = pfr.RECEIPT_ID		
+			AND plrt.RECEIPT_TYPE_CODE = '3' 
+			GROUP BY pfrd.RECEIPT_ID, plrt.RECEIPT_TYPE_CODE) C ON C.RECEIPT_ID = pfr.RECEIPT_ID		
 --------------------------------------------------------------ค่าส่งคำคู่ความ------------------------------------------------------------
-LEFT JOIN (SELECT pfrd.RECEIPT_ID,
-                   plrst.RECEIPT_SUB_TYPE_NAME,
-			       NVL(pfrd.CASH_AMOUNT,0)+NVL(pfrd.CHEQUE_AMOUNT,0)+NVL(pfrd.TRANSFER_AMOUNT,0)+NVL(pfrd.CREDIT_AMOUNT,0) AMOUNT,
-			       plrt.RECEIPT_TYPE_CODE 
+LEFT JOIN (SELECT pfrd.RECEIPT_ID
+			      ,LISTAGG(plrst.RECEIPT_SUB_TYPE_NAME, ',') WITHIN GROUP(ORDER BY plrst.RECEIPT_SUB_TYPE_NAME) RECEIPT_SUB_TYPE_NAME
+			      ,SUM(NVL(pfrd.CASH_AMOUNT,0)+NVL(pfrd.CHEQUE_AMOUNT,0)+NVL(pfrd.TRANSFER_AMOUNT,0)+NVL(pfrd.CREDIT_AMOUNT,0)) AMOUNT
+			      ,plrt.RECEIPT_TYPE_CODE 
 			FROM PC_FIN_RECEIPT_DETAIL pfrd 
 			LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE
 			                                      AND plrt.REMOVED_BY = 0
@@ -228,21 +233,22 @@ LEFT JOIN (SELECT pfrd.RECEIPT_ID,
 			                                           AND plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE 
 			                                           AND plrst.REMOVED_BY = 0 
 			WHERE pfrd.REMOVED_BY = 0
-			AND plrt.RECEIPT_TYPE_CODE = 5) D ON D.RECEIPT_ID = pfr.RECEIPT_ID	
+			AND plrt.RECEIPT_TYPE_CODE = '5' 
+			GROUP BY pfrd.RECEIPT_ID, plrt.RECEIPT_TYPE_CODE) D ON D.RECEIPT_ID = pfr.RECEIPT_ID	
 --------------------------------------------------------------ค่าอื่น ๆ------------------------------------------------------------
-LEFT JOIN (SELECT pfrd.RECEIPT_ID,
-                   plrst.RECEIPT_SUB_TYPE_NAME,
-			       NVL(pfrd.CASH_AMOUNT,0)+NVL(pfrd.CHEQUE_AMOUNT,0)+NVL(pfrd.TRANSFER_AMOUNT,0)+NVL(pfrd.CREDIT_AMOUNT,0) AMOUNT,
-			       plrt.RECEIPT_TYPE_CODE,
-			       pfrd.OTHER_DETAIL 
+LEFT JOIN (SELECT pfrd.RECEIPT_ID
+			      ,LISTAGG(plrst.RECEIPT_SUB_TYPE_NAME, ',') WITHIN GROUP(ORDER BY plrst.RECEIPT_SUB_TYPE_NAME) RECEIPT_SUB_TYPE_NAME
+			      ,SUM(NVL(pfrd.CASH_AMOUNT,0)+NVL(pfrd.CHEQUE_AMOUNT,0)+NVL(pfrd.TRANSFER_AMOUNT,0)+NVL(pfrd.CREDIT_AMOUNT,0)) AMOUNT
+			      ,plrt.RECEIPT_TYPE_CODE 
+			      ,LISTAGG(pfrd.OTHER_DETAIL , ',') WITHIN GROUP(ORDER BY pfrd.OTHER_DETAIL) OTHER_DETAIL 
 			FROM PC_FIN_RECEIPT_DETAIL pfrd 
 			LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE
 			                                      AND plrt.REMOVED_BY = 0
-			LEFT JOIN PC_LOOKUP_RECEIPT_SUB_TYPE plrst ON plrst.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE 
-			                                           AND plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE 
+			LEFT JOIN PC_LOOKUP_RECEIPT_SUB_TYPE plrst ON plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE 
 			                                           AND plrst.REMOVED_BY = 0 
 			WHERE pfrd.REMOVED_BY = 0
-			AND plrt.RECEIPT_TYPE_CODE = 4) E ON E.RECEIPT_ID = pfr.RECEIPT_ID	
+			AND plrt.RECEIPT_TYPE_CODE = '4' 
+			GROUP BY pfrd.RECEIPT_ID, plrt.RECEIPT_TYPE_CODE) E ON E.RECEIPT_ID = pfr.RECEIPT_ID	
 --------------------------------------------------------------เงินสด, เครดิต------------------------------------------------------------
 LEFT JOIN (SELECT pfrd.RECEIPT_ID,
 			        SUM(NVL(pfrd.CASH_AMOUNT,0)) CASH, 
@@ -415,6 +421,8 @@ AND pfr.RECEIPT_ID = $P{RECEIPT_ID}]]>
 	<field name="PAYER_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="PAYER_NAME"/>
 	</field>
+	<field name="ALL_CENTRALFEE_BAHT" class="java.lang.Double"/>
+	<field name="ALL_CENTRAFEE_STANG" class="java.lang.String"/>
 	<field name="CENTRALFEE_DESC" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="CENTRALFEE_DESC"/>
 	</field>
@@ -568,6 +576,17 @@ AND pfr.RECEIPT_ID = $P{RECEIPT_ID}]]>
 	</field>
 	<field name="COURT_LEVEL_NAME" class="java.lang.String"/>
 	<field name="ISSUE_COUNT" class="java.lang.Integer"/>
+	<variable name="ALL_CENTRAL_FEE" class="java.lang.String">
+		<variableExpression><![CDATA[$F{LITIGANT_FEE_DESC}.equals(" ")
+?($F{CENTRALFEE_DESC}.equals(" ")?" ":$F{CENTRALFEE_DESC}) 
+:($F{CENTRALFEE_DESC}.equals(" ")?" ":$F{CENTRALFEE_DESC}+"," ) +  $F{LITIGANT_FEE_DESC}]]></variableExpression>
+	</variable>
+	<variable name="ALL_CENTRAL_FEE_BAHT" class="java.lang.Double">
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<variable name="ALL_CENTRAL_FEE_STANG" class="java.lang.Double">
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -1103,7 +1122,7 @@ AND pfr.RECEIPT_ID = $P{RECEIPT_ID}]]>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CENTRALFEE_DESC}.equals(" ")?$F{LITIGANT_FEE_DESC}:$F{CENTRALFEE_DESC}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{ALL_CENTRAL_FEE}.equals(" ")?" ":$V{ALL_CENTRAL_FEE}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="250" y="16" width="85" height="16" uuid="3d8cfb47-586f-484e-8fe0-f7f3ac0cab94"/>
@@ -1117,9 +1136,8 @@ AND pfr.RECEIPT_ID = $P{RECEIPT_ID}]]>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CENTRALFEE_BAHT}==0
-?$F{LITIGANT_FEE_BAHT}==0?" ":new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{LITIGANT_FEE_BAHT}))
-:new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{CENTRALFEE_BAHT}))]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{ALL_CENTRALFEE_BAHT}==0?" ":
+new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{ALL_CENTRALFEE_BAHT}))]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="335" y="16" width="49" height="16" uuid="44e37812-23c7-415a-8f77-32fb425283f0"/>
@@ -1132,7 +1150,7 @@ AND pfr.RECEIPT_ID = $P{RECEIPT_ID}]]>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CENTRALFEE_STANG}.equals("   00 ")?" ":$F{CENTRALFEE_STANG}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{ALL_CENTRAFEE_STANG}.equals("   00 ")?" ":$F{ALL_CENTRAFEE_STANG}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="32" width="250" height="16" uuid="4959ec45-32f0-4c6d-9a0b-5510d46f359f">
@@ -1236,7 +1254,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{COURTFEE_BAHT}))]]
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CENTRALFEE_STANG}.equals("   00 ")?" ":$F{CENTRALFEE_STANG}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{COURTFEE_STANG}.equals("   00 ")?" ":$F{COURTFEE_STANG}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="64" width="68" height="16" uuid="dad809d0-1e9f-4c67-8060-0dc2ee3cb4dd">

@@ -2,7 +2,7 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="bail_rpt_security_register" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="458ba496-ff59-461d-a3ff-a8714a08984c">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -12,74 +12,81 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/bail_rpt_security_register"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="206"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="788"/>
 	<property name="com.jaspersoft.studio.report.description" value="35.ทะเบียนคุมหลักทรัพย์"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/bail_rpt_security_register_files/main_jrxml"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="543"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="446"/>
 	<parameter name="SELECT_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["10/03/2020"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["18/08/2021"]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
-		<![CDATA[SELECT BD.BAIL_DATE,
-LTC.TITLE_CASE_NAME || C.BLACK_IDNUM || '/' || C.BLACK_YEAR  BLACK_CASE_NO, C.ALLE_DESC ALLE,
-LT.TITLE_NAME || BB.NAME || ' ' || BB.LASTNAME BAILMAN_NAME,
-THAISDATE(BD.BAIL_DATE) THAIDATE,	
-CASE BSP.POSITION_TYPE
-	WHEN 1 THEN 'ข้าราชการ'
-    WHEN 2 THEN 'รัฐวิสาหกิจ'
-    ELSE 'อื่น ๆ'
-END,
-BSP.POSITION, BS.TOTAL_AMOUNT DEFENDANT_BAIL_COST , LC.COURT_NAME_TH,
-CASE BD.COURT_ORDER
-	WHEN 1 THEN 'อนุญาต'
-    ELSE 'ไม่อนุญาต'
-END
-FROM PC_BAIL_SEC_POSITION BSP
-LEFT JOIN PC_BAIL_SEC BS ON(BS.SEC_ID=BSP.SEC_ID)
-LEFT JOIN PC_BAIL BD ON(BD.BAIL_ID=BS.BAIL_ID)
-LEFT JOIN PC_CASE C ON(C.CASE_ID=BD.CASE_ID)
-LEFT JOIN PC_LOOKUP_TITLE_CASE LTC ON(LTC.TITLE_CASE_ID=C.BLACK_TITLE_ID)
-LEFT JOIN PC_LOOKUP_COURT LC ON(LC.COURT_ID=BD.COURT_ID)
-LEFT JOIN PC_BAIL_BAILSMAN BB ON(BB.BAILSMAN_ID=BS.BAILSMAN_ID)
-LEFT JOIN PC_LOOKUP_TITLE LT ON(LT.TITLE_ID=BB.NAME_TITLE_ID)
-WHERE BD.BAIL_DATE = TO_DATE($P{SELECT_DATE}, 'DD-MM-YYYY')]]>
+		<![CDATA[SELECT DISTINCT
+		cou.COURT_NAME_TH
+		,THAISDATE(pb.CREATED_DATE)	CREATED_DATE
+		,pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR  CASE_BLACK_NO
+		,CASE WHEN pj.RED_IDNUM IS NULL THEN ' ' ELSE pltc_r.TITLE_CASE_NAME||pj.RED_IDNUM||'/'||pj.RED_YEAR END	 CASE_RED_NO
+		,pc.PROS_DESC
+		,pc.ACCU_DESC
+		,pc.ALLE_DESC 
+		,pbb.FULLNAME BAILOR
+		,pbs.SEC_TYPE_CODE
+		,pbst.TYPE_NAME 
+FROM PC_BAIL pb 
+--case
+LEFT JOIN PC_CASE pc ON pc.CASE_ID = pb.CASE_ID AND pc.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
+--judgement 
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pb.CASE_ID AND pj.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
+--bail security
+LEFT JOIN PC_BAIL_SEC pbs ON pbs.BAIL_ID = pb.BAIL_ID AND pbs.REMOVED_BY = 0
+LEFT JOIN PC_USER_PROFILE pup ON pup.USER_PROFILE_ID = pbs.CREATED_BY AND pup.REMOVED_BY = 0
+LEFT JOIN PC_BAIL_SEC_TYPE pbst ON pbst.TYPE_CODE = pbs.SEC_TYPE_CODE AND pbst.REMOVED_BY = 0
+--bailsman
+LEFT JOIN PC_BAIL_BAILSMAN pbb ON pbb.BAIL_ID = pb.BAIL_ID AND pbb.REMOVED_BY = 0
+--court
+LEFT JOIN (SELECT plc.COURT_NAME_TH
+			FROM PC_PARAM pp
+			JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 = 1
+WHERE pb.REMOVED_BY = 0
+AND TO_CHAR(pb.CREATED_DATE,'DD/MM/YYYY') = $P{SELECT_DATE}
+AND pbst.TYPE_NAME  IS NOT NULL
+ORDER BY pbs.SEC_TYPE_CODE]]>
 	</queryString>
-	<field name="BAIL_DATE" class="java.util.Date">
-		<property name="com.jaspersoft.studio.field.label" value="BAIL_DATE"/>
-	</field>
-	<field name="BLACK_CASE_NO" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="BLACK_CASE_NO"/>
-	</field>
-	<field name="ALLE" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="ALLE"/>
-	</field>
-	<field name="BAILMAN_NAME" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="BAILMAN_NAME"/>
-	</field>
-	<field name="THAIDATE" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="THAIDATE"/>
-	</field>
-	<field name="CASEBSP.POSITION_TYPEWHEN1THEN&apos;ข้าราชการ&apos;WHEN2THEN&apos;รัฐวิสาหกิจ&apos;ELSE&apos;อื่นๆ&apos;END" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label">
-			<![CDATA[CASEBSP.POSITION_TYPEWHEN1THEN'ข้าราชการ'WHEN2THEN'รัฐวิสาหกิจ'ELSE'อื่นๆ'END]]>
-		</property>
-	</field>
-	<field name="POSITION" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="POSITION"/>
-	</field>
-	<field name="DEFENDANT_BAIL_COST" class="java.lang.Double">
-		<property name="com.jaspersoft.studio.field.label" value="DEFENDANT_BAIL_COST"/>
-	</field>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
 	</field>
-	<field name="CASEBD.COURT_ORDERWHEN1THEN&apos;อนุญาต&apos;ELSE&apos;ไม่อนุญาต&apos;END" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label">
-			<![CDATA[CASEBD.COURT_ORDERWHEN1THEN'อนุญาต'ELSE'ไม่อนุญาต'END]]>
-		</property>
+	<field name="CREATED_DATE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CREATED_DATE"/>
+	</field>
+	<field name="CASE_BLACK_NO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CASE_BLACK_NO"/>
+	</field>
+	<field name="CASE_RED_NO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CASE_RED_NO"/>
+	</field>
+	<field name="PROS_DESC" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PROS_DESC"/>
+	</field>
+	<field name="ACCU_DESC" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="ACCU_DESC"/>
+	</field>
+	<field name="ALLE_DESC" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="ALLE_DESC"/>
+	</field>
+	<field name="BAILOR" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="BAILOR"/>
+	</field>
+	<field name="SEC_TYPE_CODE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="SEC_TYPE_CODE"/>
+	</field>
+	<field name="TYPE_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TYPE_NAME"/>
 	</field>
 	<background>
 		<band splitType="Stretch"/>
@@ -93,7 +100,7 @@ WHERE BD.BAIL_DATE = TO_DATE($P{SELECT_DATE}, 'DD-MM-YYYY')]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="17" isBold="true"/>
 				</textElement>
-				<text><![CDATA[แบบรายงานการดำเนินงานใช้บุคคลเป็นหลักประกัน ในการปล่อยชั่วคราว]]></text>
+				<text><![CDATA[ทะเบียนคุมหลักทรัพย์]]></text>
 			</staticText>
 			<textField>
 				<reportElement x="0" y="25" width="798" height="25" uuid="a71417b1-b1af-4820-a02b-d3e6c45ecb60">
@@ -111,15 +118,16 @@ WHERE BD.BAIL_DATE = TO_DATE($P{SELECT_DATE}, 'DD-MM-YYYY')]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="17" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new SimpleDateFormat("ประจำวันที่ d เดือน MMMM พ.ศ. yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{SELECT_DATE}))]]></textFieldExpression>
+				<textFieldExpression><![CDATA["ประจำวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{SELECT_DATE}))]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>
 	<columnHeader>
 		<band height="50" splitType="Stretch">
 			<staticText>
-				<reportElement x="30" y="0" width="80" height="50" uuid="050c0d94-d6e8-4ce2-afcd-591c67c82d09">
+				<reportElement x="0" y="0" width="50" height="50" uuid="050c0d94-d6e8-4ce2-afcd-591c67c82d09">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="56aa675c-bd98-4577-baf9-7d422ce0cb2c"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
@@ -127,10 +135,10 @@ WHERE BD.BAIL_DATE = TO_DATE($P{SELECT_DATE}, 'DD-MM-YYYY')]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="15" isBold="true"/>
 				</textElement>
-				<text><![CDATA[วันที่ประกัน]]></text>
+				<text><![CDATA[วันเดือนปี]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="110" y="0" width="69" height="50" uuid="8dd9bea5-00e5-4229-9fe8-9a043103ff39">
+				<reportElement x="50" y="0" width="50" height="50" uuid="8dd9bea5-00e5-4229-9fe8-9a043103ff39">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="b1407c7b-8d33-47e3-bc7b-979f12bf7c18"/>
 				</reportElement>
 				<box>
@@ -139,10 +147,10 @@ WHERE BD.BAIL_DATE = TO_DATE($P{SELECT_DATE}, 'DD-MM-YYYY')]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="15" isBold="true"/>
 				</textElement>
-				<text><![CDATA[เลขดำที่]]></text>
+				<text><![CDATA[คดีดำ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="179" y="0" width="89" height="50" uuid="5d20995d-9e7b-45ae-b394-2a3f3fba6a8a">
+				<reportElement x="100" y="0" width="50" height="50" uuid="5d20995d-9e7b-45ae-b394-2a3f3fba6a8a">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="63279993-5ff6-45ad-a470-290a6f2603cd"/>
 				</reportElement>
 				<box>
@@ -151,10 +159,10 @@ WHERE BD.BAIL_DATE = TO_DATE($P{SELECT_DATE}, 'DD-MM-YYYY')]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="15" isBold="true"/>
 				</textElement>
-				<text><![CDATA[ข้อหา]]></text>
+				<text><![CDATA[คดีแดง]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="268" y="0" width="115" height="50" uuid="5c0b1756-e779-4d72-83e2-1874cc237d54">
+				<reportElement x="150" y="0" width="80" height="50" uuid="5c0b1756-e779-4d72-83e2-1874cc237d54">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ad95131a-04de-420a-b9ec-31bd7aeb80aa"/>
 				</reportElement>
 				<box>
@@ -163,10 +171,10 @@ WHERE BD.BAIL_DATE = TO_DATE($P{SELECT_DATE}, 'DD-MM-YYYY')]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="15" isBold="true"/>
 				</textElement>
-				<text><![CDATA[ชื่อนายประกัน]]></text>
+				<text><![CDATA[โจทก์]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="383" y="0" width="89" height="50" uuid="0b07f1c6-07d7-453d-87d3-4560b016da1e">
+				<reportElement x="230" y="0" width="80" height="50" uuid="0b07f1c6-07d7-453d-87d3-4560b016da1e">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="78c12677-a5d3-417b-af2a-f869161fd39f"/>
 				</reportElement>
 				<box>
@@ -175,10 +183,10 @@ WHERE BD.BAIL_DATE = TO_DATE($P{SELECT_DATE}, 'DD-MM-YYYY')]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="15" isBold="true"/>
 				</textElement>
-				<text><![CDATA[ข้าราชการ/ พนักงานรัฐวิสาหกิจ]]></text>
+				<text><![CDATA[จำเลย]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="472" y="0" width="114" height="50" uuid="4336f5b7-c335-4ec1-8654-a42937426e64">
+				<reportElement x="310" y="0" width="114" height="50" uuid="4336f5b7-c335-4ec1-8654-a42937426e64">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7c6df449-be39-42a3-bad8-24809f445fa6"/>
 				</reportElement>
 				<box>
@@ -187,11 +195,12 @@ WHERE BD.BAIL_DATE = TO_DATE($P{SELECT_DATE}, 'DD-MM-YYYY')]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="15" isBold="true"/>
 				</textElement>
-				<text><![CDATA[ตำแหน่ง]]></text>
+				<text><![CDATA[เรื่อง]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="586" y="0" width="104" height="50" uuid="62a1dc6f-e6d2-4e9d-9723-540cb6df77c8">
+				<reportElement x="424" y="0" width="80" height="50" uuid="62a1dc6f-e6d2-4e9d-9723-540cb6df77c8">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="43182f29-87ce-4648-aa75-f61c2218487a"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
@@ -199,11 +208,12 @@ WHERE BD.BAIL_DATE = TO_DATE($P{SELECT_DATE}, 'DD-MM-YYYY')]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="15" isBold="true"/>
 				</textElement>
-				<text><![CDATA[ศาลมีคำสั่ง]]></text>
+				<text><![CDATA[ชื่อผู้ส่ง]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="690" y="0" width="110" height="50" uuid="aefc8f47-874e-49ce-a3f6-275d2f31bd50">
+				<reportElement x="504" y="0" width="60" height="50" uuid="aefc8f47-874e-49ce-a3f6-275d2f31bd50">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d49b898e-a1ca-4b73-8af9-7d2747ef6d3d"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
@@ -211,11 +221,12 @@ WHERE BD.BAIL_DATE = TO_DATE($P{SELECT_DATE}, 'DD-MM-YYYY')]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="15" isBold="true"/>
 				</textElement>
-				<text><![CDATA[วงเงินที่อนุญาต]]></text>
+				<text><![CDATA[ประเภทของ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="0" y="0" width="30" height="50" uuid="0b688aa7-df92-4485-839f-8bfd71228eb6">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="56aa675c-bd98-4577-baf9-7d422ce0cb2c"/>
+				<reportElement x="564" y="0" width="60" height="50" uuid="4dba01d6-7ef4-484f-9b0b-2816297e362c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d49b898e-a1ca-4b73-8af9-7d2747ef6d3d"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
@@ -223,16 +234,72 @@ WHERE BD.BAIL_DATE = TO_DATE($P{SELECT_DATE}, 'DD-MM-YYYY')]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="15" isBold="true"/>
 				</textElement>
-				<text><![CDATA[ที่]]></text>
+				<text><![CDATA[นัมเบอร์เก็บ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="624" y="25" width="60" height="25" uuid="35f8dbe6-2a0c-4056-8963-3d630bdc478a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d49b898e-a1ca-4b73-8af9-7d2747ef6d3d"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="15" isBold="true"/>
+				</textElement>
+				<text><![CDATA[วันจ่าย]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="684" y="25" width="60" height="25" uuid="ea38efe4-3935-4d4f-922a-abbd3f967fda">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d49b898e-a1ca-4b73-8af9-7d2747ef6d3d"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="15" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ชื่อผู้รับ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="744" y="0" width="60" height="50" uuid="29e909c0-0a97-4dc6-ae7e-d4b923b0a1a9">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d49b898e-a1ca-4b73-8af9-7d2747ef6d3d"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="15" isBold="true"/>
+				</textElement>
+				<text><![CDATA[หมายเหตุ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="624" y="0" width="120" height="25" uuid="69e177d5-9c6e-4161-9d54-13bb4613d417">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d49b898e-a1ca-4b73-8af9-7d2747ef6d3d"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="15" isBold="true"/>
+				</textElement>
+				<text><![CDATA[จ่ายแก่ใคร]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
 		<band height="25" splitType="Prevent">
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="30" y="0" width="80" height="25" uuid="cb12d972-253b-41d2-b14f-62379cf161dc">
+				<reportElement stretchType="ContainerHeight" x="0" y="0" width="50" height="25" uuid="cb12d972-253b-41d2-b14f-62379cf161dc">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="56aa675c-bd98-4577-baf9-7d422ce0cb2c"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
@@ -240,10 +307,10 @@ WHERE BD.BAIL_DATE = TO_DATE($P{SELECT_DATE}, 'DD-MM-YYYY')]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{THAIDATE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{CREATED_DATE}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="110" y="0" width="69" height="25" uuid="52fb62bd-ff4d-4db0-8d71-d4b9cf9192cc">
+				<reportElement stretchType="ContainerHeight" x="50" y="0" width="50" height="25" uuid="52fb62bd-ff4d-4db0-8d71-d4b9cf9192cc">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="b1407c7b-8d33-47e3-bc7b-979f12bf7c18"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -253,10 +320,10 @@ WHERE BD.BAIL_DATE = TO_DATE($P{SELECT_DATE}, 'DD-MM-YYYY')]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{BLACK_CASE_NO}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="179" y="0" width="89" height="25" uuid="b4da0ac7-7521-4ad1-9632-e25d250e959f">
+				<reportElement stretchType="ContainerHeight" x="100" y="0" width="50" height="25" uuid="b4da0ac7-7521-4ad1-9632-e25d250e959f">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="63279993-5ff6-45ad-a470-290a6f2603cd"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -266,10 +333,10 @@ WHERE BD.BAIL_DATE = TO_DATE($P{SELECT_DATE}, 'DD-MM-YYYY')]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ALLE} == null ?  ""  : $F{ALLE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{CASE_RED_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="268" y="0" width="115" height="25" uuid="c024630e-b5bb-4151-a1a0-361e1e27ab7b">
+				<reportElement stretchType="ContainerHeight" x="150" y="0" width="80" height="25" uuid="c024630e-b5bb-4151-a1a0-361e1e27ab7b">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ad95131a-04de-420a-b9ec-31bd7aeb80aa"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -279,10 +346,10 @@ WHERE BD.BAIL_DATE = TO_DATE($P{SELECT_DATE}, 'DD-MM-YYYY')]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{BAILMAN_NAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{PROS_DESC}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="383" y="0" width="89" height="25" uuid="aa6df2f3-9123-4c67-9cd2-a84e93aa8188">
+				<reportElement stretchType="ContainerHeight" x="230" y="0" width="80" height="25" uuid="aa6df2f3-9123-4c67-9cd2-a84e93aa8188">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="78c12677-a5d3-417b-af2a-f869161fd39f"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -292,10 +359,10 @@ WHERE BD.BAIL_DATE = TO_DATE($P{SELECT_DATE}, 'DD-MM-YYYY')]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CASEBSP.POSITION_TYPEWHEN1THEN'ข้าราชการ'WHEN2THEN'รัฐวิสาหกิจ'ELSE'อื่นๆ'END}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{ACCU_DESC}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="472" y="0" width="114" height="25" uuid="7d363e30-4d41-4104-b0e4-469c387787ea">
+				<reportElement stretchType="ContainerHeight" x="310" y="0" width="114" height="25" uuid="7d363e30-4d41-4104-b0e4-469c387787ea">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7c6df449-be39-42a3-bad8-24809f445fa6"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -305,12 +372,13 @@ WHERE BD.BAIL_DATE = TO_DATE($P{SELECT_DATE}, 'DD-MM-YYYY')]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{POSITION}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{ALLE_DESC}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="586" y="0" width="104" height="25" uuid="fdb253a8-63e9-44b7-8d76-91cf50e6b2af">
+				<reportElement stretchType="ContainerHeight" x="424" y="0" width="80" height="25" uuid="fdb253a8-63e9-44b7-8d76-91cf50e6b2af">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="43182f29-87ce-4648-aa75-f61c2218487a"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
@@ -318,12 +386,13 @@ WHERE BD.BAIL_DATE = TO_DATE($P{SELECT_DATE}, 'DD-MM-YYYY')]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CASEBD.COURT_ORDERWHEN1THEN'อนุญาต'ELSE'ไม่อนุญาต'END}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{BAILOR}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="690" y="0" width="110" height="25" uuid="43efd773-0445-41ec-9df0-bc7d0848d7c9">
+				<reportElement stretchType="ContainerHeight" x="504" y="0" width="60" height="25" uuid="43efd773-0445-41ec-9df0-bc7d0848d7c9">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d49b898e-a1ca-4b73-8af9-7d2747ef6d3d"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box rightPadding="3">
 					<pen lineWidth="0.5"/>
@@ -331,20 +400,63 @@ WHERE BD.BAIL_DATE = TO_DATE($P{SELECT_DATE}, 'DD-MM-YYYY')]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.##").format($F{DEFENDANT_BAIL_COST})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{TYPE_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="0" y="0" width="30" height="25" uuid="5948bfc9-ff3d-41cc-9974-b81e8b401e45">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="56aa675c-bd98-4577-baf9-7d422ce0cb2c"/>
+				<reportElement stretchType="ContainerHeight" x="564" y="0" width="60" height="25" uuid="39622da5-be06-48bc-b4b0-8c8eb9601f6a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d49b898e-a1ca-4b73-8af9-7d2747ef6d3d"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
-				<box>
+				<box rightPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="624" y="0" width="60" height="25" uuid="67981992-5f5e-4dff-85e2-20fa52524191">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d49b898e-a1ca-4b73-8af9-7d2747ef6d3d"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box rightPadding="3">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="684" y="0" width="60" height="25" uuid="99365268-fc32-42d1-a4c4-c3812f14dde9">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d49b898e-a1ca-4b73-8af9-7d2747ef6d3d"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box rightPadding="3">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="744" y="0" width="60" height="25" uuid="e3125e67-596c-4a55-8d41-2479baac6402">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d49b898e-a1ca-4b73-8af9-7d2747ef6d3d"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box rightPadding="3">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
