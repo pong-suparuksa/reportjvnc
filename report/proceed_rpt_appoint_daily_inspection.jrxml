@@ -2,7 +2,7 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="proceed_rpt_appoint_daily_inspection" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="91e475d7-d1e6-46cb-8b6b-dde87b1765a0">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-210"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -38,13 +38,13 @@ PCC.CASE_ID,
 		NVL(PCC.ACCU_DESC ,'') AS DEFENDANT,
 	    NVL(PCC.ALLE_DESC,'') AS TOPIC,
 	     NVL(pllr.LEVEL_ROOM_DESC ,'') AS LEVEL_ROOM_DESC,
-	      NVL(PCLAR.APPOINT_REASON_NAME  ,'-') AS APPOINT_REASON,
+	      NVL(PLAL.APPOINT_LIST_NAME  ,'-') AS APPOINT_REASON,
     IDIOM_OWNER.JUDGE_NAME				AS IDIOM_OWNER,
     IDIOM_ORGANIZATION1.JUDGE_NAME		AS IDIOM_ORGANIZATION1,
     IDIOM_ORGANIZATION2.JUDGE_NAME		AS IDIOM_ORGANIZATION2,
-    ASSOCIATE_JUDGE.JUDGE_NAME			AS ASSOCIATE_JUDGE,
-    (COALESCE(PCPA.INVESTIGATE_ACCUSER_CONFESSION ,0)+ COALESCE(PCPA.INVESTIGATE_ACCUSER,0) + COALESCE(PCPA.INVESTIGATE_DEFENDANT,0) + COALESCE(PCPA.INVESTIGATE_OTHER,0)) AS INVESTIGATE,
-    (COALESCE(PCPA.INVESTIGATE_ACCUSER_CONFESSION_DATE,0)+ COALESCE(PCPA.INVESTIGATE_ACCUSER_DATE,0) + COALESCE(PCPA.INVESTIGATE_DEFENDANT_DATE,0) + COALESCE(PCPA.INVESTIGATE_OTHER_DATE,0)) AS INVESTIGATE_DATE
+    ASSOCIATE_JUDGE.JUDGE_NAME			AS ASSOCIATE_JUDGE,   
+    w.INVESTIGATE
+    ,w.INVESTIGATE_DATE
     ,PCPACNT.APPOINT_NEXT_DATE
     ,PCPACNT.APPOINT_NEXT_REASON
     ,cou.COURT_NAME_TH
@@ -55,7 +55,7 @@ PCC.CASE_ID,
     LEFT JOIN PC_JUDGEMENT PCJM ON PCC.CASE_ID = PCJM.CASE_ID
     LEFT JOIN PC_LOOKUP_TITLE_CASE PCLTS ON PCLTS.TITLE_CASE_ID = PCC.BLACK_TITLE_ID
     LEFT JOIN PC_LOOKUP_TITLE_CASE PCLTS_R ON PCLTS_R.TITLE_CASE_ID = PCJM.RED_TITLE_ID AND PCLTS_R.REMOVED_BY = 0    
-    LEFT JOIN PC_LOOKUP_APPOINT_REASON PCLAR ON PCPAC.REASON_APPOINT_ID = PCLAR.APPOINT_REASON_ID
+    LEFT JOIN PC_LOOKUP_APPOINT_LIST PLAL ON PCPAC.REASON_APPOINT_ID = PLAL.APPOINT_LIST_ID 
     LEFT JOIN 
     (
 	    SELECT pcj.CASE_ID ,pljt.JUDGE_TYPE_NAME,plj.JUDGE_NAME ,pljt.JUDGE_TYPE_CODE
@@ -101,9 +101,22 @@ PCC.CASE_ID,
 	  ) PCPACNT ON PCPACNT.APPOINT_ID = PCPA.APPOINT_ID AND PCPACNT.rn = 1
 	  --
 	LEFT JOIN (SELECT plc.COURT_NAME_TH
-			FROM PC_PARAM pp
-			JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
-			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 = 1
+			   FROM PC_PARAM pp
+			   JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+			   WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 = 1
+	LEFT JOIN (SELECT pprw.APPOINT_CON_ID
+					  ,NVL(pprw.WITNESS_DEFENDANT_COUNT,0)+NVL(pprw.WITNESS_DISSENTER_COUNT,0)+NVL(pprw.WITNESS_OTHER_COUNT,0)+NVL(pprw.WITNESS_PLAINTIFF_COUNT,0)+NVL(pprw.WITNESS_REQUESTER_COUNT,0) INVESTIGATE	  
+					  ,NVL(pprw.WITNESS_DEFENDANT_PAGE,0)+NVL(pprw.WITNESS_DISSENTER_PAGE,0)+NVL(pprw.WITNESS_OTHER_DAY,0)+NVL(pprw.WITNESS_PLAINTIFF_PAGE,0)+NVL(pprw.WITNESS_REQUESTER_PAGE,0) INVESTIGATE_DATE  
+				FROM PC_PROCEED_RECORD_WITNESS pprw
+				JOIN (SELECT pprw.APPOINT_CON_ID 
+							 ,MAX(pprw.RECORD_DATE)  RECORD_DATE 
+							 ,MAX(pprw.CREATED_DATE) CREATED_DATE
+					  FROM PC_PROCEED_RECORD_WITNESS pprw
+					  WHERE pprw.REMOVED_BY = 0
+					  GROUP BY pprw.APPOINT_CON_ID) mx ON mx.APPOINT_CON_ID = pprw.APPOINT_CON_ID 
+					                                  AND mx.RECORD_DATE = pprw.RECORD_DATE 
+					                                  AND mx.CREATED_DATE = pprw.CREATED_DATE 
+				WHERE pprw.REMOVED_BY = 0) w ON w.APPOINT_CON_ID = PCPAC.APPOINT_CON_ID 
 	WHERE PCPA.REMOVED_BY = 0 AND PCC.CASE_ID IS NOT NULL 
 	AND PCPAC.START_DATE = TO_DATE($P{SELECT_DATE} ||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS')
 	AND ($P{ROOM_COD} IS NULL OR pllr.LEVEL_ROOM_CODE = $P{ROOM_COD})]]>

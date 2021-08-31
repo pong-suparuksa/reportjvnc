@@ -11,7 +11,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_offer"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
@@ -19,6 +19,7 @@
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="621"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="368"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_offer_files/main_jrxml"/>
 	<parameter name="SELECT_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["31/05/2021"]]></defaultValueExpression>
 	</parameter>
@@ -43,12 +44,19 @@
 	   --
 FROM PC_PROCEED_APPOINT_CONTINUE ppac 
 LEFT JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID AND ppa.REMOVED_BY = 0
-LEFT JOIN (SELECT ppcd.APPOINT_CON_ID 
-				  ,SUM(NVL(ppcd.WITNESS_DEFENDANT_COUNT,0) + NVL(ppcd.WITNESS_PLAINTIFF_COUNT,0) + NVL(ppcd.WITNESS_OTHER_COUNT,0))  WITNESS
-				  ,SUM(NVL(ppcd.WITNESS_DEFENDANT_PAGE,0) + NVL(ppcd.WITNESS_PLAINTIFF_PAGE,0) + NVL(ppcd.WITNESS_OTHER_DAY,0))      PAGES
-			FROM PC_PROCEED_CASE_DETAIL ppcd 
-			WHERE ppcd.REMOVED_BY = 0
-			GROUP BY ppcd.APPOINT_CON_ID) apd ON apd.APPOINT_CON_ID = ppac.APPOINT_CON_ID
+LEFT JOIN (SELECT pprw.APPOINT_CON_ID
+				  ,NVL(pprw.WITNESS_DEFENDANT_COUNT,0)+NVL(pprw.WITNESS_DISSENTER_COUNT,0)+NVL(pprw.WITNESS_OTHER_COUNT,0)+NVL(pprw.WITNESS_PLAINTIFF_COUNT,0)+NVL(pprw.WITNESS_REQUESTER_COUNT,0) WITNESS	  
+				  ,NVL(pprw.WITNESS_DEFENDANT_PAGE,0)+NVL(pprw.WITNESS_DISSENTER_PAGE,0)+NVL(pprw.WITNESS_OTHER_DAY,0)+NVL(pprw.WITNESS_PLAINTIFF_PAGE,0)+NVL(pprw.WITNESS_REQUESTER_PAGE,0) PAGES  
+			FROM PC_PROCEED_RECORD_WITNESS pprw
+			JOIN (SELECT pprw.APPOINT_CON_ID 
+						 ,MAX(pprw.RECORD_DATE)  RECORD_DATE 
+						 ,MAX(pprw.CREATED_DATE) CREATED_DATE
+				  FROM PC_PROCEED_RECORD_WITNESS pprw
+				  WHERE pprw.REMOVED_BY = 0
+				  GROUP BY pprw.APPOINT_CON_ID) mx ON mx.APPOINT_CON_ID = pprw.APPOINT_CON_ID 
+				                                  AND mx.RECORD_DATE = pprw.RECORD_DATE 
+				                                  AND mx.CREATED_DATE = pprw.CREATED_DATE 
+			WHERE pprw.REMOVED_BY = 0) apd ON apd.APPOINT_CON_ID = ppac.APPOINT_CON_ID
 --next appoint
 LEFT JOIN (SELECT ppa.CASE_ID, MIN(ppac.START_DATE) START_DATE 
 			FROM PC_PROCEED_APPOINT_CONTINUE ppac 
@@ -58,7 +66,7 @@ LEFT JOIN (SELECT ppa.CASE_ID, MIN(ppac.START_DATE) START_DATE
 			GROUP BY ppa.CASE_ID) ap_next ON ap_next.CASE_ID = ppa.CASE_ID  
 --lookup proceed
 LEFT JOIN PC_LOOKUP_APPOINT_REASON plar ON plar.APPOINT_REASON_ID = ppac.REASON_APPOINT_ID AND plar.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_LEVEL_ROOM pllr ON pllr.LEVEL_ROOM_ID = ppa.ROOM_ID AND pllr.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_LEVEL_ROOM pllr ON pllr.LEVEL_ROOM_ID = ppac.LEVEL_ROOM_CODE AND pllr.REMOVED_BY = 0    
 --case
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
