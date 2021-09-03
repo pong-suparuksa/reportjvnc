@@ -11,12 +11,14 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/writ_rpt_acc_release_d4"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="559"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="431"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/writ_rpt_acc_release_d4_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/02/2021"]]></defaultValueExpression>
@@ -25,64 +27,36 @@
 		<defaultValueExpression><![CDATA["31/03/2021"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="NOTICE_TYPE_CODE" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["211"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["221"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT DISTINCT
-	NVL(plc.COURT_NAME_TH,'-') COURT_NAME_TH,
-    pn.PRINT_DATE,
-    THAISDATE(pn.PRINT_DATE)               PRINT_DATE_TEXT,
-    pn.NOTICE_DATE,
-    THAISDATE(pn.NOTICE_DATE)			   NOTICE_DATE_TEXT,
-    pn.NOTICE_CODE_NO || '/' || NOTICE_CODE_YEAR	NOTICE_NO,
-   CASE WHEN pc.BLACK_IDNUM IS NOT NULL 
-		     THEN pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR 
-		     ELSE '-' END CASE_BLACK_NO, 
-    NVL(lit.LITIGANT_NAME,'-') DETAINEE,
-    NVL(alle.ALLEGATION_NAME,'-') ALLEGATION_NAME,
-    NVL(lit.PENALTY_NAME,'-') PENALTY_NAME,
-    NVL(pn.NOTICE_REASON,'') NOTICE_REASON 
---
+		<![CDATA[SELECT pn.NOTICE_DATE 
+		,THAISDATE(pn.NOTICE_DATE) NOTICE_DATE_TEXT
+		,pn.NOTICE_CODE_NO || '/' || pn.NOTICE_CODE_YEAR  NOTICE_NO
+		,NVL(pltc_b.TITLE_CASE_NAME || TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR),'-')   CASE_BLACK_NO
+		,pn.LITIGANT_NAME DETAINEE
+		,pn.LITIGANT_LOV_NAME 
+		,NVL(alle.ALLEGATION_NAME,' ') ALLEGATION_NAME
+		,NVL(pn.LAW_NUMBER,' ') PENALTY_NAME
+		,NVL(pn.NOTICE_REASON,' ') NOTICE_REASON 
 FROM PC_NOTICE pn 
-LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID
---
-LEFT JOIN PC_LOOKUP_NOTICE_TYPE plnt ON plnt.NOTICE_TYPE_ID = pn.NOTICE_TYPE_ID AND plnt.REMOVED_BY = 0
+--case 
+LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.COURT_ID = pc.COURT_ID AND pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pn.COURT_ID AND plc.REMOVED_BY = 0
---
+--allegation
 LEFT JOIN (SELECT pca.CASE_ID,
-                                LISTAGG(pla.ALLEGATION_NAME, ', ') WITHIN GROUP (ORDER BY pla.ALLEGATION_NAME)  ALLEGATION_NAME
-                   FROM PC_CASE_ALLE pca
-                   JOIN PC_LOOKUP_ALLEGATION pla ON pla.ALLEGATION_ID = pca.ALLEGATION_ID AND pca.REMOVED_BY = 0
-                   WHERE pca.REMOVED_BY = 0
-                   GROUP BY pca.CASE_ID) alle ON alle.CASE_ID = pn.CASE_ID
---
-LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME,
-                                 LISTAGG(plp.PENALTY_NAME, ', ') WITHIN GROUP (ORDER BY plp.PENALTY_NAME)  PENALTY_NAME
-                   FROM PC_CASE_LIT pcl 
-                   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pcl.REMOVED_BY = 0
-                   LEFT JOIN PC_JUDGEMENT_ACCU_PENALTY pjap ON pjap.CASE_LIT_ID = pcl.CASE_LIT_ID AND pjap.REMOVED_BY = 0
-                   LEFT JOIN PC_LOOKUP_PENALTY plp ON plp.PENALTY_ID = pjap.PENALTY_ID AND plp.REMOVED_BY = 0
-                   WHERE pcl.REMOVED_BY = 0
-                   AND pllt.LIT_TYPE_CODE = '03'
-                   GROUP BY pcl.CASE_ID, pcl.LITIGANT_NAME) lit ON lit.CASE_ID = pn.CASE_ID
---           
+                   LISTAGG(pla.ALLEGATION_NAME, ', ') WITHIN GROUP (ORDER BY pla.ALLEGATION_NAME)  ALLEGATION_NAME
+            FROM PC_CASE_ALLE pca
+            JOIN PC_LOOKUP_ALLEGATION pla ON pla.ALLEGATION_ID = pca.ALLEGATION_ID AND pca.REMOVED_BY = 0
+            WHERE pca.REMOVED_BY = 0
+            GROUP BY pca.CASE_ID) alle ON alle.CASE_ID = pn.CASE_ID
+--condition
 WHERE pn.REMOVED_BY = 0
-AND pc.CASE_ID IS NOT NULL
-AND (pn.NOTICE_TYPE_CODE = $P{NOTICE_TYPE_CODE} OR $P{NOTICE_TYPE_CODE} IS NULL)
+AND pn.NOTICE_TYPE_CODE = $P{NOTICE_TYPE_CODE}
 AND pn.NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
                        AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
-ORDER BY pn.PRINT_DATE]]>
+ORDER BY pn.NOTICE_DATE]]>
 	</queryString>
-	<field name="COURT_NAME_TH" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
-	</field>
-	<field name="PRINT_DATE" class="java.util.Date">
-		<property name="com.jaspersoft.studio.field.label" value="PRINT_DATE"/>
-	</field>
-	<field name="PRINT_DATE_TEXT" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="PRINT_DATE_TEXT"/>
-	</field>
 	<field name="NOTICE_DATE" class="java.util.Date">
 		<property name="com.jaspersoft.studio.field.label" value="NOTICE_DATE"/>
 	</field>
@@ -97,6 +71,9 @@ ORDER BY pn.PRINT_DATE]]>
 	</field>
 	<field name="DETAINEE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="DETAINEE"/>
+	</field>
+	<field name="LITIGANT_LOV_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="LITIGANT_LOV_NAME"/>
 	</field>
 	<field name="ALLEGATION_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="ALLEGATION_NAME"/>
@@ -132,7 +109,8 @@ ORDER BY pn.PRINT_DATE]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="18" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new SimpleDateFormat("ระหว่างวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{START_DATE})) + new SimpleDateFormat(" ถึงวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{END_DATE}))]]></textFieldExpression>
+				<textFieldExpression><![CDATA["ระหว่างวันที่  " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +
+" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>
@@ -218,7 +196,7 @@ ORDER BY pn.PRINT_DATE]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<text><![CDATA[ชื่อผู้ต้อขังที่ออกหมายปล่อย]]></text>
+				<text><![CDATA[ชื่อผู้รับหมาย]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="516" y="0" width="133" height="25" uuid="542443d3-e6e2-46b2-85cd-ebe30bb029f5">

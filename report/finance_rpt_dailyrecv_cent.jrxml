@@ -16,7 +16,7 @@
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="402"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_rpt_dailyrecv_cent"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/finance_rpt_dailyrecv_cent_files/main_jrxml"/>
@@ -140,7 +140,7 @@ AND pfr.RECEIVED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T
 	<parameter name="END_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["20/08/2020"]]></defaultValueExpression>
 	</parameter>
-	<parameter name="RECEIPT_TYPE" class="java.lang.String" isForPrompting="false">
+	<parameter name="RECEIPT_TYPE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["1"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
@@ -330,13 +330,17 @@ ORDER BY  ps.STRUCTURE_NAME, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT
 	</background>
 	<title>
 		<band height="60" splitType="Stretch">
-			<staticText>
-				<reportElement x="0" y="29" width="170" height="30" uuid="2a16ba84-9a43-4dff-936e-854475b4bda8"/>
+			<textField>
+				<reportElement x="0" y="29" width="170" height="30" uuid="cbfc1c26-d088-4617-8df9-76b619f59db2"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
-				<text><![CDATA[รายงานการรับเงินกลางประจำวัน]]></text>
-			</staticText>
+				<textFieldExpression><![CDATA[$P{RECEIPT_TYPE}.equals("1")?"บัญชีรับเงินกลาง":
+$P{RECEIPT_TYPE}.equals("2")?"บัญชีรับเงินค่าธรรมเนียม":
+$P{RECEIPT_TYPE}.equals("3")?"บัญชีรับเงินค่าปรับ":
+$P{RECEIPT_TYPE}.equals("4")?"บัญชีรับเงินอื่นๆ":
+$P{RECEIPT_TYPE}.equals("5")?"บัญชีรับเงินค่าส่งคำคู่ความ":" "]]></textFieldExpression>
+			</textField>
 			<textField>
 				<reportElement x="246" y="0" width="310" height="30" uuid="46e0c06a-e84c-416d-a67c-e45d70da54f7"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">

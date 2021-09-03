@@ -2,7 +2,7 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="proceed_rpt_appoint" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryNewPage="true" uuid="1bfda7a9-ad46-4cbf-9696-758bf76ec1e6">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN121"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -14,11 +14,12 @@
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="614"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="376"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="603"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="387"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["10/03/2021"]]></defaultValueExpression>
 	</parameter>
@@ -31,22 +32,20 @@
 	<parameter name="CHOICE" class="java.lang.String"/>
 	<parameter name="LEVEL_ROOM_ID" class="java.lang.String"/>
 	<queryString language="SQL">
-		<![CDATA[SELECT
-	ROW_NUMBER() OVER (
-	ORDER BY pc.CASE_ID) AS row_num ,
+		<![CDATA[SELECT DISTINCT
+	ppa.CASE_ID,
 	ppac.START_DATE,
 	NVL(cou.COURT_NAME_TH, '') COURT_NAME_TH, 
 	NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR)  BLACK_CASE_NO ,
 	NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || CASE WHEN pj.RED_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pj.RED_YEAR)     RED_CASE_NO,
-	ppac.UPDATED_DATE ,
-	 ppac.CHOICE,
+	ppac.CHOICE,
 	ppac.CHOICE_TIME ,
 	pc.PROS_DESC ,
     pc.ACCU_DESC ,
     pc.ALLE_DESC ,   
 	plal.APPOINT_LIST_NAME AS APPOINT_REASON_NAME  ,
 	pllr.LEVEL_ROOM_DESC ,
-	idiom_owner.JUDGE_NAME, ppa.CASE_ID,
+	idiom_owner.JUDGE_NAME,
  	(select listagg(plj1.JUDGE_NAME ,', ') within group (order by plj1.JUDGE_NAME) 
         from PC_CASE_JUDGE pcj1, PC_LOOKUP_JUDGE plj1, PC_LOOKUP_JUDGE_TYPE pjt1 
         where pcj1.CASE_ID = ppa.CASE_ID AND pcj1.REMOVED_BY = 0 AND plj1.JUDGE_ID = pcj1.JUDGE_ID
@@ -92,6 +91,8 @@ LEFT JOIN
 		LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID
 		LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID 
 		WHERE pcj.REMOVED_BY = 0
+		AND pcj.JUDGE_START_DATE IS NOT NULL
+		AND plj.FLAG_JUDGE = 1
 		GROUP BY plj.JUDGE_ID , pcj.CASE_ID ,pljt.JUDGE_TYPE_NAME,plj.JUDGE_NAME ,pljt.JUDGE_TYPE_CODE
 	) idiom_owner ON idiom_owner.CASE_ID = pc.CASE_ID AND idiom_owner.JUDGE_TYPE_CODE ='01' -- เจ้าของสำนวน
 --เอาอันนี้
@@ -114,12 +115,12 @@ AND ppac.START_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"H
 AND (idiom_owner.JUDGE_ID = $P{JUDGE_ID} OR $P{JUDGE_ID} IS NULL)
 AND ($P{CHOICE} IS NULL OR ppac.CHOICE = $P{CHOICE})
 AND ($P{LEVEL_ROOM_ID} IS NULL OR pllr.LEVEL_ROOM_ID = $P{LEVEL_ROOM_ID} OR 0 = $P{LEVEL_ROOM_ID})
-ORDER BY pc.CASE_ID]]>
+ORDER BY ppac.START_DATE, ppac.CHOICE, ppac.CHOICE_TIME  ]]>
 	</queryString>
-	<field name="ROW_NUM" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="ROW_NUM"/>
+	<field name="CASE_ID" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="CASE_ID"/>
 	</field>
-	<field name="START_DATE" class="java.lang.String">
+	<field name="START_DATE" class="java.util.Date">
 		<property name="com.jaspersoft.studio.field.label" value="START_DATE"/>
 	</field>
 	<field name="COURT_NAME_TH" class="java.lang.String">
@@ -131,8 +132,8 @@ ORDER BY pc.CASE_ID]]>
 	<field name="RED_CASE_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="RED_CASE_NO"/>
 	</field>
-	<field name="UPDATED_DATE" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="UPDATED_DATE"/>
+	<field name="CHOICE" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="CHOICE"/>
 	</field>
 	<field name="CHOICE_TIME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="CHOICE_TIME"/>
@@ -456,7 +457,7 @@ $F{LEVEL_ROOM_DESC}]]></textFieldExpression>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="9"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ROW_NUM}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="10" y="0" width="30" height="20" uuid="b60b5930-d684-4fe1-849d-453dc7ff2bed"/>

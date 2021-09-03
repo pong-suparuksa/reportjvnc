@@ -2,11 +2,13 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report_temporary_release_statistics" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="d93cc675-dd20-4d59-988c-94ec80508898">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/ReportFeature/report_temporary_release_statistics"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/ReportFeature/report_temporary_release_statistics_files/main_jrxml"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/01/2021"]]></defaultValueExpression>
 	</parameter>
@@ -19,23 +21,23 @@
       ,pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR CASE_NO
 	  ,NVL(pc.ALLE_DESC,alle.ALLE_NAME) ALLEGATION_NAME
 	  --thai nation
-	  ,SUM(CASE WHEN lit.INTER_CODE = 10303 AND lit.LITIGANT_SEX = 1 THEN 1 ELSE 0 END) OVER (PARTITION BY pb.CASE_ID ORDER BY pb.CASE_ID)  COL_1
-	  ,SUM(CASE WHEN lit.INTER_CODE = 10303 AND lit.LITIGANT_SEX = 2 THEN 1 ELSE 0 END) OVER (PARTITION BY pb.CASE_ID ORDER BY pb.CASE_ID)  COL_2
+	  ,SUM(CASE WHEN lit.INTER_CODE = '10303' AND lit.LITIGANT_SEX = 1 THEN 1 ELSE 0 END) COL_1
+	  ,SUM(CASE WHEN lit.INTER_CODE = '10303' AND lit.LITIGANT_SEX = 2 THEN 1 ELSE 0 END) COL_2
 	  --other nation
-	  ,SUM(CASE WHEN lit.INTER_CODE <> 10303 AND lit.LITIGANT_SEX = 1 THEN 1 ELSE 0 END) OVER (PARTITION BY pb.CASE_ID ORDER BY pb.CASE_ID)  COL_3
-	  ,SUM(CASE WHEN lit.INTER_CODE <> 10303 AND lit.LITIGANT_SEX = 2 THEN 1 ELSE 0 END) OVER (PARTITION BY pb.CASE_ID ORDER BY pb.CASE_ID)  COL_4
+	  ,SUM(CASE WHEN lit.INTER_CODE <> '10303' AND lit.LITIGANT_SEX = 1 THEN 1 ELSE 0 END) COL_3
+	  ,SUM(CASE WHEN lit.INTER_CODE <> '10303' AND lit.LITIGANT_SEX = 2 THEN 1 ELSE 0 END) COL_4
 	  --thai nation allow
-	  ,SUM(CASE WHEN NVL(pb.COURT_ORDER,0) = 1 AND lit.INTER_CODE = 10303 AND lit.LITIGANT_SEX = 1 THEN 1 ELSE 0 END) OVER (PARTITION BY pb.CASE_ID ORDER BY pb.CASE_ID)  COL_5
-	  ,SUM(CASE WHEN NVL(pb.COURT_ORDER,0) = 1 AND lit.INTER_CODE = 10303 AND lit.LITIGANT_SEX = 2 THEN 1 ELSE 0 END) OVER (PARTITION BY pb.CASE_ID ORDER BY pb.CASE_ID)  COL_6
+	  ,SUM(CASE WHEN NVL(pb.COURT_ORDER,0) = 1 AND lit.INTER_CODE = '10303' AND lit.LITIGANT_SEX = 1 THEN 1 ELSE 0 END) COL_5
+	  ,SUM(CASE WHEN NVL(pb.COURT_ORDER,0) = 1 AND lit.INTER_CODE = '10303' AND lit.LITIGANT_SEX = 2 THEN 1 ELSE 0 END) COL_6
 	  --other nation allow
-	  ,SUM(CASE WHEN NVL(pb.COURT_ORDER,0) = 1 AND lit.INTER_CODE <> 10303 AND lit.LITIGANT_SEX = 1 THEN 1 ELSE 0 END) OVER (PARTITION BY pb.CASE_ID ORDER BY pb.CASE_ID)  COL_7
-	  ,SUM(CASE WHEN NVL(pb.COURT_ORDER,0) = 1 AND lit.INTER_CODE <> 10303 AND lit.LITIGANT_SEX = 2 THEN 1 ELSE 0 END) OVER (PARTITION BY pb.CASE_ID ORDER BY pb.CASE_ID)  COL_8
+	  ,SUM(CASE WHEN NVL(pb.COURT_ORDER,0) = 1 AND lit.INTER_CODE <> '10303' AND lit.LITIGANT_SEX = 1 THEN 1 ELSE 0 END) COL_7
+	  ,SUM(CASE WHEN NVL(pb.COURT_ORDER,0) = 1 AND lit.INTER_CODE <> '10303' AND lit.LITIGANT_SEX = 2 THEN 1 ELSE 0 END) COL_8
 	   --thai nation not allow
-	  ,SUM(CASE WHEN NVL(pb.COURT_ORDER,0) <> 1 AND lit.INTER_CODE = 10303 AND lit.LITIGANT_SEX = 1 THEN 1 ELSE 0 END) OVER (PARTITION BY pb.CASE_ID ORDER BY pb.CASE_ID)  COL_9
-	  ,SUM(CASE WHEN NVL(pb.COURT_ORDER,0) <> 1 AND lit.INTER_CODE = 10303 AND lit.LITIGANT_SEX = 2 THEN 1 ELSE 0 END) OVER (PARTITION BY pb.CASE_ID ORDER BY pb.CASE_ID)  COL_10
+	  ,SUM(CASE WHEN NVL(pb.COURT_ORDER,0) <> 1 AND lit.INTER_CODE = '10303' AND lit.LITIGANT_SEX = 1 THEN 1 ELSE 0 END) COL_9
+	  ,SUM(CASE WHEN NVL(pb.COURT_ORDER,0) <> 1 AND lit.INTER_CODE = '10303' AND lit.LITIGANT_SEX = 2 THEN 1 ELSE 0 END) COL_10
 	  --other nation allow
-	  ,SUM(CASE WHEN NVL(pb.COURT_ORDER,0) <> 1 AND lit.INTER_CODE <> 10303 AND lit.LITIGANT_SEX = 1 THEN 1 ELSE 0 END) OVER (PARTITION BY pb.CASE_ID ORDER BY pb.CASE_ID)  COL_11
-	  ,SUM(CASE WHEN NVL(pb.COURT_ORDER,0) <> 1 AND lit.INTER_CODE <> 10303 AND lit.LITIGANT_SEX = 2 THEN 1 ELSE 0 END) OVER (PARTITION BY pb.CASE_ID ORDER BY pb.CASE_ID)  COL_12
+	  ,SUM(CASE WHEN NVL(pb.COURT_ORDER,0) <> 1 AND lit.INTER_CODE <> '10303' AND lit.LITIGANT_SEX = 1 THEN 1 ELSE 0 END) COL_11
+	  ,SUM(CASE WHEN NVL(pb.COURT_ORDER,0) <> 1 AND lit.INTER_CODE <> '10303' AND lit.LITIGANT_SEX = 2 THEN 1 ELSE 0 END) COL_12
 FROM PC_BAIL pb 
 --case
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pb.CASE_ID AND pc.REMOVED_BY = 0
@@ -61,7 +63,10 @@ LEFT JOIN (SELECT plc.COURT_NAME_TH
 WHERE pb.REMOVED_BY = 0
 AND pb.CREATED_DATE BETWEEN TO_DATE( $P{START_DATE}  || 'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
                      AND TO_DATE( $P{END_DATE}  || 'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
-]]>
+GROUP BY cou.COURT_NAME_TH
+         ,pc.CASE_DATE
+         ,pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR
+	     ,NVL(pc.ALLE_DESC,alle.ALLE_NAME)]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
@@ -75,40 +80,40 @@ AND pb.CREATED_DATE BETWEEN TO_DATE( $P{START_DATE}  || 'T00:00:00', 'DD-MM-YYYY
 	<field name="ALLEGATION_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="ALLEGATION_NAME"/>
 	</field>
-	<field name="COL_1" class="java.math.BigDecimal">
+	<field name="COL_1" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="COL_1"/>
 	</field>
-	<field name="COL_2" class="java.math.BigDecimal">
+	<field name="COL_2" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="COL_2"/>
 	</field>
-	<field name="COL_3" class="java.math.BigDecimal">
+	<field name="COL_3" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="COL_3"/>
 	</field>
-	<field name="COL_4" class="java.math.BigDecimal">
+	<field name="COL_4" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="COL_4"/>
 	</field>
-	<field name="COL_5" class="java.math.BigDecimal">
+	<field name="COL_5" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="COL_5"/>
 	</field>
-	<field name="COL_6" class="java.math.BigDecimal">
+	<field name="COL_6" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="COL_6"/>
 	</field>
-	<field name="COL_7" class="java.math.BigDecimal">
+	<field name="COL_7" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="COL_7"/>
 	</field>
-	<field name="COL_8" class="java.math.BigDecimal">
+	<field name="COL_8" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="COL_8"/>
 	</field>
-	<field name="COL_9" class="java.math.BigDecimal">
+	<field name="COL_9" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="COL_9"/>
 	</field>
-	<field name="COL_10" class="java.math.BigDecimal">
+	<field name="COL_10" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="COL_10"/>
 	</field>
-	<field name="COL_11" class="java.math.BigDecimal">
+	<field name="COL_11" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="COL_11"/>
 	</field>
-	<field name="COL_12" class="java.math.BigDecimal">
+	<field name="COL_12" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="COL_12"/>
 	</field>
 	<background>
