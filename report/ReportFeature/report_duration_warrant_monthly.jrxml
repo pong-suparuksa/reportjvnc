@@ -14,16 +14,20 @@
 	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/ReportFeature/report_duration_warrant_monthly"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="517"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="473"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/ReportFeature/report_duration_warrant_monthly_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["26/05/2021"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="END_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["26/05/2021"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SEND_METHOD" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[0]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[SELECT cou.COURT_NAME_TH
@@ -36,6 +40,7 @@
 	    ,THAISDATE(pn.SEND_DATE)  SEND_DATE
 	    ,plnsr.NOTICE_SEND_RESULT_NAME 
 	    ,pn.SEND_FEE 
+	    ,plsm.SEND_METHOD_CODE 
 	    ,plsm.SEND_METHOD_NAME 
 	    ,pn.SEND_BY_NAME
 FROM PC_NOTICE_SEND_RESULT pnsr 
@@ -59,6 +64,11 @@ LEFT JOIN (SELECT plc.COURT_NAME_TH
 WHERE pnsr.REMOVED_BY = 0
 AND pnsr.REPORT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
                          AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+AND (
+	 (plsm.SEND_METHOD_CODE = '01' AND  $P{SEND_METHOD} = 1) OR 
+	 (plsm.SEND_METHOD_CODE = '02' AND  $P{SEND_METHOD} = 2) OR
+	 ($P{SEND_METHOD} = 0)
+	)
 ORDER BY REPORT_DATE]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
@@ -122,8 +132,7 @@ ORDER BY REPORT_DATE]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["ตั้งแต่วันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))
-]]></textFieldExpression>
+				<textFieldExpression><![CDATA["ตั้งแต่วันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>
@@ -281,7 +290,7 @@ ORDER BY REPORT_DATE]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{REPORT_DATE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{REPORT_DATE}==null?" ":$F{REPORT_DATE}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="110" y="0" width="70" height="25" uuid="8ae2f465-399f-45a1-9a91-578b5cf30aa4">
@@ -295,7 +304,7 @@ ORDER BY REPORT_DATE]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}==null?" ":$F{CASE_BLACK_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="180" y="0" width="70" height="25" uuid="a5c859f4-f206-478e-81ab-9db9d20178db">
@@ -309,7 +318,7 @@ ORDER BY REPORT_DATE]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CASE_RED_NO}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{CASE_RED_NO}==null?" ":$F{CASE_RED_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="250" y="0" width="118" height="25" uuid="5ab743e0-01a5-481b-899c-6e1e3a3231d1">
@@ -322,7 +331,7 @@ ORDER BY REPORT_DATE]]>
 				<textElement verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{TO_NAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{TO_NAME}==null?" ":$F{TO_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="368" y="0" width="70" height="25" uuid="2a831ad4-5bbe-41c9-8e23-07c81e7f92a3">
@@ -336,7 +345,7 @@ ORDER BY REPORT_DATE]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{SEND_DATE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{SEND_DATE}==null?" ":$F{SEND_DATE}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="438" y="0" width="120" height="25" uuid="98440980-09a3-4357-bfb9-efdf29d8bd11">
@@ -349,7 +358,7 @@ ORDER BY REPORT_DATE]]>
 				<textElement verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{NOTICE_SEND_RESULT_NAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{NOTICE_SEND_RESULT_NAME}==null?" ":$F{NOTICE_SEND_RESULT_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="558" y="0" width="60" height="25" uuid="663ed596-4a96-419c-b40d-91f123ee1a76">
@@ -376,7 +385,7 @@ ORDER BY REPORT_DATE]]>
 				<textElement verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{SEND_METHOD_NAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{SEND_METHOD_NAME}==null?" ":$F{SEND_METHOD_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="713" y="0" width="89" height="25" uuid="8fd4cce9-0e13-4d34-b316-9edbe8fd12a5">
@@ -389,7 +398,7 @@ ORDER BY REPORT_DATE]]>
 				<textElement verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{SEND_BY_NAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{SEND_BY_NAME}==null?" ":$F{SEND_BY_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="0" y="0" width="40" height="25" uuid="4621e121-fdd6-4bee-a148-661960cf7b08">

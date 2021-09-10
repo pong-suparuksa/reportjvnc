@@ -11,7 +11,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_offer"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
@@ -37,13 +37,14 @@
 	   ,plal.APPOINT_LIST_NAME  APPOINT_REASON_NAME 
 	   --
 	   ,pllr.LEVEL_ROOM_DESC LEVEL_ROOM
-	   ,jj.JUDGE_NAME
+	   ,j.JUDGE_NAME
 	   ,apd.WITNESS
 	   ,apd.PAGES
 	   ,CASE WHEN ap_next.START_DATE IS NULL THEN '0' ELSE THAISDATE(ap_next.START_DATE) END NEXT_DATE
 	   --
 FROM PC_PROCEED_APPOINT_CONTINUE ppac 
 LEFT JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID AND ppa.REMOVED_BY = 0
+--witness
 LEFT JOIN (SELECT pprw.APPOINT_CON_ID
 				  ,NVL(pprw.WITNESS_DEFENDANT_COUNT,0)+NVL(pprw.WITNESS_DISSENTER_COUNT,0)+NVL(pprw.WITNESS_OTHER_COUNT,0)+NVL(pprw.WITNESS_PLAINTIFF_COUNT,0)+NVL(pprw.WITNESS_REQUESTER_COUNT,0) WITNESS	  
 				  ,NVL(pprw.WITNESS_DEFENDANT_PAGE,0)+NVL(pprw.WITNESS_DISSENTER_PAGE,0)+NVL(pprw.WITNESS_OTHER_DAY,0)+NVL(pprw.WITNESS_PLAINTIFF_PAGE,0)+NVL(pprw.WITNESS_REQUESTER_PAGE,0) PAGES  
@@ -75,17 +76,16 @@ LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_I
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
 --judge
-LEFT JOIN (SELECT j.CASE_ID, LISTAGG(j.JUDGE_NAME , ',') WITHIN GROUP(ORDER BY j.JUDGE_NAME ) JUDGE_NAME
-		   FROM
-		   (
-			SELECT DISTINCT pcj.CASE_ID, plj.JUDGE_NAME 
-			FROM PC_CASE_JUDGE pcj 
-			JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
-			JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID 
-			WHERE pcj.REMOVED_BY = 0
-			AND pljt.JUDGE_TYPE_CODE = '01'
-		   ) j 
-			GROUP BY j.CASE_ID) jj ON jj.CASE_ID = ppa.CASE_ID 
+LEFT JOIN (SELECT pcj.CASE_ID
+				  ,pcj.JUDGE_ID
+				  ,plj.JUDGE_NAME 
+			      ,CASE WHEN pcj.TEMPORARY_JUDGE_FLAG = 3 THEN '003'
+			            WHEN pcj.TEMPORARY_JUDGE_FLAG = 4 THEN '002' END APPOINT_TABLE_CODE
+		   FROM PC_CASE_JUDGE pcj 
+		   JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID AND plj.REMOVED_BY = 0
+		   JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+		   WHERE pcj.REMOVED_BY = 0
+		   AND pljt.JUDGE_TYPE_CODE = '01') j ON j.CASE_ID = ppa.CASE_ID AND j.APPOINT_TABLE_CODE = ppa.APPOINT_TABLE_CODE  
 --court
 LEFT JOIN (SELECT plc.COURT_NAME_TH
 			FROM PC_PARAM pp

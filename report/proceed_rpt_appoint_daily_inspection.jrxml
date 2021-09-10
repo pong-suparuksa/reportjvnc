@@ -12,119 +12,108 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_daily_inspection"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="315"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="680"/>
 	<property name="com.jaspersoft.studio.report.description" value=""/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_daily_inspection_files/main_jrxml"/>
 	<parameter name="SELECT_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["03/03/2021"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="ROOM_COD" class="java.lang.String"/>
 	<queryString language="SQL">
-		<![CDATA[SELECT
-PCC.CASE_ID,
-    PCPAC.START_DATE   AS  APPOINT_DATE,   
-    CASE WHEN PCC.BLACK_IDNUM IS NOT NULL 
-		     THEN PCLTS.TITLE_CASE_NAME||PCC.BLACK_IDNUM||'/'||PCC.BLACK_YEAR 
-		     ELSE '-' END CASE_BLACE_NO, 
-	CASE WHEN PCJM.RED_IDNUM IS NOT NULL
-		     THEN PCLTS_R.TITLE_CASE_NAME||PCJM.RED_IDNUM||'/'||PCJM.RED_YEAR 
-		     ELSE '-' END CASE_RED_NO,
-    PCPAC.CHOICE_TIME                   AS  APPOINT_TIME,   
-		NVL(PCC.PROS_DESC,'') AS CLAIMANT,
-		NVL(PCC.ACCU_DESC ,'') AS DEFENDANT,
-	    NVL(PCC.ALLE_DESC,'') AS TOPIC,
-	     NVL(pllr.LEVEL_ROOM_DESC ,'') AS LEVEL_ROOM_DESC,
-	      NVL(PLAL.APPOINT_LIST_NAME  ,'-') AS APPOINT_REASON,
-    IDIOM_OWNER.JUDGE_NAME				AS IDIOM_OWNER,
-    IDIOM_ORGANIZATION1.JUDGE_NAME		AS IDIOM_ORGANIZATION1,
-    IDIOM_ORGANIZATION2.JUDGE_NAME		AS IDIOM_ORGANIZATION2,
-    ASSOCIATE_JUDGE.JUDGE_NAME			AS ASSOCIATE_JUDGE,   
-    w.INVESTIGATE
-    ,w.INVESTIGATE_DATE
-    ,PCPACNT.APPOINT_NEXT_DATE
-    ,PCPACNT.APPOINT_NEXT_REASON
+		<![CDATA[SELECT DISTINCT 
+	pc.CASE_ID
+    ,ppac.START_DATE   AS  APPOINT_DATE  
+    ,CASE WHEN pc.BLACK_IDNUM IS NOT NULL 
+		     THEN pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR 
+		     ELSE '-' END CASE_BLACK_NO 
+	,CASE WHEN pj.RED_IDNUM IS NOT NULL
+		     THEN pltc_r.TITLE_CASE_NAME||pj.RED_IDNUM||'/'||pj.RED_YEAR 
+		     ELSE '-' END CASE_RED_NO
+    ,ppac.CHOICE_TIME                   AS  APPOINT_TIME   
+    ,NVL(pc.PROS_DESC,'')  AS CLAIMANT
+	,NVL(pc.ACCU_DESC ,'') AS DEFENDANT
+	,NVL(pc.ALLE_DESC,'')  AS TOPIC
+	,NVL(pllr.LEVEL_ROOM_DESC ,'') AS LEVEL_ROOM_DESC
+	,NVL(plal.APPOINT_LIST_NAME  ,'-') AS APPOINT_REASON
+    ,j.JUDGE_NAME AS IDIOM_OWNER
+    ,j.ONG_1      AS IDIOM_ORGANIZATION1
+    ,j.ONG_2      AS IDIOM_ORGANIZATION2
+    ,j.ADD_1      AS ASSOCIATE_JUDGE   
+    ,apd.WITNESS  AS INVESTIGATE
+    ,apd.PAGES    AS INVESTIGATE_DATE
+    ,ap_next.START_DATE       AS APPOINT_NEXT_DATE
+    ,ap_next.APPOINT_REASON   AS APPOINT_NEXT_REASON
     ,cou.COURT_NAME_TH
-    --
-	FROM PC_PROCEED_APPOINT PCPA
-    JOIN PC_PROCEED_APPOINT_CONTINUE PCPAC ON PCPA.APPOINT_ID = PCPAC.APPOINT_ID AND PCPAC.REMOVED_BY = 0 
-    LEFT JOIN PC_CASE PCC ON PCPA.CASE_ID = PCC.CASE_ID    
-    LEFT JOIN PC_JUDGEMENT PCJM ON PCC.CASE_ID = PCJM.CASE_ID
-    LEFT JOIN PC_LOOKUP_TITLE_CASE PCLTS ON PCLTS.TITLE_CASE_ID = PCC.BLACK_TITLE_ID
-    LEFT JOIN PC_LOOKUP_TITLE_CASE PCLTS_R ON PCLTS_R.TITLE_CASE_ID = PCJM.RED_TITLE_ID AND PCLTS_R.REMOVED_BY = 0    
-    LEFT JOIN PC_LOOKUP_APPOINT_LIST PLAL ON PCPAC.REASON_APPOINT_ID = PLAL.APPOINT_LIST_ID 
-    LEFT JOIN 
-    (
-	    SELECT pcj.CASE_ID ,pljt.JUDGE_TYPE_NAME,plj.JUDGE_NAME ,pljt.JUDGE_TYPE_CODE
-		FROM PC_CASE_JUDGE pcj  
-		LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID
-		LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID 
-		WHERE pcj.REMOVED_BY = 0
-		GROUP BY pcj.CASE_ID ,pljt.JUDGE_TYPE_NAME,plj.JUDGE_NAME ,pljt.JUDGE_TYPE_CODE
-	) IDIOM_OWNER ON IDIOM_OWNER.CASE_ID = PCC.CASE_ID AND IDIOM_OWNER.JUDGE_TYPE_CODE ='01' -- เจ้าของสำนวน
-	LEFT JOIN (
-	    SELECT pcj.CASE_ID ,pljt.JUDGE_TYPE_NAME,plj.JUDGE_NAME ,pljt.JUDGE_TYPE_CODE
-		FROM PC_CASE_JUDGE pcj  
-		LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID
-		LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID 
-		WHERE pcj.REMOVED_BY = 0
-		GROUP BY pcj.CASE_ID ,pljt.JUDGE_TYPE_NAME,plj.JUDGE_NAME ,pljt.JUDGE_TYPE_CODE
-	) IDIOM_ORGANIZATION1 ON IDIOM_ORGANIZATION1.CASE_ID = PCC.CASE_ID AND IDIOM_ORGANIZATION1.JUDGE_TYPE_CODE ='05' --องค์คณะผู้ตัดสิน1
-	LEFT JOIN (
-	    SELECT pcj.CASE_ID ,pljt.JUDGE_TYPE_NAME,plj.JUDGE_NAME ,pljt.JUDGE_TYPE_CODE
-		FROM PC_CASE_JUDGE pcj  
-		LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID
-		LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID 
-		WHERE pcj.REMOVED_BY = 0
-		GROUP BY pcj.CASE_ID ,pljt.JUDGE_TYPE_NAME,plj.JUDGE_NAME ,pljt.JUDGE_TYPE_CODE
-	)  IDIOM_ORGANIZATION2 ON IDIOM_ORGANIZATION2.CASE_ID = PCC.CASE_ID AND IDIOM_ORGANIZATION2.JUDGE_TYPE_CODE ='06' --องค์คณะผู้ตัดสิน1
-    LEFT JOIN (
-	    SELECT pcj.CASE_ID ,pljt.JUDGE_TYPE_NAME,plj.JUDGE_NAME ,pljt.JUDGE_TYPE_CODE
-		FROM PC_CASE_JUDGE pcj  
-		LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID
-		LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID 
-		WHERE pcj.REMOVED_BY = 0
-		GROUP BY pcj.CASE_ID ,pljt.JUDGE_TYPE_NAME,plj.JUDGE_NAME ,pljt.JUDGE_TYPE_CODE
-	)  ASSOCIATE_JUDGE ON ASSOCIATE_JUDGE.CASE_ID = PCC.CASE_ID AND ASSOCIATE_JUDGE.JUDGE_TYPE_CODE ='08' --ผู้พิพากษาสมทบ
-    --
-	LEFT JOIN PC_LOOKUP_LEVEL_ROOM pllr ON pllr.LEVEL_ROOM_ID = PCPAC.LEVEL_ROOM_CODE AND pllr.REMOVED_BY = 0
-	--
-	LEFT JOIN (
-	  SELECT PCPACN.APPOINT_ID ,PCPACN.START_DATE AS  APPOINT_NEXT_DATE, PCLARN.APPOINT_REASON_NAME AS  APPOINT_NEXT_REASON ,ROW_NUMBER() OVER (PARTITION BY PCPACN.APPOINT_ID ORDER BY PCPACN.START_DATE DESC) AS rn
-	  FROM PC_PROCEED_APPOINT_CONTINUE PCPACN 	
-	  LEFT JOIN PC_LOOKUP_APPOINT_REASON PCLARN ON PCPACN.REASON_APPOINT_ID = PCLARN.APPOINT_REASON_ID
-	  WHERE PCPACN.START_DATE > TO_DATE($P{SELECT_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS') AND PCPACN.REMOVED_BY = 0 
-	  --FETCH FIRST 1 ROWS ONLY	  
-	  ) PCPACNT ON PCPACNT.APPOINT_ID = PCPA.APPOINT_ID AND PCPACNT.rn = 1
-	  --
-	LEFT JOIN (SELECT plc.COURT_NAME_TH
-			   FROM PC_PARAM pp
-			   JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
-			   WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 = 1
-	LEFT JOIN (SELECT pprw.APPOINT_CON_ID
-					  ,NVL(pprw.WITNESS_DEFENDANT_COUNT,0)+NVL(pprw.WITNESS_DISSENTER_COUNT,0)+NVL(pprw.WITNESS_OTHER_COUNT,0)+NVL(pprw.WITNESS_PLAINTIFF_COUNT,0)+NVL(pprw.WITNESS_REQUESTER_COUNT,0) INVESTIGATE	  
-					  ,NVL(pprw.WITNESS_DEFENDANT_PAGE,0)+NVL(pprw.WITNESS_DISSENTER_PAGE,0)+NVL(pprw.WITNESS_OTHER_DAY,0)+NVL(pprw.WITNESS_PLAINTIFF_PAGE,0)+NVL(pprw.WITNESS_REQUESTER_PAGE,0) INVESTIGATE_DATE  
-				FROM PC_PROCEED_RECORD_WITNESS pprw
-				JOIN (SELECT pprw.APPOINT_CON_ID 
-							 ,MAX(pprw.RECORD_DATE)  RECORD_DATE 
-							 ,MAX(pprw.CREATED_DATE) CREATED_DATE
-					  FROM PC_PROCEED_RECORD_WITNESS pprw
-					  WHERE pprw.REMOVED_BY = 0
-					  GROUP BY pprw.APPOINT_CON_ID) mx ON mx.APPOINT_CON_ID = pprw.APPOINT_CON_ID 
-					                                  AND mx.RECORD_DATE = pprw.RECORD_DATE 
-					                                  AND mx.CREATED_DATE = pprw.CREATED_DATE 
-				WHERE pprw.REMOVED_BY = 0) w ON w.APPOINT_CON_ID = PCPAC.APPOINT_CON_ID 
-	WHERE PCPA.REMOVED_BY = 0 AND PCC.CASE_ID IS NOT NULL 
-	AND PCPAC.START_DATE = TO_DATE($P{SELECT_DATE} ||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS')
-	AND ($P{ROOM_COD} IS NULL OR pllr.LEVEL_ROOM_CODE = $P{ROOM_COD})]]>
+FROM PC_PROCEED_APPOINT_CONTINUE ppac 
+LEFT JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID AND ppa.REMOVED_BY = 0
+--witness
+LEFT JOIN (SELECT pprw.APPOINT_CON_ID
+				  ,NVL(pprw.WITNESS_DEFENDANT_COUNT,0)+NVL(pprw.WITNESS_DISSENTER_COUNT,0)+NVL(pprw.WITNESS_OTHER_COUNT,0)+NVL(pprw.WITNESS_PLAINTIFF_COUNT,0)+NVL(pprw.WITNESS_REQUESTER_COUNT,0) WITNESS	  
+				  ,NVL(pprw.WITNESS_DEFENDANT_PAGE,0)+NVL(pprw.WITNESS_DISSENTER_PAGE,0)+NVL(pprw.WITNESS_OTHER_DAY,0)+NVL(pprw.WITNESS_PLAINTIFF_PAGE,0)+NVL(pprw.WITNESS_REQUESTER_PAGE,0) PAGES  
+			FROM PC_PROCEED_RECORD_WITNESS pprw
+			JOIN (SELECT pprw.APPOINT_CON_ID 
+						 ,MAX(pprw.RECORD_DATE)  RECORD_DATE 
+						 ,MAX(pprw.CREATED_DATE) CREATED_DATE
+				  FROM PC_PROCEED_RECORD_WITNESS pprw
+				  WHERE pprw.REMOVED_BY = 0
+				  GROUP BY pprw.APPOINT_CON_ID) mx ON mx.APPOINT_CON_ID = pprw.APPOINT_CON_ID 
+				                                  AND mx.RECORD_DATE = pprw.RECORD_DATE 
+				                                  AND mx.CREATED_DATE = pprw.CREATED_DATE 			
+				  WHERE pprw.REMOVED_BY = 0) apd ON apd.APPOINT_CON_ID = ppac.APPOINT_CON_ID
+			
+--next appoint
+LEFT JOIN (SELECT ppa.CASE_ID
+			      ,ppac.START_DATE
+			      ,plal.APPOINT_LIST_NAME APPOINT_REASON
+			      ,ROW_NUMBER() OVER (PARTITION BY ppa.CASE_ID ORDER BY ppac.START_DATE) RN 
+			FROM PC_PROCEED_APPOINT_CONTINUE ppac 
+			JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID AND ppac.REMOVED_BY = 0
+			LEFT JOIN PC_LOOKUP_APPOINT_LIST plal ON plal.APPOINT_LIST_ID = ppac.REASON_APPOINT_ID AND plal.REMOVED_BY = 0
+			WHERE ppac.REMOVED_BY = 0
+			AND ppac.START_DATE > TO_DATE($P{SELECT_DATE}, 'DD/MM/YYYY')
+			) ap_next ON ap_next.CASE_ID = ppa.CASE_ID AND ap_next.RN = 1
+LEFT JOIN PC_LOOKUP_LEVEL_ROOM pllr ON pllr.LEVEL_ROOM_ID = ppac.LEVEL_ROOM_CODE AND pllr.REMOVED_BY = 0
+--lookup proceed
+LEFT JOIN PC_LOOKUP_APPOINT_LIST plal ON plal.APPOINT_LIST_ID = ppac.REASON_APPOINT_ID AND plal.REMOVED_BY = 0
+
+LEFT JOIN PC_LOOKUP_LEVEL_ROOM pllr ON pllr.LEVEL_ROOM_ID = ppac.LEVEL_ROOM_CODE AND pllr.REMOVED_BY = 0    
+--case
+LEFT JOIN PC_CASE pc ON pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
+--judgement
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
+--judge
+LEFT JOIN (SELECT pcj.CASE_ID
+			       ,CASE WHEN pcj.TEMPORARY_JUDGE_FLAG = 3 THEN '003'
+			             WHEN pcj.TEMPORARY_JUDGE_FLAG = 4 THEN '002' END APPOINT_TABLE_CODE
+			       ,LISTAGG((CASE WHEN  pljt.JUDGE_TYPE_CODE = '01' THEN plj.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  pljt.JUDGE_TYPE_CODE = '01' THEN plj.JUDGE_NAME END)) JUDGE_NAME
+			       ,LISTAGG((CASE WHEN  pljt.JUDGE_TYPE_CODE = '02' THEN plj.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  pljt.JUDGE_TYPE_CODE = '02' THEN plj.JUDGE_NAME END)) ONG_1
+				   ,LISTAGG((CASE WHEN  pljt.JUDGE_TYPE_CODE = '03' THEN plj.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  pljt.JUDGE_TYPE_CODE = '03' THEN plj.JUDGE_NAME END)) ONG_2
+				   ,LISTAGG((CASE WHEN  pljt.JUDGE_TYPE_CODE = '12' THEN plj.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  pljt.JUDGE_TYPE_CODE = '12' THEN plj.JUDGE_NAME END)) ADD_1
+			FROM PC_CASE_JUDGE pcj 
+			JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID AND plj.REMOVED_BY = 0
+			JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+			WHERE pcj.REMOVED_BY = 0
+			AND pljt.JUDGE_TYPE_CODE IN ('02','03','12')
+			GROUP BY pcj.CASE_ID ,CASE WHEN pcj.TEMPORARY_JUDGE_FLAG = 3 THEN '003' WHEN pcj.TEMPORARY_JUDGE_FLAG = 4 THEN '002' END
+			) j ON j.CASE_ID = ppa.CASE_ID AND j.APPOINT_TABLE_CODE = ppa.APPOINT_TABLE_CODE 
+--court
+LEFT JOIN (SELECT plc.COURT_NAME_TH
+			FROM PC_PARAM pp
+			JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 = 1
+WHERE ppac.REMOVED_BY = 0
+AND ppac.START_DATE = TO_DATE($P{SELECT_DATE}, 'DD/MM/YYYY')
+AND ($P{ROOM_COD} IS NULL OR pllr.LEVEL_ROOM_CODE = $P{ROOM_COD})]]>
 	</queryString>
 	<field name="APPOINT_DATE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="APPOINT_DATE"/>
 	</field>
-	<field name="CASE_BLACE_NO" class="java.lang.String">
+	<field name="CASE_BLACK_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="CASE_BLACE_NO"/>
 	</field>
 	<field name="CASE_RED_NO" class="java.lang.String">
@@ -457,7 +446,7 @@ PCC.CASE_ID,
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CASE_BLACE_NO}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="60" y="0" width="40" height="25" uuid="297b7a8b-0331-4c6b-aa5e-36ab7263654b">
@@ -603,7 +592,7 @@ PCC.CASE_ID,
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{COLUMN_COUNT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="445" y="0" width="55" height="25" uuid="5b5a35c1-65fa-4566-b852-089ee6d3fc19">

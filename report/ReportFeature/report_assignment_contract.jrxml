@@ -11,11 +11,15 @@
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="395"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="594"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/ReportFeature/report_assignment_contract_files/main_jrxml"/>
-	<parameter name="CASE_ID" class="java.lang.String">
-		<defaultValueExpression><![CDATA["181"]]></defaultValueExpression>
+	<parameter name="START_DATE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["01/06/2021"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="END_DATE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["04/09/2021"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT pb.CASE_ID,
+		<![CDATA[SELECT DISTINCT 
+    pb.CASE_ID,
     NVL(cou.COURT_NAME_TH, '') COURT_NAME_TH, 
 	NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR)  BLACK_CASE_NO ,
 	NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || CASE WHEN pj.RED_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pj.RED_YEAR)     RED_CASE_NO ,
@@ -24,12 +28,24 @@
     pc.PROS_DESC , 
 	pc.ACCU_DESC ,
 	pc.ALLE_DESC ,
-	pbst.TYPE_NAME 
+	pbs.TYPE_NAME 
 FROM PC_BAIL pb 
 JOIN PC_CASE pc ON pc.CASE_ID = pb.CASE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN  PC_BAIL_BAILSMAN pbb ON pbb.BAIL_ID = pb.BAIL_ID AND pbb.REMOVED_BY = 0
-JOIN  PC_BAIL_SEC pbs ON pbs.BAILSMAN_ID = pbb.BAILSMAN_ID  AND pbs.REMOVED_BY = 0
-LEFT JOIN PC_BAIL_SEC_TYPE pbst ON pbst.TYPE_CODE = pbs.SEC_TYPE_CODE  
+--
+JOIN (SELECT t.BAIL_ID
+			   ,t.BAILSMAN_ID 
+			   ,LISTAGG(t.TYPE_NAME , chr(13)) WITHIN GROUP(ORDER BY t.TYPE_NAME) TYPE_NAME
+		FROM (SELECT DISTINCT 
+				       pbs.BAIL_ID
+					   ,pbs.BAILSMAN_ID 
+					   ,pbst.TYPE_NAME 
+			  FROM PC_BAIL_SEC pbs 
+			  LEFT JOIN PC_BAIL_SEC_TYPE pbst ON pbst.TYPE_CODE = pbs.SEC_TYPE_CODE AND pbst.REMOVED_BY = 0
+				WHERE pbst.REMOVED_BY = 0) t
+		GROUP BY t.BAIL_ID, t.BAILSMAN_ID 
+		) pbs ON pbs.BAIL_ID = pb.BAIL_ID AND pbs.BAILSMAN_ID = pbb.BAILSMAN_ID 
+--
 LEFT JOIN  PC_LIST_OF_VALUE plov ON plov.VALUE = pb.BAIL_PERIOD   AND plov.LOV_TYPE = 'BAIL_CLASS' AND PLOV.REMOVED_BY = 0
 --Case
 LEFT JOIN PC_JUDGEMENT pj ON
@@ -46,7 +62,8 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
 WHERE 
 	pb.REMOVED_BY = 0
 	AND pb.IS_PRINTED = 1
-	AND pb.CASE_ID = $P{CASE_ID}
+	AND pb.BAIL_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
+                         AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
 ORDER BY
 	BLACK_CASE_NO ASC]]>
 	</queryString>
@@ -97,7 +114,7 @@ ORDER BY
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="14" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["หมายเลขคดีดำที่ :  " + ($F{BLACK_CASE_NO}==null?" ":$F{BLACK_CASE_NO}) + "    เลขคดีแดง :  " + ($F{RED_CASE_NO}==null?" ":$F{RED_CASE_NO})]]></textFieldExpression>
+				<textFieldExpression><![CDATA["ตั้งแต่วันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +" ถึงวันที่" + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="103" y="30" width="554" height="30" uuid="29cc1af4-8360-4bab-8492-c3b50f418c51"/>
@@ -112,7 +129,7 @@ ORDER BY
 		<band height="20">
 			<textField>
 				<reportElement x="700" y="0" width="110" height="20" uuid="162b0341-f70a-43a7-b529-76320a637162"/>
-				<textElement>
+				<textElement textAlignment="Right">
 					<font fontName="THSarabunNew"/>
 				</textElement>
 				<textFieldExpression><![CDATA["แผ่นที่   " + $V{PAGE_NUMBER}]]></textFieldExpression>

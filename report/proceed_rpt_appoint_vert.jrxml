@@ -2,12 +2,14 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="proceed_rpt_appoint_vert" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryNewPage="true" uuid="1bfda7a9-ad46-4cbf-9696-758bf76ec1e6">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="336"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="658"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_vert"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="534"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="459"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_vert_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["10/03/2021"]]></defaultValueExpression>
@@ -21,78 +23,53 @@
 	<parameter name="CHOICE" class="java.lang.String"/>
 	<parameter name="LEVEL_ROOM_ID" class="java.lang.String"/>
 	<queryString language="SQL">
-		<![CDATA[SELECT
-	ROW_NUMBER() OVER (
-	ORDER BY pc.CASE_ID) AS row_num ,
+		<![CDATA[SELECT DISTINCT
 	ppac.START_DATE,
 	NVL(cou.COURT_NAME_TH, '') COURT_NAME_TH, 
 	NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR)  BLACK_CASE_NO ,
 	NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || CASE WHEN pj.RED_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pj.RED_YEAR)     RED_CASE_NO,
-	ppac.UPDATED_DATE ,
-	 ppac.CHOICE,
+	ppac.CHOICE,
 	ppac.CHOICE_TIME ,
 	pc.PROS_DESC ,
     pc.ACCU_DESC ,
     pc.ALLE_DESC ,   
-	plal.APPOINT_LIST_NAME AS APPOINT_REASON_NAME  ,
-	pllr.LEVEL_ROOM_DESC ,
-	idiom_owner.JUDGE_NAME, ppa.CASE_ID,
- 	(select listagg(plj1.JUDGE_NAME ,', ') within group (order by plj1.JUDGE_NAME) 
-        from PC_CASE_JUDGE pcj1, PC_LOOKUP_JUDGE plj1, PC_LOOKUP_JUDGE_TYPE pjt1 
-        where pcj1.CASE_ID = ppa.CASE_ID AND pcj1.REMOVED_BY = 0 AND plj1.JUDGE_ID = pcj1.JUDGE_ID
-        AND plj1.REMOVED_BY = 0 AND pcj1.judge_type_id = pjt1.judge_type_id 
-        and pjt1.judge_type_code = '02') ONG_1 ,
-	(select listagg(plj1.JUDGE_NAME ,', ') within group (order by plj1.JUDGE_NAME) 
-        from PC_CASE_JUDGE pcj1, PC_LOOKUP_JUDGE plj1, PC_LOOKUP_JUDGE_TYPE pjt1 
-        where pcj1.CASE_ID = ppa.CASE_ID 
-        AND pcj1.REMOVED_BY = 0 
-        AND plj1.JUDGE_ID = pcj1.JUDGE_ID 
-        AND plj1.REMOVED_BY = 0 
-        AND pcj1.judge_type_id = pjt1.judge_type_id 
-        and pjt1.judge_type_code = '03') ONG_2 ,
-	(select listagg(plj1.JUDGE_NAME,', ') within group (order by plj1.JUDGE_NAME) 
-        from PC_CASE_JUDGE pcj1, PC_LOOKUP_JUDGE plj1, PC_LOOKUP_JUDGE_TYPE pjt1 
-        where pcj1.CASE_ID = ppa.CASE_ID 
-        AND pcj1.REMOVED_BY = 0 
-        AND plj1.JUDGE_ID = pcj1.JUDGE_ID 
-        AND plj1.REMOVED_BY = 0 
-        AND pcj1.judge_type_id = pjt1.judge_type_id 
-        and pjt1.judge_type_code = '12') ADD_1
+	plal.APPOINT_LIST_NAME AS APPOINT_REASON_NAME,
+	pllr.LEVEL_ROOM_DESC,
+	j.JUDGE_ID,
+	j.JUDGE_NAME
+--
 FROM
 	PC_PROCEED_APPOINT ppa	
--- Join วันที่นัดเหตุที่นัด
+-- appoint continue
 LEFT JOIN PC_PROCEED_APPOINT_CONTINUE ppac ON
 	ppac.APPOINT_ID = ppa.APPOINT_ID AND ppac.REMOVED_BY = 0	
--- Join Case
+-- case
 LEFT JOIN PC_CASE pc ON
     pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON
+    pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0        
+--judgement    
 LEFT JOIN PC_JUDGEMENT pj ON 
  	pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON
-    pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
+--judge
+LEFT JOIN (SELECT pcj.CASE_ID
+				  ,pcj.JUDGE_ID
+				  ,plj.JUDGE_NAME 
+			      ,CASE WHEN pcj.TEMPORARY_JUDGE_FLAG = 3 THEN '003'
+			            WHEN pcj.TEMPORARY_JUDGE_FLAG = 4 THEN '002' END APPOINT_TABLE_CODE
+		   FROM PC_CASE_JUDGE pcj 
+		   JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID AND plj.REMOVED_BY = 0
+		   JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+		   WHERE pcj.REMOVED_BY = 0
+		   AND pljt.JUDGE_TYPE_CODE = '01') j ON j.CASE_ID = ppa.CASE_ID AND j.APPOINT_TABLE_CODE = ppa.APPOINT_TABLE_CODE  
+--
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON 
 	pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0	
----
-LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pc.COURT_ID AND plc.REMOVED_BY = 0	
--- JUDGE
-LEFT JOIN 
-    (
-	    SELECT plj.JUDGE_ID ,pcj.CASE_ID ,pljt.JUDGE_TYPE_NAME,plj.JUDGE_NAME ,pljt.JUDGE_TYPE_CODE
-		FROM PC_CASE_JUDGE pcj  
-		LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID
-		LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID 
-		WHERE pcj.REMOVED_BY = 0
-		GROUP BY plj.JUDGE_ID , pcj.CASE_ID ,pljt.JUDGE_TYPE_NAME,plj.JUDGE_NAME ,pljt.JUDGE_TYPE_CODE
-	) idiom_owner ON idiom_owner.CASE_ID = pc.CASE_ID AND idiom_owner.JUDGE_TYPE_CODE ='01' -- เจ้าของสำนวน
---เอาอันนี้
-LEFT JOIN (SELECT DISTINCT pcl.CASE_ID, plas.ACCU_STATUS_NAME
-           FROM PC_CASE_LIT pcl
-           LEFT JOIN PC_LOOKUP_ACCU_STATUS plas ON plas.ACCU_STATUS_ID = pcl.LITIGANT_OLD_STATUS_ID AND plas.REMOVED_BY = 0
-           WHERE pcl.REMOVED_BY = 0) plas ON plas.CASE_ID = pc.CASE_ID
--- เอาอันนี้
+--appoint reason
 LEFT JOIN PC_LOOKUP_APPOINT_LIST plal ON plal.APPOINT_LIST_ID = ppac.REASON_APPOINT_ID AND plal.REMOVED_BY = 0      
--- Join ห้อง
-LEFT JOIN PC_LOOKUP_LEVEL_ROOM pllr ON pllr.LEVEL_ROOM_ID = ppac.LEVEL_ROOM_CODE AND pllr.REMOVED_BY = 0          
+--judge room
+LEFT JOIN PC_LOOKUP_LEVEL_ROOM pllr ON pllr.LEVEL_ROOM_ID = ppac.LEVEL_ROOM_CODE AND pllr.REMOVED_BY = 0  
+--court
 CROSS JOIN (SELECT plc.COURT_NAME_TH
              FROM PC_PARAM pp
              JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
@@ -101,15 +78,12 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
 WHERE ppa.REMOVED_BY = 0 
 AND ppac.START_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS')
                            AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
-AND (idiom_owner.JUDGE_ID = $P{JUDGE_ID} OR $P{JUDGE_ID} IS NULL)
+AND (j.JUDGE_ID = $P{JUDGE_ID} OR $P{JUDGE_ID} IS NULL)
 AND ($P{CHOICE} IS NULL OR ppac.CHOICE = $P{CHOICE})
-AND ($P{LEVEL_ROOM_ID} IS NULL OR pllr.LEVEL_ROOM_ID = $P{LEVEL_ROOM_ID} OR 0 = $P{LEVEL_ROOM_ID})
-ORDER BY pc.CASE_ID]]>
+AND ($P{LEVEL_ROOM_ID} IS NULL OR pllr.LEVEL_ROOM_ID = $P{LEVEL_ROOM_ID} OR 0 = $P{LEVEL_ROOM_ID})                          
+ORDER BY ppac.START_DATE, ppac.CHOICE, ppac.CHOICE_TIME]]>
 	</queryString>
-	<field name="ROW_NUM" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="ROW_NUM"/>
-	</field>
-	<field name="START_DATE" class="java.lang.String">
+	<field name="START_DATE" class="java.util.Date">
 		<property name="com.jaspersoft.studio.field.label" value="START_DATE"/>
 	</field>
 	<field name="COURT_NAME_TH" class="java.lang.String">
@@ -121,8 +95,8 @@ ORDER BY pc.CASE_ID]]>
 	<field name="RED_CASE_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="RED_CASE_NO"/>
 	</field>
-	<field name="UPDATED_DATE" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="UPDATED_DATE"/>
+	<field name="CHOICE" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="CHOICE"/>
 	</field>
 	<field name="CHOICE_TIME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="CHOICE_TIME"/>
@@ -142,17 +116,11 @@ ORDER BY pc.CASE_ID]]>
 	<field name="LEVEL_ROOM_DESC" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="LEVEL_ROOM_DESC"/>
 	</field>
+	<field name="JUDGE_ID" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="JUDGE_ID"/>
+	</field>
 	<field name="JUDGE_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="JUDGE_NAME"/>
-	</field>
-	<field name="ONG_1" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="ONG_1"/>
-	</field>
-	<field name="ONG_2" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="ONG_2"/>
-	</field>
-	<field name="ADD_1" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="ADD_1"/>
 	</field>
 	<group name="Group1"/>
 	<title>
@@ -388,7 +356,7 @@ $F{LEVEL_ROOM_DESC}]]></textFieldExpression>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="9"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ROW_NUM}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="16" y="0" width="30" height="20" uuid="b60b5930-d684-4fe1-849d-453dc7ff2bed"/>
