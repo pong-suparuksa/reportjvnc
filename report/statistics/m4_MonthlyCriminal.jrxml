@@ -15,10 +15,10 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/CaseStat/m4_MonthlyCriminal"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN121"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/CaseStat/m4_MonthlyCriminal_files/main_jrxml"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#FFFFFF">
 		<box>
@@ -521,671 +521,102 @@ connect by level <= 3]]>
 	</subDataset>
 	<subDataset name="JUDGEPORTFOLIO" uuid="a6b3edbc-b31d-4598-b44e-e2b25e8f4ac4">
 		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[210]"/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
+		<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="524"/>
+		<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="469"/>
 		<parameter name="MONTH" class="java.lang.String">
-			<defaultValueExpression><![CDATA["04-2021"]]></defaultValueExpression>
+			<defaultValueExpression><![CDATA["09-2021"]]></defaultValueExpression>
 		</parameter>
 		<queryString language="SQL">
-			<![CDATA[SELECT *
-FROM 
-(
-SELECT
- j1.JUDGE_NAME,
- NVL( J4.COUNT_CASE,0) COUNT_CASE,
- NVL( J4.COUNT_REQ,0) COUNT_REQ,
- NVL( J5.COUNT_PREV_MONTH , 0) COUNT_PREV_MONTH,
- NVL( J5.COUNT_RECV_THIS_MONTH , 0) COUNT_RECV_THIS_MONTH,
- NVL( J0.TOTAL_COUNT, 0) TOTAL_COUNT,
- NVL( J0.TOTAL_PAGE, 0) TOTAL_PAGE,
- NVL( J6.RE_JUDGE, 0 ) RE_JUDGE,
- NVL( j2.COUNT_1_2, 0 ) COUNT_1_2,
- NVL( j2.COUNT_03, 0 ) COUNT_03,
- NVL( j2.COUNT_04, 0 ) COUNT_04,
- NVL( j2.COUNT_05, 0 ) COUNT_05,
- NVL( j2.COUNT_06, 0 ) COUNT_06,
- NVL( j2.COUNT_08, 0 ) COUNT_08,
- NVL( j2.COUNT_09, 0 ) COUNT_09,
- NVL( j2.COUNT_1_2, 0 )
- + NVL( j2.COUNT_03, 0 )
- + NVL( j2.COUNT_04, 0 )
- + NVL( j2.COUNT_05, 0 )
- + NVL( j2.COUNT_06, 0 )
- + NVL( j2.COUNT_08, 0 )
- + NVL( j2.COUNT_09, 0 ) AS TOTAL_COUNT_ALL,
- NVL( J7.LESS_6_MONTH , 0 ) LESS_6_MONTH,
- NVL( J7.LESS_1_YEAR , 0 ) LESS_1_YEAR,
- NVL( J7.LESS_2_YEAR , 0 ) LESS_2_YEAR,
- NVL( J7.LESS_5_YEAR , 0 ) LESS_5_YEAR,
- NVL( J7.MORE_5_YEAR , 0 ) MORE_5_YEAR,
- NVL( J7.LESS_6_MONTH , 0 ) 
- + NVL( J7.LESS_1_YEAR , 0 ) 
- + NVL( J7.LESS_2_YEAR , 0 ) 
- + NVL( J7.LESS_5_YEAR , 0 )
- + NVL( J7.MORE_5_YEAR , 0 ) AS TOTAL_CASE,
- NVL( J8.SEND , 0) SEND,
- NVL( J9.RECV , 0) RECV 
-FROM
- PC_LOOKUP_JUDGE j1
-LEFT JOIN ( 
-	SELECT
-		plj.JUDGE_ID,
-		nvl(TOTAL_COUNT, 0) AS TOTAL_COUNT,
-		nvl(TOTAL_PAGE, 0) AS TOTAL_PAGE
-	FROM
-		PC_LOOKUP_JUDGE plj
-	LEFT JOIN (
-		SELECT
-			CUSTOM_JUDGE_NAME,
-			CUSTOM_JUDGE_CODE,
-			COUNT(WITNESS_DEFENDANT_COUNT) + COUNT(WITNESS_OTHER_COUNT) + COUNT(WITNESS_PLAINTIFF_COUNT) AS TOTAL_COUNT,
-			COUNT(WITNESS_DEFENDANT_PAGE) + COUNT(WITNESS_PLAINTIFF_PAGE) AS TOTAL_PAGE
-		FROM
-			(
-			SELECT
-				ppacj.CASE_DETAIL_ID,
-				NVL(ppacj.JUDGE_REPLACE_NAME, ppacj.JUDGE_NAME) AS CUSTOM_JUDGE_NAME,
-				NVL(ppacj.JUDGE_REPLACE_CODE, ppacj.JUDGE_CODE) AS CUSTOM_JUDGE_CODE,
-				WITNESS_DEFENDANT_COUNT,
-				WITNESS_OTHER_COUNT,
-				WITNESS_PLAINTIFF_COUNT,
-				WITNESS_DEFENDANT_PAGE,
-				WITNESS_PLAINTIFF_PAGE
-			FROM
-				pc_proceed_case_detail_judge ppacj
-			JOIN (
-				SELECT
-					DISTINCT ppcd.case_detail_id,
-					ppcd.WITNESS_DEFENDANT_COUNT,
-					ppcd.WITNESS_OTHER_COUNT,
-					ppcd.WITNESS_PLAINTIFF_COUNT,
-					ppcd.WITNESS_DEFENDANT_PAGE,
-					ppcd.WITNESS_PLAINTIFF_PAGE
-				FROM
-					PC_PROCEED_CASE_DETAIL ppcd
-				INNER JOIN (
-					SELECT
-						T1.*
-					FROM
-						PC_CASE T1
-					JOIN PC_CASE_ALLE T2 ON
-						T1.CASE_ID = T2.CASE_ID
-					JOIN PC_LOOKUP_ALLEGATION T3 ON
-						T2.ALLEGATION_ID = T3.ALLEGATION_ID
-					JOIN PC_LOOKUP_TITLE_CASE T4 ON
-						T1.BLACK_TITLE_ID = T4.TITLE_CASE_ID					
-					WHERE
-						T1.Removed_by = 0
-						AND T4.TITLE_CASE_NAME NOT IN ('ตจ', 'มต', 'ผ', 'ฟ') 
-						AND TRUNC(t1.CASE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')
-						) pc ON
-					ppcd.CASE_id = pc.case_id ) CUSTOM_CASE_DETAIL ON
-				ppacj.case_Detail_id = CUSTOM_CASE_DETAIL.case_detail_id)
-		GROUP BY
-			CUSTOM_JUDGE_NAME,
-			CUSTOM_JUDGE_CODE ) CASE_DETAIL_JUDGE_1 ON
-		plj.JUDGE_CODE = CASE_DETAIL_JUDGE_1.CUSTOM_JUDGE_CODE
-		AND plj.JUDGE_NAME = CASE_DETAIL_JUDGE_1.CUSTOM_JUDGE_NAME
-		) j0 ON j0.JUDGE_ID = j1.JUDGE_ID
- LEFT JOIN (
- SELECT
-  t5.JUDGE_ID,
- NVL( SUM( CASE WHEN t4.JUDGE_RESULT_CODE IN ( '01', '02') THEN 1 ELSE 0 END ), 0 ) COUNT_1_2,--
- NVL( SUM( CASE WHEN t4.JUDGE_RESULT_CODE = '03' THEN 1 ELSE 0 END ), 0 ) COUNT_03,--รับสารภาพสืบประกอบ
- NVL( SUM( CASE WHEN t4.JUDGE_RESULT_CODE = '04' THEN 1 ELSE 0 END ), 0 ) COUNT_04,--รับสารภาพ
- NVL( SUM( CASE WHEN t4.JUDGE_RESULT_CODE = '05' THEN 1 ELSE 0 END ), 0 ) COUNT_05,--ประนีประนอมพิพากษาตามยอมความ
- NVL( SUM( CASE WHEN t4.JUDGE_RESULT_CODE = '06' THEN 1 ELSE 0 END ), 0 ) COUNT_06,--ถอนฟ้อง ถอนคำร้อง
- NVL( SUM( CASE WHEN t4.JUDGE_RESULT_CODE = '08' THEN 1 ELSE 0 END ), 0 ) COUNT_08,--จำหน่ายคดี 
- NVL( SUM( CASE WHEN t4.JUDGE_RESULT_CODE = '09' THEN 1 ELSE 0 END ), 0 ) COUNT_09 --โดยเหตุอื่น
-FROM
- PC_CASE t1
- LEFT JOIN PC_JUDGEMENT t2 ON t1.CASE_ID = t2.CASE_ID 
- AND t2.REMOVED_BY = 0
- LEFT JOIN PC_LOOKUP_JUDGE_RESULT t4 ON t4.JUDGE_RESULT_ID = t2.JUDGE_RESULT_ID 
- AND t4.REMOVED_BY = 0
- LEFT JOIN PC_CASE_JUDGE t5 ON t5.CASE_ID = t1.CASE_ID
- JOIN PC_LOOKUP_TITLE_CASE T4 ON t1.BLACK_TITLE_ID = T4.TITLE_CASE_ID 
-WHERE
- t1.REMOVED_BY = 0 
- AND T4.TITLE_CASE_NAME NOT IN ('ตจ', 'มต', 'ผ', 'ฟ') 
- AND T1.CASE_TYPE_ID IN ( SELECT CASE_TYPE_ID FROM PC_LOOKUP_CASE_TYPE WHERE CASE_TYPE_CODE = '1' )
- AND t1.CASE_CATE_ID IN ( SELECT CASE_CATE_ID FROM PC_LOOKUP_CASE_CATE WHERE CASE_CATE_CODE = '11001' ) 
- AND TRUNC(t1.CASE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')
- AND t5.JUDGE_TYPE_ID IN ( SELECT JUDGE_TYPE_ID FROM PC_LOOKUP_JUDGE_TYPE WHERE JUDGE_TYPE_CODE = '01' ) 
-GROUP BY
- t5.JUDGE_ID 
- ) 
- j2 ON j2.JUDGE_ID = j1.JUDGE_ID LEFT JOIN 
- (
- SELECT
-  t1.JUDGE_ID,
-  COUNT( t2.CASE_ID ) COUNT_9 
- FROM
-  PC_CASE_JUDGE t1
-  JOIN PC_JUDGEMENT t2 ON t2.CASE_ID = t1.CASE_ID 
-  AND t2.REMOVED_BY = 0
-  JOIN PC_CASE t3 ON t3.CASE_ID = t1.CASE_ID 
-  AND t3.REMOVED_BY = 0
-  JOIN PC_LOOKUP_CASE_CATE t4 ON t4.CASE_CATE_ID = t3.CASE_CATE_ID 
-  AND t4.REMOVED_BY = 0 
-  JOIN PC_LOOKUP_TITLE_CASE T5 ON t5.TITLE_CASE_ID = T3.BLACK_TITLE_ID
- WHERE
-  t1.REMOVED_BY = 0
-  AND T5.TITLE_CASE_NAME NOT IN ('ตจ', 'มต', 'ผ', 'ฟ') 
-  AND T3.CASE_TYPE_ID IN ( SELECT CASE_TYPE_ID FROM PC_LOOKUP_CASE_TYPE WHERE CASE_TYPE_CODE = '1' )
-  AND TRUNC(t2.JUDGE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH') 
-  AND t1.TEMPORARY_JUDGE_FLAG = 2 -- 1-จ่ายชั่วคราว 2-โอนสำนวน 3-จ่ายต่อเนื่อง 4-จ่ายสำนวน(ปกติ)
- GROUP BY
-  t1.JUDGE_ID 
- ) 
- j3 ON j3.JUDGE_ID = j1.JUDGE_ID LEFT JOIN
- (
- SELECT
- t5.JUDGE_ID,
- NVL( SUM( CASE WHEN T1.CASE_OR_REQ = 1 THEN 1 ELSE 0 END  ) , 0) COUNT_CASE,
-  NVL( SUM( CASE WHEN T1.CASE_OR_REQ = 2 THEN 1 ELSE 0 END  ) , 0) COUNT_REQ
- FROM
-  PC_CASE t1 
-  JOIN PC_JUDGEMENT t2 ON t1.CASE_ID = t2.CASE_ID 
-  AND t2.REMOVED_BY = 0
-  JOIN PC_LOOKUP_JUDGE_RESULT t4 ON t4.JUDGE_RESULT_ID = t2.JUDGE_RESULT_ID 
-  AND t4.REMOVED_BY = 0
-  JOIN PC_CASE_JUDGE t5 ON t5.CASE_ID = t1.CASE_ID 
-  JOIN PC_LOOKUP_TITLE_CASE T6 ON t1.BLACK_TITLE_ID = T6.TITLE_CASE_ID 
- WHERE   t1.REMOVED_BY = 0
- AND T6.TITLE_CASE_NAME NOT IN ('ตจ', 'มต', 'ผ', 'ฟ') 
- AND T1.CASE_TYPE_ID IN ( SELECT CASE_TYPE_ID FROM PC_LOOKUP_CASE_TYPE WHERE CASE_TYPE_CODE = '1' )
- AND TRUNC(t1.CASE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')
- GROUP BY
- t5.JUDGE_ID 
- ) 
- J4 ON J4.JUDGE_ID = j1.JUDGE_ID LEFT JOIN
- (
- SELECT
-  t1.JUDGE_ID,
-  NVL( SUM( CASE WHEN TRUNC(t3.CASE_DATE,'MONTH') < TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH') AND T2.JUDGE_DATE IS NULL THEN 1 ELSE 0 END  ) , 0) COUNT_PREV_MONTH,
-  NVL( SUM( CASE WHEN TRUNC(t3.CASE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')  THEN 1 ELSE 0 END  ) , 0) COUNT_RECV_THIS_MONTH
- FROM
-  PC_CASE_JUDGE t1
-  JOIN PC_JUDGEMENT t2 ON t2.CASE_ID = t1.CASE_ID 
-  AND t2.REMOVED_BY = 0
-  JOIN PC_CASE t3 ON t3.CASE_ID = t1.CASE_ID 
-  AND t3.REMOVED_BY = 0
-  JOIN PC_LOOKUP_CASE_CATE t4 ON t4.CASE_CATE_ID = t3.CASE_CATE_ID 
-  AND t4.REMOVED_BY = 0 
-  JOIN PC_LOOKUP_TITLE_CASE T5 ON T5.TITLE_CASE_ID = t3.BLACK_TITLE_ID 
- WHERE
-  t1.REMOVED_BY = 0
-  AND T5.TITLE_CASE_NAME NOT IN ('ตจ', 'มต', 'ผ', 'ฟ')  
-  AND T3.CASE_TYPE_ID IN ( SELECT CASE_TYPE_ID FROM PC_LOOKUP_CASE_TYPE WHERE CASE_TYPE_CODE = '1' ) 
- GROUP BY
- t1.JUDGE_ID
- ) 
- J5 ON J5.JUDGE_ID = J1.JUDGE_ID LEFT JOIN
- (
- SELECT
- JUDGE_ID,
- NVL( SUM( CASE WHEN RE_JUDGE_STATUS = 1 AND TRUNC(RE_JUDGE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')  THEN 1 ELSE 0 END  ) , 0) RE_JUDGE
- FROM
- PC_JUDGEMENT_SENTENCE_JUDGE T1 LEFT JOIN 
- PC_JUDGEMENT_SENTENCE T2 ON T1.SENTENCE_ID = T2.SENTENCE_ID LEFT JOIN
- PC_CASE T3 ON T2.CASE_ID = T3.CASE_ID
- JOIN PC_LOOKUP_TITLE_CASE T4 ON T4.TITLE_CASE_ID = t3.BLACK_TITLE_ID
- WHERE
-  t1.REMOVED_BY = 0 
-  AND T4.TITLE_CASE_NAME NOT IN ('ตจ', 'มต', 'ผ', 'ฟ')
-  AND T3.CASE_TYPE_ID IN ( SELECT CASE_TYPE_ID FROM PC_LOOKUP_CASE_TYPE WHERE CASE_TYPE_CODE = '1' ) 
- GROUP BY
- JUDGE_ID
- ) 
- J6 ON J6.JUDGE_ID = J1.JUDGE_ID LEFT JOIN 
- (
-  SELECT
-  t5.JUDGE_ID,
- NVL( SUM( CASE WHEN MONTHS_BETWEEN(T1.CASE_DATE,(TO_DATE($P{MONTH},'MM-YYYY'))) <= 6 AND T2.JUDGE_DATE IS NULL THEN 1 ELSE 0 END ), 0 ) LESS_6_MONTH,
- NVL( SUM( CASE WHEN MONTHS_BETWEEN(T1.CASE_DATE,(TO_DATE($P{MONTH},'MM-YYYY'))) > 6 AND MONTHS_BETWEEN(T1.CASE_DATE,(TO_DATE($P{MONTH},'MM-YYYY'))) <= 12  AND T2.JUDGE_DATE IS NULL  THEN 1 ELSE 0 END ), 0 ) LESS_1_YEAR,
- NVL( SUM( CASE WHEN MONTHS_BETWEEN(T1.CASE_DATE,(TO_DATE($P{MONTH},'MM-YYYY'))) > 12 AND MONTHS_BETWEEN(T1.CASE_DATE,(TO_DATE($P{MONTH},'MM-YYYY'))) <= 24  AND T2.JUDGE_DATE IS NULL  THEN 1 ELSE 0 END ), 0 ) LESS_2_YEAR,
- NVL( SUM( CASE WHEN MONTHS_BETWEEN(T1.CASE_DATE,(TO_DATE($P{MONTH},'MM-YYYY'))) > 24 AND MONTHS_BETWEEN(T1.CASE_DATE,(TO_DATE($P{MONTH},'MM-YYYY'))) <= 60  AND T2.JUDGE_DATE IS NULL  THEN 1 ELSE 0 END ), 0 ) LESS_5_YEAR,
- NVL( SUM( CASE WHEN MONTHS_BETWEEN(T1.CASE_DATE,(TO_DATE($P{MONTH},'MM-YYYY'))) > 60 AND T2.JUDGE_DATE IS NULL THEN 1 ELSE 0 END ), 0 ) MORE_5_YEAR
-FROM
- PC_CASE t1
- LEFT JOIN PC_JUDGEMENT t2 ON t1.CASE_ID = t2.CASE_ID 
- AND t2.REMOVED_BY = 0
- LEFT JOIN PC_LOOKUP_JUDGE_RESULT t4 ON t4.JUDGE_RESULT_ID = t2.JUDGE_RESULT_ID 
- AND t4.REMOVED_BY = 0
- LEFT JOIN PC_CASE_JUDGE t5 ON t5.CASE_ID = t1.CASE_ID 
- JOIN PC_LOOKUP_TITLE_CASE T6 ON t1.BLACK_TITLE_ID = T6.TITLE_CASE_ID
-WHERE
- t1.REMOVED_BY = 0 
- AND T6.TITLE_CASE_NAME NOT IN ('ตจ', 'มต', 'ผ', 'ฟ') 
- AND t1.CASE_TYPE_ID IN ( SELECT CASE_TYPE_ID FROM PC_LOOKUP_CASE_TYPE WHERE CASE_TYPE_CODE = '1' ) 
- AND t1.CASE_CATE_ID IN ( SELECT CASE_CATE_ID FROM PC_LOOKUP_CASE_CATE WHERE CASE_CATE_CODE = '11001' ) 
- AND TRUNC(t2.JUDGE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH') 
- AND t5.JUDGE_TYPE_ID IN ( SELECT JUDGE_TYPE_ID FROM PC_LOOKUP_JUDGE_TYPE WHERE JUDGE_TYPE_CODE = '01' ) 
-GROUP BY
- t5.JUDGE_ID 
- ) 
- J7 ON J7.JUDGE_ID = J1.JUDGE_ID LEFT JOIN 
- (
-  SELECT
-  OLD_JUDGE as JUDGE_ID,
-  COUNT(*) AS SEND
-  FROM
-  PC_MANAGER_JUDGE_TRANSFER_LOG T1 JOIN PC_CASE T2 ON T1.CASE_ID = T2.CASE_ID
-  JOIN PC_LOOKUP_TITLE_CASE T3 ON T2.BLACK_TITLE_ID = T3.TITLE_CASE_ID
-  WHERE
-  T1.REMOVED_BY = 0 
-  AND T3.TITLE_CASE_NAME NOT IN ('ตจ', 'มต', 'ผ', 'ฟ') 
-  AND TRUNC(T1.TRANSFER_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')
-  AND T2.CASE_TYPE_ID IN ( SELECT CASE_TYPE_ID FROM PC_LOOKUP_CASE_TYPE WHERE CASE_TYPE_CODE = '1' )
-  GROUP BY
-  OLD_JUDGE
- ) 
- J8 ON J8.JUDGE_ID = J1.JUDGE_ID LEFT JOIN 
-  (
-  SELECT
-  NEW_JUDGE as JUDGE_ID,
-  COUNT(*) AS RECV
-  FROM
-  PC_MANAGER_JUDGE_TRANSFER_LOG T1 JOIN PC_CASE T2 ON T1.CASE_ID = T2.CASE_ID
-  JOIN PC_LOOKUP_TITLE_CASE T3 ON T2.BLACK_TITLE_ID = T3.TITLE_CASE_ID
-  WHERE
-  T1.REMOVED_BY = 0 
-  AND T3.TITLE_CASE_NAME NOT IN ('ตจ', 'มต', 'ผ', 'ฟ')
-  AND TRUNC(T1.TRANSFER_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')
-  AND T2.CASE_TYPE_ID IN ( SELECT CASE_TYPE_ID FROM PC_LOOKUP_CASE_TYPE WHERE CASE_TYPE_CODE = '1' ) 
-  GROUP BY
-  NEW_JUDGE
- ) 
- J9 ON J9.JUDGE_ID = J1.JUDGE_ID
-WHERE
- j1.REMOVED_BY = 0 AND
- j1.FLAG_JUDGE = 1
-)
-
-,
-
-
-(
-SELECT
-	plj.JUDGE_ID,
-	JUDGE_CODE,
-	JUDGE_NAME,
-	nvl(TOTAL_DERIVE_WITNESS_FLAG_1, 0) AS TOTAL_DERIVE_WITNESS_FLAG_1,
-	nvl(TOTAL_DERIVE_WITNESS_FLAG_2, 0) AS TOTAL_DERIVE_WITNESS_FLAG_2,
-	nvl(TOTAL_COUNT, 0) AS TOTAL_COUNT,
-	nvl(TOTAL_PAGE, 0) AS TOTAL_PAGE, 
-	nvl(TOTAL_REVIEW_FLAG_NOT_0, 0) AS TOTAL_REVIEW_FLAG_NOT_0
-FROM
-	PC_LOOKUP_JUDGE plj
-LEFT JOIN (
-	SELECT
-		CUSTOM_JUDGE_NAME,
-		CUSTOM_JUDGE_CODE,
-		COUNT(WITNESS_DEFENDANT_COUNT) + COUNT(WITNESS_OTHER_COUNT) + COUNT(WITNESS_PLAINTIFF_COUNT) AS TOTAL_COUNT,
-		COUNT(WITNESS_DEFENDANT_PAGE) + COUNT(WITNESS_PLAINTIFF_PAGE) AS TOTAL_PAGE
-	FROM
-		(
-		SELECT
-			ppacj.CASE_DETAIL_ID,
-			NVL(ppacj.JUDGE_REPLACE_NAME, ppacj.JUDGE_NAME) AS CUSTOM_JUDGE_NAME,
-			NVL(ppacj.JUDGE_REPLACE_CODE, ppacj.JUDGE_CODE) AS CUSTOM_JUDGE_CODE,
-			WITNESS_DEFENDANT_COUNT,
-			WITNESS_OTHER_COUNT,
-			WITNESS_PLAINTIFF_COUNT,
-			WITNESS_DEFENDANT_PAGE,
-			WITNESS_PLAINTIFF_PAGE
-		FROM
-			pc_proceed_case_detail_judge ppacj
-		JOIN (
-			SELECT
-				DISTINCT ppcd.case_detail_id,
-				ppcd.WITNESS_DEFENDANT_COUNT,
-				ppcd.WITNESS_OTHER_COUNT,
-				ppcd.WITNESS_PLAINTIFF_COUNT,
-				ppcd.WITNESS_DEFENDANT_PAGE,
-				ppcd.WITNESS_PLAINTIFF_PAGE
-			FROM
-				PC_PROCEED_CASE_DETAIL ppcd
-			INNER JOIN (
-				SELECT
-					T1.*
-				FROM
-					PC_CASE T1
-				JOIN PC_CASE_ALLE T2 ON
-					T1.CASE_ID = T2.CASE_ID
-				JOIN PC_LOOKUP_ALLEGATION T3 ON
-					T2.ALLEGATION_ID = T3.ALLEGATION_ID
-				JOIN PC_LOOKUP_TITLE_CASE T4 ON
-					T1.BLACK_TITLE_ID = T4.TITLE_CASE_ID
-				WHERE
-					T1.Removed_by = NULL	
-					AND T1.CASE_ID NOT IN (SELECT CASE_ID FROM PC_JUDGEMENT) 
-					AND T4.TITLE_CASE_NAME = 'ตจ' 
-					AND TRUNC(T1.CASE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')) pc ON
-				ppcd.CASE_id = pc.case_id) CUSTOM_CASE_DETAIL ON
-			ppacj.case_Detail_id = CUSTOM_CASE_DETAIL.case_detail_id)
-	GROUP BY
-		CUSTOM_JUDGE_NAME,
-		CUSTOM_JUDGE_CODE ) CASE_DETAIL_JUDGE_1 ON
-	plj.JUDGE_CODE = CASE_DETAIL_JUDGE_1.CUSTOM_JUDGE_CODE
-	AND plj.JUDGE_NAME = CASE_DETAIL_JUDGE_1.CUSTOM_JUDGE_NAME
-LEFT JOIN (
-	SELECT
-		CUSTOM_JUDGE_NAME,
-		CUSTOM_JUDGE_CODE,
-		COUNT(*) AS TOTAL_DERIVE_WITNESS_FLAG_1
-	FROM
-		(
-		SELECT
-			ppcdj.CASE_DETAIL_ID,
-			NVL(ppcdj.JUDGE_REPLACE_NAME, ppcdj.JUDGE_NAME) AS CUSTOM_JUDGE_NAME,
-			NVL(ppcdj.JUDGE_REPLACE_CODE, ppcdj.JUDGE_CODE) AS CUSTOM_JUDGE_CODE,
-			ppcd.CASE_ID
-		FROM
-			PC_PROCEED_CASE_DETAIL ppcd
-		JOIN PC_PROCEED_CASE_DETAIL_JUDGE ppcdj ON
-			ppcd.CASE_DETAIL_ID = ppcdj.CASE_DETAIL_ID
-		INNER JOIN (
-			SELECT
-				T1.*
-			FROM
-				PC_CASE T1
-			JOIN PC_CASE_ALLE T2 ON
-				T1.CASE_ID = T2.CASE_ID
-			JOIN PC_LOOKUP_ALLEGATION T3 ON
-				T2.ALLEGATION_ID = T3.ALLEGATION_ID
-			JOIN PC_LOOKUP_TITLE_CASE T4 ON
-				T1.BLACK_TITLE_ID = T4.TITLE_CASE_ID
-			JOIN PC_CASE_CATCH T5 ON
-				T1.CASE_ID = T5.CASE_ID
-			WHERE
-				T1.Removed_by = NULL
-				AND T1.CASE_ID NOT IN (SELECT CASE_ID FROM PC_JUDGEMENT) 
-				AND T4.TITLE_CASE_NAME = 'ตจ'
-				AND T5.DERIVE_WITNESS_FLAG = 1
-				AND TRUNC(T1.CASE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')) pc ON
-			ppcd.CASE_id = pc.case_id )
-	GROUP BY
-		CUSTOM_JUDGE_NAME,
-		CUSTOM_JUDGE_CODE ) CASE_DETAIL_JUDGE_2 ON
-	plj.JUDGE_CODE = CASE_DETAIL_JUDGE_2.CUSTOM_JUDGE_CODE
-	AND plj.JUDGE_NAME = CASE_DETAIL_JUDGE_2.CUSTOM_JUDGE_NAME
-LEFT JOIN (
-	SELECT
-		CUSTOM_JUDGE_NAME,
-		CUSTOM_JUDGE_CODE,
-		COUNT(*) AS TOTAL_DERIVE_WITNESS_FLAG_2
-	FROM
-		(
-		SELECT
-			ppcdj.CASE_DETAIL_ID,
-			NVL(ppcdj.JUDGE_REPLACE_NAME, ppcdj.JUDGE_NAME) AS CUSTOM_JUDGE_NAME,
-			NVL(ppcdj.JUDGE_REPLACE_CODE, ppcdj.JUDGE_CODE) AS CUSTOM_JUDGE_CODE,
-			ppcd.CASE_ID
-		FROM
-			PC_PROCEED_CASE_DETAIL ppcd
-		JOIN PC_PROCEED_CASE_DETAIL_JUDGE ppcdj ON
-			ppcd.CASE_DETAIL_ID = ppcdj.CASE_DETAIL_ID
-		INNER JOIN (
-			SELECT
-				T1.*
-			FROM
-				PC_CASE T1
-			JOIN PC_CASE_ALLE T2 ON
-				T1.CASE_ID = T2.CASE_ID
-			JOIN PC_LOOKUP_ALLEGATION T3 ON
-				T2.ALLEGATION_ID = T3.ALLEGATION_ID
-			JOIN PC_LOOKUP_TITLE_CASE T4 ON
-				T1.BLACK_TITLE_ID = T4.TITLE_CASE_ID
-			JOIN PC_CASE_CATCH T5 ON
-				T1.CASE_ID = T5.CASE_ID
-			WHERE
-				T1.Removed_by = NULL
-				AND T1.CASE_ID NOT IN (SELECT CASE_ID FROM PC_JUDGEMENT) 
-				AND T4.TITLE_CASE_NAME = 'ตจ'
-				AND T5.DERIVE_WITNESS_FLAG = 2
-				AND TRUNC(T1.CASE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')) pc ON
-			ppcd.CASE_id = pc.case_id )
-	GROUP BY
-		CUSTOM_JUDGE_NAME,
-		CUSTOM_JUDGE_CODE ) CASE_DETAIL_JUDGE_3 ON
-	plj.JUDGE_CODE = CASE_DETAIL_JUDGE_3.CUSTOM_JUDGE_CODE
-	AND plj.JUDGE_NAME = CASE_DETAIL_JUDGE_3.CUSTOM_JUDGE_NAME
-LEFT JOIN (
-	SELECT
-		CUSTOM_JUDGE_NAME,
-		CUSTOM_JUDGE_CODE,
-		COUNT(*) AS TOTAL_REVIEW_FLAG_NOT_0
-	FROM
-		(
-		SELECT
-			ppcdj.CASE_DETAIL_ID,
-			NVL(ppcdj.JUDGE_REPLACE_NAME, ppcdj.JUDGE_NAME) AS CUSTOM_JUDGE_NAME,
-			NVL(ppcdj.JUDGE_REPLACE_CODE, ppcdj.JUDGE_CODE) AS CUSTOM_JUDGE_CODE,
-			ppcd.CASE_ID
-		FROM
-			PC_PROCEED_CASE_DETAIL ppcd
-		JOIN PC_PROCEED_CASE_DETAIL_JUDGE ppcdj ON
-			ppcd.CASE_DETAIL_ID = ppcdj.CASE_DETAIL_ID
-		INNER JOIN (
-			SELECT
-				ALL_T.CASE_ID
-			FROM
-				(
-				SELECT
-					pcl.CASE_ID
-				FROM
-					PC_CASE_LIT pcl
-				JOIN PC_CASE_LIT_REVIEW pclr ON
-					pcl.CASE_LIT_ID = pclr.CASE_LIT_ID
-				WHERE
-					REVIEW_FLAG <> 0) CASE_LIT_REVIEW_FLAG_NOT_0
-			INNER JOIN (
-				SELECT
-					T1.*
-				FROM
-					PC_CASE T1
-				JOIN PC_CASE_ALLE T2 ON
-					T1.CASE_ID = T2.CASE_ID
-				JOIN PC_LOOKUP_ALLEGATION T3 ON
-					T2.ALLEGATION_ID = T3.ALLEGATION_ID
-				JOIN PC_LOOKUP_TITLE_CASE T4 ON
-					T1.BLACK_TITLE_ID = T4.TITLE_CASE_ID
-				WHERE
-					T1.Removed_by = NULL
-					AND T1.CASE_ID NOT IN (SELECT CASE_ID FROM PC_JUDGEMENT) 
-					AND T4.TITLE_CASE_NAME = 'ตจ' 
-					AND TRUNC(T1.CASE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')) ALL_T ON
-				CASE_LIT_REVIEW_FLAG_NOT_0.CASE_ID = ALL_T.CASE_ID) pc ON
-			ppcd.CASE_id = pc.case_id )
-	GROUP BY
-		CUSTOM_JUDGE_NAME,
-		CUSTOM_JUDGE_CODE ) CASE_DETAIL_JUDGE ON
-	plj.JUDGE_CODE = CASE_DETAIL_JUDGE.CUSTOM_JUDGE_CODE
-	AND plj.JUDGE_NAME = CASE_DETAIL_JUDGE.CUSTOM_JUDGE_NAME
-ORDER BY
-	plj.JUDGE_ID
-)]]>
+			<![CDATA[SELECT plj.SUPER_ID
+       ,plj.JUDGE_NAME
+       ,t.*
+FROM PC_LOOKUP_JUDGE plj 
+LEFT JOIN (SELECT pcj.JUDGE_ID
+			       ,SUM(CASE WHEN pcc.DERIVE_WITNESS_FLAG = 1 THEN 1 ELSE 0 END) AS DETECT_WITNESS
+			       ,SUM(CASE WHEN pcc.DERIVE_WITNESS_FLAG = 2 THEN 1 ELSE 0 END) AS DETECT_NO_WITNESS
+			       ,SUM(w.WITNESS) AS WITNESS
+			       ,SUM(w.PAGES)   AS PAGES
+			       ,SUM(CASE WHEN l.REVIEW_FLAG = 1 THEN 1 ELSE 0 END) REVIEW_FLAG
+			--
+			FROM PC_CASE_JUDGE pcj 
+			JOIN PC_CASE pc ON pc.CASE_ID = pcj.CASE_ID AND pc.REMOVED_BY = 0
+			LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_IDNUM AND pltc.REMOVED_BY = 0
+			LEFT JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pltc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+			LEFT JOIN PC_LOOKUP_CASE_KIND plck ON plck.CASE_KIND_ID = plcc.CASE_KIND_ID AND plck.REMOVED_BY = 0
+			--
+			LEFT JOIN PC_CASE_CATCH pcc ON pcc.CASE_ID = pc.CASE_ID AND pcc.REMOVED_BY = 0
+			--
+			LEFT JOIN (SELECT DISTINCT pcl.CASE_ID, pclr.REVIEW_FLAG 
+						FROM PC_CASE_LIT pcl 
+						JOIN PC_CASE_LIT_REVIEW pclr ON pclr.CASE_LIT_ID = pcl.CASE_LIT_ID AND pclr.REMOVED_BY = 0
+						WHERE pcl.REMOVED_BY = 0) l ON l.CASE_ID = pcj.CASE_ID 
+			--
+			LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+			--witness
+			LEFT JOIN (SELECT ppa.CASE_ID 
+						       ,SUM(NVL(pprw.WITNESS_DEFENDANT_COUNT,0)+NVL(pprw.WITNESS_DISSENTER_COUNT,0)+NVL(pprw.WITNESS_OTHER_COUNT,0)+NVL(pprw.WITNESS_PLAINTIFF_COUNT,0)+NVL(pprw.WITNESS_REQUESTER_COUNT,0)) WITNESS	  
+							   ,SUM(NVL(pprw.WITNESS_DEFENDANT_PAGE,0)+NVL(pprw.WITNESS_DISSENTER_PAGE,0)+NVL(pprw.WITNESS_OTHER_DAY,0)+NVL(pprw.WITNESS_PLAINTIFF_PAGE,0)+NVL(pprw.WITNESS_REQUESTER_PAGE,0))       PAGES  
+							
+						FROM PC_PROCEED_APPOINT ppa 
+						LEFT JOIN PC_PROCEED_APPOINT_CONTINUE ppac ON ppac.APPOINT_ID = ppa.APPOINT_ID AND ppac.REMOVED_BY = 0
+						LEFT JOIN PC_PROCEED_RECORD_WITNESS pprw ON pprw.APPOINT_CON_ID = ppac.APPOINT_CON_ID AND pprw.REMOVED_BY = 0
+						WHERE ppa.REMOVED_BY = 0
+						GROUP BY ppa.CASE_ID) w ON w.CASE_ID = pcj.CASE_ID
+			--
+			WHERE pcj.REMOVED_BY = 0
+			AND TO_CHAR(pc.CASE_DATE,'MM-YYYY') = $P{MONTH}
+			AND plck.CASE_KIND_CODE = 'DETECTION'
+			AND pljt.JUDGE_TYPE_CODE = '07'
+			GROUP BY pcj.JUDGE_ID) t ON t.JUDGE_ID = plj.JUDGE_ID
+--
+WHERE plj.REMOVED_BY = 0
+AND plj.FLAG_JUDGE = 1
+AND plj.ACTIVE_FLAG = 1
+ORDER BY plj.SUPER_ID]]>
 		</queryString>
+		<field name="SUPER_ID" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="SUPER_ID"/>
+		</field>
 		<field name="JUDGE_NAME" class="java.lang.String">
 			<property name="com.jaspersoft.studio.field.label" value="JUDGE_NAME"/>
 		</field>
-		<field name="COUNT_CASE" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="COUNT_CASE"/>
-		</field>
-		<field name="COUNT_REQ" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="COUNT_REQ"/>
-		</field>
-		<field name="COUNT_PREV_MONTH" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="COUNT_PREV_MONTH"/>
-		</field>
-		<field name="COUNT_RECV_THIS_MONTH" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="COUNT_RECV_THIS_MONTH"/>
-		</field>
-		<field name="TOTAL_COUNT" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="TOTAL_COUNT"/>
-		</field>
-		<field name="TOTAL_PAGE" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="TOTAL_PAGE"/>
-		</field>
-		<field name="RE_JUDGE" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="RE_JUDGE"/>
-		</field>
-		<field name="COUNT_1_2" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="COUNT_1_2"/>
-		</field>
-		<field name="COUNT_03" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="COUNT_03"/>
-		</field>
-		<field name="COUNT_04" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="COUNT_04"/>
-		</field>
-		<field name="COUNT_05" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="COUNT_05"/>
-		</field>
-		<field name="COUNT_06" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="COUNT_06"/>
-		</field>
-		<field name="COUNT_08" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="COUNT_08"/>
-		</field>
-		<field name="COUNT_09" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="COUNT_09"/>
-		</field>
-		<field name="TOTAL_COUNT_ALL" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="TOTAL_COUNT_ALL"/>
-		</field>
-		<field name="LESS_6_MONTH" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="LESS_6_MONTH"/>
-		</field>
-		<field name="LESS_1_YEAR" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="LESS_1_YEAR"/>
-		</field>
-		<field name="LESS_2_YEAR" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="LESS_2_YEAR"/>
-		</field>
-		<field name="LESS_5_YEAR" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="LESS_5_YEAR"/>
-		</field>
-		<field name="MORE_5_YEAR" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="MORE_5_YEAR"/>
-		</field>
-		<field name="TOTAL_CASE" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="TOTAL_CASE"/>
-		</field>
-		<field name="SEND" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="SEND"/>
-		</field>
-		<field name="RECV" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="RECV"/>
-		</field>
-		<field name="JUDGE_ID" class="java.math.BigDecimal">
+		<field name="JUDGE_ID" class="java.lang.Integer">
 			<property name="com.jaspersoft.studio.field.label" value="JUDGE_ID"/>
 		</field>
-		<field name="JUDGE_CODE" class="java.lang.String">
-			<property name="com.jaspersoft.studio.field.label" value="JUDGE_CODE"/>
+		<field name="DETECT_WITNESS" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="DETECT_WITNESS"/>
 		</field>
-		<field name="COLUMN_27" class="java.lang.String">
-			<property name="com.jaspersoft.studio.field.label" value="JUDGE_NAME"/>
+		<field name="DETECT_NO_WITNESS" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="DETECT_NO_WITNESS"/>
 		</field>
-		<field name="TOTAL_DERIVE_WITNESS_FLAG_1" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="TOTAL_DERIVE_WITNESS_FLAG_1"/>
+		<field name="WITNESS" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="WITNESS"/>
 		</field>
-		<field name="TOTAL_DERIVE_WITNESS_FLAG_2" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="TOTAL_DERIVE_WITNESS_FLAG_2"/>
+		<field name="PAGES" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="PAGES"/>
 		</field>
-		<field name="COLUMN_30" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="TOTAL_COUNT"/>
+		<field name="REVIEW_FLAG" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="REVIEW_FLAG"/>
 		</field>
-		<field name="COLUMN_31" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="TOTAL_PAGE"/>
-		</field>
-		<field name="TOTAL_REVIEW_FLAG_NOT_0" class="java.math.BigDecimal">
-			<property name="com.jaspersoft.studio.field.label" value="TOTAL_REVIEW_FLAG_NOT_0"/>
-		</field>
-		<variable name="sum1_1" class="java.lang.Integer" calculation="Sum">
-			<variableExpression><![CDATA[$F{COUNT_CASE}.doubleValue()]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{COUNT_CASE}.doubleValue()]]></initialValueExpression>
+		<variable name="TOTAL_DETECT_WITNESS" class="java.lang.Integer" calculation="Sum">
+			<variableExpression><![CDATA[$F{DETECT_WITNESS}]]></variableExpression>
+			<initialValueExpression><![CDATA[0]]></initialValueExpression>
 		</variable>
-		<variable name="sum1_2" class="java.lang.Integer" calculation="Sum">
-			<variableExpression><![CDATA[$F{COUNT_REQ}.doubleValue()]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{COUNT_REQ}.doubleValue()]]></initialValueExpression>
+		<variable name="TOTAL_DETECT_NO_WITNESS" class="java.lang.Integer" calculation="Sum">
+			<variableExpression><![CDATA[$F{DETECT_NO_WITNESS}]]></variableExpression>
+			<initialValueExpression><![CDATA[0]]></initialValueExpression>
 		</variable>
-		<variable name="sum1_3" class="java.lang.Integer" calculation="Sum">
-			<variableExpression><![CDATA[$F{COUNT_PREV_MONTH}.doubleValue()]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{COUNT_PREV_MONTH}.doubleValue()]]></initialValueExpression>
+		<variable name="TOTAL_WITNESS" class="java.lang.Integer" calculation="Sum">
+			<variableExpression><![CDATA[$F{WITNESS}]]></variableExpression>
+			<initialValueExpression><![CDATA[0]]></initialValueExpression>
 		</variable>
-		<variable name="sum1_4" class="java.lang.Integer" calculation="Sum">
-			<variableExpression><![CDATA[$F{COUNT_RECV_THIS_MONTH}.doubleValue()]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{COUNT_RECV_THIS_MONTH}.doubleValue()]]></initialValueExpression>
+		<variable name="TOTAL_PAGES" class="java.lang.Integer" calculation="Sum">
+			<variableExpression><![CDATA[$F{PAGES}]]></variableExpression>
+			<initialValueExpression><![CDATA[0]]></initialValueExpression>
 		</variable>
-		<variable name="sum1_5" class="java.lang.Integer" calculation="Sum">
-			<variableExpression><![CDATA[$F{TOTAL_COUNT}.doubleValue()]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{TOTAL_COUNT}.doubleValue()]]></initialValueExpression>
-		</variable>
-		<variable name="sum1_6" class="java.lang.Integer" calculation="Sum">
-			<variableExpression><![CDATA[$F{TOTAL_PAGE}.doubleValue()]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{TOTAL_PAGE}.doubleValue()]]></initialValueExpression>
-		</variable>
-		<variable name="sum1_7" class="java.lang.Integer" calculation="Sum">
-			<variableExpression><![CDATA[$F{RE_JUDGE}.doubleValue()]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{RE_JUDGE}.doubleValue()]]></initialValueExpression>
-		</variable>
-		<variable name="sum1_8" class="java.lang.Integer" calculation="Sum">
-			<variableExpression><![CDATA[$F{COUNT_1_2}.doubleValue()]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{COUNT_1_2}.doubleValue()]]></initialValueExpression>
-		</variable>
-		<variable name="sum1_9" class="java.lang.Integer" calculation="Sum">
-			<variableExpression><![CDATA[$F{COUNT_1_2}.doubleValue()]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{COUNT_1_2}.doubleValue()]]></initialValueExpression>
-		</variable>
-		<variable name="sum1_10" class="java.lang.Integer" calculation="Sum">
-			<variableExpression><![CDATA[$F{COUNT_03}.doubleValue()]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{COUNT_03}.doubleValue()]]></initialValueExpression>
-		</variable>
-		<variable name="sum1_11" class="java.lang.Integer" calculation="Sum">
-			<variableExpression><![CDATA[$F{COUNT_04}.doubleValue()]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{COUNT_04}.doubleValue()]]></initialValueExpression>
-		</variable>
-		<variable name="sum1_12" class="java.lang.Integer" calculation="Sum">
-			<variableExpression><![CDATA[$F{COUNT_05}.doubleValue()]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{COUNT_05}.doubleValue()]]></initialValueExpression>
-		</variable>
-		<variable name="sum1_13" class="java.lang.Integer" calculation="Sum">
-			<variableExpression><![CDATA[$F{TOTAL_COUNT_ALL}.doubleValue()]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{TOTAL_COUNT_ALL}.doubleValue()]]></initialValueExpression>
-		</variable>
-		<variable name="sum1_14" class="java.lang.Integer" calculation="Sum">
-			<variableExpression><![CDATA[$F{TOTAL_COUNT_ALL}.doubleValue()]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{TOTAL_COUNT_ALL}.doubleValue()]]></initialValueExpression>
-		</variable>
-		<variable name="sum1_15" class="java.lang.Integer" calculation="Sum">
-			<variableExpression><![CDATA[$F{LESS_1_YEAR}.doubleValue()]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{LESS_1_YEAR}.doubleValue()]]></initialValueExpression>
-		</variable>
-		<variable name="sum1_16" class="java.lang.Integer" calculation="Sum">
-			<variableExpression><![CDATA[$F{LESS_2_YEAR}.doubleValue()]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{LESS_2_YEAR}.doubleValue()]]></initialValueExpression>
-		</variable>
-		<variable name="sum1_17" class="java.lang.Integer" calculation="Sum">
-			<variableExpression><![CDATA[$F{LESS_5_YEAR}.doubleValue()]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{LESS_5_YEAR}.doubleValue()]]></initialValueExpression>
-		</variable>
-		<variable name="sum1_18" class="java.lang.Integer" calculation="Sum">
-			<variableExpression><![CDATA[$F{MORE_5_YEAR}.doubleValue()]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{MORE_5_YEAR}.doubleValue()]]></initialValueExpression>
-		</variable>
-		<variable name="sum1_19" class="java.lang.Integer" calculation="Sum">
-			<variableExpression><![CDATA[$F{TOTAL_CASE}.doubleValue()]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{TOTAL_CASE}.doubleValue()]]></initialValueExpression>
-		</variable>
-		<variable name="sum1_20" class="java.lang.Integer" calculation="Sum">
-			<variableExpression><![CDATA[$F{SEND}.doubleValue()]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{SEND}.doubleValue()]]></initialValueExpression>
-		</variable>
-		<variable name="sum1_21" class="java.lang.Integer" calculation="Sum">
-			<variableExpression><![CDATA[$F{RECV}.doubleValue()]]></variableExpression>
-			<initialValueExpression><![CDATA[$F{RECV}.doubleValue()]]></initialValueExpression>
+		<variable name="TOTAL_REVIEW_FLAG" class="java.lang.Integer" calculation="Sum">
+			<variableExpression><![CDATA[$F{REVIEW_FLAG}]]></variableExpression>
 		</variable>
 	</subDataset>
 	<subDataset name="OTHERPLAINT" uuid="7410d3d8-158d-4fbb-8e92-3dbd9b1c230b">
@@ -7126,7 +6557,7 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font fontName="THSarabunNew" size="14"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{COLUMN_COUNT}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -7154,7 +6585,7 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 							<textField>
 								<reportElement x="0" y="0" width="102" height="30" uuid="44ed4478-c8ca-4eb5-b98a-80fea0b7038e"/>
 								<box leftPadding="5"/>
-								<textElement verticalAlignment="Middle">
+								<textElement textAlignment="Left" verticalAlignment="Middle">
 									<font fontName="THSarabunNew" size="14"/>
 								</textElement>
 								<textFieldExpression><![CDATA[$F{JUDGE_NAME}]]></textFieldExpression>
@@ -7185,40 +6616,23 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 								</staticText>
 							</jr:columnHeader>
 							<jr:columnFooter style="Table_CH" height="30" rowSpan="1">
-								<componentElement>
-									<reportElement x="0" y="0" width="100" height="30" uuid="c0a2943a-85cd-4676-9479-ee1fa7b38350">
-										<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
-										<property name="com.jaspersoft.studio.table.style.table_header" value="Table 2_TH"/>
-										<property name="com.jaspersoft.studio.table.style.column_header" value="Table 2_CH"/>
-										<property name="com.jaspersoft.studio.table.style.detail" value="Table 2_TD"/>
-									</reportElement>
-									<jr:table>
-										<datasetRun subDataset="JUDGEPORTFOLIO-1" uuid="0fcb7462-a72e-420e-9b7f-f756dbfcfc38">
-											<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-										</datasetRun>
-										<jr:column width="100" uuid="96f585ab-3784-408c-9c4c-d86de0834f7b">
-											<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
-											<jr:detailCell style="Table 2_TD" height="30">
-												<textField>
-													<reportElement x="0" y="0" width="100" height="30" uuid="3d835983-5ae8-4468-9f7c-9ece16e4ac7e"/>
-													<textElement textAlignment="Center" verticalAlignment="Middle">
-														<font fontName="THSarabunNew" size="14"/>
-													</textElement>
-													<textFieldExpression><![CDATA[$F{TOTAL_DERIVE_WITNESS_FLAG_1}]]></textFieldExpression>
-												</textField>
-											</jr:detailCell>
-										</jr:column>
-									</jr:table>
-								</componentElement>
+								<textField>
+									<reportElement x="0" y="0" width="100" height="30" uuid="5c42a413-5c71-456d-86cf-ca0b9cbdc757"/>
+									<box leftPadding="5"/>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{TOTAL_DETECT_WITNESS}==null?0:$V{TOTAL_DETECT_WITNESS}]]></textFieldExpression>
+								</textField>
 							</jr:columnFooter>
 							<jr:detailCell style="Table_TD" height="30">
 								<textField>
 									<reportElement x="0" y="0" width="100" height="30" uuid="a7f2aabb-b4f8-44f4-8369-24e638df0040"/>
 									<box leftPadding="5"/>
-									<textElement verticalAlignment="Middle">
+									<textElement textAlignment="Center" verticalAlignment="Middle">
 										<font fontName="THSarabunNew" size="14"/>
 									</textElement>
-									<textFieldExpression><![CDATA[$F{TOTAL_DERIVE_WITNESS_FLAG_1}]]></textFieldExpression>
+									<textFieldExpression><![CDATA[$F{DETECT_WITNESS}==null?0:$F{DETECT_WITNESS}]]></textFieldExpression>
 								</textField>
 							</jr:detailCell>
 						</jr:column>
@@ -7235,40 +6649,23 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 								</staticText>
 							</jr:columnHeader>
 							<jr:columnFooter style="Table_CH" height="30" rowSpan="1">
-								<componentElement>
-									<reportElement x="0" y="0" width="101" height="30" uuid="de3df192-f7ac-40e0-94c1-7c2cd28b0fb0">
-										<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
-										<property name="com.jaspersoft.studio.table.style.table_header" value="Table 3_TH"/>
-										<property name="com.jaspersoft.studio.table.style.column_header" value="Table 3_CH"/>
-										<property name="com.jaspersoft.studio.table.style.detail" value="Table 3_TD"/>
-									</reportElement>
-									<jr:table>
-										<datasetRun subDataset="JUDGEPORTFOLIO-2" uuid="edf75782-54b4-470a-972f-da881017eccf">
-											<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-										</datasetRun>
-										<jr:column width="101" uuid="a68bf0d2-86f1-4140-b892-8dffedd40d81">
-											<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
-											<jr:detailCell style="Table 3_TD" height="30">
-												<textField>
-													<reportElement x="0" y="0" width="101" height="30" uuid="92e3c50b-c3f3-4ee8-a921-bfdea301be96"/>
-													<textElement textAlignment="Center" verticalAlignment="Middle">
-														<font fontName="THSarabunNew" size="14"/>
-													</textElement>
-													<textFieldExpression><![CDATA[$F{TOTAL_DERIVE_WITNESS_FLAG_2}]]></textFieldExpression>
-												</textField>
-											</jr:detailCell>
-										</jr:column>
-									</jr:table>
-								</componentElement>
+								<textField>
+									<reportElement x="0" y="0" width="101" height="30" uuid="18cb5ae3-8e7d-4725-8e74-9725beccead1"/>
+									<box leftPadding="5"/>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{TOTAL_DETECT_NO_WITNESS}==null?0:$V{TOTAL_DETECT_NO_WITNESS}]]></textFieldExpression>
+								</textField>
 							</jr:columnFooter>
 							<jr:detailCell style="Table_TD" height="30">
 								<textField>
 									<reportElement x="0" y="0" width="101" height="30" uuid="14c0f17e-0726-43bc-9e24-2b415458b071"/>
 									<box leftPadding="5"/>
-									<textElement verticalAlignment="Middle">
+									<textElement textAlignment="Center" verticalAlignment="Middle">
 										<font fontName="THSarabunNew" size="14"/>
 									</textElement>
-									<textFieldExpression><![CDATA[$F{TOTAL_DERIVE_WITNESS_FLAG_2}]]></textFieldExpression>
+									<textFieldExpression><![CDATA[$F{DETECT_NO_WITNESS}==null?0:$F{DETECT_NO_WITNESS}]]></textFieldExpression>
 								</textField>
 							</jr:detailCell>
 						</jr:column>
@@ -7296,40 +6693,23 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 								</staticText>
 							</jr:columnHeader>
 							<jr:columnFooter style="Table_CH" height="30" rowSpan="1">
-								<componentElement>
-									<reportElement x="0" y="0" width="100" height="30" uuid="52191682-f18e-466f-af61-302eef9072bb">
-										<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
-										<property name="com.jaspersoft.studio.table.style.table_header" value="Table 4_TH"/>
-										<property name="com.jaspersoft.studio.table.style.column_header" value="Table 4_CH"/>
-										<property name="com.jaspersoft.studio.table.style.detail" value="Table 4_TD"/>
-									</reportElement>
-									<jr:table>
-										<datasetRun subDataset="JUDGEPORTFOLIO-3" uuid="e4934ef9-2985-4107-a330-f3f2ae6390eb">
-											<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-										</datasetRun>
-										<jr:column width="100" uuid="05a9261c-84bf-48f6-80b0-cb3b992ede28">
-											<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
-											<jr:detailCell style="Table 4_TD" height="30">
-												<textField>
-													<reportElement x="0" y="0" width="100" height="30" uuid="00352f4c-4364-4a58-b1f2-c75230f2acb0"/>
-													<textElement textAlignment="Center" verticalAlignment="Middle">
-														<font fontName="THSarabunNew" size="14"/>
-													</textElement>
-													<textFieldExpression><![CDATA[$F{TOTAL_COUNT}]]></textFieldExpression>
-												</textField>
-											</jr:detailCell>
-										</jr:column>
-									</jr:table>
-								</componentElement>
+								<textField>
+									<reportElement x="0" y="0" width="100" height="30" uuid="cddc1f4b-734e-477d-91cc-9e3e0b1eedb1"/>
+									<box leftPadding="5"/>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{TOTAL_WITNESS}==null?0:$V{TOTAL_WITNESS}]]></textFieldExpression>
+								</textField>
 							</jr:columnFooter>
 							<jr:detailCell style="Table_TD" height="30">
 								<textField>
 									<reportElement x="0" y="0" width="100" height="30" uuid="683fc136-1046-456b-a963-16bb8a69b93c"/>
 									<box leftPadding="5"/>
-									<textElement verticalAlignment="Middle">
+									<textElement textAlignment="Center" verticalAlignment="Middle">
 										<font fontName="THSarabunNew" size="14"/>
 									</textElement>
-									<textFieldExpression><![CDATA[$F{TOTAL_COUNT}]]></textFieldExpression>
+									<textFieldExpression><![CDATA[$F{WITNESS}==null?0:$F{WITNESS}]]></textFieldExpression>
 								</textField>
 							</jr:detailCell>
 						</jr:column>
@@ -7346,40 +6726,23 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 								</staticText>
 							</jr:columnHeader>
 							<jr:columnFooter style="Table_CH" height="30" rowSpan="1">
-								<componentElement>
-									<reportElement x="0" y="0" width="99" height="30" uuid="b2a21485-9fc4-4064-884f-225accbbb723">
-										<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
-										<property name="com.jaspersoft.studio.table.style.table_header" value="Table 5_TH"/>
-										<property name="com.jaspersoft.studio.table.style.column_header" value="Table 5_CH"/>
-										<property name="com.jaspersoft.studio.table.style.detail" value="Table 5_TD"/>
-									</reportElement>
-									<jr:table>
-										<datasetRun subDataset="JUDGEPORTFOLIO-4" uuid="fecf5bea-18bd-46c4-a25f-a0cb97484617">
-											<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-										</datasetRun>
-										<jr:column width="99" uuid="2a71e67e-3197-4afb-95ce-8b121ac3152d">
-											<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
-											<jr:detailCell style="Table 5_TD" height="30">
-												<textField>
-													<reportElement x="0" y="0" width="99" height="30" uuid="9f024bf8-a482-460c-a63a-0881c3c1908b"/>
-													<textElement textAlignment="Center" verticalAlignment="Middle">
-														<font fontName="THSarabunNew" size="14"/>
-													</textElement>
-													<textFieldExpression><![CDATA[$F{TOTAL_PAGE}]]></textFieldExpression>
-												</textField>
-											</jr:detailCell>
-										</jr:column>
-									</jr:table>
-								</componentElement>
+								<textField>
+									<reportElement x="0" y="0" width="99" height="30" uuid="6b202575-e149-4f7c-8d3d-276ee528c622"/>
+									<box leftPadding="5"/>
+									<textElement textAlignment="Center" verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$V{TOTAL_PAGES}==null?0:$V{TOTAL_PAGES}]]></textFieldExpression>
+								</textField>
 							</jr:columnFooter>
 							<jr:detailCell style="Table_TD" height="30">
 								<textField>
 									<reportElement x="0" y="0" width="99" height="30" uuid="3968dcbd-1332-45a5-9649-94675ecb9724"/>
 									<box leftPadding="5"/>
-									<textElement verticalAlignment="Middle">
+									<textElement textAlignment="Center" verticalAlignment="Middle">
 										<font fontName="THSarabunNew" size="14"/>
 									</textElement>
-									<textFieldExpression><![CDATA[$F{TOTAL_PAGE}]]></textFieldExpression>
+									<textFieldExpression><![CDATA[$F{PAGES}==null?0:$F{PAGES}]]></textFieldExpression>
 								</textField>
 							</jr:detailCell>
 						</jr:column>
@@ -7398,40 +6761,23 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 							</staticText>
 						</jr:columnHeader>
 						<jr:columnFooter style="Table_CH" height="30" rowSpan="1">
-							<componentElement>
-								<reportElement x="0" y="0" width="99" height="30" uuid="26745fec-b043-4ab0-bfa6-37958f54fbce">
-									<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
-									<property name="com.jaspersoft.studio.table.style.table_header" value="Table 6_TH"/>
-									<property name="com.jaspersoft.studio.table.style.column_header" value="Table 6_CH"/>
-									<property name="com.jaspersoft.studio.table.style.detail" value="Table 6_TD"/>
-								</reportElement>
-								<jr:table>
-									<datasetRun subDataset="JUDGEPORTFOLIO-5" uuid="e4b7177f-1b94-454f-985a-36f127117ad4">
-										<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-									</datasetRun>
-									<jr:column width="99" uuid="f60e210a-763e-477d-a6d0-edc0a7e1bba8">
-										<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
-										<jr:detailCell style="Table 6_TD" height="30">
-											<textField>
-												<reportElement x="0" y="0" width="99" height="30" uuid="d0bcbfcd-ad3c-4880-957e-f1ca23746e38"/>
-												<textElement textAlignment="Center" verticalAlignment="Middle">
-													<font fontName="THSarabunNew" size="14"/>
-												</textElement>
-												<textFieldExpression><![CDATA[$F{TOTAL_REVIEW_FLAG_NOT_0}]]></textFieldExpression>
-											</textField>
-										</jr:detailCell>
-									</jr:column>
-								</jr:table>
-							</componentElement>
+							<textField>
+								<reportElement x="0" y="0" width="99" height="30" uuid="5729d3f0-8e8e-4e97-8702-522eae62346a"/>
+								<box leftPadding="5"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font fontName="THSarabunNew" size="14"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{REVIEW_FLAG}==null?0:$F{REVIEW_FLAG}]]></textFieldExpression>
+							</textField>
 						</jr:columnFooter>
 						<jr:detailCell style="Table_TD" height="30">
 							<textField>
 								<reportElement x="0" y="0" width="99" height="30" uuid="c1e5312b-1783-48a4-8213-6f9a99b8812b"/>
 								<box leftPadding="5"/>
-								<textElement verticalAlignment="Middle">
+								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font fontName="THSarabunNew" size="14"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{TOTAL_REVIEW_FLAG_NOT_0}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{REVIEW_FLAG}==null?0:$F{REVIEW_FLAG}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
