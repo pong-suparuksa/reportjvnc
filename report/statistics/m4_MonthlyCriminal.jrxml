@@ -15,7 +15,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/CaseStat/m4_MonthlyCriminal"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
@@ -1359,9 +1359,13 @@ FROM
 SELECT
 COUNT(*) AS CASE_1
 FROM
-PC_CASE T1 
-WHERE T1.REMOVED_BY = 0 AND NOT EXISTS (SELECT * FROM PC_JUDGEMENT T2 WHERE T1.CASE_ID = T2.CASE_ID AND T2.JUDGE_DATE IS NOT NULL AND T2.REMOVED_BY = 0)
-AND EXTRACT (YEAR FROM T1.CASE_DATE) < EXTRACT(YEAR FROM TO_DATE($P{MONTH},'MM-YYYY'))
+PC_CASE T1
+LEFT JOIN PC_JUDGEMENT t2 ON t2.CASE_ID = t1.CASE_ID AND t2.REMOVED_BY = 0
+WHERE 
+t1.REMOVED_BY = 0 
+AND T1.CASE_CATE_ID IN ( SELECT CASE_CATE_ID FROM PC_LOOKUP_CASE_CATE WHERE CASE_CATE_CODE = '21001' ) 
+AND EXTRACT (YEAR FROM T1.CASE_DATE) <= EXTRACT (YEAR FROM (TO_DATE('06-2021','MM-YYYY'))) 
+AND t2.JUDGE_DATE IS NULL
 ),
 (
 SELECT
@@ -25771,7 +25775,7 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<text><![CDATA[]]></text>
 			</staticText>
 			<subreport>
-				<reportElement x="-20" y="70" width="821" height="230" uuid="073faadd-c962-4873-8fd6-70b35c0e9c31"/>
+				<reportElement x="0" y="70" width="801" height="230" uuid="073faadd-c962-4873-8fd6-70b35c0e9c31"/>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["JudgesRE-1.jasper"]]></subreportExpression>
 			</subreport>

@@ -9,8 +9,13 @@
 	<property name="ireport.jasperserver.reportUnit" value="/reports/CaseStat/SubReport/JudgesRE_1"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="469"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="524"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<parameter name="MONTH" class="java.lang.String">
 		<defaultValueExpression><![CDATA["04-2021"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="CASE_CATE_CODE" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["21001"]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
 		<![CDATA[SELECT plj.SUPER_ID
@@ -52,11 +57,13 @@ LEFT JOIN(SELECT pcj.JUDGE_ID
 		  LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
 		  --
 		  LEFT JOIN PC_CASE pc ON pc.CASE_ID = pcj.CASE_ID AND pcj.REMOVED_BY = 0
+		  LEFT JOIN PC_LOOKUP_CASE_TYPE plct ON plct.CASE_TYPE_ID = pc.CASE_TYPE_ID AND plct.REMOVED_BY = 0
 		  LEFT JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
 		  --
 		  WHERE pcj.REMOVED_BY = 0
-		  AND TO_CHAR(pc.CASE_DATE,'MM-YYYY') = $P{MONTH} 
-		  AND plcc.CASE_CATE_CODE = '21001'
+		  AND TO_CHAR(pc.CASE_DATE,'MM-YYYY') = $P{MONTH}
+		  AND plct.CASE_TYPE_CODE = '1'
+		  AND plcc.CASE_CATE_CODE =  $P{CASE_CATE_CODE} 
 		  GROUP BY pcj.JUDGE_ID) A ON A.JUDGE_ID = plj.JUDGE_ID 
 --B:เป็นเจ้าของสำนวน จากเดือนก่อน และรับใหม่เดือนนี้(case owner prev and curr month)
 LEFT JOIN (SELECT pcj.JUDGE_ID 
@@ -68,13 +75,15 @@ LEFT JOIN (SELECT pcj.JUDGE_ID
 			LEFT JOIN PC_CASE pc ON pc.CASE_ID = pcj.CASE_ID AND pc.REMOVED_BY = 0
 			LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
 			--
+		    LEFT JOIN PC_LOOKUP_CASE_TYPE plct ON plct.CASE_TYPE_ID = pc.CASE_TYPE_ID AND plct.REMOVED_BY = 0
 			LEFT JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
 			--
 			WHERE pcj.REMOVED_BY = 0
 			AND pcj.TEMPORARY_JUDGE_FLAG IS NULL
 			AND pljt.JUDGE_TYPE_CODE = '01'
 			AND (pj.JUDGE_DATE IS NULL OR pj.JUDGE_DATE > LAST_DAY(TO_DATE($P{MONTH},'MM-YYYY' )))
-			AND plcc.CASE_CATE_CODE = '21001'
+			AND plct.CASE_TYPE_CODE = '1'
+			AND plcc.CASE_CATE_CODE = $P{CASE_CATE_CODE} 
 			GROUP BY pcj.JUDGE_ID) B ON B.JUDGE_ID = plj.JUDGE_ID
 --C:สืบพยาน(witness investigate)
 LEFT JOIN(SELECT pcj.JUDGE_ID 
@@ -93,11 +102,13 @@ LEFT JOIN(SELECT pcj.JUDGE_ID
 		  LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
 		  --
 		  LEFT JOIN PC_CASE pc ON pc.CASE_ID = pcj.CASE_ID AND pcj.REMOVED_BY = 0
+		  LEFT JOIN PC_LOOKUP_CASE_TYPE plct ON plct.CASE_TYPE_ID = pc.CASE_TYPE_ID AND plct.REMOVED_BY = 0
 		  LEFT JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
 		  --
 		  WHERE pcj.REMOVED_BY = 0
 		  AND pljt.JUDGE_TYPE_CODE IN ('01','02','03','12')
-		  AND plcc.CASE_CATE_CODE = '21001'
+		  AND plct.CASE_TYPE_CODE = '1'
+		  AND plcc.CASE_CATE_CODE =  $P{CASE_CATE_CODE} 
 		  GROUP BY pcj.JUDGE_ID) C ON C.JUDGE_ID = plj.JUDGE_ID 
 --D:คดีแดงที่นำมาพิจารณาใหม่(re-judgement)
 LEFT JOIN (SELECT pcj.JUDGE_ID
@@ -113,12 +124,14 @@ LEFT JOIN (SELECT pcj.JUDGE_ID
 			LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
 			--
 			LEFT JOIN PC_CASE pc ON pc.CASE_ID = pcj.CASE_ID AND pcj.REMOVED_BY = 0
+			LEFT JOIN PC_LOOKUP_CASE_TYPE plct ON plct.CASE_TYPE_ID = pc.CASE_TYPE_ID AND plct.REMOVED_BY = 0
 		    LEFT JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
 			--
 		    WHERE pcj.REMOVED_BY = 0
 			AND pcj.TEMPORARY_JUDGE_FLAG IS NULL
 			AND pljt.JUDGE_TYPE_CODE = '04'
-			AND plcc.CASE_CATE_CODE = '21001'
+			AND plct.CASE_TYPE_CODE = '1'
+			AND plcc.CASE_CATE_CODE = $P{CASE_CATE_CODE} 
 			GROUP BY pcj.JUDGE_ID) D ON D.JUDGE_ID = plj.JUDGE_ID
 --E:คดีเสร็จไป(judgement done)
 LEFT JOIN (SELECT pcj.JUDGE_ID
@@ -136,12 +149,14 @@ LEFT JOIN (SELECT pcj.JUDGE_ID
 			LEFT JOIN PC_LOOKUP_JUDGE_RESULT pljr ON pljr.JUDGE_RESULT_ID = pj.JUDGE_RESULT_ID AND pljr.REMOVED_BY = 0
 			--
 			LEFT JOIN PC_CASE pc ON pc.CASE_ID = pcj.CASE_ID AND pcj.REMOVED_BY = 0
+			LEFT JOIN PC_LOOKUP_CASE_TYPE plct ON plct.CASE_TYPE_ID = pc.CASE_TYPE_ID AND plct.REMOVED_BY = 0
 		    LEFT JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
 			--
 		    WHERE pcj.REMOVED_BY = 0
 			AND pljt.JUDGE_TYPE_CODE = '04'
 			AND TO_CHAR(pj.JUDGE_DATE,'MM-YYYY') = $P{MONTH} 
-			AND plcc.CASE_CATE_CODE = '21001'
+			AND plct.CASE_TYPE_CODE = '1'
+			AND plcc.CASE_CATE_CODE =  $P{CASE_CATE_CODE} 
 			GROUP BY pcj.JUDGE_ID) E ON E.JUDGE_ID = plj.JUDGE_ID 
 --F:คดีค้างไปเดือนหน้า(remain to next month)
 LEFT JOIN (SELECT pcj.JUDGE_ID 
@@ -157,11 +172,13 @@ LEFT JOIN (SELECT pcj.JUDGE_ID
 						      ,MONTHS_BETWEEN(LAST_DAY(TO_DATE( $P{MONTH},'MM-YYYY' )), pc.CASE_DATE)  MONTHS
 					   FROM PC_CASE pc 
 					   LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
+					   LEFT JOIN PC_LOOKUP_CASE_TYPE plct ON plct.CASE_TYPE_ID = pc.CASE_TYPE_ID AND plct.REMOVED_BY = 0
 					   LEFT JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
 					   WHERE pc.REMOVED_BY = 0
 					   AND pc.CASE_DATE <= LAST_DAY(TO_DATE( $P{MONTH},'MM-YYYY' ))
 					   AND (pj.JUDGE_DATE IS NULL OR pj.JUDGE_DATE > LAST_DAY(TO_DATE( $P{MONTH},'MM-YYYY' )))
-					   AND plcc.CASE_CATE_CODE = '21001'
+					   AND plct.CASE_TYPE_CODE = '1'
+					   AND plcc.CASE_CATE_CODE =  $P{CASE_CATE_CODE} 
 					   ) cj ON cj.CASE_ID = pcj.CASE_ID
 			--
 			WHERE pcj.REMOVED_BY = 0
@@ -175,12 +192,14 @@ LEFT JOIN (SELECT pcj.JUDGE_ID
 			FROM PC_CASE_JUDGE pcj 
 			LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
 			LEFT JOIN PC_CASE pc ON pc.CASE_ID = pcj.CASE_ID AND pc.REMOVED_BY = 0
+			LEFT JOIN PC_LOOKUP_CASE_TYPE plct ON plct.CASE_TYPE_ID = pc.CASE_TYPE_ID AND plct.REMOVED_BY = 0
 			LEFT JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
 			WHERE pcj.REMOVED_BY = 0
 			AND pcj.TEMPORARY_JUDGE_FLAG = 2
 			AND pljt.JUDGE_TYPE_CODE = '01'
 			AND TO_CHAR(pc.CASE_DATE,'MM-YYYY') = $P{MONTH} 
-			AND plcc.CASE_CATE_CODE = '21001'
+			AND plct.CASE_TYPE_CODE = '1'
+			AND plcc.CASE_CATE_CODE =  $P{CASE_CATE_CODE} 
 			GROUP BY pcj.JUDGE_ID ) G ON G.JUDGE_ID = plj.JUDGE_ID 
 --
 WHERE plj.REMOVED_BY = 0
@@ -258,6 +277,18 @@ ORDER BY plj.SUPER_ID]]>
 	<field name="SEND_CASE" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="SEND_CASE"/>
 	</field>
+	<variable name="ALL_J" class="java.lang.Integer">
+		<variableExpression><![CDATA[$F{J1N2}+
+$F{J3}+
+$F{J4}+
+$F{J5}+
+$F{J6}+
+$F{J7N8}+
+$F{J9}]]></variableExpression>
+	</variable>
+	<variable name="ALL_MY" class="java.lang.Integer">
+		<variableExpression><![CDATA[$F{M6LT}+$F{M6Y1}+$F{Y1Y2}+$F{Y2Y5}+$F{Y5UP}]]></variableExpression>
+	</variable>
 	<variable name="SUM_C_CASE" class="java.lang.Integer" calculation="Sum">
 		<variableExpression><![CDATA[$F{C_CASE}]]></variableExpression>
 	</variable>
@@ -300,33 +331,32 @@ ORDER BY plj.SUPER_ID]]>
 	<variable name="SUM_J9" class="java.lang.Integer" calculation="Sum">
 		<variableExpression><![CDATA[$F{J9}]]></variableExpression>
 	</variable>
-	<variable name="sum1_15" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{LESS_1_YEAR}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{LESS_1_YEAR}.doubleValue()]]></initialValueExpression>
+	<variable name="SUM_ALLJ" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$V{ALL_J}]]></variableExpression>
 	</variable>
-	<variable name="sum1_16" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{LESS_2_YEAR}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{LESS_2_YEAR}.doubleValue()]]></initialValueExpression>
+	<variable name="SUM_M6LT" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{M6LT}]]></variableExpression>
 	</variable>
-	<variable name="sum1_17" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{LESS_5_YEAR}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{LESS_5_YEAR}.doubleValue()]]></initialValueExpression>
+	<variable name="SUM_M6Y1" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{M6Y1}]]></variableExpression>
 	</variable>
-	<variable name="sum1_18" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{MORE_5_YEAR}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{MORE_5_YEAR}.doubleValue()]]></initialValueExpression>
+	<variable name="SUMY1Y2" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{Y1Y2}]]></variableExpression>
 	</variable>
-	<variable name="sum1_19" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{TOTAL_CASE}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{TOTAL_CASE}.doubleValue()]]></initialValueExpression>
+	<variable name="SUM_Y2Y5" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{Y2Y5}]]></variableExpression>
 	</variable>
-	<variable name="sum1_20" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{SEND}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{SEND}.doubleValue()]]></initialValueExpression>
+	<variable name="SUM_Y5UP" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{Y5UP}]]></variableExpression>
 	</variable>
-	<variable name="sum1_21" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{RECV}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{RECV}.doubleValue()]]></initialValueExpression>
+	<variable name="SUM_ALLMY" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$V{ALL_MY}]]></variableExpression>
+	</variable>
+	<variable name="SUM_GETCASE" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{GET_CASE}]]></variableExpression>
+	</variable>
+	<variable name="SUM_SENDCASE" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{SEND_CASE}]]></variableExpression>
 	</variable>
 	<background>
 		<band splitType="Stretch"/>
@@ -961,7 +991,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{ALL_J}==null?0:$V{ALL_J}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="582" y="0" width="25" height="30" uuid="4b3a261f-471a-48d7-b018-ceacbceccf4b"/>
@@ -1039,7 +1069,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{ALL_MY}==null?0:$V{ALL_MY}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="732" y="0" width="25" height="30" uuid="c3f4f447-b3b6-4769-aef2-6983d5b8e9a3"/>
@@ -1108,7 +1138,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_18}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_Y5UP}==null?0:$V{SUM_Y5UP}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="557" y="0" width="25" height="30" uuid="6b4e13f2-6fe8-4d76-b606-21dac147cc0f"/>
@@ -1121,7 +1151,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{SUM_J7NJ8}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_ALLJ}==null?0:$V{SUM_ALLJ}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="482" y="0" width="25" height="30" uuid="5f53d97f-33df-4a5f-bcb4-c3d372d2665d"/>
@@ -1134,7 +1164,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{SUM_J6}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_J6}==null?0:$V{SUM_J6}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="432" y="0" width="25" height="30" uuid="f07cbaf8-bbeb-4ff6-912e-1be1bd54bf08"/>
@@ -1147,7 +1177,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{SUM_J4}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_J4}==null?0:$V{SUM_J4}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="252" y="0" width="25" height="30" uuid="3a1410a7-7129-41f7-8a48-2695705d7257"/>
@@ -1160,7 +1190,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{SUM_O_PREVM}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_O_PREVM}==null?0:$V{SUM_O_PREVM}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="657" y="0" width="25" height="30" uuid="3842fcb4-d0ff-4bb6-b1b6-c882c31ff252"/>
@@ -1173,7 +1203,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_17}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_Y2Y5}==null?0:$V{SUM_Y2Y5}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="457" y="0" width="25" height="30" uuid="8b9452f9-18ea-444c-9ae1-4a435476cd9f"/>
@@ -1186,7 +1216,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{SUM_J5}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_J5}==null?0:$V{SUM_J5}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="757" y="0" width="25" height="30" uuid="631c8023-94e8-42dc-a45f-e462021f776a"/>
@@ -1199,7 +1229,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_21}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_SENDCASE}==null?0:$V{SUM_SENDCASE}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="607" y="0" width="25" height="30" uuid="5f0eac7c-c554-4a9c-a1f3-520ac54d1fb6"/>
@@ -1212,7 +1242,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_15}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_M6Y1}==null?0:$V{SUM_M6Y1}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="227" y="0" width="25" height="30" uuid="0ed94527-5783-4b14-a24f-30b76644d40c"/>
@@ -1225,7 +1255,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{SUM_C_REQ}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_C_REQ}==null?0:$V{SUM_C_REQ}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="277" y="0" width="25" height="30" uuid="44f0f97c-47bb-4fe2-bd2e-87dcfdc5d587"/>
@@ -1238,7 +1268,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{SUM_O_CURRM}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_O_CURRM}==null?0:$V{SUM_O_CURRM}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="407" y="0" width="25" height="30" uuid="24669c11-1c28-40be-b961-b458f2a03aab"/>
@@ -1251,7 +1281,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{SUM_J3}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_J3}==null?0:$V{SUM_J3}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="582" y="0" width="25" height="30" uuid="b92fc05e-1297-46ea-a8eb-906e8e6b50e2"/>
@@ -1264,7 +1294,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{SUM_J9}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_M6LT}==null?0:$V{SUM_M6LT}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="202" y="0" width="25" height="30" uuid="27a2668a-0385-45d8-b856-dfcb23d8a1df"/>
@@ -1277,7 +1307,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{SUM_C_CASE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_C_CASE}==null?0:$V{SUM_C_CASE}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="732" y="0" width="25" height="30" uuid="d008c489-1578-4e92-ac8e-21ae24eb7f8c"/>
@@ -1290,7 +1320,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_20}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_GETCASE}==null?0:$V{SUM_GETCASE}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="352" y="0" width="30" height="30" uuid="cab97749-0531-431c-a033-add2ddbad9d8"/>
@@ -1303,7 +1333,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{SUM_REJUDGE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_REJUDGE}==null?0:$V{SUM_REJUDGE}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="632" y="0" width="25" height="30" uuid="fbaeeffb-a278-4ab1-856f-2ad1a9d5c2ea"/>
@@ -1316,7 +1346,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_16}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUMY1Y2}==null?0:$V{SUMY1Y2}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="327" y="0" width="25" height="30" uuid="aea5ea22-7c07-4fa1-b02f-a099d729ca35"/>
@@ -1329,7 +1359,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{SUM_PAGES}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_PAGES}==null?0:$V{SUM_PAGES}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="707" y="0" width="25" height="30" uuid="13b10ed6-f071-44f9-9ee7-671ae366bfb9"/>
@@ -1342,7 +1372,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_19}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_ALLMY}==null?0:$V{SUM_ALLMY}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="382" y="0" width="25" height="30" uuid="50e56449-bd9c-430a-8599-348778d48579"/>
@@ -1355,7 +1385,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{SUM_J1N2}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_J1N2}==null?0:$V{SUM_J1N2}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="15" y="0" width="187" height="30" uuid="f8fdebac-fd33-4f44-a6e0-3af9c0cc3a4c">
@@ -1383,7 +1413,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{SUM_WITNESS}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_WITNESS}==null?0:$V{SUM_WITNESS}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="507" y="0" width="25" height="30" uuid="09405f67-6ca3-4a00-afc8-2cb1c15389e3"/>
@@ -1396,7 +1426,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{SUM_J6}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_J7NJ8}==null?0:$V{SUM_J7NJ8}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="532" y="0" width="25" height="30" uuid="5089e56e-963c-4815-9858-2f44830a971c"/>
@@ -1409,7 +1439,7 @@ ORDER BY plj.SUPER_ID]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{SUM_J6}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_J9}==null?0:$V{SUM_J9}]]></textFieldExpression>
 			</textField>
 		</band>
 	</columnFooter>

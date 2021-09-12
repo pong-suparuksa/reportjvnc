@@ -10,7 +10,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_noticefrees"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
@@ -27,7 +27,7 @@
 		<defaultValueExpression><![CDATA["31/03/2021"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="SENDER" class="java.lang.String">
-		<defaultValueExpression><![CDATA["-1"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["0"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[SELECT 
@@ -79,13 +79,7 @@ AND NVL(pni.HAS_MONEY,0) = 0
 AND pn.IS_COURT_AREA = 1
 AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
                                                         AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
-AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
-						   FROM(SELECT NVL(pn.SEND_BY,0) SEND_BY, -1 SENDER 
-		     	 	     		 FROM PC_NOTICE pn 
-			                     UNION 
-			                     SELECT NVL(pn.SEND_BY,0) SEND_BY, NVL(pn.SEND_BY,0) SENDER
-			                     FROM PC_NOTICE pn) A 
-		                   WHERE A.SENDER IN ($P!{SENDER}))]]>
+AND (pn.SEND_METHOD_BY_NAME = $P{SENDER} OR '0' = $P{SENDER})]]>
 	</queryString>
 	<field name="SEND_NOTICE_DATE" class="java.util.Date">
 		<property name="com.jaspersoft.studio.field.label" value="SEND_NOTICE_DATE"/>

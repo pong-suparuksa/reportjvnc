@@ -16,10 +16,10 @@
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_writres_howsend"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="672"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="321"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_writres_howsend_files/main_jrxml"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="415"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="575"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/07/2020"]]></defaultValueExpression>
 	</parameter>
@@ -57,6 +57,7 @@
             NVL(plnsr.NOTICE_SEND_RESULT_NAME, ' ')														NOTICE_SEND_RESULT_NAME,
             NVL(pn.UNSEND_DETAIL, ' ')																	UNSEND_DETAIL
            ,pn.IS_COURT_AREA
+           ,CASE WHEN pn.SEND_METHOD = 1 THEN 'ไปรษณีย์' ELSE  pn.SEND_METHOD_BY_NAME END                  SEND_METHOD_BY_NAME 
 FROM PC_NOTICE pn 
 LEFT JOIN PC_NOTICE_SEND_RESULT pnsr ON pnsr.NOTICE_ID = pn.NOTICE_ID 
 --
@@ -160,6 +161,9 @@ ORDER BY pn.SEND_METHOD, pni.SEND_NOTICE_DATE]]>
 	</field>
 	<field name="IS_COURT_AREA" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="IS_COURT_AREA"/>
+	</field>
+	<field name="SEND_METHOD_BY_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="SEND_METHOD_BY_NAME"/>
 	</field>
 	<variable name="TOTAL" class="java.math.BigDecimal" calculation="Sum">
 		<variableExpression><![CDATA[$F{SEND_FEE}]]></variableExpression>
@@ -436,7 +440,7 @@ ORDER BY pn.SEND_METHOD, pni.SEND_NOTICE_DATE]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{USER_PROFILE_FULL_NAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{SEND_METHOD_BY_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="0" y="0" width="40" height="25" uuid="4621e121-fdd6-4bee-a148-661960cf7b08">

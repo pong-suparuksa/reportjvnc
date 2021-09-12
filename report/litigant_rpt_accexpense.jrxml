@@ -14,9 +14,9 @@
 	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_accexpense"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="361"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="629"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="416"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="577"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_accexpense_files/main_jrxml"/>
@@ -27,12 +27,12 @@
 		<defaultValueExpression><![CDATA["31/03/2021"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="SENDER" class="java.lang.String">
-		<defaultValueExpression><![CDATA["-1"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["0"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[SELECT DISTINCT
 		pni.SEND_NOTICE_DATE,
-		THAILDATE(NVL(pni.SEND_NOTICE_DATE,TO_TIMESTAMP('01/01/1900','DD/MM/YYYY'))) SEND_NOTICE_DATE_TEXT,
+		THAISDATE(pni.SEND_NOTICE_DATE)                                     SEND_NOTICE_DATE_TEXT,
         NVL(cou.COURT_NAME_TH, '-') 	     								COURT_NAME_TH,                        
         pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR  	CASE_BLACK_NO,    
 		CASE WHEN pj.PRINT_DUE_DATE IS NULL THEN ' ' ELSE pltc_red.TITLE_CASE_NAME || pj.RED_IDNUM || '/' || pj.RED_YEAR END  	CASE_RED_NO,
@@ -43,10 +43,13 @@
         NVL(plnt.NOTICE_TYPE_NAME,'-')										NOTICE_TYPE_NAME,            
         NVL(pls.SUBDISTRICT_NAME,'-')										SUBDISTRICT_NAME,
         NVL(pld.DISTRICT_NAME,'-')											DISTRICT_NAME,
+        NVL(plp.PROVINCE_NAME,'-')                                          PROVINCE_NAME,
         NVL(pn.SEND_FEE,0)													SEND_FEE,																																	   
 	    NVL(pn.SEND_BY_NAME ,'-')											SENDER,
-	    pfr.RECEIPT_BOOK_NO || '/' || pfr.RECEIPT_NO                        RECEIPT_REF,
-        THAISDATE(NVL(pnsr.CREATED_DATE,TO_TIMESTAMP('01/01/1900','DD/MM/YYYY')))     RESULT_CREATE_DATE
+	    CASE WHEN pfr.RECEIPT_ID IS NULL THEN '-' ELSE pfr.RECEIPT_BOOK_NO || '/' || pfr.RECEIPT_NO END RECEIPT_REF,
+        THAISDATE(pnsr.REPORT_DATE)                                         RESULT_CREATE_DATE,
+        NVL(pn.SEND_METHOD_BY_NAME,'-')										SENDER
+        
 --            
 FROM PC_NOTICE pn
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID AND pc.REMOVED_BY = 0
@@ -65,6 +68,7 @@ LEFT JOIN PC_USER_PROFILE pup1 ON pn.SEND_BY = pup.USER_PROFILE_ID
 --
 LEFT JOIN PC_LOOKUP_NOTICE_TYPE plnt ON plnt.NOTICE_TYPE_ID = pn.NOTICE_TYPE_ID AND plnt.REMOVED_BY = 0
 ----
+LEFT JOIN PC_LOOKUP_PROVINCE plp ON plp.PROVINCE_ID = pn.CURRENT_PROVINCE_ID AND plp.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_DISTRICT pld ON pld.DISTRICT_ID =  pn.CURRENT_DISTRICT_ID 
                                 AND pld.PROVINCE_ID = pn.CURRENT_PROVINCE_ID 
                                 AND pld.REMOVED_BY = 0
@@ -86,14 +90,8 @@ AND pn.SEND_METHOD = 2
 AND pn.IS_COURT_AREA = 1
 AND NVL(pni.HAS_MONEY,1) = 1 
 AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
-                                                        AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
-AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
-						   FROM(SELECT NVL(pn.SEND_BY,0) SEND_BY, -1 SENDER 
-		     	 	     		 FROM PC_NOTICE pn 
-			                     UNION 
-			                     SELECT NVL(pn.SEND_BY,0) SEND_BY, NVL(pn.SEND_BY,0) SENDER
-			                     FROM PC_NOTICE pn) A 
-		                   WHERE A.SENDER IN ($P!{SENDER}))]]>
+                             AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
+AND (pn.SEND_METHOD_BY_NAME = $P{SENDER} OR '0' = $P{SENDER})]]>
 	</queryString>
 	<field name="SEND_NOTICE_DATE" class="java.util.Date">
 		<property name="com.jaspersoft.studio.field.label" value="SEND_NOTICE_DATE"/>
@@ -131,6 +129,9 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 	<field name="DISTRICT_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="DISTRICT_NAME"/>
 	</field>
+	<field name="PROVINCE_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PROVINCE_NAME"/>
+	</field>
 	<field name="SEND_FEE" class="java.lang.Double">
 		<property name="com.jaspersoft.studio.field.label" value="SEND_FEE"/>
 	</field>
@@ -142,6 +143,9 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 	</field>
 	<field name="RESULT_CREATE_DATE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="RESULT_CREATE_DATE"/>
+	</field>
+	<field name="COLUMN_18" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="SENDER"/>
 	</field>
 	<background>
 		<band splitType="Stretch"/>
@@ -155,7 +159,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="18" isBold="true"/>
+					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}==null?" "
 :$F{COURT_NAME_TH}]]></textFieldExpression>
@@ -166,7 +170,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement>
-					<font fontName="TH Sarabun New" size="18" isBold="true"/>
+					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
 				<text><![CDATA[บัญชีขอเบิกจ่ายเงิน]]></text>
 			</staticText>
@@ -175,7 +179,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Left">
-					<font fontName="TH Sarabun New" size="18" isBold="true"/>
+					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["ตั้งแต่วันที่  " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +
 " ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))]]></textFieldExpression>
@@ -190,147 +194,191 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17" isBold="true"/>
+					<font fontName="THSarabunNew" size="17" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["หน้าที่ "+$V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>
 	<columnHeader>
-		<band height="50" splitType="Stretch">
+		<band height="30" splitType="Stretch">
 			<staticText>
-				<reportElement x="721" y="0" width="80" height="50" uuid="37f90df7-1877-4a3c-b66c-3f625544282e">
+				<reportElement x="711" y="0" width="80" height="30" uuid="37f90df7-1877-4a3c-b66c-3f625544282e">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17" isBold="true"/>
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[เล่มที่เลขที่ ใบเสร็จ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="101" y="0" width="70" height="50" uuid="27da178e-bc8f-4127-a98a-a48630fcd216">
+				<reportElement x="131" y="0" width="50" height="30" uuid="27da178e-bc8f-4127-a98a-a48630fcd216">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-				</reportElement>
-				<box>
-					<pen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17" isBold="true"/>
-				</textElement>
-				<text><![CDATA[เลขดำที่]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="241" y="0" width="70" height="50" uuid="a2ca5046-9711-4dd3-87fa-01614ae231a6">
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-				</reportElement>
-				<box>
-					<pen lineWidth="0.5"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17" isBold="true"/>
-				</textElement>
-				<text><![CDATA[หมายอะไร]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="311" y="0" width="100" height="50" uuid="e5a0fc2e-58d9-437c-bf22-5dfc42570a5a">
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17" isBold="true"/>
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[เลขดำที่]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="231" y="0" width="70" height="30" uuid="a2ca5046-9711-4dd3-87fa-01614ae231a6">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[หมายอะไร]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="301" y="0" width="100" height="30" uuid="e5a0fc2e-58d9-437c-bf22-5dfc42570a5a">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ส่งหมายให้ใคร]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="31" y="0" width="70" height="50" uuid="09cd8c1f-a496-4412-a77d-72a7074d2eba">
+				<reportElement x="31" y="0" width="50" height="30" uuid="09cd8c1f-a496-4412-a77d-72a7074d2eba">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17" isBold="true"/>
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
 				</textElement>
-				<text><![CDATA[วันที่ลงข้อมูล]]></text>
+				<text><![CDATA[วันที่รายงาน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="1" y="0" width="30" height="50" uuid="ff7ebcc5-9b92-406b-b201-d313a38108b8">
+				<reportElement x="1" y="0" width="30" height="30" uuid="ff7ebcc5-9b92-406b-b201-d313a38108b8">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17" isBold="true"/>
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ที่]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="171" y="0" width="70" height="50" uuid="a7bbee70-9819-4f9d-8820-88599d54331f">
+				<reportElement x="181" y="0" width="50" height="30" uuid="a7bbee70-9819-4f9d-8820-88599d54331f">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17" isBold="true"/>
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[เลขแดงที่]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="621" y="0" width="100" height="50" uuid="4cfc5b6f-4c19-4eae-b158-94a1710334aa">
+				<reportElement x="631" y="0" width="80" height="30" uuid="4cfc5b6f-4c19-4eae-b158-94a1710334aa">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17" isBold="true"/>
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ผู้ส่งหมาย]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="551" y="0" width="70" height="50" uuid="a07d7525-46de-4aab-b4f6-dbd0551db83a">
+				<reportElement x="581" y="0" width="50" height="30" uuid="a07d7525-46de-4aab-b4f6-dbd0551db83a">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17" isBold="true"/>
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ราคาหมาย]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="481" y="0" width="70" height="50" uuid="690e2467-8272-4def-a24a-dcf73cc87a07">
+				<reportElement x="471" y="0" width="50" height="30" uuid="690e2467-8272-4def-a24a-dcf73cc87a07">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17" isBold="true"/>
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[อำเภอ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="411" y="0" width="70" height="50" uuid="0160cbbd-9c5b-423c-9cb0-a704fe2b76c0">
+				<reportElement x="401" y="0" width="70" height="30" uuid="0160cbbd-9c5b-423c-9cb0-a704fe2b76c0">
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17" isBold="true"/>
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ตำบล]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="81" y="0" width="50" height="30" uuid="3bdd3b9e-d145-4731-928a-12c8d48c4ba9">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[วันที่ส่งหมาย]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="521" y="0" width="60" height="30" uuid="3c726533-d808-40a0-992f-71c8b6fdc633">
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[จังหวัด]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
@@ -345,51 +393,54 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="31" y="0" width="70" height="25" uuid="291dad45-9240-4bb5-b224-8645663223b6">
+				<reportElement stretchType="ContainerHeight" x="31" y="0" width="50" height="25" uuid="291dad45-9240-4bb5-b224-8645663223b6">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box leftPadding="3" rightPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RESULT_CREATE_DATE}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="101" y="0" width="70" height="25" uuid="51ffa338-f48c-4187-be8e-e6421ff767e1">
+				<reportElement stretchType="ContainerHeight" x="131" y="0" width="50" height="25" uuid="51ffa338-f48c-4187-be8e-e6421ff767e1">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box leftPadding="3" rightPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}.equals("/") ? "-" : $F{CASE_BLACK_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="171" y="0" width="70" height="25" uuid="ccb2545a-50ef-4acd-a5eb-7dde92c834d7">
+				<reportElement stretchType="ContainerHeight" x="181" y="0" width="50" height="25" uuid="ccb2545a-50ef-4acd-a5eb-7dde92c834d7">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box leftPadding="3" rightPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_RED_NO}.equals("/") ? "-" : $F{CASE_RED_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="241" y="0" width="70" height="25" uuid="25b30f4b-cf62-4d19-9ce6-098f9cc4030d">
+				<reportElement stretchType="ContainerHeight" x="231" y="0" width="70" height="25" uuid="25b30f4b-cf62-4d19-9ce6-098f9cc4030d">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
@@ -397,12 +448,12 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{NOTICE_TYPE_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="311" y="0" width="100" height="25" uuid="cc993e95-1789-4e99-80ba-c1518066be70">
+				<reportElement stretchType="ContainerHeight" x="301" y="0" width="100" height="25" uuid="cc993e95-1789-4e99-80ba-c1518066be70">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
@@ -410,12 +461,12 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{TO_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="411" y="0" width="70" height="25" uuid="5c74944a-0936-4592-a4c4-5a0d0ce4c142">
+				<reportElement stretchType="ContainerHeight" x="401" y="0" width="70" height="25" uuid="5c74944a-0936-4592-a4c4-5a0d0ce4c142">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
@@ -423,51 +474,54 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{SUBDISTRICT_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="481" y="0" width="70" height="25" uuid="04d758c7-2a32-41cd-ab44-c03cf66057b9">
+				<reportElement stretchType="ContainerHeight" x="471" y="0" width="50" height="25" uuid="04d758c7-2a32-41cd-ab44-c03cf66057b9">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box leftPadding="3" rightPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{DISTRICT_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="551" y="0" width="70" height="25" uuid="fcd4bf1c-debe-4b85-9a83-0c9456a9dac4">
+				<reportElement stretchType="ContainerHeight" x="581" y="0" width="50" height="25" uuid="fcd4bf1c-debe-4b85-9a83-0c9456a9dac4">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box leftPadding="3" rightPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format($F{SEND_FEE})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="621" y="0" width="100" height="25" uuid="a2ca080c-f138-448f-90f1-4a4e961ad3d8">
+				<reportElement stretchType="ContainerHeight" x="631" y="0" width="80" height="25" uuid="a2ca080c-f138-448f-90f1-4a4e961ad3d8">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box leftPadding="3" rightPadding="3">
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{SENDER}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="721" y="0" width="80" height="25" uuid="d6822bee-c1a3-427b-b807-c7c92c35ffc7">
+				<reportElement stretchType="ContainerHeight" x="711" y="0" width="80" height="25" uuid="d6822bee-c1a3-427b-b807-c7c92c35ffc7">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
@@ -475,9 +529,36 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIPT_REF}.equals("/") ? "-" : $F{RECEIPT_REF}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="81" y="0" width="50" height="25" uuid="e66ad7ad-cc33-433a-9c02-be9bfa7dab29">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box leftPadding="3" rightPadding="3">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{RESULT_CREATE_DATE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="521" y="0" width="60" height="25" uuid="795c0431-5407-4888-8929-f6e58d103b11">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box leftPadding="3" rightPadding="3">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PROVINCE_NAME}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

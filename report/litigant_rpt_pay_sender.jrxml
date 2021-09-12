@@ -18,6 +18,8 @@
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_pay_sender_files/main_jrxml"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="503"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="490"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/03/2021"]]></defaultValueExpression>
 	</parameter>
@@ -40,12 +42,12 @@
   NVL(pn.LITIGANT_NAME,'-')																	   TO_NAME,
   NVL(pls.SUBDISTRICT_NAME,'-')														 	   SUBDISTRICT_NAME,
   NVL(pld.DISTRICT_NAME,'-')															   DISTRICT_NAME,
+  NVL(plp.PROVINCE_NAME,'-')                                                               PROVINCE_NAME,
   --
   pfr.RECEIPT_BOOK_NO || '/' || pfr.RECEIPT_NO                                             RECEIPT_REF,
- -- NVL(pfrc.CHEQUE_CODE,'-')                                                                CHEQUE_CODE,
   NVL(pn.SEND_FEE,0)                                                                       SEND_FEE,
   NVL(pfr.PAYER_NAME,'-')																   PAYER_NAME,
-  NVL(pup.USER_PROFILE_FULL_NAME,'-')													   NOTICE_SENDER,
+  NVL(pn.SEND_METHOD_BY_NAME ,'-')													   NOTICE_SENDER,
   NVL(pup1.USER_PROFILE_FULL_NAME,'-')													   PAYER
 --  
   FROM PC_NOTICE_SEND_RESULT pnsr 
@@ -73,6 +75,7 @@ LEFT JOIN PC_LOOKUP_COURT plc1 ON plc1.COURT_ID = pn.SEND_TO_COURT AND plc1.REMO
 --
 LEFT JOIN PC_LOOKUP_NOTICE_TYPE plnt ON plnt.NOTICE_TYPE_ID = pn.NOTICE_TYPE_ID AND plnt.REMOVED_BY = 0
 --
+LEFT JOIN PC_LOOKUP_PROVINCE plp ON plp.PROVINCE_ID = pn.CURRENT_PROVINCE_ID AND plp.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_DISTRICT pld ON pld.DISTRICT_ID =  pn.CURRENT_DISTRICT_ID 
                                  AND pld.PROVINCE_ID = pn.CURRENT_PROVINCE_ID 
                                  AND pld.REMOVED_BY = 0
@@ -88,7 +91,8 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
 --
 WHERE pnsr.REMOVED_BY = 0
 AND pnsr.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS')  AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
-AND pn.SEND_METHOD = 2]]>
+AND pn.SEND_METHOD = 2
+ORDER BY pn.SEND_METHOD_BY_NAME]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
@@ -119,6 +123,9 @@ AND pn.SEND_METHOD = 2]]>
 	</field>
 	<field name="DISTRICT_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="DISTRICT_NAME"/>
+	</field>
+	<field name="PROVINCE_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PROVINCE_NAME"/>
 	</field>
 	<field name="RECEIPT_REF" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_REF"/>
@@ -358,7 +365,7 @@ AND pn.SEND_METHOD = 2]]>
 				<text><![CDATA[ชื่อผู้วางเงิน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="420" y="0" width="110" height="25" uuid="4b7674d4-6ae9-4abe-ae36-d01632f847cd">
+				<reportElement x="420" y="0" width="69" height="25" uuid="4b7674d4-6ae9-4abe-ae36-d01632f847cd">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d6f3be46-ebd3-4944-a418-026b02c2ef0f"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -390,7 +397,7 @@ AND pn.SEND_METHOD = 2]]>
 				<text><![CDATA[ส่งหมายถึงใคร]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="530" y="0" width="95" height="25" uuid="157e74d7-db28-4b18-aa02-ba449a68ed3d">
+				<reportElement x="489" y="0" width="64" height="25" uuid="157e74d7-db28-4b18-aa02-ba449a68ed3d">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e5a431d-ad40-4073-81e9-7e6399ae90d3"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -451,6 +458,22 @@ AND pn.SEND_METHOD = 2]]>
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
 				<text><![CDATA[ที่]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="553" y="0" width="72" height="25" uuid="02765543-fafe-4bb8-b8d0-2435f4b4264c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e5a431d-ad40-4073-81e9-7e6399ae90d3"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="TH Sarabun New" size="17"/>
+				</textElement>
+				<text><![CDATA[จังหวัด]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
@@ -521,7 +544,7 @@ AND pn.SEND_METHOD = 2]]>
 				<textFieldExpression><![CDATA[$F{PAYER_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="420" y="0" width="110" height="25" uuid="6f2d7650-27ed-425d-b65a-af0d70f01b3f">
+				<reportElement stretchType="ContainerHeight" x="420" y="0" width="69" height="25" uuid="6f2d7650-27ed-425d-b65a-af0d70f01b3f">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d6f3be46-ebd3-4944-a418-026b02c2ef0f"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -553,7 +576,7 @@ AND pn.SEND_METHOD = 2]]>
 				<textFieldExpression><![CDATA[$F{TO_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="530" y="0" width="95" height="25" uuid="7fb97607-dc5a-409f-9b5b-9d954ac1989b">
+				<reportElement stretchType="ContainerHeight" x="489" y="0" width="64" height="25" uuid="7fb97607-dc5a-409f-9b5b-9d954ac1989b">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e5a431d-ad40-4073-81e9-7e6399ae90d3"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -615,10 +638,27 @@ AND pn.SEND_METHOD = 2]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="553" y="0" width="72" height="25" uuid="b641adba-df08-458e-a135-4cd1ce7dc486">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e5a431d-ad40-4073-81e9-7e6399ae90d3"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="TH Sarabun New" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PROVINCE_NAME}]]></textFieldExpression>
+			</textField>
 		</band>
 	</detail>
 	<summary>
-		<band height="45" splitType="Stretch">
+		<band height="58" splitType="Stretch">
 			<textField>
 				<reportElement x="618" y="6" width="50" height="25" uuid="f1a33def-f5e9-4865-ad2a-30fe5ad2e1b4">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="8484834b-44ee-47dc-949d-624ab70b1c56"/>
@@ -722,7 +762,7 @@ AND pn.SEND_METHOD = 2]]>
 				<text><![CDATA[รวมเป็นเงินทั้งสิ้น]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="60" y="20" width="30" height="25" uuid="4cf6bdf2-bc63-4a0b-8563-23fb6f6a8207">
+				<reportElement x="60" y="33" width="30" height="25" uuid="4cf6bdf2-bc63-4a0b-8563-23fb6f6a8207">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="de2b0635-d9b7-4167-8859-582873ce69e2"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -739,7 +779,7 @@ AND pn.SEND_METHOD = 2]]>
 				<text><![CDATA[ลงชื่อ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="181" y="20" width="78" height="25" uuid="cfc87e9c-d045-4560-a868-15cd8049bc33">
+				<reportElement x="226" y="33" width="78" height="25" uuid="cfc87e9c-d045-4560-a868-15cd8049bc33">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="de2b0635-d9b7-4167-8859-582873ce69e2"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -756,11 +796,31 @@ AND pn.SEND_METHOD = 2]]>
 				<text><![CDATA[ผู่้ตรวจสอบ]]></text>
 			</staticText>
 			<line>
-				<reportElement x="90" y="38" width="100" height="1" uuid="2c1aa1ee-f020-4fee-ba1e-f91ca2eead61"/>
+				<reportElement x="90" y="51" width="150" height="1" uuid="2c1aa1ee-f020-4fee-ba1e-f91ca2eead61">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
 			</line>
+			<staticText>
+				<reportElement x="94" y="6" width="130" height="25" uuid="644f3173-cfa3-40dc-9fb3-aaa891cddbb1">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="de2b0635-d9b7-4167-8859-582873ce69e2"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="17"/>
+				</textElement>
+				<text><![CDATA[ตรวจสอบแล้วว่าถูกต้อง]]></text>
+			</staticText>
 		</band>
 	</summary>
 </jasperReport>
