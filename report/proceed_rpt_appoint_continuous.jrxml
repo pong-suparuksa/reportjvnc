@@ -2,7 +2,7 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="proceed_rpt_appoint_continuous" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2442022f-f774-4941-965d-fac8362ad9aa">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_continuous"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_continuous_files/main_jrxml"/>
@@ -90,7 +90,7 @@
 	</style>
 	<subDataset name="DSET_APPOINT_CON" uuid="9d43052b-6af2-4c09-b434-f7463d94285b">
 		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojTest"/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 		<parameter name="FROM_DATE" class="java.lang.String">
@@ -103,7 +103,6 @@
 			<![CDATA[SELECT  A.A_DATE COL_DAY 
         ,A.WK_DAY
         ,B.APPOINT_DESC
-        ,B.JUDGE
 --crosstab column
 FROM (SELECT  EXTRACT(DAY FROM A.DT) A_DATE  
 		       ,DECODE(TO_CHAR(A.DT,'D'),'2','จันทร์','3','อังคาร','4','พุธ','5','พฤหัสฯ','6','ศุกร์','-') WK_DAY 
@@ -114,19 +113,22 @@ FROM (SELECT  EXTRACT(DAY FROM A.DT) A_DATE
 			  WHERE ROWNUM <= TO_DATE($P{TO_DATE},'DD/MM/YYYY')-TO_DATE($P{FROM_DATE},'DD/MM/YYYY')+1) A	  
 		WHERE TO_CHAR(A.DT,'D') IN (2,3,4,5,6)) A
 --crosstab measure
-LEFT JOIN (SELECT DISTINCT
-                   ppac.START_DATE APPOINT_DATE
-				   ,pltc.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR APPOINT_DESC
-			       ,plj.JUDGE_NAME JUDGE
-			FROM PC_PROCEED_APPOINT_CONTINUE ppac 
-			--appoint
-			LEFT JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID 
-			LEFT JOIN PC_PROCEED_APPOINT_CASE_JUDGE ppacj ON ppacj.APPOINT_ID = ppac.APPOINT_ID 
-			LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = ppacj.JUDGE_ID AND plj.REMOVED_BY = 0
-			--case
-			LEFT JOIN PC_CASE pc ON pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
-			LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc.REMOVED_BY = 0
-			WHERE ppac.REMOVED_BY = 0) B ON B.APPOINT_DATE = A.DT
+LEFT JOIN (SELECT A.APPOINT_DATE
+			       ,LISTAGG(A.APPOINT_DESC, CHR(13)) WITHIN GROUP(ORDER BY A.APPOINT_DESC) APPOINT_DESC
+			FROM(SELECT DISTINCT
+				        ppac.START_DATE APPOINT_DATE
+					    ,pltc.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR APPOINT_DESC
+				 FROM PC_PROCEED_APPOINT_CONTINUE ppac 
+				 --appoint
+				 LEFT JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID 
+				 LEFT JOIN PC_PROCEED_APPOINT_CASE_JUDGE ppacj ON ppacj.APPOINT_ID = ppac.APPOINT_ID 
+				 LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = ppacj.JUDGE_ID AND plj.REMOVED_BY = 0
+				 --case
+				 LEFT JOIN PC_CASE pc ON pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
+				 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc.REMOVED_BY = 0
+				 WHERE ppac.REMOVED_BY = 0
+				 AND ppa.APPOINT_TABLE_CODE = '003') A
+			GROUP BY A.APPOINT_DATE) B ON B.APPOINT_DATE = A.DT
 ORDER BY A.A_DATE]]>
 		</queryString>
 		<field name="COL_DAY" class="java.lang.Integer">
@@ -137,9 +139,6 @@ ORDER BY A.A_DATE]]>
 		</field>
 		<field name="APPOINT_DESC" class="java.lang.String">
 			<property name="com.jaspersoft.studio.field.label" value="APPOINT_DESC"/>
-		</field>
-		<field name="JUDGE" class="java.lang.String">
-			<property name="com.jaspersoft.studio.field.label" value="JUDGE"/>
 		</field>
 	</subDataset>
 	<parameter name="START_DATE" class="java.lang.String">
@@ -210,30 +209,16 @@ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
 				</crosstabDataset>
 				<crosstabHeaderCell>
 					<cellContents>
-						<staticText>
-							<reportElement style="Crosstab_CH" x="0" y="0" width="150" height="50" uuid="a0677a0d-01db-4e12-884f-c46f281e34a4"/>
-							<textElement textAlignment="Center" verticalAlignment="Middle">
-								<font fontName="THSarabunNew" size="16"/>
-							</textElement>
-							<text><![CDATA[ผู้พิพากษา]]></text>
-						</staticText>
+						<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					</cellContents>
 				</crosstabHeaderCell>
-				<rowGroup name="JUDGE" width="150">
+				<rowGroup name="JUDGE" width="0">
 					<bucket class="java.lang.String">
-						<bucketExpression><![CDATA[$F{JUDGE}]]></bucketExpression>
+						<bucketExpression><![CDATA[" "]]></bucketExpression>
 					</bucket>
 					<crosstabRowHeader>
 						<cellContents mode="Opaque" style="Crosstab 1_CH">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
-							<textField>
-								<reportElement x="0" y="0" width="150" height="50" uuid="dacc1842-1866-45f2-954c-75ab4a3d4d20"/>
-								<box leftPadding="3"/>
-								<textElement textAlignment="Left" verticalAlignment="Middle">
-									<font fontName="THSarabunNew" size="16"/>
-								</textElement>
-								<textFieldExpression><![CDATA[$V{JUDGE}==null?' ':$V{JUDGE}]]></textFieldExpression>
-							</textField>
 						</cellContents>
 					</crosstabRowHeader>
 					<crosstabTotalRowHeader>

@@ -2,7 +2,7 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="litigant_rpt_payrecv_bycase" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="e317825e-f08b-43a4-b494-0a6b7e4d57da">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -17,6 +17,8 @@
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_payrecv_bycase"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="478"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="511"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_payrecv_bycase_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/07/2020"]]></defaultValueExpression>
@@ -24,91 +26,94 @@
 	<parameter name="END_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["31/07/2020"]]></defaultValueExpression>
 	</parameter>
-	<parameter name="SENDER" class="java.lang.String">
+	<parameter name="SENDER" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["-1"]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
-		<![CDATA[SELECT DISTINCT
-  pn.CASE_ID,
-  THAILDATE(NVL(pfr.RECEIVED_DATE,TO_TIMESTAMP('01/01/1900','DD/MM/YYYY')),1)        RECEIVED_DATE_TEXT,
-  pfr.RECEIVED_DATE,
-  NVL(cou.COURT_NAME_TH,'-')	   COURT_NAME_TH,
-  NVL(pfr.RECEIPT_BOOK_NO,0)       RECEIPT_BOOK_NO,
-  NVL(pfr.RECEIPT_NO,0)            RECEIPT_NO,
-  THAISDATE(NVL(pn.NOTICE_DATE,TO_DATE('01/01/1900','DD/MM/YYYY'))) NOTICE_DATE,
-  NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR)             CASE_BLACK_NO,    
-  CASE WHEN pj.RED_IDNUM IS NULL THEN ' ' 
-       ELSE NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || '/' || TO_CHAR(pj.RED_YEAR) END  CASE_RED_NO,
-  NVL(pc.PROS_DESC,'-')			CLAIMANT, 
-  NVL(pc.ACCU_DESC,'-')		   	DEFENDANT,     
-  NVL(pfr.PAYER_NAME,'-')			PAYER_NAME,
-  NVL(pfrc.CHEQUE_CODE,'-')		    CHEQUE_CODE,
-  pfr.TOTAL_AMOUNT,
-  NVL(dbms_lob.substr(pfrc.NOTES, 4000, 1),'-')	 NOTES,
-  NVL(pup1.USER_PROFILE_FULL_NAME,'-')	         OFFICER,
-  NVL(pn.SEND_BY,0)                              SEND_BY
+		<![CDATA[SELECT 
+    cou.COURT_NAME_TH,
+  	pfr.RECEIPT_BOOK_NO,
+    pfr.RECEIPT_NO,
+	pfr.RECEIVED_DATE,
+	THAISDATE(pfr.RECEIVED_DATE) RECEIVED_DATE_TEXT,
+	pltc_b.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR CASE_BLACK_NO,
+  	CASE WHEN pj.RED_IDNUM  IS NULL 
+  	     THEN ' ' 
+  	     ELSE pltc_r.TITLE_CASE_NAME || pj.RED_IDNUM  || '/' || pj.RED_YEAR END CASE_RED_NO,
+  	NVL(pc.PROS_DESC,' ')  PROS_DESC,
+  	NVL(pc.ACCU_DESC,' ')  ACCU_DESC,
+    pfr.PAYER_NAME,
+    pfrd.PAY_TYPE,
+    NVL(pfrd.PAY_DETAIL,' ')     PAY_DETAIL,
+    pfrd.TOTAL_AMOUNT             TOTAL_RECEIVED_AMOUNT,
+    pup.USER_PROFILE_FULL_NAME   PAYEE,
+    ps.STRUCTURE_NAME,
+    plrt.RECEIPT_TYPE_NAME,
+    plrst.RECEIPT_SUB_TYPE_NAME,
+    pfrc.CANCEL_ID,
+    pfrc.NOTES
+FROM PC_FIN_RECEIPT pfr
+LEFT JOIN PC_FIN_RECEIPT_CANCEL pfrc ON pfrc.RECEIPT_ID = pfr.RECEIPT_ID
+LEFT JOIN (SELECT pfrd.RECEIPT_ID,
+			       --
+			       CASE WHEN NVL(SUM(pfrd.CASH_AMOUNT),0) > 0 THEN 'เงินสด'
+			            WHEN NVL(SUM(pfrd.TRANSFER_AMOUNT),0) > 0 THEN 'เงินโอน'
+			            WHEN NVL(SUM(pfrd.CHEQUE_AMOUNT),0) > 0 THEN 'เช็ค'
+			            WHEN NVL(SUM(pfrd.CREDIT_AMOUNT),0) > 0 THEN 'บัตรเครดิต'
+			            ELSE ' ' END PAY_TYPE,
+			       CASE WHEN NVL(SUM(pfrd.CASH_AMOUNT),0) > 0 THEN ' '
+			            WHEN NVL(SUM(pfrd.TRANSFER_AMOUNT),0) > 0 THEN pfrt.ACCOUNT_NO 
+			            WHEN NVL(SUM(pfrd.CHEQUE_AMOUNT),0) > 0 THEN pfrcq.CHEQUE_CODE
+			            WHEN NVL(SUM(pfrd.CREDIT_AMOUNT),0) > 0 THEN pfrcr.CREDIT_NO 
+			            ELSE ' ' END PAY_DETAIL,
+			       pfrd.RECEIPT_TYPE,
+			       pfrd.RECEIPT_SUB_TYPE,
+			       SUM(NVL(pfrd.TOTAL_AMOUNT,0)) TOTAL_AMOUNT
+			FROM PC_FIN_RECEIPT_DETAIL pfrd 
+			LEFT JOIN PC_FIN_RECEIPT_CHEQUE pfrcq ON pfrcq.RECEIPT_ID = pfrd.RECEIPT_ID
+			LEFT JOIN PC_FIN_RECEIPT_TRANSFER pfrt ON pfrt.RECEIPT_ID = pfrd.RECEIPT_ID
+			LEFT JOIN PC_FIN_RECEIPT_CREDIT pfrcr ON pfrcr.RECEIPT_ID = pfrd.RECEIPT_ID
+			GROUP BY pfrd.RECEIPT_ID, pfrt.ACCOUNT_NO, pfrcq.CHEQUE_CODE,  
+			         pfrcr.CREDIT_NO, pfrd.RECEIPT_TYPE, pfrd.RECEIPT_SUB_TYPE )pfrd ON pfrd.RECEIPT_ID = pfr.RECEIPT_ID 
 --
-FROM PC_FIN_PAYMENT_DETAIL pfpd
-LEFT JOIN PC_FIN_PAYMENT pfp ON pfp.PAYMENT_ID = pfpd.PAYMENT_ID AND pfp.REMOVED_BY = 0
---
-LEFT JOIN PC_FIN_RECEIPT pfr ON pfr.RECEIPT_ID = pfpd.RECEIPT_ID AND pfr.REMOVED_BY = 0
-LEFT JOIN PC_FIN_RECEIPT_CHEQUE pfrc ON pfrc.RECEIPT_ID = pfpd.RECEIPT_ID AND pfrc.REMOVED_BY = 0
---
-LEFT JOIN PC_NOTICE_ISSUED pni ON pni.RECEIPT_ID = pfr.RECEIPT_ID AND pni.REMOVED_BY = 0
-LEFT JOIN PC_NOTICE_LIT_DETAIL pnld ON pnld.NOTICE_ID = pni.NOTICE_ID AND pnld.REMOVED_BY = 0
-LEFT JOIN PC_NOTICE pn ON pn.NOTICE_ID = pni.NOTICE_ID AND pn.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE AND plrt.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_RECEIPT_SUB_TYPE plrst ON plrst.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE 
+                                          AND plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE
+                                          AND plrst.REMOVED_BY = 0
 --
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pfr.CASE_ID AND pc.REMOVED_BY = 0
-LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pfr.CASE_ID AND pj.REMOVED_BY = 0
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID  = pc.CASE_ID AND pj.REMOVED_BY = 0
 --
-LEFT JOIN PC_USER_PROFILE pup ON pup.USER_ID = pn.SEND_BY
-LEFT JOIN PC_USER_PROFILE pup1 ON pup1.USER_ID = pfp.CREATED_BY
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
+LEFT JOIN PC_USER_PROFILE pup ON pup.USER_PROFILE_ID = pfr.CREATED_BY AND pup.REMOVED_BY = 0
+LEFT JOIN PC_STRUCTURE ps ON ps.STRUCTURE_ID = pup.STRUCTURE_ID AND ps.REMOVED_BY = 0
+LEFT JOIN PC_FIN_RECEIPT_CANCEL pfrcc ON pfrcc.RECEIPT_ID = pfr.RECEIPT_ID AND pfrcc.REMOVED_BY = 0
 --
-LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.COURT_ID = pc.COURT_ID AND pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID
-LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.COURT_ID = pj.COURT_ID AND pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID
+CROSS JOIN (SELECT plc.COURT_NAME_TH 
+             FROM PC_PARAM pp
+		     JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+             WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
 --
-LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pn.COURT_ID
-LEFT JOIN PC_LOOKUP_COURT plc1 ON plc1.COURT_ID = pn.SEND_TO_COURT
-LEFT JOIN PC_LOOKUP_PROVINCE plp ON plp.PROVINCE_ID = plc1.PROVINCE_ID
+WHERE  pfr.RECEIVED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
+                         AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')  
 --
-LEFT JOIN PC_LOOKUP_NOTICE_TYPE plnt ON plnt.NOTICE_TYPE_ID = pn.NOTICE_TYPE_ID AND plnt.COURT_ID = pn.COURT_ID
---
-LEFT JOIN PC_LOOKUP_DISTRICT pld ON pld.DISTRICT_ID =  pn.CURRENT_DISTRICT_ID AND pld.PROVINCE_ID = pn.CURRENT_PROVINCE_ID 
-LEFT JOIN PC_LOOKUP_SUBDISTRICT pls ON pls.SUBDISTRICT_ID = pn.CURRENT_SUBDISTRICT_ID AND  pls.DISTRICT_ID =  pn.CURRENT_DISTRICT_ID AND pls.PROVINCE_ID = pn.CURRENT_PROVINCE_ID
---
-CROSS JOIN (SELECT plc.COURT_NAME_TH
-			 FROM PC_PARAM pp
-			 JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
-			 WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
---
-WHERE NVL(pfpd.REMOVED_BY,0) = 0
-AND pfr.RECEIVED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
-                          AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
-AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
-						   FROM(SELECT NVL(pn.SEND_BY,0) SEND_BY, -1 SENDER 
-		     	 	     		 FROM PC_NOTICE pn 
-			                     UNION 
-			                     SELECT NVL(pn.SEND_BY,0) SEND_BY, NVL(pn.SEND_BY,0) SENDER
-			                     FROM PC_NOTICE pn) A 
-		                   WHERE A.SENDER IN ($P!{SENDER}))]]>
+ORDER BY  ps.STRUCTURE_NAME, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 	</queryString>
-	<field name="RECEIVED_DATE_TEXT" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="RECEIVED_DATE_TEXT"/>
+	<field name="COURT_NAME_TH" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
+	</field>
+	<field name="RECEIPT_BOOK_NO" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_BOOK_NO"/>
+	</field>
+	<field name="RECEIPT_NO" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_NO"/>
 	</field>
 	<field name="RECEIVED_DATE" class="java.util.Date">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIVED_DATE"/>
 	</field>
-	<field name="COURT_NAME_TH" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
-	</field>
-	<field name="RECEIPT_BOOK_NO" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_BOOK_NO"/>
-	</field>
-	<field name="RECEIPT_NO" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_NO"/>
-	</field>
-	<field name="NOTICE_DATE" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="NOTICE_DATE"/>
+	<field name="RECEIVED_DATE_TEXT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="RECEIVED_DATE_TEXT"/>
 	</field>
 	<field name="CASE_BLACK_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="CASE_BLACK_NO"/>
@@ -116,29 +121,74 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 	<field name="CASE_RED_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="CASE_RED_NO"/>
 	</field>
-	<field name="CLAIMANT" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="CLAIMANT"/>
+	<field name="PROS_DESC" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PROS_DESC"/>
 	</field>
-	<field name="DEFENDANT" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="DEFENDANT"/>
+	<field name="ACCU_DESC" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="ACCU_DESC"/>
 	</field>
 	<field name="PAYER_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="PAYER_NAME"/>
 	</field>
-	<field name="CHEQUE_CODE" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="CHEQUE_CODE"/>
+	<field name="PAY_TYPE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PAY_TYPE"/>
 	</field>
-	<field name="TOTAL_AMOUNT" class="java.lang.Double">
-		<property name="com.jaspersoft.studio.field.label" value="TOTAL_AMOUNT"/>
+	<field name="PAY_DETAIL" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PAY_DETAIL"/>
+	</field>
+	<field name="TOTAL_RECEIVED_AMOUNT" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.label" value="TOTAL_RECEIVED_AMOUNT"/>
+	</field>
+	<field name="PAYEE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PAYEE"/>
+	</field>
+	<field name="STRUCTURE_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="STRUCTURE_NAME"/>
+	</field>
+	<field name="RECEIPT_TYPE_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_TYPE_NAME"/>
+	</field>
+	<field name="RECEIPT_SUB_TYPE_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_SUB_TYPE_NAME"/>
+	</field>
+	<field name="CANCEL_ID" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="CANCEL_ID"/>
 	</field>
 	<field name="NOTES" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="NOTES"/>
 	</field>
-	<field name="OFFICER" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="OFFICER"/>
-	</field>
-	<variable name="TOTAL" class="java.math.BigDecimal" calculation="Sum">
-		<variableExpression><![CDATA[$F{TOTAL_AMOUNT}]]></variableExpression>
+	<variable name="TOTAL" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{TOTAL_RECEIVED_AMOUNT}]]></variableExpression>
+	</variable>
+	<variable name="CNT_RECEIPTS" class="java.lang.Long" calculation="Sum">
+		<variableExpression><![CDATA[$F{CANCEL_ID}==null?1:0]]></variableExpression>
+	</variable>
+	<variable name="CNT_CANCEL" class="java.lang.Long" calculation="Sum">
+		<variableExpression><![CDATA[$F{CANCEL_ID}==null?0:1]]></variableExpression>
+	</variable>
+	<variable name="CNT_CHEQUE" class="java.lang.Long" calculation="Sum">
+		<variableExpression><![CDATA[$F{PAY_TYPE}.equals("เช็ค")&&$F{CANCEL_ID}==null?1:0]]></variableExpression>
+	</variable>
+	<variable name="CNT_CASH" class="java.lang.Long" calculation="Sum">
+		<variableExpression><![CDATA[$F{PAY_TYPE}.equals("เงินสด")&&$F{CANCEL_ID}==null?1:0]]></variableExpression>
+	</variable>
+	<variable name="CNT_TRANSFER" class="java.lang.Long" calculation="Sum">
+		<variableExpression><![CDATA[$F{PAY_TYPE}.equals("เงินโอน")&&$F{CANCEL_ID}==null?1:0]]></variableExpression>
+	</variable>
+	<variable name="CNT_CREDIT" class="java.lang.Long" calculation="Sum">
+		<variableExpression><![CDATA[$F{PAY_TYPE}.equals("บัตรเครดิต")&&$F{CANCEL_ID}==null?1:0]]></variableExpression>
+	</variable>
+	<variable name="SUM_CHEQUE" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{PAY_TYPE}.equals("เช็ค")&&$F{CANCEL_ID}==null?$F{TOTAL_RECEIVED_AMOUNT}:0]]></variableExpression>
+	</variable>
+	<variable name="SUM_CASH" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{PAY_TYPE}.equals("เงินสด")&&$F{CANCEL_ID}==null?$F{TOTAL_RECEIVED_AMOUNT}:0]]></variableExpression>
+	</variable>
+	<variable name="SUM_TRANSFER" class="java.lang.Long" calculation="Sum">
+		<variableExpression><![CDATA[$F{PAY_TYPE}.equals("เงินโอน")&&$F{CANCEL_ID}==null?$F{TOTAL_RECEIVED_AMOUNT}:0]]></variableExpression>
+	</variable>
+	<variable name="SUM_CREDIT" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{PAY_TYPE}.equals("บัตรเครดิต")&&$F{CANCEL_ID}==null?$F{TOTAL_RECEIVED_AMOUNT}:0]]></variableExpression>
 	</variable>
 	<background>
 		<band splitType="Stretch"/>
@@ -415,7 +465,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<textElement>
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CLAIMANT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{PROS_DESC}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="383" y="0" width="70" height="25" uuid="6f2d7650-27ed-425d-b65a-af0d70f01b3f">
@@ -429,7 +479,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<textElement>
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{DEFENDANT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{ACCU_DESC}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="0" y="0" width="25" height="25" uuid="d5589104-d9ff-436e-8cb9-ef7a9987b288">
@@ -496,7 +546,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<textElement textAlignment="Center">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{NOTICE_DATE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{RECEIVED_DATE_TEXT}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="527" y="0" width="50" height="25" uuid="f539be0c-7d82-4839-8bc6-6a63a8e47f04">
@@ -509,7 +559,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<textElement>
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA["เงินสด"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{PAY_TYPE}==null?" ":$F{PAY_TYPE}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="577" y="0" width="50" height="25" uuid="2f562637-4dd0-4a77-a5ce-07b9cc558a1a">
@@ -522,7 +572,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<textElement textAlignment="Center">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CHEQUE_CODE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{PAY_DETAIL}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="627" y="0" width="50" height="25" uuid="765a3306-b0d0-4884-8da9-2b631a040e90">
@@ -535,9 +585,9 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<textElement textAlignment="Center">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{TOTAL_AMOUNT}==null
+				<textFieldExpression><![CDATA[$F{TOTAL_RECEIVED_AMOUNT}==null
 ?"0"
-:new java.text.DecimalFormat("#,##0").format($F{TOTAL_AMOUNT})]]></textFieldExpression>
+:new java.text.DecimalFormat("#,##0").format($F{TOTAL_RECEIVED_AMOUNT})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="677" y="0" width="50" height="25" uuid="0e201f92-bee8-4f67-a79e-9e88b0efb174">
@@ -550,7 +600,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<textElement textAlignment="Center">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{NOTES}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{NOTES}==null?" ":$F{NOTES}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="727" y="0" width="74" height="25" uuid="010d064e-5af1-4e06-9723-f33036eb03e8">
@@ -564,7 +614,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<textElement textAlignment="Center">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{OFFICER}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{PAYEE}==null?" ":$F{PAYEE}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
@@ -746,7 +796,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[0]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{CNT_CANCEL}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="330" y="6" width="117" height="25" uuid="44e99983-181a-49e4-a374-ff9192a0aae3">
@@ -814,7 +864,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[0]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{CNT_CHEQUE}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="497" y="56" width="30" height="25" uuid="1433ef3c-3f2a-45fb-92b3-fe53ef258e1f">
@@ -865,7 +915,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{CNT_CASH}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="497" y="80" width="30" height="25" uuid="cb5db1e7-ec21-4442-a6f9-3baddc507b58">
@@ -916,7 +966,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[0]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{CNT_TRANSFER}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="497" y="105" width="30" height="25" uuid="5d327352-20ef-4196-8460-83737e941843">
@@ -967,7 +1017,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[0]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{CNT_CREDIT}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="668" y="31" width="133" height="25" uuid="b2697a4d-82ae-4f86-a96f-6c886c2569e0">
@@ -1001,7 +1051,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_CHEQUE}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="535" y="31" width="83" height="25" uuid="3fe190f4-8bd9-425f-b921-96bd726d3755">
@@ -1069,9 +1119,9 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{TOTAL}==null
+				<textFieldExpression><![CDATA[$V{SUM_CASH}==null
 ?"0"
-:new java.text.DecimalFormat("#,##0").format($V{TOTAL})]]></textFieldExpression>
+:new java.text.DecimalFormat("#,##0").format($V{SUM_CASH})]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="668" y="80" width="133" height="25" uuid="9affe8b4-ca90-466e-b4ff-f0d5096cd689">
@@ -1122,7 +1172,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_TRANSFER}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="668" y="105" width="133" height="25" uuid="4937a02d-3918-4fc5-99ad-e310f729d9ab">
@@ -1173,7 +1223,7 @@ AND NVL(pn.SEND_BY,0) IN (SELECT A.SEND_BY
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_CREDIT}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="452" y="154" width="78" height="25" uuid="9882c9e7-15b7-47ce-82e1-d924926ccb7a">
