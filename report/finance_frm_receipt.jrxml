@@ -2,7 +2,7 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="finance_frm_receipt" pageWidth="420" pageHeight="595" whenNoDataType="AllSectionsNoDetail" columnWidth="385" leftMargin="14" rightMargin="21" topMargin="14" bottomMargin="20" uuid="91ef4741-a901-4bf3-8b94-8304dcb4486b">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_frm_receipt"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -18,7 +18,6 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/finance_frm_receipt_files/main_jrxml"/>
 	<parameter name="IS_PREPRINT" class="java.lang.Integer">
 		<parameterDescription><![CDATA[select for use pre-print papaer or not]]></parameterDescription>
 		<defaultValueExpression><![CDATA[0]]></defaultValueExpression>
@@ -43,12 +42,12 @@
        TO_CHAR(pfr.RECEIVED_DATE, 'YYYY', 'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI') TH_YEAR,
        pfr.PAYER_NAME,
        --รวมเงินกลาง กับคำคู่ความ
-       TRUNC(NVL(A.AMOUNT,0)+NVL(D.AMOUNT,0))	ALL_CENTRALFEE_BAHT,
-       REPLACE(TO_CHAR((NVL(A.AMOUNT,0)+NVL(D.AMOUNT,0))-TRUNC(NVL(A.AMOUNT,0)+NVL(D.AMOUNT,0)),'999D99MI'),'.','') ALL_CENTRAFEE_STANG,
+       TRUNC(NVL(A1.AMOUNT,0)+NVL(D.AMOUNT,0))	ALL_CENTRALFEE_BAHT,
+       REPLACE(TO_CHAR((NVL(A1.AMOUNT,0)+NVL(D.AMOUNT,0))-TRUNC(NVL(A1.AMOUNT,0)+NVL(D.AMOUNT,0)),'999D99MI'),'.','') ALL_CENTRAFEE_STANG,
        --เงินกลาง
-       NVL(A.RECEIPT_SUB_TYPE_NAME,' ')    CENTRALFEE_DESC,
-       TRUNC(NVL(A.AMOUNT,0))              CENTRALFEE_BAHT,
-       REPLACE(TO_CHAR((NVL(A.AMOUNT,0))-TRUNC(NVL(A.AMOUNT,0)),'999D99MI'),'.','') CENTRALFEE_STANG,
+       NVL(A1.RECEIPT_SUB_TYPE_NAME,' ')    CENTRALFEE_DESC,
+       TRUNC(NVL(A1.AMOUNT,0))              CENTRALFEE_BAHT,
+       REPLACE(TO_CHAR((NVL(A1.AMOUNT,0))-TRUNC(NVL(A1.AMOUNT,0)),'999D99MI'),'.','') CENTRALFEE_STANG,
        --ค่าธรรมเนียม:ค่าขึ้นศาล
        NVL(B1.RECEIPT_SUB_TYPE_NAME,' ')   COURTFEE_DESC,
        TRUNC(NVL(B1.AMOUNT,0))             COURTFEE_BAHT,
@@ -101,7 +100,8 @@
        --ตำแหน่ง
        pp.POSITION_NAME,
        pfr.COURT_LEVEL_NAME,
-       pfr.ISSUE_COUNT
+       pfr.ISSUE_COUNT,
+       A2.OTHER_DETAIL AS CENTRAL_OTHER_DETAIL
 --
 FROM PC_FIN_RECEIPT pfr 
 --------------------------------------------------------------หมายเลขดำ------------------------------------------------------------
@@ -129,7 +129,18 @@ LEFT JOIN (SELECT pfrd.RECEIPT_ID
 			                                           AND plrst.REMOVED_BY = 0 
 			WHERE pfrd.REMOVED_BY = 0
 			AND plrt.RECEIPT_TYPE_CODE = '1' 
-			GROUP BY pfrd.RECEIPT_ID, plrt.RECEIPT_TYPE_CODE) A ON A.RECEIPT_ID = pfr.RECEIPT_ID
+			GROUP BY pfrd.RECEIPT_ID, plrt.RECEIPT_TYPE_CODE) A1 ON A1.RECEIPT_ID = pfr.RECEIPT_ID
+--เงินกลางค่าประกาศหนังสือพิมพ์
+LEFT JOIN (SELECT DISTINCT pfrd.RECEIPT_ID, pfrd.OTHER_DETAIL
+           FROM PC_FIN_RECEIPT_DETAIL pfrd 
+           LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE
+			                                      AND plrt.REMOVED_BY = 0
+		   LEFT JOIN PC_LOOKUP_RECEIPT_SUB_TYPE plrst ON plrst.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE 
+			                                           AND plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE 
+			                                           AND plrst.REMOVED_BY = 0 
+		   WHERE pfrd.REMOVED_BY = 0
+		   AND plrt.RECEIPT_TYPE_CODE = '1'
+		   AND plrst.RECEIPT_SUB_TYPE_CODE = '003') A2 ON A2.RECEIPT_ID = pfr.RECEIPT_ID
 -------------------------------------------------------ค่าธรรมเนียม----------------------------------------------------------------------
 --ค่าขึ้นศาล
 LEFT JOIN (SELECT pfrd.RECEIPT_ID,
@@ -575,6 +586,7 @@ AND pfr.RECEIPT_ID = $P{RECEIPT_ID}]]>
 	</field>
 	<field name="COURT_LEVEL_NAME" class="java.lang.String"/>
 	<field name="ISSUE_COUNT" class="java.lang.Integer"/>
+	<field name="CENTRAL_OTHER_DETAIL" class="java.lang.String"/>
 	<variable name="ALL_CENTRAL_FEE" class="java.lang.String">
 		<variableExpression><![CDATA[$F{LITIGANT_FEE_DESC}.equals(" ")
 ?($F{CENTRALFEE_DESC}.equals(" ")?" ":$F{CENTRALFEE_DESC}) 
@@ -739,7 +751,8 @@ AND pfr.RECEIPT_ID = $P{RECEIPT_ID}]]>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{ALL_CENTRAL_FEE}.equals(" ")?" ":$V{ALL_CENTRAL_FEE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{ALL_CENTRAL_FEE}.equals(" ")?" ":$V{ALL_CENTRAL_FEE} + " " +
+($F{CENTRAL_OTHER_DETAIL}==null?" ":$F{CENTRAL_OTHER_DETAIL})]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="250" y="16" width="85" height="16" uuid="3d8cfb47-586f-484e-8fe0-f7f3ac0cab94"/>

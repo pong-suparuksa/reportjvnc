@@ -19,6 +19,7 @@
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="460"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="529"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["10/03/2021"]]></defaultValueExpression>
 	</parameter>
@@ -55,7 +56,10 @@ FROM
 	PC_PROCEED_APPOINT ppa	
 -- appoint continue
 LEFT JOIN PC_PROCEED_APPOINT_CONTINUE ppac ON
-	ppac.APPOINT_ID = ppa.APPOINT_ID AND ppac.REMOVED_BY = 0	
+	ppac.APPOINT_ID = ppa.APPOINT_ID AND ppac.REMOVED_BY = 0
+--appoint_table
+LEFT JOIN PC_PROCEED_APPOINT_TABLE ppat ON
+	ppat.APPOINT_TABLE_CODE = ppac.APPOINT_TABLE_CODE AND ppat.REMOVED_BY = 0
 -- case
 LEFT JOIN PC_CASE pc ON
     pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
@@ -68,27 +72,27 @@ LEFT JOIN PC_JUDGEMENT pj ON
 LEFT JOIN (SELECT pcj.CASE_ID
 				  ,pcj.JUDGE_ID
 				  ,plj.JUDGE_NAME 
-			      ,CASE WHEN pcj.TEMPORARY_JUDGE_FLAG = 3 THEN '003'
-			            WHEN pcj.TEMPORARY_JUDGE_FLAG = 4 THEN '002' END APPOINT_TABLE_CODE
+			      ,CASE WHEN pcj.TEMPORARY_JUDGE_FLAG = 3 THEN 'continuous'
+			            WHEN pcj.TEMPORARY_JUDGE_FLAG = 4 THEN 'special' END APPOINT_TABLE_TYPE
 		   FROM PC_CASE_JUDGE pcj 
 		   JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID AND plj.REMOVED_BY = 0
 		   JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
 		   WHERE pcj.REMOVED_BY = 0
-		   AND pljt.JUDGE_TYPE_CODE = '01') j ON j.CASE_ID = ppa.CASE_ID AND j.APPOINT_TABLE_CODE = ppa.APPOINT_TABLE_CODE  
+		   AND pljt.JUDGE_TYPE_CODE = '01') j ON j.CASE_ID = ppa.CASE_ID AND j.APPOINT_TABLE_TYPE = ppat.APPOINT_TABLE_TYPE 
 --judge assist
 LEFT JOIN (SELECT pcj.CASE_ID
-			       ,CASE WHEN pcj.TEMPORARY_JUDGE_FLAG = 3 THEN '003'
-			             WHEN pcj.TEMPORARY_JUDGE_FLAG = 4 THEN '002' END APPOINT_TABLE_CODE
+			       ,CASE WHEN pcj.TEMPORARY_JUDGE_FLAG = 3 THEN 'continuous'
+			             WHEN pcj.TEMPORARY_JUDGE_FLAG = 4 THEN 'special' END APPOINT_TABLE_TYPE
 			       ,LISTAGG((CASE WHEN  pljt.JUDGE_TYPE_CODE = '02' THEN plj.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  pljt.JUDGE_TYPE_CODE = '02' THEN plj.JUDGE_NAME END)) ONG_1
 				   ,LISTAGG((CASE WHEN  pljt.JUDGE_TYPE_CODE = '03' THEN plj.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  pljt.JUDGE_TYPE_CODE = '03' THEN plj.JUDGE_NAME END)) ONG_2
 				   ,LISTAGG((CASE WHEN  pljt.JUDGE_TYPE_CODE = '12' THEN plj.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  pljt.JUDGE_TYPE_CODE = '12' THEN plj.JUDGE_NAME END)) ADD_1
-			FROM PC_CASE_JUDGE pcj 
-			JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID AND plj.REMOVED_BY = 0
-			JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
-			WHERE pcj.REMOVED_BY = 0
-			AND pljt.JUDGE_TYPE_CODE IN ('02','03','12')
-			GROUP BY pcj.CASE_ID ,CASE WHEN pcj.TEMPORARY_JUDGE_FLAG = 3 THEN '003' WHEN pcj.TEMPORARY_JUDGE_FLAG = 4 THEN '002' END
-			) ja ON ja.CASE_ID = ppa.CASE_ID AND ja.APPOINT_TABLE_CODE = ppa.APPOINT_TABLE_CODE 
+		   FROM PC_CASE_JUDGE pcj 
+		   JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID AND plj.REMOVED_BY = 0
+		   JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+		   WHERE pcj.REMOVED_BY = 0
+		   AND pljt.JUDGE_TYPE_CODE IN ('02','03','12')
+		   GROUP BY pcj.CASE_ID ,CASE WHEN pcj.TEMPORARY_JUDGE_FLAG = 3 THEN 'continuous' WHEN pcj.TEMPORARY_JUDGE_FLAG = 4 THEN 'special' END
+			) ja ON ja.CASE_ID = ppa.CASE_ID AND ja.APPOINT_TABLE_TYPE = ppat.APPOINT_TABLE_TYPE 
 --
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON 
 	pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0	

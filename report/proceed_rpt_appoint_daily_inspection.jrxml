@@ -12,13 +12,15 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_daily_inspection"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="315"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="680"/>
 	<property name="com.jaspersoft.studio.report.description" value=""/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_daily_inspection_files/main_jrxml"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="534"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="459"/>
 	<parameter name="SELECT_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["03/03/2021"]]></defaultValueExpression>
 	</parameter>
@@ -50,6 +52,7 @@
     ,cou.COURT_NAME_TH
 FROM PC_PROCEED_APPOINT_CONTINUE ppac 
 LEFT JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID AND ppa.REMOVED_BY = 0
+LEFT JOIN PC_PROCEED_APPOINT_TABLE ppat ON ppat.APPOINT_TABLE_CODE = ppac.APPOINT_TABLE_CODE AND ppat.REMOVED_BY = 0
 --witness
 LEFT JOIN (SELECT pprw.APPOINT_CON_ID
 				  ,NVL(pprw.WITNESS_DEFENDANT_COUNT,0)+NVL(pprw.WITNESS_DISSENTER_COUNT,0)+NVL(pprw.WITNESS_OTHER_COUNT,0)+NVL(pprw.WITNESS_PLAINTIFF_COUNT,0)+NVL(pprw.WITNESS_REQUESTER_COUNT,0) WITNESS	  
@@ -89,8 +92,8 @@ LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
 --judge
 LEFT JOIN (SELECT pcj.CASE_ID
-			       ,CASE WHEN pcj.TEMPORARY_JUDGE_FLAG = 3 THEN '003'
-			             WHEN pcj.TEMPORARY_JUDGE_FLAG = 4 THEN '002' END APPOINT_TABLE_CODE
+			       ,CASE WHEN pcj.TEMPORARY_JUDGE_FLAG = 3 THEN 'continuous'
+			             WHEN pcj.TEMPORARY_JUDGE_FLAG = 4 THEN 'special' END APPOINT_TABLE_TYPE
 			       ,LISTAGG((CASE WHEN  pljt.JUDGE_TYPE_CODE = '01' THEN plj.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  pljt.JUDGE_TYPE_CODE = '01' THEN plj.JUDGE_NAME END)) JUDGE_NAME
 			       ,LISTAGG((CASE WHEN  pljt.JUDGE_TYPE_CODE = '02' THEN plj.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  pljt.JUDGE_TYPE_CODE = '02' THEN plj.JUDGE_NAME END)) ONG_1
 				   ,LISTAGG((CASE WHEN  pljt.JUDGE_TYPE_CODE = '03' THEN plj.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  pljt.JUDGE_TYPE_CODE = '03' THEN plj.JUDGE_NAME END)) ONG_2
@@ -100,8 +103,9 @@ LEFT JOIN (SELECT pcj.CASE_ID
 			JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
 			WHERE pcj.REMOVED_BY = 0
 			AND pljt.JUDGE_TYPE_CODE IN ('01','02','03','12')
-			GROUP BY pcj.CASE_ID ,CASE WHEN pcj.TEMPORARY_JUDGE_FLAG = 3 THEN '003' WHEN pcj.TEMPORARY_JUDGE_FLAG = 4 THEN '002' END
-			) j ON j.CASE_ID = ppa.CASE_ID AND j.APPOINT_TABLE_CODE = ppa.APPOINT_TABLE_CODE 
+			GROUP BY pcj.CASE_ID ,CASE WHEN pcj.TEMPORARY_JUDGE_FLAG = 3 THEN 'continuous' 
+			                           WHEN pcj.TEMPORARY_JUDGE_FLAG = 4 THEN 'special' END
+			) j ON j.CASE_ID = ppa.CASE_ID AND j.APPOINT_TABLE_TYPE = ppat.APPOINT_TABLE_TYPE
 --court
 LEFT JOIN (SELECT plc.COURT_NAME_TH
 			FROM PC_PARAM pp

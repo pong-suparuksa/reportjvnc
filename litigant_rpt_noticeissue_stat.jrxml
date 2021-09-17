@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="litigant_rpt_noticeissue_stat" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="4199760f-33da-4339-8789-a1fd49f3f018">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="536"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="457"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_noticeissue_stat"/>
+	<parameter name="START_DATE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["01/08/2021"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="END_DATE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["16/09/2021"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT pn.SEND_METHOD_BY_NAME 
+       ,COUNT(pni.NOTICE_ID) COUNT_NOTICE_ALL
+       ,SUM(CASE WHEN pnsr.REPORT_DATE IS NOT NULL THEN 1 ELSE 0 END) COUNT_NOTICE_REPORTED
+       ,SUM(CASE WHEN pnsr.REPORT_DATE IS NULL THEN 1 ELSE 0 END) COUNT_NOTICE_NOTREPORTED
+FROM PC_NOTICE_ISSUED pni 
+LEFT JOIN PC_NOTICE pn ON pn.NOTICE_ID = pni.NOTICE_ID AND pn.REMOVED_BY = 0
+LEFT JOIN PC_NOTICE_SEND_RESULT pnsr ON pnsr.NOTICE_ID = pni.NOTICE_ID AND pnsr.REMOVED_BY = 0
+WHERE pni.REMOVED_BY = 0
+AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
+                             AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
+GROUP BY pn.SEND_METHOD_BY_NAME 
+]]>
+	</queryString>
+	<field name="SEND_METHOD_BY_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="SEND_METHOD_BY_NAME"/>
+	</field>
+	<field name="COUNT_NOTICE_ALL" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_NOTICE_ALL"/>
+	</field>
+	<field name="COUNT_NOTICE_REPORTED" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_NOTICE_REPORTED"/>
+	</field>
+	<field name="COUNT_NOTICE_NOTREPORTED" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="COUNT_NOTICE_NOTREPORTED"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="60" splitType="Stretch">
+			<staticText>
+				<reportElement x="162" y="0" width="230" height="30" uuid="5401f25e-9c4f-4bda-ba9f-334ab23ee4a7"/>
+				<textElement textAlignment="Center">
+					<font fontName="THSarabunNew" size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[สถิติการจ่ายหมายให้พนักงานศาล]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="128" y="30" width="298" height="30" uuid="dae044cf-71ff-425b-955f-bf1730a93fa7"/>
+				<textElement textAlignment="Center">
+					<font fontName="THSarabunNew" size="18" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +" ถึง " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))
+]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="30" splitType="Stretch">
+			<textField>
+				<reportElement x="490" y="0" width="65" height="20" uuid="9b7c059c-ab2a-4f97-93f7-e3e4e5659861">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["หน้าที่ "+$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="30" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="255" height="30" uuid="5238e3e0-1038-4ad1-aa49-9efe655fc2ca">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="fbee83c6-beb0-4168-b009-f316462826f4"/>
+				</reportElement>
+				<box leftPadding="4"/>
+				<textElement textAlignment="Left">
+					<font fontName="THSarabunNew" size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ชื่อคิวส่งหมาย :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="255" y="0" width="100" height="30" uuid="5502bdb5-34ea-46c2-8a9f-c61d122af88f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="dfbcb905-210e-452a-8d92-26a754075030"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="THSarabunNew" size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[หมายที่ได้รับ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="355" y="0" width="100" height="30" uuid="106a3f1d-5594-491b-ad04-1205d7995b6c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7b86e8fd-b7bc-44c2-959e-68ca23cef80f"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="THSarabunNew" size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[รายงานแล้ว]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="455" y="0" width="100" height="30" uuid="5010efc4-83b3-4b81-99f2-1699e05b6534">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ca2f3d0d-3000-449a-8319-a1af98f9ef7c"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center">
+					<font fontName="THSarabunNew" size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ยังไม่รายงาน]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="30" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="255" height="25" uuid="0b5e0e32-cca5-4895-b8e2-801642a8f8b0">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="fbee83c6-beb0-4168-b009-f316462826f4"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box leftPadding="10">
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="16"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SEND_METHOD_BY_NAME}==null?"-":$F{SEND_METHOD_BY_NAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="255" y="0" width="100" height="25" uuid="2198762f-6550-4ca3-ae51-8fcf43d1c940">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="dfbcb905-210e-452a-8d92-26a754075030"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="16"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_NOTICE_ALL}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="355" y="0" width="100" height="25" uuid="2fb88bba-38c9-4dfd-a69e-7c30e0a1b0a5">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7b86e8fd-b7bc-44c2-959e-68ca23cef80f"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="16"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_NOTICE_REPORTED}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="455" y="0" width="100" height="25" uuid="3f549087-ccdc-495b-a3e8-c32bd73fea5d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ca2f3d0d-3000-449a-8319-a1af98f9ef7c"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="16"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT_NOTICE_NOTREPORTED}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

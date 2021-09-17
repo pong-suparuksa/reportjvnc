@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="proceed_rpt_appoint_account" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="91e475d7-d1e6-46cb-8b6b-dde87b1765a0">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="proceed_rpt_appointment_cancel" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="91e475d7-d1e6-46cb-8b6b-dde87b1765a0">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-229"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -49,7 +49,7 @@ FROM PC_PROCEED_APPOINT ppa
 JOIN PC_PROCEED_APPOINT_CONTINUE ppac ON ppac.APPOINT_ID = ppa.APPOINT_ID   
 --	  
 JOIN PC_PROCEED_APPOINT_CONTINUE_CANCEL ppacc ON ppacc.APPOINT_CON_ID = ppac.APPOINT_CON_ID AND ppacc.REMOVED_BY = 0
---	
+LEFT JOIN PC_PROCEED_APPOINT_TABLE ppat ON ppat.APPOINT_TABLE_CODE = ppac.APPOINT_TABLE_CODE AND ppat.REMOVED_BY = 0
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
 --
@@ -62,11 +62,16 @@ LEFT JOIN PC_BAIL pb ON pb.CASE_ID = ppa.CASE_ID AND pb.REMOVED_BY = 0
 --
 LEFT JOIN PC_LOOKUP_APPOINT_REASON plar ON plar.APPOINT_REASON_ID = ppac.REASON_APPOINT_ID AND plar.REMOVED_BY = 0
 --
-LEFT JOIN (SELECT pcj.CASE_ID, plj.JUDGE_NAME ,pljt.JUDGE_TYPE_NAME ,pljt.JUDGE_TYPE_CODE
-            FROM PC_CASE_JUDGE pcj
-            LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID AND plj.REMOVED_BY = 0
-            LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
-            AND pcj.REMOVED_BY = 0) jud ON jud.CASE_ID = ppa.CASE_ID AND jud.JUDGE_TYPE_CODE ='01' -- เจ้าของสำนวน
+LEFT JOIN (SELECT pcj.CASE_ID
+				  ,pcj.JUDGE_ID
+				  ,plj.JUDGE_NAME 
+			      ,CASE WHEN pcj.TEMPORARY_JUDGE_FLAG = 3 THEN 'continuous'
+			            WHEN pcj.TEMPORARY_JUDGE_FLAG = 4 THEN 'special' END APPOINT_TABLE_TYPE
+		   FROM PC_CASE_JUDGE pcj 
+		   JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID AND plj.REMOVED_BY = 0
+		   JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+		   WHERE pcj.REMOVED_BY = 0
+		   AND pljt.JUDGE_TYPE_CODE = '01') jud ON jud.CASE_ID = ppa.CASE_ID AND jud.APPOINT_TABLE_TYPE = ppat.APPOINT_TABLE_TYPE 
 --
 WHERE ppac.START_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS')
                            AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
@@ -400,7 +405,7 @@ ORDER BY ppac.START_DATE]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{APPOINT_REASON}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{APPOINT_REASON}==null?"-":$F{APPOINT_REASON}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="622" y="0" width="60" height="25" uuid="66069df9-c0cd-4e73-85fb-87946009520c">
