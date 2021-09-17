@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="litigant_rpt_postems" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2b00589c-6c9f-4881-8017-3aaf15e6fde3">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
@@ -12,12 +12,11 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_freeems"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_freeems_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/07/2020"]]></defaultValueExpression>
 	</parameter>
@@ -25,7 +24,7 @@
 		<defaultValueExpression><![CDATA["14/07/2020"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT
+		<![CDATA[SELECT DISTINCT
 	pni.SEND_NOTICE_DATE,
 	THAILDATE(NVL(pni.SEND_NOTICE_DATE,CURRENT_DATE))                   SEND_NOTICE_DATE_TEXT,
 	
@@ -33,7 +32,7 @@
     NVL(cou.COURT_NAME_TH, ' ') 							             COURT_NAME_TH, 
     NVL(cou.POST_LICENCE,' ')                                            POST_LICENCE,
     
-    NVL(pcl.LITIGANT_NAME ,' ')	                                       		 TO_NAME,
+    NVL(pn.LITIGANT_NAME ,' ')	                                       		 TO_NAME,
     
     pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR  	 CASE_BLACK_NO,
 	pn.CURRENT_POST_CODE,    
@@ -94,569 +93,1180 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="197">
+		<band height="130">
 			<staticText>
-				<reportElement x="150" y="16" width="274" height="25" uuid="f53039cf-6173-4f3e-9ec4-d91328e9774e">
+				<reportElement x="0" y="10" width="300" height="25" uuid="55e4a1dc-a5dc-44cd-8173-d8336e4a24bc">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17" isBold="true"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="17" isBold="true"/>
 				</textElement>
-				<text><![CDATA[หนังสือนำส่งไปรษณีย์ด่วนพิเศษ หมายฟรี]]></text>
+				<text><![CDATA[ใบนำส่งสิ่งของทางไปรษณีย์โดยชำระค่าบริการเป็นเงินเชื่อ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="5" y="41" width="45" height="25" uuid="ccb2e111-d825-4c7d-9a1b-7943c066f1e4">
+				<reportElement x="349" y="10" width="81" height="25" uuid="a2ed23a9-b2dc-4da3-b689-55d032d7921a">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
 				<textElement verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="16"/>
 				</textElement>
-				<text><![CDATA[ใบนำส่งที่]]></text>
+				<text><![CDATA[วัน / เดือน / ปี]]></text>
 			</staticText>
-			<textField>
-				<reportElement x="50" y="41" width="84" height="25" uuid="98661a5f-499a-466b-87b5-547818422d1f">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{ISSUED_ID}==null?" ":$F{ISSUED_ID}]]></textFieldExpression>
-			</textField>
-			<line>
-				<reportElement x="50" y="59" width="87" height="1" uuid="4070e18e-d434-4848-8a62-5bf46a7f6bbe">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-			</line>
-			<textField>
-				<reportElement x="74" y="84" width="84" height="25" uuid="771c2427-54fb-4972-97ac-089c2c10c205">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{POST_LICENCE}==null?" ":$F{POST_LICENCE}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement x="5" y="84" width="69" height="25" uuid="af823f6d-8197-49bc-a359-ac2d47f8a146">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
-				</textElement>
-				<text><![CDATA[ใบอนุญาตเลขที่]]></text>
-			</staticText>
-			<line>
-				<reportElement x="74" y="100" width="87" height="1" uuid="86440524-8cc9-4b7a-97ae-5efc0cec4e51">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-			</line>
-			<textField>
-				<reportElement x="240" y="59" width="325" height="25" uuid="93666a80-d5d2-44e9-9d6a-f012856ef508">
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="430" y="10" width="118" height="25" uuid="2f53a8c0-7dcc-4a85-b196-e63cc0c0a02f">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
-				<box rightPadding="5"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA["3 กันยายน 2564"]]></textFieldExpression>
+				<patternExpression><![CDATA[new java.text.SimpleDateFormat("d MMMM y ", new Locale("TH","th")).format(TODAY( ))]]></patternExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="80" width="348" height="25" uuid="40e110b3-efd8-4ed1-92a9-388da3972cc0">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="16"/>
+				</textElement>
+				<textFieldExpression><![CDATA["ได้ฝากส่งสิ่งของทางไปรษณีย์โดยชำระค่าปรับบริการเป็นเงินเชื่อ ดังรายการต่อไปนี้"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="35" width="300" height="25" uuid="f55a19b8-4ae6-4b4c-af3c-114e8ff9170d">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="17" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new SimpleDateFormat("ระหว่างวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{START_DATE})) + new SimpleDateFormat(" ถึงวันที่ d MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy").parse($P{END_DATE}))]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="35" y="116" width="354" height="25" uuid="9d9190b5-fb61-4b3f-b9de-f37ca74341f8">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
-				</textElement>
-				<textFieldExpression><![CDATA["หัวหน้าที่ทำการไปรษณีย์จังหวัดนครศรีธรรมราช"]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement x="5" y="116" width="30" height="25" uuid="1be6c93a-f171-4164-ab48-06031dc37a9a">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
-				</textElement>
-				<text><![CDATA[เรียน]]></text>
+				<text><![CDATA[ของศาลเยาวชนและครอบครัวจังหวัดนนทบุรี]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="325" y="141" width="230" height="25" uuid="ad621448-3603-40b4-99a2-02b66f2ff30b">
+				<reportElement x="385" y="35" width="115" height="25" uuid="5ff96c92-a9f2-4995-a32d-79fe2350b6ca">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				</reportElement>
 				<textElement verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="16"/>
 				</textElement>
-				<text><![CDATA[ขอฝากส่งไปรษณีย์ด่วนพิเศษ (EMS) ตอบรับในประเทศ]]></text>
+				<text><![CDATA[ใบอนุญาตเลขที่ 8 / 2532]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="115" y="141" width="208" height="25" uuid="b8712959-38bf-4d21-83e5-49cfa28fa16b">
+				<reportElement x="400" y="80" width="119" height="25" uuid="40aca3c3-a5da-4671-8452-a2ff90505451">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="16"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}==null?" ":$F{COURT_NAME_TH}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["ปณ. นนทบุรี"]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="6" y="172" width="98" height="25" uuid="04b653eb-619e-42d7-9b58-094668787d35">
+				<reportElement x="400" y="105" width="142" height="25" uuid="83ce590f-8585-484a-90ef-87973ae08216">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<textElement verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="16"/>
 				</textElement>
-				<text><![CDATA[ตามรายละเอียดต่อไปนี้]]></text>
+				<text><![CDATA[ฝากส่งครั้งที่...............ของเดือน]]></text>
 			</staticText>
-			<line>
-				<reportElement x="133" y="159" width="191" height="1" uuid="e3b8b7f9-948c-4333-9c78-c8b05b298b04">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-			</line>
 		</band>
 	</title>
 	<columnHeader>
-		<band height="80" splitType="Stretch">
+		<band height="40" splitType="Stretch">
 			<staticText>
-				<reportElement x="20" y="30" width="70" height="50" uuid="a34493cc-ab22-4022-bd07-6be4d445580b">
+				<reportElement x="140" y="0" width="61" height="40" uuid="940d5bb5-24e0-4a67-8145-2292a7521b07">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="73fb58b7-9a6a-416e-9f6a-08065f23ac29"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[ปลายทาง]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="32" height="40" uuid="ad41455e-6dc3-4b99-bdeb-db60bc1d1843">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[ลำดับ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="32" y="0" width="108" height="40" uuid="5b46aa39-338a-4270-98be-4471f847075a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<text><![CDATA[หมายเลขดำที่]]></text>
+				<text><![CDATA[ผู้รับ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="90" y="30" width="100" height="50" uuid="f49ee39d-7256-4d1d-a7d7-4a28c1cbbc55">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="73fb58b7-9a6a-416e-9f6a-08065f23ac29"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
-				</textElement>
-				<text><![CDATA[ชื่อ -นามสกุล ผู้รับ]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="190" y="30" width="55" height="50" uuid="f67027df-7984-49ca-a8b2-88c28a6c586d">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d588a7c9-96ba-40a2-9904-6d7fa3188d15"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
-				</textElement>
-				<text><![CDATA[ปลายทาง รหัสไปรฯ]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="245" y="30" width="39" height="50" uuid="031a98c0-75bc-419b-a71e-024e695b87ba">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f83f5294-165e-4078-9b24-e8c9e405c6cd"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
-				</textElement>
-				<text><![CDATA[ขนาด]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="284" y="30" width="48" height="50" uuid="a880b592-8a94-4896-b762-bd613612a501">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="94d57d1d-fd73-4ad5-9232-21adb81b8880"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<box leftPadding="2">
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
-				</textElement>
-				<text><![CDATA[ค่าบริการ ต่อซอง]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="332" y="30" width="52" height="50" uuid="4ea07b8b-9176-43a2-b33c-95f47af4f178">
+				<reportElement x="368" y="20" width="52" height="20" uuid="0e824eb4-ac2e-4304-b66f-1eebd2c07773">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="64442a30-7b93-4f6c-bb14-1759ea5499f3"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<box leftPadding="5">
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<text><![CDATA[ หมายเลข    EMS]]></text>
+				<text><![CDATA[พัสดุ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="384" y="30" width="100" height="50" uuid="4fbacc5f-9dcb-49f8-af93-380f4a661c6d">
+				<reportElement x="201" y="0" width="219" height="20" uuid="fe72b932-d271-45bf-afb8-2678e9523fbe">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[เลขที่บริการ 13 หลัก]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="256" y="20" width="50" height="20" uuid="ba1ca826-1f5b-4d7f-8544-0e4ca2bb128f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f83f5294-165e-4078-9b24-e8c9e405c6cd"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[ธรรมดา]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="420" y="0" width="63" height="40" uuid="57ca5f13-0de6-4fb2-abc6-951916c05857">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4054e056-136e-4045-9d2e-a5f5a7a3f6e7"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<text><![CDATA[วันที่ส่งคืน ใบตอบรับ (ป.133 พิเศษ)]]></text>
+				<text><![CDATA[ค่าบริการ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="484" y="30" width="70" height="50" uuid="8e905629-37a9-467a-8742-b01a992fce81">
+				<reportElement x="483" y="0" width="70" height="40" uuid="70684588-8cdb-4b82-ba58-d8f452d99136">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<text><![CDATA[REMARK]]></text>
+				<text><![CDATA[หมายเหตุ ศย.301.009/]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="0" y="0" width="384" height="30" uuid="3af6ffc2-f935-40fe-b25d-a1eeba00d218">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="16"/>
-				</textElement>
-				<text><![CDATA[เจ้าหน้าที่ศาลกรอก]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="384" y="0" width="170" height="30" uuid="9a707999-38f1-45f7-9074-c343b6a5e86f">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="16"/>
-				</textElement>
-				<text><![CDATA[เจ้าหน้าที่ กสท.กรอก]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="0" y="30" width="20" height="50" uuid="0c85e383-590b-458c-9e59-e11914dfa373">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
+				<reportElement x="306" y="20" width="62" height="20" uuid="0a321c00-68bb-4809-bbae-1085ec87547f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="94d57d1d-fd73-4ad5-9232-21adb81b8880"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				<box leftPadding="2">
+					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<text><![CDATA[ที่]]></text>
+				<text><![CDATA[EMS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="201" y="20" width="55" height="20" uuid="3d5f7219-bf94-44da-a556-a656f6646aeb">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d588a7c9-96ba-40a2-9904-6d7fa3188d15"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[ลงทะเบียน]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="25" splitType="Stretch">
+		<band height="20" splitType="Stretch">
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="20" y="0" width="70" height="25" uuid="aefacc63-2d7c-4702-b26f-ad5b4fe0138d">
+				<reportElement stretchType="ContainerHeight" x="32" y="0" width="108" height="20" uuid="2b7475bd-a24b-42c2-8dfd-e2faa2149e01">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="190" y="0" width="55" height="25" uuid="e3b07b86-1d80-42bd-b465-4c666dbfd509">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d588a7c9-96ba-40a2-9904-6d7fa3188d15"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{CURRENT_POST_CODE}==null?" ":$F{CURRENT_POST_CODE}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="245" y="0" width="39" height="25" uuid="7a0656d1-a575-46a0-b6d9-1ca7af903455">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f83f5294-165e-4078-9b24-e8c9e405c6cd"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				<box leftPadding="3">
+					<pen lineWidth="0.5"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ENVELOP_SIZE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{TO_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="284" y="0" width="48" height="25" uuid="7678035d-1d4d-437b-bf40-64ba11112424">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="94d57d1d-fd73-4ad5-9232-21adb81b8880"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<box rightPadding="3">
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{SEND_FEE}==null?0
-:new java.text.DecimalFormat("#,##0").format($F{SEND_FEE})]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="332" y="0" width="52" height="25" uuid="198efa85-1c64-4046-b203-ba91dc302a3f">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="64442a30-7b93-4f6c-bb14-1759ea5499f3"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				<reportElement stretchType="ContainerHeight" x="0" y="0" width="32" height="20" uuid="0b29ae41-06f1-4759-9a7b-72f5d602ec26">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
 				</reportElement>
 				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{EMS_CODE}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="384" y="0" width="100" height="25" uuid="bd7e83db-4e00-49bb-bb30-fa6c7045ede4">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4054e056-136e-4045-9d2e-a5f5a7a3f6e7"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
-				</textElement>
-				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="484" y="0" width="70" height="25" uuid="9db8eff2-ed27-4917-8ced-5539b61b106e">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-					<property name="com.jaspersoft.studio.unit.x" value="px"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
-				</textElement>
-				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="0" y="0" width="20" height="25" uuid="8566c875-5a6a-4b21-a558-6c080aceba07">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<box rightPadding="3">
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="90" y="0" width="100" height="25" uuid="9e6b6290-13ed-4dcc-87fa-1befa79744c2">
+				<reportElement stretchType="ContainerHeight" x="140" y="0" width="61" height="20" uuid="e49daad9-3d74-4874-b864-bf3c2fe1127d">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{TO_NAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{CURRENT_POST_CODE}==null?" ":$F{CURRENT_POST_CODE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="420" y="0" width="63" height="20" uuid="ac756e3a-c198-4a43-bc7e-5daa06f5f429">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4054e056-136e-4045-9d2e-a5f5a7a3f6e7"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="256" y="0" width="50" height="20" uuid="5a37c5ec-4e42-4b2e-ba11-cfbf21ecc93b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f83f5294-165e-4078-9b24-e8c9e405c6cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="368" y="0" width="52" height="20" uuid="26b17686-a323-4647-87db-a13134bffaef">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="64442a30-7b93-4f6c-bb14-1759ea5499f3"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="306" y="0" width="62" height="20" uuid="01edd33f-4a95-4801-a1f7-fd05ec41fe9e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="94d57d1d-fd73-4ad5-9232-21adb81b8880"/>
+				</reportElement>
+				<box rightPadding="3">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="201" y="0" width="55" height="20" uuid="f84187fa-db06-402c-ba8f-50a2a6232302">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d588a7c9-96ba-40a2-9904-6d7fa3188d15"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="483" y="0" width="70" height="20" uuid="4a14e4d1-430e-4748-83c8-f31718758d71">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
 	<summary>
-		<band height="125" splitType="Stretch">
+		<band height="260" splitType="Stretch">
 			<staticText>
-				<reportElement x="168" y="0" width="102" height="25" uuid="9bc70061-1957-4a7f-b07f-1d66ff4d35c6">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				<reportElement stretchType="ContainerHeight" x="45" y="140" width="34" height="20" uuid="b59e0834-76a1-439d-a6ff-0800a8eced43">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="219" y="220" width="90" height="20" uuid="67882681-ff36-429c-b53e-66f828324b6b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="352" y="80" width="202" height="20" uuid="7999e170-c6c4-405e-a9b7-44a181a1b448">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
-				</textElement>
-				<text><![CDATA[คิดเป็นราคาค่าส่งหมาย]]></text>
-			</staticText>
-			<textField>
-				<reportElement x="270" y="0" width="62" height="25" uuid="e43b67a0-3611-4163-bdcd-9d8303ca5147">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="94d57d1d-fd73-4ad5-9232-21adb81b8880"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<box rightPadding="3">
+				<box>
 					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
-				</textElement>
-				<textFieldExpression><![CDATA[0]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement x="332" y="0" width="36" height="25" uuid="db06c355-9ee4-4f39-85da-aee27f1599b0">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="14"/>
 				</textElement>
-				<text><![CDATA[บาท]]></text>
+				<text><![CDATA[ได้ตรวจสอบความถูกต้องแล้ว]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="24" y="70" width="24" height="25" uuid="4d684f4b-e7bc-4de4-bf64-cc164cdebaaa">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				<reportElement stretchType="ContainerHeight" x="219" y="100" width="90" height="20" uuid="8a480c5c-be64-41e7-81be-76bab4264595">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<text><![CDATA[ลงชื่อ]]></text>
+				<text><![CDATA[รวมเงิน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="168" y="70" width="110" height="25" uuid="8c6924f5-00a0-4268-b768-b82ad03e8db7">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				<reportElement stretchType="ContainerHeight" x="45" y="120" width="34" height="20" uuid="7458d7c0-65ae-43f3-b69a-dccc8e08fd2f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[ชิ้น]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="140" y="0" width="61" height="20" uuid="4d26f5ac-022a-4413-9c3c-9f47aff1fb0a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="219" y="120" width="90" height="20" uuid="9c0a5631-ace7-4b0a-844d-5db76dc0edbf">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[{1 + 2}]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="0" y="0" width="32" height="20" uuid="c3aeb5b1-04ff-47eb-a43b-bf0aea22f25d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="129" y="120" width="34" height="20" uuid="179dd5bf-36b3-4020-bdad-6698aa6d33e3">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[ชิ้น]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="45" y="200" width="34" height="20" uuid="b4a6365d-b7b8-4ce5-86ee-fb376e8f818c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="219" y="180" width="90" height="20" uuid="2c795972-c8fc-4079-9fea-f210cff2878c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="129" y="140" width="34" height="20" uuid="eaa0afd9-c698-4a3c-ac1a-4f044653f98d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="163" y="200" width="56" height="20" uuid="a5cd4bbb-8d4f-4268-92a0-cf49d6e5affc">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="219" y="200" width="90" height="20" uuid="f0b77a7d-6032-425c-9580-b2fcee0f860a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="140" y="40" width="351" height="20" uuid="ae856435-286b-4e80-8c23-e4fa2826ac4f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[รวมทั้งสิ้น]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="0" y="180" width="45" height="20" uuid="ad50b722-9311-4c00-b1ee-ee0dc4b8b742">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4054e056-136e-4045-9d2e-a5f5a7a3f6e7"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[พัสดุ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="0" y="220" width="45" height="20" uuid="1cbd1566-e096-4545-ba37-9d6b033ec4c7">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4054e056-136e-4045-9d2e-a5f5a7a3f6e7"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[ยอดรวม]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="129" y="100" width="90" height="20" uuid="7d7e639a-5135-4190-8d7a-7b8d60a2a248">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[ต่างประเทศ(ยอดรวม)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="350" y="160" width="204" height="20" uuid="ad3c6e87-650f-494b-b12d-773acebad730">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14"/>
+				</textElement>
+				<text><![CDATA[ตราประจำวัน     ลงชื่อ.........................................]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="79" y="140" width="50" height="20" uuid="d4d30899-8001-4135-9d99-a32e7f08824c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="0" y="200" width="45" height="20" uuid="188b7993-d329-47f4-a18a-215aa82ce7c9">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4054e056-136e-4045-9d2e-a5f5a7a3f6e7"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[ธรรมดา]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="140" y="20" width="280" height="20" uuid="85a7a78e-73d2-4449-9b05-ffffdc8c6d6b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box leftPadding="2">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[ไปรษณีย์ภัณฑ์ธรรมดารวม Express จำนวน .....1....... ชิ้น]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="129" y="220" width="34" height="20" uuid="9e459687-cfa4-4e35-a6a2-912b51d1df9b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="389" y="120" width="165" height="20" uuid="7a2ca7c4-7652-483d-8181-ab3086d0164a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14"/>
 				</textElement>
 				<text><![CDATA[ผู้รับผิดชอบในการฝากส่ง]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="24" y="100" width="36" height="25" uuid="ae9ec068-8549-4d25-a449-41aac838748e">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				<reportElement stretchType="ContainerHeight" x="0" y="100" width="45" height="40" uuid="fbfbe613-da96-476e-9d6e-472d6397bf9e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4054e056-136e-4045-9d2e-a5f5a7a3f6e7"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<text><![CDATA[ตำแหน่ง]]></text>
+				<text><![CDATA[ประเภท บริการ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="168" y="100" width="110" height="25" uuid="ddcab86d-5308-4921-b233-a10d24de4fce">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				<reportElement stretchType="ContainerHeight" x="129" y="160" width="34" height="20" uuid="60b19dd8-dfe2-436f-9660-3519e9702ad0">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<text><![CDATA[วันเดือนปีที่จ่ายหมาย]]></text>
+				<text><![CDATA[]]></text>
 			</staticText>
-			<textField>
-				<reportElement x="278" y="100" width="170" height="25" uuid="9b2902f4-f26d-4367-adc9-780713b3b638">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-					<property name="com.jaspersoft.studio.unit.y" value="px"/>
-				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{SEND_NOTICE_DATE_TEXT}==null?" ":$F{SEND_NOTICE_DATE_TEXT}]]></textFieldExpression>
-			</textField>
 			<staticText>
-				<reportElement x="466" y="70" width="74" height="25" uuid="9dd1b97e-03e9-4b16-967f-be7abd80127a">
+				<reportElement stretchType="ContainerHeight" x="163" y="160" width="56" height="20" uuid="c444f1b7-d118-47ff-b738-9dd764f52653">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="0" y="140" width="45" height="20" uuid="454cf021-6585-49b7-9e01-331996da98ef">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4054e056-136e-4045-9d2e-a5f5a7a3f6e7"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[ลงทะเบียน]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="352" y="60" width="202" height="20" uuid="a32d265b-b1f6-4344-8780-d79d9053a078">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14"/>
+				</textElement>
+				<text><![CDATA[(ตัวอักษร).......................................................................]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="79" y="200" width="50" height="20" uuid="d885c4d2-6ecc-440f-9a49-981aa703356d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="45" y="160" width="34" height="20" uuid="bec514cf-4d9b-4818-ae8b-5c0722254400">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="45" y="180" width="34" height="20" uuid="dce6144c-351f-44b0-aa1d-9e5c0c404569">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="79" y="120" width="50" height="20" uuid="12a2414d-15e3-4dc3-9f08-6dc96c21dc93">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[เงิน{1}]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="79" y="220" width="50" height="20" uuid="3a18b829-5d95-4728-abf4-38874d9ed422">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="45" y="100" width="84" height="20" uuid="d6c53fa8-81b9-418b-9cc4-267ed19d2baa">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[ในประเทศ(ยอดรวม)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="129" y="180" width="34" height="20" uuid="915ba616-b428-4ba2-9ff8-3fb17da21fd0">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="219" y="140" width="90" height="20" uuid="538d888f-e962-4c50-8c32-25db31061155">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="163" y="180" width="56" height="20" uuid="56fbe553-1761-483e-a093-775b1eabc2ad">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="163" y="220" width="56" height="20" uuid="49ba84db-663a-45b9-ba1f-740db6c51bfe">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="45" y="220" width="34" height="20" uuid="38fd495b-cade-4a96-8e44-5984e00281d1">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="219" y="160" width="90" height="20" uuid="53a4e496-940c-4cd6-87af-0db0f78b8c90">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="400" y="180" width="154" height="20" uuid="27c884d5-2be5-4789-b644-967df35f9467">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14"/>
 				</textElement>
 				<text><![CDATA[เจ้าหน้าที่รับฝาก]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="283" y="70" width="24" height="25" uuid="7f4a496a-4503-4123-a3b7-8aac2c4e37d0">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				<reportElement stretchType="ContainerHeight" x="389" y="100" width="165" height="20" uuid="315f3042-ae6e-4049-8764-d63cf4f3aa51">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14"/>
 				</textElement>
-				<text><![CDATA[ลงชื่อ]]></text>
+				<text><![CDATA[ลงชื่อ.....................................................]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="79" y="160" width="50" height="20" uuid="47b3407c-60b4-422b-8980-6c896fc464c9">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="32" y="0" width="108" height="20" uuid="f2e186e4-5261-449b-bbfe-68c606b7d68c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="163" y="140" width="56" height="20" uuid="f9d8d75f-3243-4747-8680-93bcad342371">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="163" y="120" width="56" height="20" uuid="c33dbfe4-ec27-4a44-947a-471101d36395">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[งาน{2}]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="389" y="140" width="165" height="20" uuid="e18c73d2-2472-494d-bbc5-44bb511bc2cc">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14"/>
+				</textElement>
+				<text><![CDATA[ได้ตรวจสอบและรับฝากไว้ถูกต้องแล้ว]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="79" y="180" width="50" height="20" uuid="d471ad43-7491-45d1-a22a-2666c032694e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="0" y="160" width="45" height="20" uuid="56714b40-b47a-4156-bf57-c32e47d86e40">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4054e056-136e-4045-9d2e-a5f5a7a3f6e7"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[EMS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="129" y="200" width="34" height="20" uuid="d790a773-0cd7-4502-9ab2-e56856d4c0c7">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="483" y="0" width="70" height="20" uuid="546ccc46-0db9-4f19-8f1f-067e37059cab">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="420" y="0" width="63" height="20" uuid="f6557d76-aa18-4cb5-917f-c079d7723678">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4054e056-136e-4045-9d2e-a5f5a7a3f6e7"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="201" y="0" width="55" height="20" uuid="47f3db9b-3605-4e7e-b835-c92df8eb364b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d588a7c9-96ba-40a2-9904-6d7fa3188d15"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="368" y="0" width="52" height="20" uuid="54ae97ce-7a9a-44ee-8e85-0bfabe070278">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="64442a30-7b93-4f6c-bb14-1759ea5499f3"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="306" y="0" width="62" height="20" uuid="fb3e1cfd-aab3-42ab-8d70-0cd0c92daa23">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="94d57d1d-fd73-4ad5-9232-21adb81b8880"/>
+				</reportElement>
+				<box rightPadding="3">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="256" y="0" width="50" height="20" uuid="76cc75d4-3498-4f9c-8164-56200c8f40f9">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f83f5294-165e-4078-9b24-e8c9e405c6cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="420" y="20" width="63" height="20" uuid="3ebc9cec-4b1d-4a09-b3df-bca9808a7d32">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4054e056-136e-4045-9d2e-a5f5a7a3f6e7"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="420" y="40" width="63" height="20" uuid="73c0eeb6-9f0b-40db-a5c0-6d6ab53591f5">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4054e056-136e-4045-9d2e-a5f5a7a3f6e7"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="483" y="40" width="70" height="20" uuid="09074511-9f78-4674-98dc-9e27213091b6">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement stretchType="ContainerHeight" x="483" y="20" width="70" height="20" uuid="b55bbf90-434b-4a1c-9655-d99035e23f8e">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="14"/>
+				</textElement>
+				<text><![CDATA[]]></text>
 			</staticText>
 		</band>
 	</summary>
