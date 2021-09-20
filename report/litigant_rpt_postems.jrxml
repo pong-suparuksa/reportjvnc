@@ -11,82 +11,54 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_postems"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN121"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="721"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="268"/>
 	<parameter name="START_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["01/03/2021"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["01/09/2021"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="END_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["31/03/2021"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["30/09/2021"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT DISTINCT
-		pni.SEND_NOTICE_DATE,
-		THAILDATE(NVL(pni.SEND_NOTICE_DATE,CURRENT_DATE))                    SEND_NOTICE_DATE_TEXT,
-        pni.ISSUED_ID													       ISSUED_ID,
-        NVL(plc.COURT_NAME_TH, '-') 					                       COURT_NAME_TH, 
-        NVL(plc.POST_LICENCE,'-')                                              POST_LICENCE,
-	    NVL(pn.LITIGANT_NAME,'-')	                                  		   TO_NAME,
-        pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR         CASE_BLACK_NO,
-		pn.CURRENT_POST_CODE,    
-		'ขนาดซอง N/A'                                                     	   ENVELOP_SIZE,
-		pn.SEND_FEE,
-		NVL(pni.EMS_CODE,' ')         								   	       EMS_CODE
-
-FROM PC_NOTICE pn
---
-LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID AND pc.REMOVED_BY = 0
-LEFT JOIN PC_NOTICE_ISSUED pni ON pn.NOTICE_ID = pni.NOTICE_ID AND pn.REMOVED_BY = 0
---
-LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID
-LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pn.COURT_ID AND plc.REMOVED_BY = 0
---
-WHERE pn.SEND_METHOD = 1 
-AND NVL(pni.HAS_MONEY,1) = 1 
-AND pn.SEND_FEE > 0
-AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
-                              AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')]]>
+		<![CDATA[SELECT NVL(pwds.RECEIVER_NAME,'-') RECEIVER_NAME 
+ 	    ,NVL(pwdsi.DESTINATION,'-') DESTINATION 
+ 	    ,CASE WHEN pwdst.DOCUMENT_SENDPOST_TYPE_CODE = '001' THEN pwdsi.PARCEL_NO ELSE '-' END DOC_REGISTER_NO
+ 	    ,CASE WHEN pwdst.DOCUMENT_SENDPOST_TYPE_CODE = '002' THEN pwdsi.PARCEL_NO ELSE '-' END DOC_EMS_NO
+ 	    ,NVL(pwds.DOCUMENT_NO,'-')  DOCUMENT_NO
+ 	    ,NVL(pwdsi.NOTE,'-')  NOTE 
+ 	    --
+ FROM PC_WF_DOCUMENT_SEND_ITEM pwdsi
+ LEFT JOIN PC_WF_DOCUMENT_SEND pwds ON pwdsi.WF_DOCUMENT_SEND_ID = pwds.WF_DOCUMENT_SEND_ID AND pwdsi.REMOVED_BY = 0
+ LEFT JOIN PC_WF_DOCUMENT_SENDPOST_TYPE pwdst ON pwdst.DOCUMENT_SENDPOST_TYPE_ID = pwdsi.DOCUMENT_SENDPOST_TYPE_ID AND pwdst.REMOVED_BY = 0
+ WHERE pwdsi.REMOVED_BY = 0
+ AND pwds.DOCUMENT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                            AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+ AND pwdst.DOCUMENT_SENDPOST_TYPE_CODE = '004']]>
 	</queryString>
-	<field name="SEND_NOTICE_DATE" class="java.util.Date">
-		<property name="com.jaspersoft.studio.field.label" value="SEND_NOTICE_DATE"/>
+	<field name="RECEIVER_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="RECEIVER_NAME"/>
 	</field>
-	<field name="SEND_NOTICE_DATE_TEXT" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="SEND_NOTICE_DATE_TEXT"/>
+	<field name="DESTINATION" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESTINATION"/>
 	</field>
-	<field name="ISSUED_ID" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.label" value="ISSUED_ID"/>
+	<field name="DOC_REGISTER_NO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DOC_REGISTER_NO"/>
 	</field>
-	<field name="COURT_NAME_TH" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
+	<field name="DOC_EMS_NO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DOC_EMS_NO"/>
 	</field>
-	<field name="POST_LICENCE" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="POST_LICENCE"/>
+	<field name="DOCUMENT_NO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DOCUMENT_NO"/>
 	</field>
-	<field name="TO_NAME" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="TO_NAME"/>
+	<field name="NOTE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="NOTE"/>
 	</field>
-	<field name="CASE_BLACK_NO" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="CASE_BLACK_NO"/>
-	</field>
-	<field name="CURRENT_POST_CODE" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="CURRENT_POST_CODE"/>
-	</field>
-	<field name="ENVELOP_SIZE" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="ENVELOP_SIZE"/>
-	</field>
-	<field name="SEND_FEE" class="java.lang.Double">
-		<property name="com.jaspersoft.studio.field.label" value="SEND_FEE"/>
-	</field>
-	<field name="EMS_CODE" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="EMS_CODE"/>
-	</field>
-	<variable name="TOTAL" class="java.math.BigDecimal" calculation="Sum">
-		<variableExpression><![CDATA[$F{SEND_FEE}]]></variableExpression>
-	</variable>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -303,7 +275,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="20" splitType="Stretch">
+		<band height="40" splitType="Stretch">
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="32" y="0" width="108" height="20" uuid="aefacc63-2d7c-4702-b26f-ad5b4fe0138d">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
@@ -315,7 +287,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<textElement textAlignment="Left" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{TO_NAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{RECEIVER_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="201" y="0" width="55" height="20" uuid="e3b07b86-1d80-42bd-b465-4c666dbfd509">
@@ -327,7 +299,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{DOC_REGISTER_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="256" y="0" width="50" height="20" uuid="7a0656d1-a575-46a0-b6d9-1ca7af903455">
@@ -352,7 +324,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{DOC_EMS_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="368" y="0" width="52" height="20" uuid="198efa85-1c64-4046-b203-ba91dc302a3f">
@@ -390,7 +362,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{DOCUMENT_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="0" y="0" width="32" height="20" uuid="a8a1cf09-8b79-4f3f-ab50-1f894f4dbc19">
@@ -415,14 +387,10 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CURRENT_POST_CODE}==null?" ":$F{CURRENT_POST_CODE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{DESTINATION}]]></textFieldExpression>
 			</textField>
-		</band>
-	</detail>
-	<summary>
-		<band height="260" splitType="Stretch">
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="0" y="0" width="553" height="20" uuid="6d83431b-dcb9-498d-9bcd-94a54950eb14">
+				<reportElement stretchType="ContainerHeight" x="0" y="20" width="553" height="20" uuid="ff89468f-bada-4351-a710-cd0b28aa8813">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -432,10 +400,14 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA["หมายเหตุ  แยกใบเสร็จเรียกเก็บเงินจากคดี ยชพ ดำ 268/64    ปณ 871 ลว 3 ก.ย.2564"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{NOTE}]]></textFieldExpression>
 			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="260" splitType="Stretch">
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="32" y="20" width="108" height="20" uuid="a97757c1-8176-4176-aef6-4182f8cbc58e">
+				<reportElement stretchType="ContainerHeight" x="32" y="0" width="108" height="20" uuid="a97757c1-8176-4176-aef6-4182f8cbc58e">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -448,7 +420,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="0" y="20" width="32" height="20" uuid="ecbeb9c9-7980-417e-af9c-1065d59bf71a">
+				<reportElement stretchType="ContainerHeight" x="0" y="0" width="32" height="20" uuid="ecbeb9c9-7980-417e-af9c-1065d59bf71a">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
 				</reportElement>
 				<box>
@@ -460,7 +432,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="256" y="20" width="50" height="20" uuid="b6e40462-0b2f-4319-b2e5-229593c0ac8c">
+				<reportElement stretchType="ContainerHeight" x="256" y="0" width="50" height="20" uuid="b6e40462-0b2f-4319-b2e5-229593c0ac8c">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f83f5294-165e-4078-9b24-e8c9e405c6cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -473,7 +445,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="140" y="20" width="61" height="20" uuid="a6198f79-63f3-41ad-abb4-ae7f8442d38b">
+				<reportElement stretchType="ContainerHeight" x="140" y="0" width="61" height="20" uuid="a6198f79-63f3-41ad-abb4-ae7f8442d38b">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -486,7 +458,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="420" y="20" width="63" height="20" uuid="2a1726bb-fd04-4745-9849-327fdfa57ae2">
+				<reportElement stretchType="ContainerHeight" x="420" y="0" width="63" height="20" uuid="2a1726bb-fd04-4745-9849-327fdfa57ae2">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4054e056-136e-4045-9d2e-a5f5a7a3f6e7"/>
 				</reportElement>
 				<box>
@@ -498,7 +470,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="483" y="20" width="70" height="20" uuid="e6eb8b8b-a756-4ac3-9181-74a6b74fdf44">
+				<reportElement stretchType="ContainerHeight" x="483" y="0" width="70" height="20" uuid="e6eb8b8b-a756-4ac3-9181-74a6b74fdf44">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -512,7 +484,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="306" y="20" width="62" height="20" uuid="ca7d7605-533a-4f85-af9f-afaa1ec97766">
+				<reportElement stretchType="ContainerHeight" x="306" y="0" width="62" height="20" uuid="ca7d7605-533a-4f85-af9f-afaa1ec97766">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="94d57d1d-fd73-4ad5-9232-21adb81b8880"/>
 				</reportElement>
 				<box rightPadding="3">
@@ -524,7 +496,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="201" y="20" width="55" height="20" uuid="4e30abdd-8e6a-4e50-8907-d9db4d9effe3">
+				<reportElement stretchType="ContainerHeight" x="201" y="0" width="55" height="20" uuid="4e30abdd-8e6a-4e50-8907-d9db4d9effe3">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="d588a7c9-96ba-40a2-9904-6d7fa3188d15"/>
 				</reportElement>
 				<box>
@@ -536,7 +508,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="368" y="20" width="52" height="20" uuid="8888abde-08da-4838-b32d-4d5c0c766cfb">
+				<reportElement stretchType="ContainerHeight" x="368" y="0" width="52" height="20" uuid="8888abde-08da-4838-b32d-4d5c0c766cfb">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="64442a30-7b93-4f6c-bb14-1759ea5499f3"/>
 				</reportElement>
 				<box>
@@ -548,7 +520,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="140" y="40" width="280" height="20" uuid="6f87974b-85f5-4ffd-b638-f0cbfc0ae2f5">
+				<reportElement stretchType="ContainerHeight" x="140" y="20" width="280" height="20" uuid="6f87974b-85f5-4ffd-b638-f0cbfc0ae2f5">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
 				</reportElement>
 				<box leftPadding="2">
@@ -560,7 +532,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[ไปรษณีย์ภัณฑ์ธรรมดารวม Express จำนวน .....1....... ชิ้น]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="420" y="40" width="63" height="20" uuid="5433d236-0dae-4d78-86c1-41e10d4fc0aa">
+				<reportElement stretchType="ContainerHeight" x="420" y="20" width="63" height="20" uuid="5433d236-0dae-4d78-86c1-41e10d4fc0aa">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4054e056-136e-4045-9d2e-a5f5a7a3f6e7"/>
 				</reportElement>
 				<box>
@@ -572,7 +544,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="483" y="40" width="70" height="20" uuid="ea2ebecd-0a41-47f8-b922-16e3d9381f20">
+				<reportElement stretchType="ContainerHeight" x="483" y="20" width="70" height="20" uuid="ea2ebecd-0a41-47f8-b922-16e3d9381f20">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -586,7 +558,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="420" y="60" width="63" height="20" uuid="2652e6f9-db25-44b0-bca9-1e5c8f51f893">
+				<reportElement stretchType="ContainerHeight" x="420" y="40" width="63" height="20" uuid="2652e6f9-db25-44b0-bca9-1e5c8f51f893">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4054e056-136e-4045-9d2e-a5f5a7a3f6e7"/>
 				</reportElement>
 				<box>
@@ -598,7 +570,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="483" y="60" width="70" height="20" uuid="57e9726e-8c1c-496b-a277-adb4204c8a3c">
+				<reportElement stretchType="ContainerHeight" x="483" y="40" width="70" height="20" uuid="57e9726e-8c1c-496b-a277-adb4204c8a3c">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -612,7 +584,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="140" y="60" width="279" height="20" uuid="d57d5c59-e1af-41d6-936b-5c75604a58c2">
+				<reportElement stretchType="ContainerHeight" x="140" y="40" width="279" height="20" uuid="d57d5c59-e1af-41d6-936b-5c75604a58c2">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -628,7 +600,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[รวมทั้งสิ้น]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="352" y="80" width="202" height="20" uuid="42174a12-0a5e-4207-a55a-8399bd96afcb">
+				<reportElement stretchType="ContainerHeight" x="352" y="60" width="202" height="20" uuid="42174a12-0a5e-4207-a55a-8399bd96afcb">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -644,7 +616,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[(ตัวอักษร).......................................................................]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="352" y="100" width="202" height="20" uuid="eac99109-752c-4f88-8a3c-264ef3a60ca7">
+				<reportElement stretchType="ContainerHeight" x="352" y="80" width="202" height="20" uuid="eac99109-752c-4f88-8a3c-264ef3a60ca7">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -660,7 +632,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[ได้ตรวจสอบความถูกต้องแล้ว]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="389" y="120" width="165" height="20" uuid="821e7fee-1341-4d75-8e1a-65eb3f5d6ee7">
+				<reportElement stretchType="ContainerHeight" x="389" y="100" width="165" height="20" uuid="821e7fee-1341-4d75-8e1a-65eb3f5d6ee7">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -676,7 +648,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[ลงชื่อ.........................................................]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="389" y="140" width="165" height="20" uuid="0635ed73-371f-41d7-9422-f323eafe2ac5">
+				<reportElement stretchType="ContainerHeight" x="389" y="120" width="165" height="20" uuid="0635ed73-371f-41d7-9422-f323eafe2ac5">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -692,7 +664,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[ผู้รับผิดชอบในการฝากส่ง]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="389" y="160" width="165" height="20" uuid="c6aea9ee-c955-4b43-81af-280f44a74ac0">
+				<reportElement stretchType="ContainerHeight" x="389" y="140" width="165" height="20" uuid="c6aea9ee-c955-4b43-81af-280f44a74ac0">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="9e33b2e2-4826-4dab-86b0-ae1848738458"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -740,7 +712,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[เจ้าหน้าที่รับฝาก]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="45" y="140" width="34" height="20" uuid="2182f72c-df34-4d2c-b527-149f78a7e6d0">
+				<reportElement stretchType="ContainerHeight" x="45" y="120" width="34" height="20" uuid="2182f72c-df34-4d2c-b527-149f78a7e6d0">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -754,7 +726,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[ชิ้น]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="45" y="120" width="84" height="20" uuid="7e823bf9-d13f-4dd4-940e-a2fc52b1bf92">
+				<reportElement stretchType="ContainerHeight" x="45" y="100" width="84" height="20" uuid="7e823bf9-d13f-4dd4-940e-a2fc52b1bf92">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -768,7 +740,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[ในประเทศ(ยอดรวม)]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="0" y="120" width="45" height="40" uuid="d974a6a9-6b6c-4764-ba77-a16ec8b681f2">
+				<reportElement stretchType="ContainerHeight" x="0" y="100" width="45" height="40" uuid="d974a6a9-6b6c-4764-ba77-a16ec8b681f2">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4054e056-136e-4045-9d2e-a5f5a7a3f6e7"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -781,7 +753,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[ประเภท บริการ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="0" y="160" width="45" height="20" uuid="665b55be-548d-4df8-b3cc-ae02a9dac503">
+				<reportElement stretchType="ContainerHeight" x="0" y="140" width="45" height="20" uuid="665b55be-548d-4df8-b3cc-ae02a9dac503">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4054e056-136e-4045-9d2e-a5f5a7a3f6e7"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -795,7 +767,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[ลงทะเบียน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="0" y="180" width="45" height="20" uuid="5c2c32e7-fac7-4da9-9d07-3d93e8299742">
+				<reportElement stretchType="ContainerHeight" x="0" y="160" width="45" height="20" uuid="5c2c32e7-fac7-4da9-9d07-3d93e8299742">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4054e056-136e-4045-9d2e-a5f5a7a3f6e7"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -809,7 +781,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[EMS]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="0" y="200" width="45" height="20" uuid="2deaaa7c-cdc9-4138-a68f-5bfd76b513a3">
+				<reportElement stretchType="ContainerHeight" x="0" y="180" width="45" height="20" uuid="2deaaa7c-cdc9-4138-a68f-5bfd76b513a3">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4054e056-136e-4045-9d2e-a5f5a7a3f6e7"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -823,7 +795,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[พัสดุ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="0" y="220" width="45" height="20" uuid="1d095ec0-3b87-4db6-8c6a-b2e9e4e65449">
+				<reportElement stretchType="ContainerHeight" x="0" y="200" width="45" height="20" uuid="1d095ec0-3b87-4db6-8c6a-b2e9e4e65449">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4054e056-136e-4045-9d2e-a5f5a7a3f6e7"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -837,7 +809,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[ธรรมดา]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="0" y="240" width="45" height="20" uuid="1581096b-c29f-4ef0-8544-ae72c1bb34fc">
+				<reportElement stretchType="ContainerHeight" x="0" y="220" width="45" height="20" uuid="1581096b-c29f-4ef0-8544-ae72c1bb34fc">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4054e056-136e-4045-9d2e-a5f5a7a3f6e7"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -851,7 +823,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[ยอดรวม]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="79" y="140" width="50" height="20" uuid="59cc38e8-7b06-4b4c-a80d-6f79f5d7620a">
+				<reportElement stretchType="ContainerHeight" x="79" y="120" width="50" height="20" uuid="59cc38e8-7b06-4b4c-a80d-6f79f5d7620a">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -865,7 +837,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[เงิน{1}]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="45" y="160" width="34" height="20" uuid="8270c662-f3df-4a51-ad0a-36061c5d899a">
+				<reportElement stretchType="ContainerHeight" x="45" y="140" width="34" height="20" uuid="8270c662-f3df-4a51-ad0a-36061c5d899a">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -879,7 +851,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="45" y="180" width="34" height="20" uuid="bcd84f16-483f-4814-813f-b9702b3f12c1">
+				<reportElement stretchType="ContainerHeight" x="45" y="160" width="34" height="20" uuid="bcd84f16-483f-4814-813f-b9702b3f12c1">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -893,7 +865,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="45" y="200" width="34" height="20" uuid="86fb8776-6b68-4c7b-9be5-e883042dc4e0">
+				<reportElement stretchType="ContainerHeight" x="45" y="180" width="34" height="20" uuid="86fb8776-6b68-4c7b-9be5-e883042dc4e0">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -907,7 +879,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="45" y="220" width="34" height="20" uuid="378963ec-a5a9-4d84-95d3-180158818be4">
+				<reportElement stretchType="ContainerHeight" x="45" y="200" width="34" height="20" uuid="378963ec-a5a9-4d84-95d3-180158818be4">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -921,7 +893,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="45" y="240" width="34" height="20" uuid="67bd75b0-2517-432c-aa44-04c39d79fdbc">
+				<reportElement stretchType="ContainerHeight" x="45" y="220" width="34" height="20" uuid="67bd75b0-2517-432c-aa44-04c39d79fdbc">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -935,7 +907,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="79" y="160" width="50" height="20" uuid="dc1701fa-5c73-4a3b-9b04-a00012a74c4c">
+				<reportElement stretchType="ContainerHeight" x="79" y="140" width="50" height="20" uuid="dc1701fa-5c73-4a3b-9b04-a00012a74c4c">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -949,7 +921,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="79" y="180" width="50" height="20" uuid="d6458085-64d7-45be-b63b-2640909f6655">
+				<reportElement stretchType="ContainerHeight" x="79" y="160" width="50" height="20" uuid="d6458085-64d7-45be-b63b-2640909f6655">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -963,7 +935,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="79" y="200" width="50" height="20" uuid="865b1b37-82d8-425b-9d44-2e43cd97b5d4">
+				<reportElement stretchType="ContainerHeight" x="79" y="180" width="50" height="20" uuid="865b1b37-82d8-425b-9d44-2e43cd97b5d4">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -977,7 +949,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="79" y="220" width="50" height="20" uuid="9731d4a6-7d0e-46d3-9a21-f5c07c9840ec">
+				<reportElement stretchType="ContainerHeight" x="79" y="200" width="50" height="20" uuid="9731d4a6-7d0e-46d3-9a21-f5c07c9840ec">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -991,7 +963,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="79" y="240" width="50" height="20" uuid="c540e560-e24f-4e17-bb62-9a41c78a33b0">
+				<reportElement stretchType="ContainerHeight" x="79" y="220" width="50" height="20" uuid="c540e560-e24f-4e17-bb62-9a41c78a33b0">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -1005,7 +977,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="129" y="120" width="90" height="20" uuid="e563b734-45ef-4547-abd8-fd81ca03f4cf">
+				<reportElement stretchType="ContainerHeight" x="129" y="100" width="90" height="20" uuid="e563b734-45ef-4547-abd8-fd81ca03f4cf">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -1019,7 +991,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[ต่างประเทศ(ยอดรวม)]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="219" y="120" width="90" height="20" uuid="13309a56-bc79-4836-ac5c-b2bd484db796">
+				<reportElement stretchType="ContainerHeight" x="219" y="100" width="90" height="20" uuid="13309a56-bc79-4836-ac5c-b2bd484db796">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -1033,7 +1005,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[รวมเงิน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="129" y="140" width="34" height="20" uuid="eb271978-7ce8-4030-8ae5-b8db025b72ab">
+				<reportElement stretchType="ContainerHeight" x="129" y="120" width="34" height="20" uuid="eb271978-7ce8-4030-8ae5-b8db025b72ab">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -1047,7 +1019,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[ชิ้น]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="163" y="140" width="56" height="20" uuid="ceee7ff1-3b25-4b34-bfd4-a3f2cbc05e10">
+				<reportElement stretchType="ContainerHeight" x="163" y="120" width="56" height="20" uuid="ceee7ff1-3b25-4b34-bfd4-a3f2cbc05e10">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
@@ -1060,7 +1032,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[งาน{2}]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="129" y="160" width="34" height="20" uuid="c8681044-7251-4c24-a105-e508317a9979">
+				<reportElement stretchType="ContainerHeight" x="129" y="140" width="34" height="20" uuid="c8681044-7251-4c24-a105-e508317a9979">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -1074,7 +1046,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="129" y="180" width="34" height="20" uuid="c5b3c230-e7eb-4deb-ba44-3c5cb25cb844">
+				<reportElement stretchType="ContainerHeight" x="129" y="160" width="34" height="20" uuid="c5b3c230-e7eb-4deb-ba44-3c5cb25cb844">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -1088,7 +1060,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="129" y="200" width="34" height="20" uuid="5a411340-cac3-4422-a332-ffbeac1a96c7">
+				<reportElement stretchType="ContainerHeight" x="129" y="180" width="34" height="20" uuid="5a411340-cac3-4422-a332-ffbeac1a96c7">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -1102,7 +1074,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="129" y="220" width="34" height="20" uuid="43d95123-78f3-4095-94e9-ad751b322498">
+				<reportElement stretchType="ContainerHeight" x="129" y="200" width="34" height="20" uuid="43d95123-78f3-4095-94e9-ad751b322498">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -1116,7 +1088,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="129" y="240" width="34" height="20" uuid="10725cea-0a88-43d4-b763-80bd0dc9e12e">
+				<reportElement stretchType="ContainerHeight" x="129" y="220" width="34" height="20" uuid="10725cea-0a88-43d4-b763-80bd0dc9e12e">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -1130,7 +1102,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="163" y="160" width="56" height="20" uuid="80cc6d00-2453-459c-a4c2-84f823ae40c5">
+				<reportElement stretchType="ContainerHeight" x="163" y="140" width="56" height="20" uuid="80cc6d00-2453-459c-a4c2-84f823ae40c5">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
@@ -1143,7 +1115,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="163" y="180" width="56" height="20" uuid="30fdec0a-b55d-4c95-a0a9-2705bc862824">
+				<reportElement stretchType="ContainerHeight" x="163" y="160" width="56" height="20" uuid="30fdec0a-b55d-4c95-a0a9-2705bc862824">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
@@ -1156,7 +1128,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="163" y="200" width="56" height="20" uuid="04f1f0db-5e36-4b1a-b589-3c5f9d48e537">
+				<reportElement stretchType="ContainerHeight" x="163" y="180" width="56" height="20" uuid="04f1f0db-5e36-4b1a-b589-3c5f9d48e537">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
@@ -1169,7 +1141,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="163" y="220" width="56" height="20" uuid="ba068b0c-e3cf-4a64-98ad-f211068f717b">
+				<reportElement stretchType="ContainerHeight" x="163" y="200" width="56" height="20" uuid="ba068b0c-e3cf-4a64-98ad-f211068f717b">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
@@ -1182,7 +1154,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="163" y="240" width="56" height="20" uuid="b9bd7aed-1b29-4e37-a56e-fad998512c18">
+				<reportElement stretchType="ContainerHeight" x="163" y="220" width="56" height="20" uuid="b9bd7aed-1b29-4e37-a56e-fad998512c18">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
@@ -1195,7 +1167,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="219" y="140" width="90" height="20" uuid="a160594d-33b8-4c93-b4e8-8e30978ec610">
+				<reportElement stretchType="ContainerHeight" x="219" y="120" width="90" height="20" uuid="a160594d-33b8-4c93-b4e8-8e30978ec610">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -1209,7 +1181,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[{1 + 2}]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="219" y="160" width="90" height="20" uuid="041aaf70-eb66-491b-ba35-32a3b723eb34">
+				<reportElement stretchType="ContainerHeight" x="219" y="140" width="90" height="20" uuid="041aaf70-eb66-491b-ba35-32a3b723eb34">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -1223,7 +1195,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="219" y="180" width="90" height="20" uuid="81e96d14-4667-48f6-9baf-5d01f7718b51">
+				<reportElement stretchType="ContainerHeight" x="219" y="160" width="90" height="20" uuid="81e96d14-4667-48f6-9baf-5d01f7718b51">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -1237,7 +1209,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="219" y="200" width="90" height="20" uuid="033a4e45-516f-4129-8e10-8b1311ea7eb7">
+				<reportElement stretchType="ContainerHeight" x="219" y="180" width="90" height="20" uuid="033a4e45-516f-4129-8e10-8b1311ea7eb7">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -1251,7 +1223,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="219" y="220" width="90" height="20" uuid="40f0ceb5-fc96-4f26-a079-c98b6dbf6c06">
+				<reportElement stretchType="ContainerHeight" x="219" y="200" width="90" height="20" uuid="40f0ceb5-fc96-4f26-a079-c98b6dbf6c06">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -1265,7 +1237,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<text><![CDATA[]]></text>
 			</staticText>
 			<staticText>
-				<reportElement stretchType="ContainerHeight" x="219" y="240" width="90" height="20" uuid="f4cf0117-1356-4c86-b243-88bcf5d39acb">
+				<reportElement stretchType="ContainerHeight" x="219" y="220" width="90" height="20" uuid="f4cf0117-1356-4c86-b243-88bcf5d39acb">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bdbaf895-3eca-4987-b2df-6a7de1e353cd"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>

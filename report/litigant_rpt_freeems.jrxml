@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="litigant_rpt_postems" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2b00589c-6c9f-4881-8017-3aaf15e6fde3">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="litigant_rpt_freeems" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2b00589c-6c9f-4881-8017-3aaf15e6fde3">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_freeems"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -24,70 +24,38 @@
 		<defaultValueExpression><![CDATA["14/07/2020"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT DISTINCT
-	pni.SEND_NOTICE_DATE,
-	THAILDATE(NVL(pni.SEND_NOTICE_DATE,CURRENT_DATE))                   SEND_NOTICE_DATE_TEXT,
-	
-    pni.ISSUED_ID														 ISSUED_ID,
-    NVL(cou.COURT_NAME_TH, ' ') 							             COURT_NAME_TH, 
-    NVL(cou.POST_LICENCE,' ')                                            POST_LICENCE,
-    
-    NVL(pn.LITIGANT_NAME ,' ')	                                       		 TO_NAME,
-    
-    pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR  	 CASE_BLACK_NO,
-	pn.CURRENT_POST_CODE,    
-	'ขนาดซอง N/A'                                                     	 ENVELOP_SIZE,
-	pn.SEND_FEE,
-	NVL(pni.EMS_CODE,' ')         								   		 EMS_CODE
-
-FROM PC_NOTICE pn
-LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID AND pc.REMOVED_BY = 0
-LEFT JOIN PC_NOTICE_ISSUED pni ON pn.NOTICE_ID = pni.NOTICE_ID AND pn.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID
-LEFT JOIN PC_CASE_LIT pcl ON pcl.CASE_LIT_ID = pn.LITIGANT_ID AND pcl.REMOVED_BY = 0
---
-CROSS JOIN (SELECT plc.COURT_NAME_TH, plc.POST_LICENCE
-			FROM PC_PARAM pp
-			JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
-			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
---
-WHERE pn.SEND_METHOD = 1 
-AND NVL(pni.HAS_MONEY,0) = 0 
-AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
-                              AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')]]>
+		<![CDATA[SELECT NVL(pwds.RECEIVER_NAME,'-') RECEIVER_NAME 
+ 	    ,NVL(pwdsi.DESTINATION,'-') DESTINATION 
+ 	    ,CASE WHEN pwdst.DOCUMENT_SENDPOST_TYPE_CODE = '001' THEN pwdsi.PARCEL_NO ELSE '-' END DOC_REGISTER_NO
+ 	    ,CASE WHEN pwdst.DOCUMENT_SENDPOST_TYPE_CODE = '002' THEN pwdsi.PARCEL_NO ELSE '-' END DOC_EMS_NO
+ 	    ,NVL(pwds.DOCUMENT_NO,'-')  DOCUMENT_NO
+ 	    ,NVL(pwdsi.NOTE,'-')  NOTE 
+ 	    --
+ FROM PC_WF_DOCUMENT_SEND_ITEM pwdsi
+ LEFT JOIN PC_WF_DOCUMENT_SEND pwds ON pwdsi.WF_DOCUMENT_SEND_ID = pwds.WF_DOCUMENT_SEND_ID AND pwdsi.REMOVED_BY = 0
+ LEFT JOIN PC_WF_DOCUMENT_SENDPOST_TYPE pwdst ON pwdst.DOCUMENT_SENDPOST_TYPE_ID = pwdsi.DOCUMENT_SENDPOST_TYPE_ID AND pwdst.REMOVED_BY = 0
+ WHERE pwdsi.REMOVED_BY = 0
+ AND pwds.DOCUMENT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                            AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+ AND pwdst.DOCUMENT_SENDPOST_TYPE_CODE IN ('001','002')]]>
 	</queryString>
-	<field name="SEND_NOTICE_DATE" class="java.sql.Date">
-		<property name="com.jaspersoft.studio.field.label" value="SEND_NOTICE_DATE"/>
+	<field name="RECEIVER_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="RECEIVER_NAME"/>
 	</field>
-	<field name="SEND_NOTICE_DATE_TEXT" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="SEND_NOTICE_DATE_TEXT"/>
+	<field name="DESTINATION" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DESTINATION"/>
 	</field>
-	<field name="ISSUED_ID" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="ISSUED_ID"/>
+	<field name="DOC_REGISTER_NO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DOC_REGISTER_NO"/>
 	</field>
-	<field name="COURT_NAME_TH" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
+	<field name="DOC_EMS_NO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DOC_EMS_NO"/>
 	</field>
-	<field name="POST_LICENCE" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="POST_LICENCE"/>
+	<field name="DOCUMENT_NO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DOCUMENT_NO"/>
 	</field>
-	<field name="TO_NAME" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="TO_NAME"/>
-	</field>
-	<field name="CASE_BLACK_NO" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="CASE_BLACK_NO"/>
-	</field>
-	<field name="CURRENT_POST_CODE" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="CURRENT_POST_CODE"/>
-	</field>
-	<field name="ENVELOP_SIZE" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="ENVELOP_SIZE"/>
-	</field>
-	<field name="SEND_FEE" class="java.lang.Double">
-		<property name="com.jaspersoft.studio.field.label" value="SEND_FEE"/>
-	</field>
-	<field name="EMS_CODE" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="EMS_CODE"/>
+	<field name="NOTE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="NOTE"/>
 	</field>
 	<background>
 		<band splitType="Stretch"/>
@@ -317,7 +285,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<textElement textAlignment="Left" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{TO_NAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{RECEIVER_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="0" y="0" width="32" height="20" uuid="0b29ae41-06f1-4759-9a7b-72f5d602ec26">
@@ -342,7 +310,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CURRENT_POST_CODE}==null?" ":$F{CURRENT_POST_CODE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{DESTINATION}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="420" y="0" width="63" height="20" uuid="ac756e3a-c198-4a43-bc7e-5daa06f5f429">
@@ -391,7 +359,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{DOC_EMS_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="201" y="0" width="55" height="20" uuid="f84187fa-db06-402c-ba8f-50a2a6232302">
@@ -403,7 +371,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{DOC_REGISTER_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="483" y="0" width="70" height="20" uuid="4a14e4d1-430e-4748-83c8-f31718758d71">
@@ -417,7 +385,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYY
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{DOCUMENT_NO}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
