@@ -5,9 +5,12 @@
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="536"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="457"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_noticeissue_stat"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_noticeissue_stat_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/08/2021"]]></defaultValueExpression>
 	</parameter>
@@ -15,21 +18,27 @@
 		<defaultValueExpression><![CDATA["16/09/2021"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT pn.SEND_METHOD_BY_NAME 
+		<![CDATA[SELECT  CASE WHEN plsm.SEND_METHOD_CODE = '01' THEN plsm.SEND_METHOD_NAME ELSE pn.SEND_METHOD_BY_NAME END SEND_METHOD_BY_NAME  
+       ,plsm.SEND_METHOD_CODE 
        ,COUNT(pni.NOTICE_ID) COUNT_NOTICE_ALL
        ,SUM(CASE WHEN pnsr.REPORT_DATE IS NOT NULL THEN 1 ELSE 0 END) COUNT_NOTICE_REPORTED
        ,SUM(CASE WHEN pnsr.REPORT_DATE IS NULL THEN 1 ELSE 0 END) COUNT_NOTICE_NOTREPORTED
 FROM PC_NOTICE_ISSUED pni 
 LEFT JOIN PC_NOTICE pn ON pn.NOTICE_ID = pni.NOTICE_ID AND pn.REMOVED_BY = 0
 LEFT JOIN PC_NOTICE_SEND_RESULT pnsr ON pnsr.NOTICE_ID = pni.NOTICE_ID AND pnsr.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_SEND_METHOD plsm ON plsm.SEND_METHOD_ID = pn.SEND_METHOD AND plsm.REMOVED_BY = 0
 WHERE pni.REMOVED_BY = 0
 AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
                              AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
-GROUP BY pn.SEND_METHOD_BY_NAME 
-]]>
+GROUP BY (CASE WHEN plsm.SEND_METHOD_CODE = '01' THEN plsm.SEND_METHOD_NAME ELSE pn.SEND_METHOD_BY_NAME END)
+         ,plsm.SEND_METHOD_CODE 
+ORDER BY plsm.SEND_METHOD_CODE DESC]]>
 	</queryString>
 	<field name="SEND_METHOD_BY_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="SEND_METHOD_BY_NAME"/>
+	</field>
+	<field name="SEND_METHOD_CODE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="SEND_METHOD_CODE"/>
 	</field>
 	<field name="COUNT_NOTICE_ALL" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="COUNT_NOTICE_ALL"/>
@@ -57,8 +66,7 @@ GROUP BY pn.SEND_METHOD_BY_NAME
 				<textElement textAlignment="Center">
 					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +" ถึง " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))
-]]></textFieldExpression>
+				<textFieldExpression><![CDATA[DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +" ถึง " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="litigant_rpt_notice_noresult" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="fce605c5-9701-4feb-b2d9-a914ac8b6891">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="litigant_rpt_postnotice_noresult" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="fce605c5-9701-4feb-b2d9-a914ac8b6891">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -14,8 +14,9 @@
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
-	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_notice_noresult"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_notice_noresult_files/main_jrxml"/>
+	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_postnotice_noresult"/>
+	<property name="com.jaspersoft.studio.report.description" value=""/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_postnotice_noresult_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/08/2021"]]></defaultValueExpression>
 	</parameter>
@@ -24,7 +25,7 @@
 	</parameter>
 	<queryString language="SQL">
 		<![CDATA[SELECT DISTINCT
-       pn.SEND_METHOD_BY_NAME
+       'ไปรษณีย์' SEND_METHOD_BY_NAME
 	   ,pni.SEND_NOTICE_DATE
 	   ,THAISDATE(pni.SEND_NOTICE_DATE) SEND_NOTICE_DATE_TEXT
  	   ,pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR CASE_BLACK_NO
@@ -58,10 +59,9 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYY
                              AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
 AND pnsr.REPORT_DATE IS NULL 
 AND pn.IS_COURT_AREA = 1
-AND pn.SEND_METHOD = 2
-AND NVL(pn.SEND_FEE,0) > 0 
+AND pn.SEND_METHOD = 1
 AND (pltc_b.TITLE_CASE_NAME <> 'ต' AND pltc_b.TITLE_CASE_NAME <> 'ต.')
-ORDER BY pn.SEND_METHOD_BY_NAME, pni.SEND_NOTICE_DATE ]]>
+ORDER BY pni.SEND_NOTICE_DATE]]>
 	</queryString>
 	<field name="SEND_METHOD_BY_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="SEND_METHOD_BY_NAME"/>
@@ -445,7 +445,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GR_TOTAL_SENDFEE})
 				<textElement>
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{PAYER_NAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{PAYER_NAME}==null?"-":$F{PAYER_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="297" y="0" width="74" height="30" uuid="6e951493-d6a1-4798-9c0d-79a74b0a86c2">
@@ -481,7 +481,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GR_TOTAL_SENDFEE})
 				<textElement>
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{SUBDISTRICT_NAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{SUBDISTRICT_NAME}==null?"-":$F{SUBDISTRICT_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="524" y="0" width="72" height="30" uuid="6449e3ee-9690-426a-ba13-8e90c0f36eaf">
@@ -493,7 +493,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GR_TOTAL_SENDFEE})
 				<textElement>
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{DISTRICT_NAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{DISTRICT_NAME}==null?"-":$F{DISTRICT_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="596" y="0" width="72" height="30" uuid="f583a1b5-0903-4567-bc21-b02ca54a5c53">
@@ -505,7 +505,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GR_TOTAL_SENDFEE})
 				<textElement>
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{PROVINCE_NAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{PROVINCE_NAME}==null?"-":$F{PROVINCE_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="668" y="0" width="58" height="30" uuid="e258e352-d21c-4145-8d9a-d931d34ec4a1">
