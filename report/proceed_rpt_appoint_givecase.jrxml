@@ -11,7 +11,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_givecase"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="202"/>
@@ -33,9 +33,9 @@
 	<queryString language="SQL">
 		<![CDATA[SELECT DISTINCT
 		(CASE  
-	       WHEN $P{APPOIN_TABLE_CODE} = '001' THEN 'เสนอจ่ายสำนวนเข้าศูนย์ไกล่เกลี่ย' 
-	       WHEN $P{APPOIN_TABLE_CODE} = '004' THEN 'เสนอจ่ายสำนวนเข้าจัดการพิเศษ'
-	       WHEN $P{APPOIN_TABLE_CODE} IS NULL THEN 'เสนอจ่ายสำนวน'
+	       WHEN ppat.APPOINT_TABLE_TYPE = 'general' AND ppat.APPOINT_TABLE_CODE = '001' THEN 'เสนอจ่ายสำนวนเข้าศูนย์ไกล่เกลี่ย' 
+	       WHEN ppat.APPOINT_TABLE_TYPE = 'special' AND ppat.APPOINT_TABLE_CODE = '002' THEN 'เสนอจ่ายสำนวนเข้าจัดการพิเศษ'
+	       ELSE 'เสนอจ่ายสำนวน'
         END) APPOINT_TITLE
 		,NVL(pltc_b.TITLE_CASE_NAME,' ')  || TO_CHAR(pc.BLACK_IDNUM) || CASE WHEN pc.BLACK_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pc.BLACK_YEAR) CASE_BLACK_NO
 		,NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || CASE WHEN pj.RED_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pj.RED_YEAR)       CASE_RED_NO
@@ -49,6 +49,7 @@
 		,j.ONG_1
 		,j.ONG_2
 		,j.ADD_1
+		,ppat.APPOINT_TABLE_TYPE 
 FROM PC_PROCEED_APPOINT ppa 
 JOIN PC_PROCEED_APPOINT_CONTINUE ppac ON ppac.APPOINT_ID = ppa.APPOINT_ID AND ppac.REMOVED_BY = 0
 LEFT JOIN PC_PROCEED_APPOINT_TABLE ppat ON ppat.APPOINT_TABLE_CODE = ppac.APPOINT_TABLE_CODE AND ppat.REMOVED_BY = 0

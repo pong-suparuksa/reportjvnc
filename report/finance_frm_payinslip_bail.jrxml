@@ -2,22 +2,22 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="finance_frm_payinslip_bail" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="6a214b07-32da-4750-b45b-f3010d720d1d">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_frm_payinslip_bail"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="456"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="533"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/finance_frm_payinslip_bail_files/main_jrxml"/>
 	<parameter name="INVOICE_ID" class="java.lang.Integer">
 		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT 
-  plc.COURT_ID
-  ,plc.COURT_NAME_TH
-  ,plc.TAX_ID
+		<![CDATA[SELECT   
+  plc.COURT_NAME_TH
+  ,NVL(plc.TAX_ID,'0000000000000') TAX_ID
   ,pfcc.COMP_CODE
   ,pfcc.SERVICE_CODE
   ,pfi.CASE_ID
@@ -27,9 +27,9 @@
   ,pfi.REF2
   ,TO_CHAR(pfi.DUE_DATE,'DD/MM/YYYY')      DUE_DATE
   ,TO_CHAR(pfi.CREATED_DATE,'DD/MM/YYYY')  CREATED_DATE
-  ,pfi.TOTAL_PAID_AMOUNT
+  ,pfi.TOTAL_PAID_AMOUNT 
+  ,TO_CHAR(pfi.TOTAL_PAID_AMOUNT*100)      TOTAL_PAID_AMOUNT_BARCODE 
   ,BAHT(TOTAL_PAID_AMOUNT)                 TOTAL_PAID_AMOUNT_TEXT
-  ,'|'||plc.TAX_ID ||pfcc.SERVICE_CODE||chr(13)||pfi.REF1||chr(13)||pfi.REF2||chr(13)||pfi.TOTAL_PAID_AMOUNT||'00'  AS BARCODE
 FROM PC_FIN_INVOICE pfi 
 LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pfi.COURT_ID AND plc.REMOVED_BY = 0
 LEFT JOIN PC_FIN_COMP_CODE pfcc ON pfcc.MONEY_TYPE_BY = pfi.MONEY_TYPE_BY  AND pfcc.REMOVED_BY = 0
@@ -37,9 +37,6 @@ WHERE pfi.REMOVED_BY = 0
 AND ROWNUM = 1
 AND pfi.INVOICE_ID = $P{INVOICE_ID}]]>
 	</queryString>
-	<field name="COURT_ID" class="java.lang.Long">
-		<property name="com.jaspersoft.studio.field.label" value="COURT_ID"/>
-	</field>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
 	</field>
@@ -49,10 +46,13 @@ AND pfi.INVOICE_ID = $P{INVOICE_ID}]]>
 	<field name="COMP_CODE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COMP_CODE"/>
 	</field>
-	<field name="CASE_ID" class="java.lang.Long">
+	<field name="SERVICE_CODE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="SERVICE_CODE"/>
+	</field>
+	<field name="CASE_ID" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="CASE_ID"/>
 	</field>
-	<field name="INVOICE_ID" class="java.lang.Long">
+	<field name="INVOICE_ID" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="INVOICE_ID"/>
 	</field>
 	<field name="PAYER_NAME" class="java.lang.String">
@@ -72,6 +72,9 @@ AND pfi.INVOICE_ID = $P{INVOICE_ID}]]>
 	</field>
 	<field name="TOTAL_PAID_AMOUNT" class="java.lang.Double">
 		<property name="com.jaspersoft.studio.field.label" value="TOTAL_PAID_AMOUNT"/>
+	</field>
+	<field name="TOTAL_PAID_AMOUNT_BARCODE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TOTAL_PAID_AMOUNT_BARCODE"/>
 	</field>
 	<field name="TOTAL_PAID_AMOUNT_TEXT" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="TOTAL_PAID_AMOUNT_TEXT"/>
@@ -222,7 +225,7 @@ DateFormat.getDateInstance(DateFormat.MEDIUM,new Locale("th", "TH")).format(new 
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<jr:Code128 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" moduleWidth="1.0">
-					<jr:codeExpression><![CDATA["|"+$F{TAX_ID}+"00"+"\r\n"+$F{REF1}+"\r\n"+$F{REF2}+"\r\n"+$F{TOTAL_PAID_AMOUNT}+"00"]]></jr:codeExpression>
+					<jr:codeExpression><![CDATA["|"+$F{TAX_ID}+$F{SERVICE_CODE}+"\r\n"+$F{REF1}+"\r\n"+$F{REF2}+"\r\n"+$F{TOTAL_PAID_AMOUNT_BARCODE}]]></jr:codeExpression>
 				</jr:Code128>
 			</componentElement>
 			<staticText>
@@ -390,7 +393,7 @@ DateFormat.getDateInstance(DateFormat.MEDIUM,new Locale("th", "TH")).format(new 
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<jr:Code128 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" moduleWidth="1.0">
-					<jr:codeExpression><![CDATA["|"+$F{TAX_ID}+"00"+"\r\n"+$F{REF1}+"\r\n"+$F{REF2}+"\r\n"+$F{TOTAL_PAID_AMOUNT}+"00"]]></jr:codeExpression>
+					<jr:codeExpression><![CDATA["|"+$F{TAX_ID}+$F{SERVICE_CODE}+"\r\n"+$F{REF1}+"\r\n"+$F{REF2}+"\r\n"+$F{TOTAL_PAID_AMOUNT_BARCODE}]]></jr:codeExpression>
 				</jr:Code128>
 			</componentElement>
 			<staticText>

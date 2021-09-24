@@ -11,13 +11,14 @@
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="424"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="565"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/finance_frm_payinslip_files/main_jrxml"/>
 	<parameter name="INVOICE_ID" class="java.lang.Integer">
 		<defaultValueExpression><![CDATA[5003]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[SELECT   
   plc.COURT_NAME_TH
-  ,plc.TAX_ID
+  ,NVL(plc.TAX_ID,'0000000000000') TAX_ID
   ,pfcc.COMP_CODE
   ,pfcc.SERVICE_CODE
   ,pfi.CASE_ID
@@ -27,9 +28,9 @@
   ,pfi.REF2
   ,TO_CHAR(pfi.DUE_DATE,'DD/MM/YYYY')      DUE_DATE
   ,TO_CHAR(pfi.CREATED_DATE,'DD/MM/YYYY')  CREATED_DATE
-  ,pfi.TOTAL_PAID_AMOUNT
+  ,pfi.TOTAL_PAID_AMOUNT 
+  ,TO_CHAR(pfi.TOTAL_PAID_AMOUNT*100)      TOTAL_PAID_AMOUNT_BARCODE 
   ,BAHT(TOTAL_PAID_AMOUNT)                 TOTAL_PAID_AMOUNT_TEXT
-  ,'|'||plc.TAX_ID ||pfcc.SERVICE_CODE||chr(13)||pfi.REF1||chr(13)||pfi.REF2||chr(13)||pfi.TOTAL_PAID_AMOUNT||'00'  AS BARCODE
 FROM PC_FIN_INVOICE pfi 
 LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pfi.COURT_ID AND plc.REMOVED_BY = 0
 LEFT JOIN PC_FIN_COMP_CODE pfcc ON pfcc.MONEY_TYPE_BY = pfi.MONEY_TYPE_BY  AND pfcc.REMOVED_BY = 0
@@ -73,11 +74,11 @@ AND pfi.INVOICE_ID = $P{INVOICE_ID}]]>
 	<field name="TOTAL_PAID_AMOUNT" class="java.lang.Double">
 		<property name="com.jaspersoft.studio.field.label" value="TOTAL_PAID_AMOUNT"/>
 	</field>
+	<field name="TOTAL_PAID_AMOUNT_BARCODE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="TOTAL_PAID_AMOUNT_BARCODE"/>
+	</field>
 	<field name="TOTAL_PAID_AMOUNT_TEXT" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="TOTAL_PAID_AMOUNT_TEXT"/>
-	</field>
-	<field name="BARCODE" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="BARCODE"/>
 	</field>
 	<background>
 		<band splitType="Stretch"/>
@@ -222,7 +223,7 @@ AND pfi.INVOICE_ID = $P{INVOICE_ID}]]>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<jr:Code128 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" moduleWidth="1.0">
-					<jr:codeExpression><![CDATA[$F{BARCODE}]]></jr:codeExpression>
+					<jr:codeExpression><![CDATA["|"+$F{TAX_ID}+$F{SERVICE_CODE}+"\r\n"+$F{REF1}+"\r\n"+$F{REF2}+"\r\n"+$F{TOTAL_PAID_AMOUNT_BARCODE}]]></jr:codeExpression>
 				</jr:Code128>
 			</componentElement>
 			<staticText>
@@ -464,7 +465,7 @@ AND pfi.INVOICE_ID = $P{INVOICE_ID}]]>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<jr:Code128 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" moduleWidth="1.0">
-					<jr:codeExpression><![CDATA[$F{BARCODE}]]></jr:codeExpression>
+					<jr:codeExpression><![CDATA["|"+$F{TAX_ID}+$F{SERVICE_CODE}+"\r\n"+$F{REF1}+"\r\n"+$F{REF2}+"\r\n"+$F{TOTAL_PAID_AMOUNT_BARCODE}]]></jr:codeExpression>
 				</jr:Code128>
 			</componentElement>
 		</band>

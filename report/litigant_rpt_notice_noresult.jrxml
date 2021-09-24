@@ -12,10 +12,9 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_notice_noresult"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_notice_noresult_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/08/2021"]]></defaultValueExpression>
 	</parameter>
@@ -33,7 +32,7 @@
  	   ,pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR CASE_BLACK_NO
        ,CASE WHEN pj.RED_IDNUM IS NULL THEN '-' ELSE pltc_r.TITLE_CASE_NAME||pj.RED_IDNUM||'/'||pj.RED_YEAR END CASE_RED_NO
        ,pfr.PAYER_NAME 
-       ,pn.NOTICE_TYPE_NAME
+       ,NVL(pn.NOTICE_TYPE_NAME,plnt.NOTICE_TYPE_NAME) NOTICE_TYPE_NAME
        ,pn.LITIGANT_NAME 
        ,pls.SUBDISTRICT_NAME 
        ,pld.DISTRICT_NAME 
@@ -43,6 +42,7 @@
 FROM PC_NOTICE_ISSUED pni 
 LEFT JOIN PC_NOTICE pn ON pn.NOTICE_ID = pni.NOTICE_ID AND pn.REMOVED_BY = 0
 LEFT JOIN PC_NOTICE_SEND_RESULT pnsr ON pnsr.NOTICE_ID = pni.NOTICE_ID AND pnsr.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_NOTICE_TYPE plnt ON plnt.NOTICE_TYPE_ID = pn.NOTICE_TYPE_ID AND pn.REMOVED_BY = 0
 --case
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
@@ -60,7 +60,6 @@ WHERE pni.REMOVED_BY = 0
 AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
                              AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
 AND pnsr.REPORT_DATE IS NULL 
-AND pn.IS_COURT_AREA = 1
 AND pn.SEND_METHOD = 2
 AND (pltc_b.TITLE_CASE_NAME <> 'ต' AND pltc_b.TITLE_CASE_NAME <> 'ต.')
 AND (pn.SEND_METHOD_BY_NAME = $P{SENDER} OR '0' = $P{SENDER})
@@ -273,7 +272,9 @@ ORDER BY pn.SEND_METHOD_BY_NAME, pni.SEND_NOTICE_DATE]]>
 					<textElement textAlignment="Left">
 						<font fontName="THSarabunNew" size="16" isBold="true"/>
 					</textElement>
-					<textFieldExpression><![CDATA["บัญชีหมายที่รับผิดชอบโดย "+($F{SEND_METHOD_BY_NAME}==null?"-":$F{SEND_METHOD_BY_NAME})+" ยังไม่ได้รายงาน รวม "+$V{GROUP_SENDER_COUNT}+" เรื่อง    รวมเป็นเงิน "+  new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GR_TOTAL_SENDFEE})) +" บาท"]]></textFieldExpression>
+					<textFieldExpression><![CDATA["บัญชีหมายที่รับผิดชอบโดย "+($F{SEND_METHOD_BY_NAME}==null?"-":$F{SEND_METHOD_BY_NAME})+
+" ยังไม่ได้รายงาน รวม "+($V{GROUP_SENDER_COUNT}==null?0:$V{GROUP_SENDER_COUNT})+" เรื่อง  "+    
+"รวมเป็นเงิน "+  ($V{GR_TOTAL_SENDFEE}==null?0:new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GR_TOTAL_SENDFEE}))) +" บาท"]]></textFieldExpression>
 				</textField>
 			</band>
 		</groupHeader>

@@ -19,6 +19,7 @@
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/CaseStat/m4_MonthlyCriminal"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/CaseStat/m4_MonthlyCriminal_files/main_jrxml"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#FFFFFF">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
@@ -497,6 +498,33 @@
 		</box>
 	</style>
 	<style name="Table 17_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table 18_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table 18_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table 18_TD" mode="Opaque" backcolor="#FFFFFF">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
 			<topPen lineWidth="0.5" lineColor="#000000"/>
@@ -3692,6 +3720,103 @@ FROM
 			<property name="com.jaspersoft.studio.field.label" value="INTERPRETER_SETUP"/>
 		</field>
 	</subDataset>
+	<subDataset name="SUBDATASET_SUM_CHECKCATCH73" uuid="d495214b-88a1-4ef6-a48d-51753c7c95b5">
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<parameter name="START_DATE" class="java.lang.String">
+			<defaultValueExpression><![CDATA["01/09/2021"]]></defaultValueExpression>
+		</parameter>
+		<parameter name="END_DATE" class="java.lang.String">
+			<defaultValueExpression><![CDATA["30/09/2021"]]></defaultValueExpression>
+		</parameter>
+		<queryString>
+			<![CDATA[SELECT  COUNT(pc.CASE_ID) SUM_CASE
+       ,SUM(l.CASE_1) SUM_CASE_1
+       ,SUM(l.CASE_2) SUM_CASE_2
+       ,SUM(l.CASE_3) SUM_CASE_3
+       ,SUM(l.CASE_4) SUM_CASE_4
+       ,SUM(l.CASE_5) SUM_CASE_5
+       ,SUM(l.CASE_5) SUM_CASE_6
+       ,SUM(l.CASE_UNLAW) SUM_CASE_UNLAW
+--       
+FROM PC_CASE pc 
+JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc.REMOVED_BY = 0
+JOIN PC_CASE_CATCH pcc ON pcc.CASE_ID = pc.CASE_ID AND pcc.REMOVED_BY = 0
+--litigant
+LEFT JOIN (SELECT pcl.CASE_ID    
+		         ,SUM(CASE WHEN pcl.LAWFUL_FLAG = 0 AND pcl.SURRENDER_FLAG = 1 THEN 1 ELSE 0 END)   CASE_1
+		         ,SUM(CASE WHEN pcl.LAWFUL_FLAG = 0 AND pcl.CURE_FLAG = 1 THEN 1 ELSE 0 END)        CASE_2
+		         ,SUM(CASE WHEN pcl.LAWFUL_FLAG = 0 AND pcl.CUSTODY_FLAG = 1 AND pcl.CUSTODY_PLACE_FLAG = 1 THEN 1 ELSE 0 END)  CASE_3
+		         ,SUM(CASE WHEN pcl.LAWFUL_FLAG = 0 AND pcl.CUSTODY_FLAG = 1 AND pcl.CUSTODY_PLACE_FLAG = 2 THEN 1 ELSE 0 END)  CASE_4
+		         ,SUM(CASE WHEN pcl.LAWFUL_FLAG = 0 AND pcl.CUSTODY_FLAG = 1 AND pcl.CUSTODY_PLACE_FLAG = 3 THEN 1 ELSE 0 END)  CASE_5
+		         ,SUM(CASE WHEN pcl.LAWFUL_FLAG = 0 AND pcl.OTHER_ORDER_FLAG = 1 THEN 1 ELSE 0 END) CASE_6
+		         ,SUM(CASE WHEN pcl.LAWFUL_FLAG = 1 THEN 1 ELSE 0 END) CASE_UNLAW
+		  --
+		  FROM PC_CASE_LIT pcl 
+		  JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0
+		  WHERE pcl.REMOVED_BY = 0
+		  AND pllt.LIT_TYPE_CODE = '03'
+		  GROUP BY pcl.CASE_ID) l ON l.CASE_ID = pc.CASE_ID
+--allegation
+JOIN PC_CASE_ALLE pca ON pca.CASE_ID = pc.CASE_ID AND pca.REMOVED_BY = 0
+JOIN PC_LOOKUP_ALLEGATION pla ON pla.ALLEGATION_ID = pca.ALLEGATION_ID AND pla.REMOVED_BY = 0
+WHERE pc.REMOVED_BY = 0
+AND pcc.REQ_CATCH_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
+                           AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
+AND pltc.TITLE_CASE_CODE = '220101'
+AND pla.ALLEGATION_CODE IN
+('2103','2104','2105','2106','2107',
+'2108','2109','2110','2111','2112',
+'2113','2114','2115','2116','2117',
+'2118','2119','2120','2121','2122',
+'2123','2124','2125','2126','2127',
+'2128','2129','2130','2131','2132',
+'2133','2134','2135','2136','2137',
+'2138','2139','2140','2141','2142',
+'2143','2144','2145','2408','2147',
+'2148','2149','2150','2151','2152',
+'2153','2154','2155','2156','2157',
+'2158','2159','2160','2161','2162',
+'2163','2164','2165','2166','2167',
+'2168','2441','2169','2170','2171',
+'2172','2173','2174','2175','2176',
+'2177','2178','2179','2180','2181',
+'2182','2183','2184','2185','2186',
+'2187','2188','2189','2190','2191',
+'2192','2193','2194','2195','2196',
+'2197','2198','2199','2200','2201',
+'2202','2203','2204','2205','2206',
+'2207','2398','2399','2400','2401',
+'2390','2405','2406','2391','2208')]]>
+		</queryString>
+		<field name="SUM_CASE" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="SUM_CASE"/>
+		</field>
+		<field name="SUM_CASE_1" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="SUM_CASE_1"/>
+		</field>
+		<field name="SUM_CASE_2" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="SUM_CASE_2"/>
+		</field>
+		<field name="SUM_CASE_3" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="SUM_CASE_3"/>
+		</field>
+		<field name="SUM_CASE_4" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="SUM_CASE_4"/>
+		</field>
+		<field name="SUM_CASE_5" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="SUM_CASE_5"/>
+		</field>
+		<field name="SUM_CASE_6" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="SUM_CASE_6"/>
+		</field>
+		<field name="SUM_CASE_UNLAW" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="SUM_CASE_UNLAW"/>
+		</field>
+		<variable name="TOTAL_CASE" class="java.lang.Integer">
+			<variableExpression><![CDATA[$F{SUM_CASE_1}+$F{SUM_CASE_2}+$F{SUM_CASE_3}+$F{SUM_CASE_4}+$F{SUM_CASE_5}+$F{SUM_CASE_6}]]></variableExpression>
+		</variable>
+	</subDataset>
 	<parameter name="MONTH" class="java.lang.String">
 		<defaultValueExpression><![CDATA["04-2021"]]></defaultValueExpression>
 	</parameter>
@@ -3731,6 +3856,16 @@ FROM DUAL]]>
 		<property name="com.jaspersoft.studio.field.label" value="MONTH_LASTDAY"/>
 	</field>
 	<variable name="TEST1" class="java.lang.String"/>
+	<variable name="SUM_CASE" class="java.lang.Integer">
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<variable name="SUM_CASE_1" class="java.lang.Integer"/>
+	<variable name="SUM_CASE_2" class="java.lang.Integer"/>
+	<variable name="SUM_CASE_3" class="java.lang.Integer"/>
+	<variable name="SUM_CASE_4" class="java.lang.Integer"/>
+	<variable name="SUM_CASE_5" class="java.lang.Integer"/>
+	<variable name="SUM_CASE_6" class="java.lang.Integer"/>
+	<variable name="SUM_CASE_7" class="java.lang.Integer"/>
 	<detail>
 		<band splitType="Stretch">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -5162,6 +5297,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="220" width="459" height="20" uuid="66c72f8e-c53d-4ac0-9dc3-d0b0d7063935">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other11"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other11.jasper"]]></subreportExpression>
 			</subreport>
@@ -5170,6 +5311,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other12"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other12.jasper"]]></subreportExpression>
 			</subreport>
@@ -5178,6 +5325,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other13"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other13.jasper"]]></subreportExpression>
 			</subreport>
@@ -5185,6 +5338,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="280" width="459" height="20" uuid="01fc0ece-90de-4805-ad48-7f5184d8e2d9">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other14"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other14.jasper"]]></subreportExpression>
 			</subreport>
@@ -5612,6 +5771,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="0" width="459" height="19" uuid="20590f75-4271-4848-bde2-09f34a94d875">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other15"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other15.jasper"]]></subreportExpression>
 			</subreport>
@@ -5619,6 +5784,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="20" width="459" height="19" uuid="f559448f-617c-4088-a715-5fa8da955b65">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other16"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other16.jasper"]]></subreportExpression>
 			</subreport>
@@ -5626,6 +5797,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="60" width="459" height="20" uuid="bfdb6696-5506-4770-b1a1-bd98c84b8573">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other17-1"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other17-1.jasper"]]></subreportExpression>
 			</subreport>
@@ -5633,6 +5810,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="80" width="459" height="20" uuid="23faa05d-9586-4458-9b0b-efe34492b490">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other17-2"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other17-2.jasper"]]></subreportExpression>
 			</subreport>
@@ -5640,6 +5823,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="100" width="459" height="20" uuid="db41cb14-6c36-42e2-bfff-25e17c7bc163">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other17-3"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other17-3.jasper"]]></subreportExpression>
 			</subreport>
@@ -5654,6 +5843,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="140" width="459" height="20" uuid="f2b203c9-4ce9-4866-af62-c0da51112c05">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other17-5"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other17-5.jasper"]]></subreportExpression>
 			</subreport>
@@ -5661,6 +5856,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="160" width="459" height="20" uuid="0a7b2890-791f-4c86-9d4c-db8e5f57934a">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other17-6"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other17-6.jasper"]]></subreportExpression>
 			</subreport>
@@ -5668,6 +5869,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="180" width="459" height="20" uuid="502424f1-e4ea-40a7-9f89-75aa49fe06bf">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other17-7"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other17-7.jasper"]]></subreportExpression>
 			</subreport>
@@ -5675,6 +5882,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="200" width="459" height="20" uuid="d1807010-6ed6-490e-bffe-027aba00148e">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other17-8"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other17-8.jasper"]]></subreportExpression>
 			</subreport>
@@ -5682,6 +5895,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="220" width="459" height="20" uuid="ddd89788-da04-46a3-bc8e-d34200e42efc">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other17-9"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other17-9.jasper"]]></subreportExpression>
 			</subreport>
@@ -5689,6 +5908,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="240" width="459" height="20" uuid="c3ff127d-9c1c-4c91-8ab9-2da721ac8197">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other18"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other18.jasper"]]></subreportExpression>
 			</subreport>
@@ -5696,6 +5921,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="260" width="459" height="20" uuid="8144353e-2c7a-452d-9d38-1d1d7fc0e389">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other19"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other19.jasper"]]></subreportExpression>
 			</subreport>
@@ -5703,6 +5934,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="280" width="459" height="20" uuid="078d8ec8-7d1d-45cb-88c3-84814946ebc8">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other20"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other20.jasper"]]></subreportExpression>
 			</subreport>
@@ -5710,6 +5947,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="300" width="459" height="20" uuid="9c1fc851-1686-4c41-a94b-c0929350aabe">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other21"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other21.jasper"]]></subreportExpression>
 			</subreport>
@@ -5717,6 +5960,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="320" width="459" height="20" uuid="8a5de46c-5561-4917-9039-18c22148c165">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other22"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other22.jasper"]]></subreportExpression>
 			</subreport>
@@ -5724,6 +5973,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="340" width="459" height="20" uuid="c471e1c9-e00f-4a2b-a5fc-e3641e15de1e">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other23"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other23.jasper"]]></subreportExpression>
 			</subreport>
@@ -5731,6 +5986,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="360" width="459" height="20" uuid="993281aa-6590-4534-a8af-b3356b4dc2c5">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other24"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other24.jasper"]]></subreportExpression>
 			</subreport>
@@ -5738,6 +5999,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="380" width="459" height="20" uuid="145b6112-3d94-49dd-9914-20e9b7567208">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other25"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other25.jasper"]]></subreportExpression>
 			</subreport>
@@ -5745,6 +6012,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="400" width="459" height="20" uuid="f975de86-55fe-452c-ad62-df5a9a608b07">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other26"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other26.jasper"]]></subreportExpression>
 			</subreport>
@@ -5752,6 +6025,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="420" width="459" height="20" uuid="25916b15-bc83-4b36-b956-2cf691b231bd">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other27"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other27.jasper"]]></subreportExpression>
 			</subreport>
@@ -5759,6 +6038,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="440" width="459" height="20" uuid="01a058d6-a6dc-41d9-ad45-4ed2fc68d7d5">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other28"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other28.jasper"]]></subreportExpression>
 			</subreport>
@@ -5766,6 +6051,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="460" width="459" height="20" uuid="bdb6dacb-351e-43d8-bb6b-e6a70d23ffa0">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other29"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other29.jasper"]]></subreportExpression>
 			</subreport>
@@ -5773,6 +6064,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="480" width="459" height="20" uuid="1a81cc51-c72c-4e2b-ae79-037f67635d61">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other30"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other30.jasper"]]></subreportExpression>
 			</subreport>
@@ -5780,6 +6077,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="500" width="459" height="20" uuid="4caffdbc-1be8-40f4-8bdb-ce950b486e7c">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other31"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other31.jasper"]]></subreportExpression>
 			</subreport>
@@ -5787,6 +6090,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="520" width="459" height="20" uuid="528d4dd9-0b77-4851-a10b-50d7e033ef5e">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other32"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other32.jasper"]]></subreportExpression>
 			</subreport>
@@ -6026,6 +6335,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="0" width="459" height="20" uuid="e9f590df-fab4-48e8-a555-151327bde9c1">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other33"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other33.jasper"]]></subreportExpression>
 			</subreport>
@@ -6033,6 +6348,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="20" width="459" height="20" uuid="02f75ae0-e22d-4fe3-a4f5-f7a4b1b01ff5">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other34"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other34.jasper"]]></subreportExpression>
 			</subreport>
@@ -6040,6 +6361,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="40" width="459" height="20" uuid="a6457388-059e-4d75-a5df-f98675bc6e91">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other35"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other35.jasper"]]></subreportExpression>
 			</subreport>
@@ -6047,6 +6374,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="60" width="459" height="20" uuid="3c71192c-5ceb-4acb-bac9-ea2a4877b36c">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other36"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other36.jasper"]]></subreportExpression>
 			</subreport>
@@ -6054,6 +6387,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="80" width="459" height="20" uuid="025085a4-89a0-40c6-a9a7-553f6bda8d43">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other37"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other37.jasper"]]></subreportExpression>
 			</subreport>
@@ -6061,6 +6400,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="100" width="459" height="20" uuid="f6471433-c5af-40dc-b0fc-9f7d6714f0bd">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other38"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other38.jasper"]]></subreportExpression>
 			</subreport>
@@ -6068,6 +6413,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="120" width="459" height="20" uuid="bbfa3e43-2e85-4c40-81f3-5e69da03a3e8">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other39"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other39.jasper"]]></subreportExpression>
 			</subreport>
@@ -6075,6 +6426,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="140" width="459" height="20" uuid="6b2eabc5-1566-48fd-85c9-b6d63cc7b6ab">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other40"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other40.jasper"]]></subreportExpression>
 			</subreport>
@@ -6082,6 +6439,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="160" width="459" height="20" uuid="78d233d6-893d-4c91-beac-71dbafeaf353">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other41"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other41.jasper"]]></subreportExpression>
 			</subreport>
@@ -6089,6 +6452,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="180" width="459" height="20" uuid="3aaa4f0d-b165-4d68-9621-e196cf993b83">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other42"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other42.jasper"]]></subreportExpression>
 			</subreport>
@@ -6096,6 +6465,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="200" width="459" height="20" uuid="b8adbfa7-b5af-416c-b0c8-10cf1af88e0b">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other43"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other43.jasper"]]></subreportExpression>
 			</subreport>
@@ -6103,6 +6478,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="220" width="459" height="20" uuid="10eb0d78-aeb7-4c27-8895-b2f7a5d684b2">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other44"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other44.jasper"]]></subreportExpression>
 			</subreport>
@@ -6110,6 +6491,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="240" width="459" height="20" uuid="78bb2796-9d50-4aad-b4b6-1b0b997290a9">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other45"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other45.jasper"]]></subreportExpression>
 			</subreport>
@@ -6117,6 +6504,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="260" width="459" height="20" uuid="9a975e29-e14f-4a80-8984-9bab53146a8f">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other46"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other46.jasper"]]></subreportExpression>
 			</subreport>
@@ -6124,6 +6517,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="280" width="459" height="20" uuid="da1080fd-b2e7-48de-9966-88c21712abaf">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-Other47"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-Other47.jasper"]]></subreportExpression>
 			</subreport>
@@ -6449,21 +6848,6 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				</textElement>
 				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="343" y="220" width="51" height="20" uuid="4621af11-2ff5-4891-ae4e-c2bb600c8f3b">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
-				</textElement>
-				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
-			</textField>
 			<staticText>
 				<reportElement x="0" y="425" width="802" height="30" uuid="723ff213-4e00-4081-92b9-727458f9acbc">
 					<property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -6474,21 +6858,6 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 			</staticText>
 			<textField>
 				<reportElement x="394" y="180" width="51" height="20" uuid="46170bfd-c3b6-4fd7-beae-f735dd9c6c52">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
-				</textElement>
-				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="394" y="220" width="51" height="20" uuid="2fb930af-a0a7-4648-acd2-15e5222a9668">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
@@ -6518,37 +6887,7 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="445" y="220" width="51" height="20" uuid="635d6d29-2b3f-4987-80a4-4a11e7b224ce">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
-				</textElement>
-				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
-			</textField>
-			<textField>
 				<reportElement x="496" y="180" width="51" height="20" uuid="b856ce8d-6a5f-4f81-acf8-fa10ba1a9a3d">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
-				</textElement>
-				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="496" y="220" width="51" height="20" uuid="ac6fdbb7-db5d-497b-bf49-85e5ee7709ed">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
@@ -6578,37 +6917,7 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="547" y="220" width="51" height="20" uuid="6ed206bf-4803-47d5-b867-beab57948a4e">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
-				</textElement>
-				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
-			</textField>
-			<textField>
 				<reportElement x="598" y="180" width="51" height="20" uuid="6c9d36d9-86e8-48f8-8b74-c1d6f96dec50">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
-				</textElement>
-				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="598" y="220" width="51" height="20" uuid="1aaa5d66-4354-464a-b142-47b7e8a29e24">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
@@ -6638,37 +6947,7 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="649" y="220" width="51" height="20" uuid="82b7784b-96ea-48f0-a5f7-44b798a9ab6c">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
-				</textElement>
-				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
-			</textField>
-			<textField>
 				<reportElement x="700" y="180" width="51" height="20" uuid="c7331c4e-7656-4329-ad29-b89609b0587e">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
-				</textElement>
-				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="700" y="220" width="51" height="20" uuid="ccfef93e-2486-422c-8144-8794ac66816c">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
@@ -6697,32 +6976,30 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				</textElement>
 				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="751" y="220" width="51" height="20" uuid="4d430778-5d08-431f-a478-68bd814056b8">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
-				<box>
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="14"/>
-				</textElement>
-				<textFieldExpression><![CDATA["0"]]></textFieldExpression>
-			</textField>
 			<subreport>
 				<reportElement x="343" y="20" width="459" height="20" uuid="ecc76edd-ae95-46f0-94ed-bb14daeb988c">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-OtherAcc1"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<returnValue subreportVariable="TOTAL_CASE" toVariable="SUM_CASE"/>
 				<subreportExpression><![CDATA["TJ73-OtherAcc1.jasper"]]></subreportExpression>
 			</subreport>
 			<subreport>
 				<reportElement x="343" y="40" width="459" height="20" uuid="659e9ffc-e4b5-4f07-9200-1b9387d8fd95">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-OtherAcc2"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-OtherAcc2.jasper"]]></subreportExpression>
 			</subreport>
@@ -6730,6 +7007,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="60" width="459" height="20" uuid="2ff60864-6397-468b-9f4f-f0ddd72fe22c">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-OtherAcc3"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-OtherAcc3.jasper"]]></subreportExpression>
 			</subreport>
@@ -6737,6 +7020,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="80" width="459" height="20" uuid="dd8385cc-2d90-4911-8100-85a56d89fb49">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-OtherAcc4"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-OtherAcc4.jasper"]]></subreportExpression>
 			</subreport>
@@ -6744,6 +7033,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="100" width="459" height="20" uuid="d1401dde-0d2a-447e-b547-14977b4a37ee">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-OtherAcc5"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-OtherAcc5.jasper"]]></subreportExpression>
 			</subreport>
@@ -6751,6 +7046,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="120" width="459" height="20" uuid="a4ef5649-cc99-4f1c-873f-db902b2859b9">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-OtherAcc6"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-OtherAcc6.jasper"]]></subreportExpression>
 			</subreport>
@@ -6758,6 +7059,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="140" width="459" height="20" uuid="3cf63e81-1854-4259-a785-6382466048fd">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-OtherAcc7"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-OtherAcc7.jasper"]]></subreportExpression>
 			</subreport>
@@ -6765,6 +7072,12 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="160" width="459" height="20" uuid="d85eecb1-ad98-4291-b95d-e5a3c4d69b58">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-OtherAcc8"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-OtherAcc8.jasper"]]></subreportExpression>
 			</subreport>
@@ -6772,9 +7085,208 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<reportElement x="343" y="200" width="459" height="20" uuid="fe217ff9-9bd5-408c-94e5-a91853b74516">
 					<property name="com.jaspersoft.studio.element.name" value="TJ73-OtherAcc9"/>
 				</reportElement>
+				<subreportParameter name="START_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="END_DATE">
+					<subreportParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></subreportParameterExpression>
+				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["TJ73-OtherAcc9.jasper"]]></subreportExpression>
 			</subreport>
+			<componentElement>
+				<reportElement x="343" y="220" width="459" height="20" uuid="7796f7a7-0009-4ee2-9a91-ea7e81752618">
+					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+					<property name="com.jaspersoft.studio.table.style.table_header" value="Table 18_TH"/>
+					<property name="com.jaspersoft.studio.table.style.column_header" value="Table 18_CH"/>
+					<property name="com.jaspersoft.studio.table.style.detail" value="Table 18_TD"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="SUBDATASET_SUM_CHECKCATCH73" uuid="0bec581a-1bac-4b2f-9554-f981131e5067">
+						<datasetParameter name="START_DATE">
+							<datasetParameterExpression><![CDATA[$F{MONTH_FIRSTDAY}]]></datasetParameterExpression>
+						</datasetParameter>
+						<datasetParameter name="END_DATE">
+							<datasetParameterExpression><![CDATA[$F{MONTH_LASTDAY}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:column width="51" uuid="7ab8802f-e461-43ce-8e39-064fae6b92ca">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
+						<jr:detailCell style="Table 18_TD" height="20">
+							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<textField>
+								<reportElement x="0" y="0" width="51" height="20" uuid="1803d07e-0a57-423b-9210-30b445cda834"/>
+								<box>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font fontName="THSarabunNew" size="14"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{SUM_CASE}==null?0:$F{SUM_CASE}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="51" uuid="c97b67be-e91a-47d7-a4a0-fd5e3284cab8">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
+						<jr:detailCell style="Table 18_TD" height="20">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<textField>
+								<reportElement x="0" y="0" width="51" height="20" uuid="668759c0-2998-4e2b-b9ed-4fbe198ea0ed"/>
+								<box>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font fontName="THSarabunNew" size="14"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{SUM_CASE_1}==null?0:$F{SUM_CASE_1}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="51" uuid="096bc309-29ae-4b21-9062-1984c8b59c16">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
+						<jr:detailCell style="Table 18_TD" height="20">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<textField>
+								<reportElement x="0" y="0" width="51" height="20" uuid="20ba15dc-a4ba-4c3f-afc4-d841357d1abe"/>
+								<box>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font fontName="THSarabunNew" size="14"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{SUM_CASE_2}==null?0:$F{SUM_CASE_2}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="51" uuid="3159e4fa-a2ad-4527-8729-76e438ca7abf">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column4"/>
+						<jr:detailCell style="Table 18_TD" height="20">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<textField>
+								<reportElement x="0" y="0" width="51" height="20" uuid="a584ca76-d9a4-4bca-b845-da6f0eea0fba"/>
+								<box>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font fontName="THSarabunNew" size="14"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{SUM_CASE_3}==null?0:$F{SUM_CASE_3}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="51" uuid="ac297660-c924-4091-a333-4b979afc92f6">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
+						<jr:detailCell style="Table 18_TD" height="20">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<textField>
+								<reportElement x="0" y="0" width="51" height="20" uuid="12ac3f8e-344e-497b-b18d-c48c0060b52f"/>
+								<box>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font fontName="THSarabunNew" size="14"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{SUM_CASE_4}==null?0:$F{SUM_CASE_4}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="51" uuid="61d2a9a8-534e-4569-878e-015b9e49bdf7">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
+						<jr:detailCell style="Table 18_TD" height="20">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<textField>
+								<reportElement x="0" y="0" width="51" height="20" uuid="fbffef0e-c15a-4071-9e72-7ee35c4f6f82"/>
+								<box>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font fontName="THSarabunNew" size="14"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{SUM_CASE_5}==null?0:$F{SUM_CASE_5}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="51" uuid="02ef61a9-47bc-4eeb-8aa0-0af2f1da92eb">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column7"/>
+						<jr:detailCell style="Table 18_TD" height="20">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<textField>
+								<reportElement x="0" y="0" width="51" height="20" uuid="d55b1408-bc10-433e-8fe4-83e39121ef7f"/>
+								<box>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font fontName="THSarabunNew" size="14"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{SUM_CASE_6}==null?0:$F{SUM_CASE_6}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="51" uuid="656f547a-a1b3-4a5d-a2f6-258c9da4f6cc">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column8"/>
+						<jr:detailCell style="Table 18_TD" height="20">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<textField>
+								<reportElement x="0" y="0" width="51" height="20" uuid="80f6e321-f447-4c40-a1bf-22f9c09a195b"/>
+								<box>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font fontName="THSarabunNew" size="14"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{TOTAL_CASE}==null?0:$V{TOTAL_CASE}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="51" uuid="3251cc0d-a100-49c2-8afa-608049c94055">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column9"/>
+						<jr:detailCell style="Table 18_TD" height="20">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<textField>
+								<reportElement x="0" y="0" width="51" height="20" uuid="d00cb51b-2f94-476b-9a8b-4215f423c696"/>
+								<box>
+									<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+									<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font fontName="THSarabunNew" size="14"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{SUM_CASE_UNLAW}==null?0:$F{SUM_CASE_UNLAW}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+				</jr:table>
+			</componentElement>
 		</band>
 		<band height="385">
 			<printWhenExpression><![CDATA[$P{JUDGEPORTFOLIOBEFORE} == 1]]></printWhenExpression>
