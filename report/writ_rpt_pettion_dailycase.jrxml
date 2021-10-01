@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="writ_rpt_pettion_dailycase" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="3861b480-704f-47bb-a9ca-7622f54d09e0">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -18,6 +17,9 @@
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/writ_rpt_pettion_dailycase_files/main_jrxml"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="512"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="477"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/07/2020"]]></defaultValueExpression>
 	</parameter>
@@ -26,64 +28,67 @@
 	</parameter>
 	<queryString>
 		<![CDATA[SELECT DISTINCT
-  	cou.COURT_NAME_TH,
-  	THAILDATE(pc.CASE_DATE) CASE_DATE_TEXT, 
- 	pltc_b.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR CASE_BLACK_NO,
-  	CASE WHEN pj.RED_IDNUM IS NULL THEN ' ' 
-  	     ELSE pltc_r.TITLE_CASE_NAME || pj.RED_IDNUM  || '/' || pj.RED_YEAR END   CASE_RED_NO,
+	cou.COURT_NAME_TH
+ 	,pltc_b.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR CASE_BLACK_NO
+  	,CASE WHEN pj.RED_IDNUM IS NULL THEN ' ' 
+  	      ELSE pltc_r.TITLE_CASE_NAME || pj.RED_IDNUM  || '/' || pj.RED_YEAR END   CASE_RED_NO
   	--     
-  	NVL(pc.PROS_DESC,'-') PROS_DESC,
-  	NVL(pc.ACCU_DESC,'-') ACCU_DESC,
-  	NVL(alle.ALLEGATION_NAME,'-') ALLEGATION_NAME,
-  	NVL(pc.DEPOSIT,0) DEPOSIT,
-  	NVL(plp.PROVINCE_NAME,'-') PROVINCE_NAME,
-  	plj.JUDGE_NAME,
-  	CASE WHEN ppa.APPOINT_DATE IS NULL THEN ' '
-  	     ELSE TO_CHAR(ppa.APPOINT_DATE, 'dd MONTHyyyy hh:mm', 'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI')||' น.' END APPOINT_DATE,  	
-  	' ' REMARK
+  	,NVL(pc.PROS_DESC,'-') PROS_DESC
+  	,NVL(pc.ACCU_DESC,'-') ACCU_DESC
+    ,NVL(pc.ALLE_DESC, NVL(alle.ALLEGATION_NAME,'-')) ALLE_DESC
+    ,NVL(pc.DEPOSIT,0) DEPOSIT
+    --
+    ,NVL(plp.PROVINCE_NAME,'-') PROVINCE_NAME
+  	,j7.JUDGE_NAME
+  	,CASE WHEN ppa.APPOINT_DATE IS NULL THEN ' '
+  	      ELSE TO_CHAR(ppa.APPOINT_DATE, 'dd MONTHyyyy hh:mm', 'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI')||' น.' END APPOINT_DATE	
+  	,' ' REMARK
 FROM PC_CASE pc 
-LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID  = pc.CASE_ID AND pj.REMOVED_BY = 0
-LEFT JOIN (SELECT ppac.START_DATE APPOINT_DATE, 
-			       ppa.CASE_ID
-			FROM PC_PROCEED_APPOINT ppa 
-			JOIN PC_PROCEED_APPOINT_CONTINUE ppac ON ppac.APPOINT_ID = ppa.APPOINT_ID 
-			JOIN (SELECT ppac.APPOINT_ID, MIN(ppac.APPOINT_CON_ID) APPOINT_CON_ID 
-				  FROM PC_PROCEED_APPOINT_CONTINUE ppac 
-				  GROUP BY ppac.APPOINT_ID) fapp ON fapp.APPOINT_CON_ID = ppac.APPOINT_CON_ID) ppa ON ppa.CASE_ID = pc.CASE_ID
---
-LEFT JOIN PC_CASE_CRIME_SCENE pccs ON pccs.CASE_ID = pc.CASE_ID AND pccs.REMOVED_BY = 0
-LEFT JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID = pc.CASE_ID AND pcj.REMOVED_BY = 0
---
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
+--judgment
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID  = pc.CASE_ID AND pj.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
---
-LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pc.COURT_ID AND plc.REMOVED_BY = 0
---
-LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID AND plj.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_PROVINCE plp ON plp.PROVINCE_ID = pccs.PROVINCE_ID AND plp.REMOVED_BY = 0
---
+--case has judge owner
+JOIN (SELECT DISTINCT pcj.CASE_ID 
+      FROM PC_CASE_JUDGE pcj 
+      JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+      WHERE pcj.REMOVED_BY = 0
+      AND pljt.JUDGE_TYPE_CODE = '01') j1 ON j1.CASE_ID = pc.CASE_ID 
+--name for judge receive case
+LEFT JOIN (SELECT DISTINCT pcj.CASE_ID, plj.JUDGE_NAME 
+           FROM PC_CASE_JUDGE pcj 
+           JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+           JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID AND plj.REMOVED_BY = 0
+           WHERE pcj.REMOVED_BY = 0
+           AND pljt.JUDGE_TYPE_CODE = '07') j7 ON j7.CASE_ID = pc.CASE_ID
+--allegation
 LEFT JOIN (SELECT pca.CASE_ID, LISTAGG(pla.ALLEGATION_NAME,',') WITHIN GROUP(ORDER BY pla.ALLEGATION_NAME) ALLEGATION_NAME
-			FROM PC_CASE_ALLE pca 
-			LEFT JOIN PC_LOOKUP_ALLEGATION pla ON pla.ALLEGATION_ID = pca.ALLEGATION_ID AND pla.REMOVED_BY = 0
-			WHERE pca.REMOVED_BY = 0
-			GROUP BY pca.CASE_ID ) alle ON alle.CASE_ID = pc.CASE_ID
---
+		   FROM PC_CASE_ALLE pca 
+		   LEFT JOIN PC_LOOKUP_ALLEGATION pla ON pla.ALLEGATION_ID = pca.ALLEGATION_ID AND pla.REMOVED_BY = 0
+		   WHERE pca.REMOVED_BY = 0
+		   GROUP BY pca.CASE_ID ) alle ON alle.CASE_ID = pc.CASE_ID
+--court
 LEFT JOIN (SELECT plc.COURT_NAME_TH
-			 FROM PC_PARAM pp
-			 JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
-			 WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 = 1
+		   FROM PC_PARAM pp
+		   JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+		   WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 = 1
+--place of case
+LEFT JOIN PC_CASE_CRIME_SCENE pccs ON pccs.CASE_ID = pc.CASE_ID AND pccs.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_PROVINCE plp ON plp.PROVINCE_ID = pccs.PROVINCE_ID AND plp.REMOVED_BY = 0
+--first appoint
+LEFT JOIN (SELECT ppa.CASE_ID
+                  ,MIN(ppac.START_DATE) APPOINT_DATE 
+           FROM PC_PROCEED_APPOINT ppa 
+           JOIN PC_PROCEED_APPOINT_CONTINUE ppac ON ppac.APPOINT_ID = ppa.APPOINT_ID AND ppac.REMOVED_BY = 0
+           WHERE ppa.REMOVED_BY = 0
+           GROUP BY ppa.CASE_ID) ppa ON ppa.CASE_ID = pc.CASE_ID
 --
 WHERE pc.REMOVED_BY = 0
-AND pljt.JUDGE_TYPE_CODE = '01'
 AND pc.CASE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
                          AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
-	</field>
-	<field name="CASE_DATE_TEXT" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="CASE_DATE_TEXT"/>
 	</field>
 	<field name="CASE_BLACK_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="CASE_BLACK_NO"/>
@@ -97,8 +102,8 @@ AND pc.CASE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24
 	<field name="ACCU_DESC" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="ACCU_DESC"/>
 	</field>
-	<field name="ALLEGATION_NAME" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="ALLEGATION_NAME"/>
+	<field name="ALLE_DESC" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="ALLE_DESC"/>
 	</field>
 	<field name="DEPOSIT" class="java.lang.Double">
 		<property name="com.jaspersoft.studio.field.label" value="DEPOSIT"/>
@@ -336,7 +341,7 @@ AND pc.CASE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ALLEGATION_NAME}==null?"-":$F{ALLEGATION_NAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{ALLE_DESC}==null?"-":$F{ALLE_DESC}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="373" y="0" width="89" height="25" uuid="742e4355-2ae1-4807-bbb6-28b5b1794dc5">
