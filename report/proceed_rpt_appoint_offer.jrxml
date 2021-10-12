@@ -11,15 +11,14 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_offer"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="621"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="368"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_offer_files/main_jrxml"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="462"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="531"/>
 	<parameter name="SELECT_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["31/05/2021"]]></defaultValueExpression>
 	</parameter>
@@ -41,6 +40,7 @@
 	   ,apd.WITNESS
 	   ,apd.PAGES
 	   ,CASE WHEN ap_next.START_DATE IS NULL THEN '0' ELSE THAISDATE(ap_next.START_DATE) END NEXT_DATE
+	   ,NVL(ap_next.APPOINT_LIST_NAME,'-') NEXT_APPOINT_REASON
 	   --
 FROM PC_PROCEED_APPOINT_CONTINUE ppac 
 LEFT JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID AND ppa.REMOVED_BY = 0
@@ -60,15 +60,16 @@ LEFT JOIN (SELECT pprw.APPOINT_CON_ID
 				                                  AND mx.CREATED_DATE = pprw.CREATED_DATE 
 			WHERE pprw.REMOVED_BY = 0) apd ON apd.APPOINT_CON_ID = ppac.APPOINT_CON_ID
 --next appoint
-LEFT JOIN (SELECT ppa.CASE_ID, MIN(ppac.START_DATE) START_DATE 
+LEFT JOIN (SELECT ppa.CASE_ID, plal.APPOINT_LIST_NAME, MIN(ppac.START_DATE) START_DATE 
 			FROM PC_PROCEED_APPOINT_CONTINUE ppac 
 			JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID AND ppac.REMOVED_BY = 0
+			LEFT JOIN PC_LOOKUP_APPOINT_LIST plal ON plal.APPOINT_LIST_ID = ppac.REASON_APPOINT_ID AND plal.REMOVED_BY = 0
 			WHERE ppac.REMOVED_BY = 0
 			AND ppac.START_DATE > TO_DATE($P{SELECT_DATE}, 'DD/MM/YYYY')
-			GROUP BY ppa.CASE_ID) ap_next ON ap_next.CASE_ID = ppa.CASE_ID  
---lookup proceed
+			GROUP BY ppa.CASE_ID, plal.APPOINT_LIST_NAME) ap_next ON ap_next.CASE_ID = ppa.CASE_ID  
+--proceed reason
 LEFT JOIN PC_LOOKUP_APPOINT_LIST plal ON plal.APPOINT_LIST_ID = ppac.REASON_APPOINT_ID AND plal.REMOVED_BY = 0
-
+--
 LEFT JOIN PC_LOOKUP_LEVEL_ROOM pllr ON pllr.LEVEL_ROOM_ID = ppac.LEVEL_ROOM_CODE AND pllr.REMOVED_BY = 0    
 --case
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
@@ -94,7 +95,8 @@ LEFT JOIN (SELECT plc.COURT_NAME_TH
 			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 = 1
 WHERE ppac.REMOVED_BY = 0
 AND ppac.START_DATE = TO_DATE($P{SELECT_DATE}, 'DD/MM/YYYY')
-AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
+AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})
+AND plal.APPOINT_LIST_CODE <> '1']]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
@@ -134,6 +136,9 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 	</field>
 	<field name="NEXT_DATE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="NEXT_DATE"/>
+	</field>
+	<field name="NEXT_APPOINT_REASON" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="NEXT_APPOINT_REASON"/>
 	</field>
 	<variable name="VAR_CNTCASE" class="java.lang.Long" incrementType="Report" calculation="Count"/>
 	<variable name="TEMP_START_DATE" class="java.lang.String">
@@ -357,7 +362,7 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 				<text><![CDATA[ปาก / หน้า]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="641" y="0" width="50" height="25" uuid="883d1188-b537-47e2-86a9-2c31dc83dee4">
+				<reportElement x="693" y="0" width="50" height="25" uuid="883d1188-b537-47e2-86a9-2c31dc83dee4">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -371,10 +376,10 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
-				<text><![CDATA[คดีเสร็จหรือไม่]]></text>
+				<text><![CDATA[สาเหตุนัด]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="691" y="0" width="64" height="25" uuid="43959e61-31a3-432e-beae-3d759de31894">
+				<reportElement x="743" y="0" width="64" height="25" uuid="43959e61-31a3-432e-beae-3d759de31894">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -391,7 +396,7 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 				<text><![CDATA[หมายเหตุ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="755" y="0" width="52" height="25" uuid="5724d0ea-5739-45e6-8230-8a06a1a06cd5">
+				<reportElement x="641" y="0" width="52" height="25" uuid="5724d0ea-5739-45e6-8230-8a06a1a06cd5">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -563,7 +568,7 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 				<textFieldExpression><![CDATA[$F{PAGES}==null?0:$F{PAGES}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="641" y="0" width="50" height="25" uuid="e2194e19-1f53-4e26-b1fd-f496740684dc">
+				<reportElement stretchType="ContainerHeight" x="693" y="0" width="50" height="25" uuid="e2194e19-1f53-4e26-b1fd-f496740684dc">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
@@ -577,13 +582,14 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{NEXT_DATE}== null||$F{NEXT_DATE}.equals("0")?  "-"  :  "พิจารณาต่อนัดหน้า"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{NEXT_APPOINT_REASON}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="755" y="0" width="52" height="25" uuid="07fbce9d-022b-4f02-b65d-1c0426bdc468">
+				<reportElement stretchType="ContainerHeight" x="641" y="0" width="52" height="25" uuid="07fbce9d-022b-4f02-b65d-1c0426bdc468">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				</reportElement>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -613,7 +619,7 @@ AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})]]>
 				<textFieldExpression><![CDATA[$F{BLACK_CASE_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="ContainerHeight" x="691" y="0" width="64" height="25" uuid="46907b13-f8a8-4c91-aaa8-a89300837c05">
+				<reportElement stretchType="ContainerHeight" x="743" y="0" width="64" height="25" uuid="46907b13-f8a8-4c91-aaa8-a89300837c05">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.y" value="px"/>
