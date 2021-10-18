@@ -14,7 +14,7 @@
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="460"/>
@@ -54,11 +54,11 @@
 FROM
 	PC_PROCEED_APPOINT ppa	
 -- appoint continue
-LEFT JOIN PC_PROCEED_APPOINT_CONTINUE ppac ON
+JOIN PC_PROCEED_APPOINT_CONTINUE ppac ON
 	ppac.APPOINT_ID = ppa.APPOINT_ID AND ppac.REMOVED_BY = 0
 --appoint_table
 LEFT JOIN PC_PROCEED_APPOINT_TABLE ppat ON
-	ppat.APPOINT_TABLE_CODE = ppac.APPOINT_TABLE_CODE AND ppat.REMOVED_BY = 0
+	ppat.APPOINT_TABLE_CODE = ppa.APPOINT_TABLE_CODE AND ppat.REMOVED_BY = 0
 -- case
 LEFT JOIN PC_CASE pc ON
     pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
@@ -104,13 +104,14 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
              FROM PC_PARAM pp
              JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
              WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
---             
+--           
 WHERE ppa.REMOVED_BY = 0 
 AND ppac.START_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS')
                         AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 AND (j.JUDGE_ID = $P{JUDGE_ID} OR $P{JUDGE_ID} IS NULL)
 AND ($P{CHOICE} IS NULL OR ppac.CHOICE = $P{CHOICE})
-AND ($P{LEVEL_ROOM_ID} IS NULL OR pllr.LEVEL_ROOM_ID = $P{LEVEL_ROOM_ID} OR 0 = $P{LEVEL_ROOM_ID})                          
+AND ($P{LEVEL_ROOM_ID} IS NULL OR pllr.LEVEL_ROOM_ID = $P{LEVEL_ROOM_ID} OR 0 = $P{LEVEL_ROOM_ID})  
+AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE WHERE REF_APPOINT_CON_ID = ppac.APPOINT_CON_ID)
 ORDER BY ppac.START_DATE, ppac.CHOICE, ppac.CHOICE_TIME]]>
 	</queryString>
 	<field name="START_DATE" class="java.util.Date">

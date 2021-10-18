@@ -19,6 +19,7 @@
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="462"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="531"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_offer_files/main_jrxml"/>
 	<parameter name="SELECT_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["31/05/2021"]]></defaultValueExpression>
 	</parameter>
@@ -41,10 +42,10 @@
 	   ,apd.PAGES
 	   ,CASE WHEN ap_next.START_DATE IS NULL THEN '0' ELSE THAISDATE(ap_next.START_DATE) END NEXT_DATE
 	   ,NVL(ap_next.APPOINT_LIST_NAME,'-') NEXT_APPOINT_REASON
-	   --
+	   
 FROM PC_PROCEED_APPOINT_CONTINUE ppac 
-LEFT JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID AND ppa.REMOVED_BY = 0
-LEFT JOIN PC_PROCEED_APPOINT_TABLE ppat ON ppat.APPOINT_TABLE_CODE = ppac.APPOINT_TABLE_CODE AND ppat.REMOVED_BY = 0
+JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID AND ppa.REMOVED_BY = 0
+LEFT JOIN PC_PROCEED_APPOINT_TABLE ppat ON ppat.APPOINT_TABLE_CODE = ppa.APPOINT_TABLE_CODE AND ppat.REMOVED_BY = 0
 --witness
 LEFT JOIN (SELECT pprw.APPOINT_CON_ID
 				  ,NVL(pprw.WITNESS_DEFENDANT_COUNT,0)+NVL(pprw.WITNESS_DISSENTER_COUNT,0)+NVL(pprw.WITNESS_OTHER_COUNT,0)+NVL(pprw.WITNESS_PLAINTIFF_COUNT,0)+NVL(pprw.WITNESS_REQUESTER_COUNT,0) WITNESS	  
@@ -60,17 +61,27 @@ LEFT JOIN (SELECT pprw.APPOINT_CON_ID
 				                                  AND mx.CREATED_DATE = pprw.CREATED_DATE 
 			WHERE pprw.REMOVED_BY = 0) apd ON apd.APPOINT_CON_ID = ppac.APPOINT_CON_ID
 --next appoint
-LEFT JOIN (SELECT ppa.CASE_ID, plal.APPOINT_LIST_NAME, MIN(ppac.START_DATE) START_DATE 
+LEFT JOIN (SELECT ppa.CASE_ID
+			       ,ppac.APPOINT_CON_ID
+			       ,plal.APPOINT_LIST_NAME
+			       ,ppac.START_DATE
+			       ,ROW_NUMBER() OVER (PARTITION BY ppa.CASE_ID ORDER BY ppac.START_DATE, ppac.APPOINT_CON_ID) APPOINT_ORDER			      
 			FROM PC_PROCEED_APPOINT_CONTINUE ppac 
 			JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID AND ppac.REMOVED_BY = 0
 			LEFT JOIN PC_LOOKUP_APPOINT_LIST plal ON plal.APPOINT_LIST_ID = ppac.REASON_APPOINT_ID AND plal.REMOVED_BY = 0
+			--postpone appoint			
+			LEFT JOIN (SELECT ppac.REF_APPOINT_CON_ID 
+			           FROM PC_PROCEED_APPOINT_CONTINUE ppac
+			           WHERE ppac.REMOVED_BY = 0
+			           AND ppac.REF_APPOINT_CON_ID > 0) ppac_p ON ppac_p.REF_APPOINT_CON_ID = ppac.APPOINT_CON_ID
+			           
 			WHERE ppac.REMOVED_BY = 0
 			AND ppac.START_DATE > TO_DATE($P{SELECT_DATE}, 'DD/MM/YYYY')
-			GROUP BY ppa.CASE_ID, plal.APPOINT_LIST_NAME) ap_next ON ap_next.CASE_ID = ppa.CASE_ID  
+			AND ppac_p.REF_APPOINT_CON_ID IS NULL) ap_next ON ap_next.CASE_ID = ppa.CASE_ID AND ap_next.APPOINT_ORDER = 1 
 --proceed reason
 LEFT JOIN PC_LOOKUP_APPOINT_LIST plal ON plal.APPOINT_LIST_ID = ppac.REASON_APPOINT_ID AND plal.REMOVED_BY = 0
 --
-LEFT JOIN PC_LOOKUP_LEVEL_ROOM pllr ON pllr.LEVEL_ROOM_ID = ppac.LEVEL_ROOM_CODE AND pllr.REMOVED_BY = 0    
+LEFT JOIN PC_LOOKUP_LEVEL_ROOM pllr ON pllr.LEVEL_ROOM_CODE = ppac.LEVEL_ROOM_CODE AND pllr.REMOVED_BY = 0    
 --case
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
@@ -93,10 +104,12 @@ LEFT JOIN (SELECT plc.COURT_NAME_TH
 			FROM PC_PARAM pp
 			JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
 			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 = 1
+--
 WHERE ppac.REMOVED_BY = 0
 AND ppac.START_DATE = TO_DATE($P{SELECT_DATE}, 'DD/MM/YYYY')
 AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})
-AND plal.APPOINT_LIST_CODE <> '1']]>
+AND plal.APPOINT_LIST_CODE <> '1'
+AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE WHERE REF_APPOINT_CON_ID = ppac.APPOINT_CON_ID)]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
@@ -517,7 +530,7 @@ AND plal.APPOINT_LIST_CODE <> '1']]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{APPOINT_TIME}  == null ?  " "  :  $F{APPOINT_TIME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{APPOINT_TIME}  == null ?  "-"  :    $F{APPOINT_TIME}.length()== 8 ?  $F{APPOINT_TIME}.substring(0,5) : $F{APPOINT_TIME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="495" y="0" width="85" height="25" uuid="14561a8d-97a8-4e3b-80c4-d55bfb4900cc">

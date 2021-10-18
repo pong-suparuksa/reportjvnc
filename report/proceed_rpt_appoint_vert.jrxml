@@ -10,6 +10,7 @@
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_vert"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="534"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="459"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_vert_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["10/03/2021"]]></defaultValueExpression>
 	</parameter>
@@ -40,7 +41,7 @@
 FROM
 	PC_PROCEED_APPOINT ppa	
 -- appoint continue
-LEFT JOIN PC_PROCEED_APPOINT_CONTINUE ppac ON
+JOIN PC_PROCEED_APPOINT_CONTINUE ppac ON
 	ppac.APPOINT_ID = ppa.APPOINT_ID AND ppac.REMOVED_BY = 0	
 -- case
 LEFT JOIN PC_CASE pc ON
@@ -79,7 +80,8 @@ AND ppac.START_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"H
                            AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 AND (j.JUDGE_ID = $P{JUDGE_ID} OR $P{JUDGE_ID} IS NULL)
 AND ($P{CHOICE} IS NULL OR ppac.CHOICE = $P{CHOICE})
-AND ($P{LEVEL_ROOM_ID} IS NULL OR pllr.LEVEL_ROOM_ID = $P{LEVEL_ROOM_ID} OR 0 = $P{LEVEL_ROOM_ID})                          
+AND ($P{LEVEL_ROOM_ID} IS NULL OR pllr.LEVEL_ROOM_ID = $P{LEVEL_ROOM_ID} OR 0 = $P{LEVEL_ROOM_ID}) 
+AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE WHERE REF_APPOINT_CON_ID = ppac.APPOINT_CON_ID) 
 ORDER BY ppac.START_DATE, ppac.CHOICE, ppac.CHOICE_TIME]]>
 	</queryString>
 	<field name="START_DATE" class="java.util.Date">
