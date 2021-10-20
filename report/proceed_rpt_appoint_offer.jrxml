@@ -19,12 +19,14 @@
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="462"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="531"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_offer_files/main_jrxml"/>
 	<parameter name="SELECT_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["31/05/2021"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="APPOINT_BY_ID" class="java.lang.Integer">
 		<defaultValueExpression><![CDATA[0]]></defaultValueExpression>
+	</parameter>
+	<parameter name="TABLE_CODE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["0"]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
 		<![CDATA[SELECT cou.COURT_NAME_TH
@@ -40,7 +42,9 @@
 	   ,j.JUDGE_NAME
 	   ,apd.WITNESS
 	   ,apd.PAGES
-	   ,CASE WHEN ap_next.START_DATE IS NULL THEN '0' ELSE THAISDATE(ap_next.START_DATE) END NEXT_DATE
+	   ,CASE WHEN ap_next.START_DATE IS NULL THEN '0' 
+	         ELSE TO_CHAR(ap_next.START_DATE, 'dd-fmMon-yy', 'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI') 
+	         END NEXT_DATE
 	   ,NVL(ap_next.APPOINT_LIST_NAME,'-') NEXT_APPOINT_REASON
 	   
 FROM PC_PROCEED_APPOINT_CONTINUE ppac 
@@ -109,7 +113,8 @@ WHERE ppac.REMOVED_BY = 0
 AND ppac.START_DATE = TO_DATE($P{SELECT_DATE}, 'DD/MM/YYYY')
 AND (ppa.APPOINT_BY_ID = $P!{APPOINT_BY_ID} OR 0 = $P!{APPOINT_BY_ID})
 AND plal.APPOINT_LIST_CODE <> '1'
-AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE WHERE REF_APPOINT_CON_ID = ppac.APPOINT_CON_ID)]]>
+AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE WHERE REF_APPOINT_CON_ID = ppac.APPOINT_CON_ID)
+AND (ppat.APPOINT_TABLE_CODE IN ($P!{TABLE_CODE}) OR '0' IN ($P!{TABLE_CODE}))]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>

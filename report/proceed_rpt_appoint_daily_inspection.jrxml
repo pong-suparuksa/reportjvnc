@@ -12,19 +12,21 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_daily_inspection"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="315"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="680"/>
 	<property name="com.jaspersoft.studio.report.description" value=""/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_daily_inspection_files/main_jrxml"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="534"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="459"/>
 	<parameter name="SELECT_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["03/03/2021"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="ROOM_COD" class="java.lang.String"/>
+	<parameter name="TABLE_CODE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["0"]]></defaultValueExpression>
+	</parameter>
 	<queryString language="SQL">
 		<![CDATA[SELECT DISTINCT 
 	pc.CASE_ID
@@ -114,7 +116,8 @@ LEFT JOIN (SELECT plc.COURT_NAME_TH
 WHERE ppac.REMOVED_BY = 0
 AND ppac.START_DATE = TO_DATE($P{SELECT_DATE}, 'DD/MM/YYYY')
 AND ($P{ROOM_COD} IS NULL OR pllr.LEVEL_ROOM_CODE = $P{ROOM_COD})
-AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE WHERE REF_APPOINT_CON_ID = ppac.APPOINT_CON_ID)]]>
+AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE WHERE REF_APPOINT_CON_ID = ppac.APPOINT_CON_ID)
+AND (ppat.APPOINT_TABLE_CODE IN ($P!{TABLE_CODE}) OR '0' IN ($P!{TABLE_CODE}))]]>
 	</queryString>
 	<field name="APPOINT_DATE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="APPOINT_DATE"/>

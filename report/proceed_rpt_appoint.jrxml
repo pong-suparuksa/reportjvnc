@@ -17,19 +17,21 @@
 	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="460"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="529"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="661"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="329"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["10/03/2021"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["01/08/2021"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="END_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["28/03/2021"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["31/10/2021"]]></defaultValueExpression>
 	</parameter>
-	<parameter name="JUDGE_ID" class="java.lang.String">
-		<defaultValueExpression><![CDATA[5]]></defaultValueExpression>
-	</parameter>
+	<parameter name="JUDGE_ID" class="java.lang.String"/>
 	<parameter name="CHOICE" class="java.lang.String"/>
 	<parameter name="LEVEL_ROOM_ID" class="java.lang.String"/>
+	<parameter name="TABLE_CODE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["0"]]></defaultValueExpression>
+	</parameter>
 	<queryString language="SQL">
 		<![CDATA[SELECT DISTINCT
     ppa.CASE_ID,
@@ -49,7 +51,9 @@
 	j.JUDGE_NAME,
 	ja.ONG_1,
 	ja.ONG_2,
-	ja.ADD_1
+	ja.ADD_1,
+	--
+	ppat.APPOINT_TABLE_CODE 
 --
 FROM
 	PC_PROCEED_APPOINT ppa	
@@ -112,6 +116,7 @@ AND (j.JUDGE_ID = $P{JUDGE_ID} OR $P{JUDGE_ID} IS NULL)
 AND ($P{CHOICE} IS NULL OR ppac.CHOICE = $P{CHOICE})
 AND ($P{LEVEL_ROOM_ID} IS NULL OR pllr.LEVEL_ROOM_ID = $P{LEVEL_ROOM_ID} OR 0 = $P{LEVEL_ROOM_ID})  
 AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE WHERE REF_APPOINT_CON_ID = ppac.APPOINT_CON_ID)
+AND (ppat.APPOINT_TABLE_CODE IN ($P!{TABLE_CODE}) OR '0' IN ($P!{TABLE_CODE}))
 ORDER BY ppac.START_DATE, ppac.CHOICE, ppac.CHOICE_TIME]]>
 	</queryString>
 	<field name="START_DATE" class="java.util.Date">

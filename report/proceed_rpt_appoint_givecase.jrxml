@@ -11,7 +11,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_givecase"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="202"/>
@@ -27,8 +27,8 @@
 	<parameter name="END_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["31/05/2021"]]></defaultValueExpression>
 	</parameter>
-	<parameter name="APPOIN_TABLE_CODE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["001"]]></defaultValueExpression>
+	<parameter name="TABLE_CODE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["0"]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
 		<![CDATA[SELECT DISTINCT
@@ -80,8 +80,8 @@ LEFT JOIN (SELECT pcj.CASE_ID
 WHERE ppa.REMOVED_BY = 0
 AND ppac.START_DATE BETWEEN TO_DATE( $P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
 AND (($P{PERIOD} IS NULL) OR (ppac.CHOICE = $P{PERIOD}))
-AND (($P{APPOIN_TABLE_CODE} IS NULL)OR(ppac.APPOINT_TABLE_CODE = $P{APPOIN_TABLE_CODE}))
 AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE WHERE REF_APPOINT_CON_ID = ppac.APPOINT_CON_ID)
+AND (ppat.APPOINT_TABLE_CODE IN ($P!{TABLE_CODE}) OR '0' IN ($P!{TABLE_CODE}))
 ORDER BY APPOINT_DATE, APPOINT_TIME]]>
 	</queryString>
 	<field name="APPOINT_TITLE" class="java.lang.String">
