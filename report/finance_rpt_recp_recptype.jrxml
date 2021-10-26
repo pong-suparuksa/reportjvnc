@@ -10,14 +10,16 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="RemoteCojStage2"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN121"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_rpt_recp_recptype"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.report.description" value=""/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="409"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="581"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/finance_rpt_recp_recptype_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/07/2020"]]></defaultValueExpression>
@@ -50,16 +52,16 @@
             WHEN NVL(pfrt.AMOUNT,0) > 0 THEN pfrt.ACCOUNT_NO
             ELSE '-' END REF_NO,
        --
-       NVL(plrst.RECEIPT_SUB_TYPE_NAME ,' ') PAID_DESCRIPTION,
-       pfrd.TOTAL_AMOUNT,
-       pfrca.NOTES REMARK,   
-       plrt.RECEIPT_TYPE_CODE,
-       plrt.RECEIPT_TYPE_NAME,
-       plrst.RECEIPT_SUB_TYPE_CODE,
-       plrst.RECEIPT_SUB_TYPE_NAME,
+       LISTAGG(plrst.RECEIPT_SUB_TYPE_NAME, ',') WITHIN GROUP(ORDER BY plrst.RECEIPT_SUB_TYPE_NAME) PAID_DESCRIPTION,
+       --
+       SUM(CASE WHEN pfrca.CANCEL_ID  IS NOT NULL THEN 0 ELSE pfrd.TOTAL_AMOUNT END) TOTAL_AMOUNT,
+       TO_CHAR(pfrca.NOTES) REMARK,   
        ps.STRUCTURE_NAME,
        NVL(pup.USER_PROFILE_FULL_NAME,'-')            USER_NAME,
-       pfrca.CANCEL_ID
+       pfrca.CANCEL_ID,
+       plrt.RECEIPT_TYPE_CODE,
+       plrt.RECEIPT_TYPE_NAME
+       
 --       
 FROM PC_FIN_RECEIPT pfr
 LEFT JOIN PC_FIN_RECEIPT_DETAIL pfrd ON pfrd.RECEIPT_ID = pfr.RECEIPT_ID
@@ -77,6 +79,7 @@ LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID 
 --
 LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pfr.COURT_ID AND plc.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE AND plrt.REMOVED_BY = 0
+
 LEFT JOIN PC_LOOKUP_RECEIPT_SUB_TYPE plrst ON plrst.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE 
                                      AND plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE AND plrst.REMOVED_BY = 0
 ----
@@ -90,16 +93,44 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
 --
 WHERE pfr.RECEIVED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
                           AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
-AND plrt.RECEIPT_TYPE_CODE IN   ($P!{RTYPE})                
+AND plrt.RECEIPT_TYPE_CODE IN   ($P!{RTYPE}) 
+--
+GROUP BY       
+       cou.COURT_NAME_TH,
+       pfr.RECEIPT_BOOK_NO,
+       pfr.RECEIPT_NO,
+       pfr.RECEIVED_DATE,
+       THAISDATE(pfr.RECEIVED_DATE),
+       NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR),
+       NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || CASE WHEN pj.RED_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pj.RED_YEAR),
+       NVL(pc.PROS_DESC,' '),
+       NVL(pc.ACCU_DESC,' '),
+       pfr.PAYER_NAME,    
+       CASE WHEN NVL(pfrc.AMOUNT,0) > 0 THEN 'เช็ค'
+            WHEN NVL(pfrcr.AMOUNT,0) > 0 THEN 'เครดิต'
+            WHEN NVL(pfrt.AMOUNT,0) > 0 THEN 'เงินโอน'
+            ELSE 'เงินสด' END,
+       --        
+       CASE WHEN NVL(pfrc.AMOUNT,0) > 0 THEN pfrc.CHEQUE_CODE
+            WHEN NVL(pfrcr.AMOUNT,0) > 0 THEN pfrcr.CREDIT_NO
+            WHEN NVL(pfrt.AMOUNT,0) > 0 THEN pfrt.ACCOUNT_NO
+            ELSE '-' END,        
+       TO_CHAR(pfrca.NOTES),   
+       ps.STRUCTURE_NAME,
+       NVL(pup.USER_PROFILE_FULL_NAME,'-'),
+       pfrca.CANCEL_ID,
+       plrt.RECEIPT_TYPE_CODE,
+       plrt.RECEIPT_TYPE_NAME         
+--         
 ORDER BY plrt.RECEIPT_TYPE_CODE, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
 	</field>
-	<field name="RECEIPT_BOOK_NO" class="java.lang.Long">
+	<field name="RECEIPT_BOOK_NO" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_BOOK_NO"/>
 	</field>
-	<field name="RECEIPT_NO" class="java.lang.Long">
+	<field name="RECEIPT_NO" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_NO"/>
 	</field>
 	<field name="RECEIVED_DATE" class="java.util.Date">
@@ -138,26 +169,20 @@ ORDER BY plrt.RECEIPT_TYPE_CODE, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.REC
 	<field name="REMARK" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="REMARK"/>
 	</field>
-	<field name="RECEIPT_TYPE_CODE" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_TYPE_CODE"/>
-	</field>
-	<field name="RECEIPT_TYPE_NAME" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_TYPE_NAME"/>
-	</field>
-	<field name="RECEIPT_SUB_TYPE_CODE" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_SUB_TYPE_CODE"/>
-	</field>
-	<field name="RECEIPT_SUB_TYPE_NAME" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_SUB_TYPE_NAME"/>
-	</field>
 	<field name="STRUCTURE_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="STRUCTURE_NAME"/>
 	</field>
 	<field name="USER_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="USER_NAME"/>
 	</field>
-	<field name="CANCEL_ID" class="java.lang.Long">
-		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_ID"/>
+	<field name="CANCEL_ID" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="CANCEL_ID"/>
+	</field>
+	<field name="RECEIPT_TYPE_CODE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_TYPE_CODE"/>
+	</field>
+	<field name="RECEIPT_TYPE_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_TYPE_NAME"/>
 	</field>
 	<variable name="C_RECPTYP_CENT" class="java.lang.String">
 		<variableExpression><![CDATA["1"]]></variableExpression>
@@ -269,8 +294,7 @@ ORDER BY plrt.RECEIPT_TYPE_CODE, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.REC
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="18" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["ตั้งแต่วันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))
-]]></textFieldExpression>
+				<textFieldExpression><![CDATA["ตั้งแต่วันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>
@@ -518,8 +542,8 @@ ORDER BY plrt.RECEIPT_TYPE_CODE, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.REC
 	<detail>
 		<band height="50" splitType="Prevent">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
-			<textField>
-				<reportElement x="0" y="0" width="30" height="50" uuid="35e1b10f-4b94-4548-adcc-e3c2eda11f3f">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="0" y="0" width="30" height="50" uuid="35e1b10f-4b94-4548-adcc-e3c2eda11f3f">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -534,8 +558,8 @@ ORDER BY plrt.RECEIPT_TYPE_CODE, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.REC
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="30" y="0" width="40" height="50" uuid="21050b67-fb8b-4f46-b524-912bc248c839">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="30" y="0" width="40" height="50" uuid="21050b67-fb8b-4f46-b524-912bc248c839">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 				</reportElement>
 				<box>
@@ -549,8 +573,8 @@ ORDER BY plrt.RECEIPT_TYPE_CODE, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.REC
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIPT_BOOK_NO}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="70" y="0" width="40" height="50" uuid="dab2c5fe-a83d-4d33-8584-8abf84b6392e">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="70" y="0" width="40" height="50" uuid="dab2c5fe-a83d-4d33-8584-8abf84b6392e">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 				</reportElement>
 				<box>
@@ -564,8 +588,8 @@ ORDER BY plrt.RECEIPT_TYPE_CODE, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.REC
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIPT_NO}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="110" y="0" width="60" height="50" uuid="9660702b-1206-4f30-97e5-b5a231e76cb5">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="110" y="0" width="60" height="50" uuid="9660702b-1206-4f30-97e5-b5a231e76cb5">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 				</reportElement>
 				<box>
@@ -579,8 +603,8 @@ ORDER BY plrt.RECEIPT_TYPE_CODE, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.REC
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIVED_DATE_TEXT}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="170" y="0" width="70" height="50" uuid="9dfa5c76-37be-4105-a2eb-b67e85ecdec6">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="170" y="0" width="70" height="50" uuid="9dfa5c76-37be-4105-a2eb-b67e85ecdec6">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -595,8 +619,8 @@ ORDER BY plrt.RECEIPT_TYPE_CODE, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.REC
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="240" y="0" width="70" height="50" uuid="a72611f0-498d-4ae6-a8bf-1845fbc2a85d">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="240" y="0" width="70" height="50" uuid="a72611f0-498d-4ae6-a8bf-1845fbc2a85d">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -611,8 +635,8 @@ ORDER BY plrt.RECEIPT_TYPE_CODE, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.REC
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_RED_NO}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="310" y="0" width="70" height="50" uuid="d33061c1-2790-4f02-b503-737324e68904">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="310" y="0" width="70" height="50" uuid="d33061c1-2790-4f02-b503-737324e68904">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -627,8 +651,8 @@ ORDER BY plrt.RECEIPT_TYPE_CODE, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.REC
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PROS_DESC}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="380" y="0" width="70" height="50" uuid="c2dbd932-9623-4540-ba3d-aa176238371c">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="380" y="0" width="70" height="50" uuid="c2dbd932-9623-4540-ba3d-aa176238371c">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -643,8 +667,8 @@ ORDER BY plrt.RECEIPT_TYPE_CODE, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.REC
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ACCU_DESC}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="450" y="0" width="96" height="50" uuid="0021df82-2520-49e0-8d22-d6e386fc8a2b">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="450" y="0" width="96" height="50" uuid="0021df82-2520-49e0-8d22-d6e386fc8a2b">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -659,8 +683,8 @@ ORDER BY plrt.RECEIPT_TYPE_CODE, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.REC
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PAYER_NAME}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="546" y="0" width="94" height="50" uuid="5f10c83f-9512-4662-85a6-ea6000cd8cfc">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="546" y="0" width="94" height="50" uuid="5f10c83f-9512-4662-85a6-ea6000cd8cfc">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -675,8 +699,8 @@ ORDER BY plrt.RECEIPT_TYPE_CODE, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.REC
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PAID_DESCRIPTION}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="640" y="0" width="50" height="50" uuid="a221f09b-3a1d-4f1d-99d6-9391349f4b33">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="640" y="0" width="50" height="50" uuid="a221f09b-3a1d-4f1d-99d6-9391349f4b33">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -693,8 +717,8 @@ ORDER BY plrt.RECEIPT_TYPE_CODE, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.REC
 ?"0"
 :new java.text.DecimalFormat("#,##0").format($F{TOTAL_AMOUNT})]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="690" y="0" width="50" height="50" uuid="af4ad95f-7c3c-47de-9c7f-0ba3baaedb40">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="690" y="0" width="50" height="50" uuid="af4ad95f-7c3c-47de-9c7f-0ba3baaedb40">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -709,8 +733,8 @@ ORDER BY plrt.RECEIPT_TYPE_CODE, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.REC
 				</textElement>
 				<textFieldExpression><![CDATA[$F{REMARK}==null?" ":$F{REMARK}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="740" y="0" width="60" height="50" uuid="7687be38-5af7-48e4-a935-629e3f2cc491">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="740" y="0" width="60" height="50" uuid="7687be38-5af7-48e4-a935-629e3f2cc491">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>

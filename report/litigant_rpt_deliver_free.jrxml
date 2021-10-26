@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_deliver_free"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -27,24 +27,23 @@
 		<defaultValueExpression><![CDATA["14/07/2020"]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
-		<![CDATA[SELECT * FROM (
-	SELECT DISTINCT
-			pni.SEND_NOTICE_DATE,
-			THAILDATE(NVL(pni.SEND_NOTICE_DATE,CURRENT_DATE))                                                               SEND_NOTICE_DATE_TEXT,            
-            NVL(plc.COURT_NAME_TH, '-') 	     																           		COURT_NAME_TH,                        
-            pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR  												CASE_BLACK_NO,    
-  			pltc_red.TITLE_CASE_NAME || pj.RED_IDNUM || '/' || pj.RED_YEAR  												CASE_RED_NO,             
-            NVL(pc.PROS_DESC,'-')	      													          						CLAIMANT, 
-  			NVL(pc.ACCU_DESC,'-')																        					DEFENDANT,
-            NVL(pup.USER_PROFILE_FULL_NAME,'-')																				PAYER_NAME,
-  		    NVL(pn.LITIGANT_NAME,'-')	                                       													TO_NAME,
-            NVL(plnt.NOTICE_TYPE_NAME,'-')																					NOTICE_TYPE_NAME,            
-            
-            NVL(pls.SUBDISTRICT_NAME,'-')																					SUBDISTRICT_NAME,
-            NVL(pld.DISTRICT_NAME,'-')																						DISTRICT_NAME,
-            NVL(plp.PROVINCE_NAME,'-')											 										    PROVINCE_NAME,
-            NVL(pn.SEND_FEE, 0)																								SEND_FEE,																																		   
-		    NVL(pn.SEND_METHOD_BY_NAME,'-')																   		USER_PROFILE_FULL_NAME
+		<![CDATA[SELECT DISTINCT
+		pni.SEND_NOTICE_DATE,
+		THAILDATE(NVL(pni.SEND_NOTICE_DATE,CURRENT_DATE))                                                               SEND_NOTICE_DATE_TEXT,            
+        NVL(plc.COURT_NAME_TH, '-') 	     																           		COURT_NAME_TH,                        
+        pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR  												CASE_BLACK_NO,    
+		pltc_red.TITLE_CASE_NAME || pj.RED_IDNUM || '/' || pj.RED_YEAR  												CASE_RED_NO,             
+        NVL(pc.PROS_DESC,'-')	      													          						CLAIMANT, 
+		NVL(pc.ACCU_DESC,'-')																        					DEFENDANT,
+        NVL(pup.USER_PROFILE_FULL_NAME,'-')																				PAYER_NAME,
+	    NVL(pn.LITIGANT_NAME,'-')	                                       													TO_NAME,
+        NVL(plnt.NOTICE_TYPE_NAME,'-')																					NOTICE_TYPE_NAME,            
+        
+        NVL(pls.SUBDISTRICT_NAME,'-')																					SUBDISTRICT_NAME,
+        NVL(pld.DISTRICT_NAME,'-')																						DISTRICT_NAME,
+        NVL(plp.PROVINCE_NAME,'-')											 										    PROVINCE_NAME,
+        NVL(pn.SEND_FEE, 0)																								SEND_FEE,																																		   
+	    NVL(pn.SEND_METHOD_BY_NAME,'-')																   		            USER_PROFILE_FULL_NAME
             
 FROM PC_NOTICE pn
 JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID AND pc.REMOVED_BY = 0
@@ -67,10 +66,13 @@ LEFT JOIN PC_LOOKUP_PROVINCE plp ON plp.PROVINCE_ID = pn.CURRENT_PROVINCE_ID AND
 LEFT JOIN PC_LOOKUP_DISTRICT pld ON pld.DISTRICT_ID =  pn.CURRENT_DISTRICT_ID AND pld.PROVINCE_ID = pn.CURRENT_PROVINCE_ID AND pld.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_SUBDISTRICT pls ON pls.SUBDISTRICT_ID = pn.CURRENT_SUBDISTRICT_ID AND  pls.DISTRICT_ID = pn.CURRENT_DISTRICT_ID AND pls.PROVINCE_ID = pn.CURRENT_PROVINCE_ID AND pls.REMOVED_BY = 0
 
-WHERE pn.SEND_METHOD = 1 AND NVL(pni.HAS_MONEY,0) = 0 AND pn.IS_COURT_AREA = 1
-)
-WHERE SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
-AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')]]>
+WHERE pn.REMOVED_BY = 0
+AND pn.SEND_METHOD = 1 
+AND NVL(pni.HAS_MONEY,0) = 0 
+AND pn.IS_COURT_AREA = 1
+AND NVL(pn.SEND_FEE, 0) = 0
+AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
+	                          AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')]]>
 	</queryString>
 	<field name="SEND_NOTICE_DATE" class="java.util.Date">
 		<property name="com.jaspersoft.studio.field.label" value="SEND_NOTICE_DATE"/>

@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_continuous"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_continuous_files/main_jrxml"/>
@@ -116,6 +116,8 @@ LEFT JOIN (SELECT A.APPOINT_DATE
 				 FROM PC_PROCEED_APPOINT_CONTINUE ppac 
 				 --appoint
 				 JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID 
+				                            AND ppa.APPOINT_TABLE_CODE = ppac.APPOINT_TABLE_CODE
+				                            AND ppa.REMOVED_BY = 0
 				 --case
 				 LEFT JOIN PC_CASE pc ON pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
 				 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc.REMOVED_BY = 0
@@ -123,6 +125,7 @@ LEFT JOIN (SELECT A.APPOINT_DATE
 				 WHERE ppac.REMOVED_BY = 0
 				 AND ppa.APPOINT_TABLE_CODE = '003'
 				 AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE WHERE REF_APPOINT_CON_ID  = ppac.APPOINT_CON_ID)
+				 AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE_CANCEL ppacc WHERE ppacc.APPOINT_CON_ID = ppac.APPOINT_CON_ID)
 				 ) A
 			GROUP BY A.APPOINT_DATE, A.APPOINT_TABLE_CODE, A.APPOINT_DESC) B ON B.APPOINT_DATE = A.DT
 --day in appoint table			
@@ -168,6 +171,8 @@ ORDER BY A.A_DATE]]>
        ,LISTAGG(THAILDATE(A.START_DATE,1,0,0), CHR(13)) WITHIN GROUP(ORDER BY A.START_DATE)   APPOINT_DATE
        ,SUM(APPOINT_COUNT) APPOINT_COUNT
        ,A.JUDGE_NAME
+       --check
+       ,A.CASE_ID
 FROM
 (
 SELECT pc.CASE_ID
@@ -180,6 +185,8 @@ SELECT pc.CASE_ID
 FROM PC_PROCEED_APPOINT_CONTINUE ppac 
 --appoint
 JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID 
+                           AND ppa.APPOINT_TABLE_CODE = ppac.APPOINT_TABLE_CODE
+                           AND ppa.REMOVED_BY = 0
 --appoint_table
 LEFT JOIN PC_PROCEED_APPOINT_TABLE ppat ON ppat.APPOINT_TABLE_CODE = ppa.APPOINT_TABLE_CODE AND ppat.REMOVED_BY = 0
  --case
@@ -202,9 +209,10 @@ AND ppa.APPOINT_TABLE_CODE = '003'
 AND ppac.START_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
                         AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
 AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE WHERE REF_APPOINT_CON_ID  = ppac.APPOINT_CON_ID)
+AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE_CANCEL ppacc WHERE ppacc.APPOINT_CON_ID = ppac.APPOINT_CON_ID)
 GROUP BY pc.CASE_ID, pltc.TITLE_CASE_NAME, pc.BLACK_IDNUM, pc.BLACK_YEAR, ppac.START_DATE, j.JUDGE_NAME
 ) A
-GROUP BY A.CASE_BLACK_NO, A.JUDGE_NAME]]>
+GROUP BY A.CASE_BLACK_NO, A.JUDGE_NAME, A.CASE_ID]]>
 		</queryString>
 		<field name="CASE_BLACK_NO" class="java.lang.String">
 			<property name="com.jaspersoft.studio.field.label" value="CASE_BLACK_NO"/>

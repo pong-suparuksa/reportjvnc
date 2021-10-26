@@ -20,6 +20,7 @@
 	<property name="com.jaspersoft.studio.report.description" value=""/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="534"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="459"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_daily_inspection_files/main_jrxml"/>
 	<parameter name="SELECT_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["03/03/2021"]]></defaultValueExpression>
 	</parameter>
@@ -117,7 +118,11 @@ WHERE ppac.REMOVED_BY = 0
 AND ppac.START_DATE = TO_DATE($P{SELECT_DATE}, 'DD/MM/YYYY')
 AND ($P{ROOM_COD} IS NULL OR pllr.LEVEL_ROOM_CODE = $P{ROOM_COD})
 AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE WHERE REF_APPOINT_CON_ID = ppac.APPOINT_CON_ID)
-AND (ppat.APPOINT_TABLE_CODE IN ($P!{TABLE_CODE}) OR '0' IN ($P!{TABLE_CODE}))]]>
+AND (
+	  ppat.APPOINT_TABLE_CODE IN (SELECT REGEXP_SUBSTR($P{TABLE_CODE}, '[^,]+', 1, LEVEL) FROM DUAL CONNECT BY REGEXP_SUBSTR($P{TABLE_CODE}, '[^,]+', 1, LEVEL) IS NOT NULL) 
+	  OR 
+	  '0' IN (SELECT REGEXP_SUBSTR($P{TABLE_CODE}, '[^,]+', 1, LEVEL) FROM DUAL CONNECT BY REGEXP_SUBSTR($P{TABLE_CODE}, '[^,]+', 1, LEVEL) IS NOT NULL)
+	)]]>
 	</queryString>
 	<field name="APPOINT_DATE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="APPOINT_DATE"/>
