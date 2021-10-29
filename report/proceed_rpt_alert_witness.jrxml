@@ -61,6 +61,7 @@ WHERE ppawa.REMOVED_BY = 0
 AND ppac.START_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS')
                        AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 AND ($P{APPOINT_TABLE_CODE} IS NULL OR ppac.APPOINT_TABLE_CODE = $P{APPOINT_TABLE_CODE})
+AND pltc_b.TITLE_CASE_NAME NOT IN ('มต','ตจ','มต.','ตจ.')	
 GROUP BY
 		CASE WHEN pc.BLACK_IDNUM IS NOT NULL 
 		    THEN pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR 
@@ -373,7 +374,7 @@ ORDER BY APPOINT_DATE]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{APPOINT_TIME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{APPOINT_TIME}  == null ?  "-"  :    $F{APPOINT_TIME}.length()== 8 ?  $F{APPOINT_TIME}.substring(0,5) : $F{APPOINT_TIME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="442" y="0" width="90" height="25" uuid="094f2a88-8c63-4686-a137-fb675f0eb16f">

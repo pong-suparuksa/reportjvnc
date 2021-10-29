@@ -19,6 +19,7 @@
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="519"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="474"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_writres_sender_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/05/2020"]]></defaultValueExpression>
 	</parameter>
@@ -38,6 +39,7 @@
        NVL(pn.LITIGANT_NAME,pcl.LITIGANT_NAME) TO_NAME, 
 	   pnsr.REPORT_DATE,
        pnsr.SEND_NOTICE_DATE,
+       pn.SEND_DATE,
        plnsr.NOTICE_SEND_RESULT_NAME,
        pn.SEND_FEE,
        pn.SEND_BY,
@@ -67,7 +69,8 @@ LEFT JOIN (SELECT plc.COURT_NAME_TH
 			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0)cou ON 1 = 1
 --
 WHERE pnsr.REMOVED_BY = 0
-AND pnsr.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS')  AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
+AND pnsr.REPORT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS')  AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
+AND pn.SEND_DATE IS NOT NULL
 AND (pn.SEND_METHOD_BY_NAME = $P{SENDER} OR '0' = $P{SENDER})
 ORDER BY pnsr.REPORT_DATE]]>
 	</queryString>
@@ -88,6 +91,9 @@ ORDER BY pnsr.REPORT_DATE]]>
 	</field>
 	<field name="SEND_NOTICE_DATE" class="java.util.Date">
 		<property name="com.jaspersoft.studio.field.label" value="SEND_NOTICE_DATE"/>
+	</field>
+	<field name="SEND_DATE" class="java.util.Date">
+		<property name="com.jaspersoft.studio.field.label" value="SEND_DATE"/>
 	</field>
 	<field name="NOTICE_SEND_RESULT_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="NOTICE_SEND_RESULT_NAME"/>
@@ -381,7 +387,7 @@ ORDER BY pnsr.REPORT_DATE]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{SEND_NOTICE_DATE}==null?" ":new SimpleDateFormat("d MMM yyyy", new Locale("th", "TH")).format($F{SEND_NOTICE_DATE})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{SEND_DATE}==null?" ":new SimpleDateFormat("d MMM yyyy", new Locale("th", "TH")).format($F{SEND_DATE})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="430" y="0" width="112" height="25" uuid="98440980-09a3-4357-bfb9-efdf29d8bd11">

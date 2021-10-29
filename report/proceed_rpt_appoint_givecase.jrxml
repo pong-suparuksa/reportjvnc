@@ -11,15 +11,15 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_givecase"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="202"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="793"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_givecase_files/main_jrxml"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="473"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="520"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="705"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="284"/>
 	<parameter name="PERIOD" class="java.lang.String"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/03/2020"]]></defaultValueExpression>
@@ -27,6 +27,7 @@
 	<parameter name="END_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["31/05/2021"]]></defaultValueExpression>
 	</parameter>
+	<parameter name="APPOIN_TABLE_CODE" class="java.lang.String"/>
 	<parameter name="TABLE_CODE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["0"]]></defaultValueExpression>
 	</parameter>
@@ -50,6 +51,9 @@
 		,j.ONG_2
 		,j.ADD_1
 		,ppat.APPOINT_TABLE_TYPE 
+		,CASE WHEN ppat.APPOINT_TABLE_TYPE = 'general' THEN '001'
+		      WHEN ppat.APPOINT_TABLE_TYPE = 'special' THEN '002'
+		      ELSE NULL END APPOINT_TABLE_SELECT
 FROM PC_PROCEED_APPOINT ppa 
 JOIN PC_PROCEED_APPOINT_CONTINUE ppac ON ppac.APPOINT_ID = ppa.APPOINT_ID AND ppac.REMOVED_BY = 0
 LEFT JOIN PC_PROCEED_APPOINT_TABLE ppat ON ppat.APPOINT_TABLE_CODE = ppa.APPOINT_TABLE_CODE AND ppat.REMOVED_BY = 0
@@ -81,11 +85,17 @@ WHERE ppa.REMOVED_BY = 0
 AND ppac.START_DATE BETWEEN TO_DATE( $P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
 AND (($P{PERIOD} IS NULL) OR (ppac.CHOICE = $P{PERIOD}))
 AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE WHERE REF_APPOINT_CON_ID = ppac.APPOINT_CON_ID)
+AND (((CASE WHEN ppat.APPOINT_TABLE_TYPE = 'general' THEN '001'
+		  WHEN ppat.APPOINT_TABLE_TYPE = 'special' THEN '002' END) = $P{APPOIN_TABLE_CODE})
+     OR
+     ($P{APPOIN_TABLE_CODE} IS NULL)
+    )
 AND (
 	  ppat.APPOINT_TABLE_CODE IN (SELECT REGEXP_SUBSTR($P{TABLE_CODE}, '[^,]+', 1, LEVEL) FROM DUAL CONNECT BY REGEXP_SUBSTR($P{TABLE_CODE}, '[^,]+', 1, LEVEL) IS NOT NULL) 
 	  OR 
 	  '0' IN (SELECT REGEXP_SUBSTR($P{TABLE_CODE}, '[^,]+', 1, LEVEL) FROM DUAL CONNECT BY REGEXP_SUBSTR($P{TABLE_CODE}, '[^,]+', 1, LEVEL) IS NOT NULL)
 	)
+AND pltc_b.TITLE_CASE_NAME NOT IN ('มต','ตจ','มต.','ตจ.')	
 ORDER BY APPOINT_DATE, APPOINT_TIME]]>
 	</queryString>
 	<field name="APPOINT_TITLE" class="java.lang.String">
@@ -127,17 +137,22 @@ ORDER BY APPOINT_DATE, APPOINT_TIME]]>
 	<field name="ADD_1" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="ADD_1"/>
 	</field>
+	<variable name="APPOINT_TITLE" class="java.lang.String">
+		<variableExpression><![CDATA[$P{APPOIN_TABLE_CODE}.equals("001")?"เสนอจ่ายสำนวนเข้าศูนย์ไกล่เกลี่ย"
+:$P{APPOIN_TABLE_CODE}.equals("002")?"เสนอจ่ายสำนวนเข้าจัดการพิเศษ"
+:"เสนอจ่ายสำนวน"]]></variableExpression>
+	</variable>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
 	<pageHeader>
 		<band height="95">
-			<textField>
+			<textField evaluationTime="Report">
 				<reportElement x="106" y="45" width="628" height="30" uuid="6adb7285-64fa-4909-958e-a7388c54a72e"/>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="17" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["ใช้ติดหน้าศาลไม่ได้ บัญชีนัดความ " + ($F{APPOINT_TITLE}==null?" ": $F{APPOINT_TITLE}) +
+				<textFieldExpression><![CDATA["ใช้ติดหน้าศาลไม่ได้ บัญชีนัดความ " + ($V{APPOINT_TITLE}==null?" ": $V{APPOINT_TITLE}) +
 ($P{START_DATE}==$P{END_DATE} ? " ประจำวันที่ " + new java.text.SimpleDateFormat("d MMMM yyyy", new Locale("TH","th")).format(DATE(Integer.valueOf($P{START_DATE}.substring(6,10)),Integer.valueOf($P{START_DATE}.substring(3,5)),Integer.valueOf($P{START_DATE}.substring(0,2)))) : " ระหว่างวันที่ " +new java.text.SimpleDateFormat("d MMMM yyyy", new Locale("TH","th")).format(DATE(Integer.valueOf($P{START_DATE}.substring(6,10)),Integer.valueOf($P{START_DATE}.substring(3,5)),Integer.valueOf($P{START_DATE}.substring(0,2)))) + "  - " + new java.text.SimpleDateFormat("d MMMM yyyy", new Locale("TH","th")).format(DATE(Integer.valueOf($P{END_DATE}.substring(6,10)),Integer.valueOf($P{END_DATE}.substring(3,5)),Integer.valueOf($P{END_DATE}.substring(0,2)))))]]></textFieldExpression>
 			</textField>
 			<textField>
@@ -362,7 +377,8 @@ $P{PERIOD}.equals("2")?"บ่าย":" "]]></textFieldExpression>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{APPOINT_TIME}==null?" ":
 $F{APPOINT_TIME}.indexOf( "-" )>0?$F{APPOINT_TIME}:
-$F{APPOINT_TIME}.substring( 0, 5 )]]></textFieldExpression>
+$F{APPOINT_TIME}.length()>=5? $F{APPOINT_TIME}.substring( 0, 5 ):
+$F{APPOINT_TIME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
 				<reportElement stretchType="ContainerHeight" x="220" y="0" width="60" height="25" isPrintWhenDetailOverflows="true" uuid="15e2ef7e-a28d-40e7-92c6-897bec76af01">

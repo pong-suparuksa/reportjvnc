@@ -11,7 +11,7 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_writres_howsend"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -32,8 +32,8 @@
 	<queryString>
 		<![CDATA[SELECT     pn.SEND_METHOD, 
 			pni.SEND_NOTICE_DATE,
-			THAILDATE(NVL(pni.SEND_NOTICE_DATE,CURRENT_DATE))                                                SEND_NOTICE_DATE_TEXT,
-			THAISDATE(NVL(pnsr.SEND_NOTICE_DATE,TO_TIMESTAMP('01/01/1900','DD/MM/YYYY')))                        SEND_NOTICE_SDATE,
+			THAILDATE(NVL(pni.SEND_NOTICE_DATE,CURRENT_DATE))                                            SEND_NOTICE_DATE_TEXT,
+			THAISDATE(NVL(pn.SEND_DATE ,TO_TIMESTAMP('01/01/1900','DD/MM/YYYY')))                        SEND_NOTICE_SDATE,
             --
             NVL(plc.COURT_NAME_TH, ' ') 	     													       COURT_NAME_TH,
             NVL(plsm.SEND_METHOD_NAME, ' ')																   SEND_METHOD_NAME,
@@ -52,14 +52,15 @@
 		    NVL(pn.SEND_METHOD_BY_NAME,' ')														   USER_PROFILE_FULL_NAME,  
             NVL(plc1.COURT_NAME_TH,' ')                                                                 OTHER_COURT,
             pfr.RECEIPT_BOOK_NO || '/' || pfr.RECEIPT_NO                                                       RECEIPT_REF,
-            THAISDATE(NVL(pnsr.CREATED_DATE,TO_TIMESTAMP('01/01/1900','DD/MM/YYYY')))                        RESULT_CREATE_DATE,
+            THAISDATE(NVL(pnsr.REPORT_DATE ,TO_TIMESTAMP('01/01/1900','DD/MM/YYYY')))                        RESULT_CREATE_DATE,
             NVL(pnsr.RESULT_DETAIL,' ')                                                                 RESULT_DETAIL,
             NVL(plnsr.NOTICE_SEND_RESULT_NAME, ' ')														NOTICE_SEND_RESULT_NAME,
             NVL(pn.UNSEND_DETAIL, ' ')																	UNSEND_DETAIL
            ,pn.IS_COURT_AREA
-           ,CASE WHEN pn.SEND_METHOD = 1 THEN 'ไปรษณีย์' ELSE  pn.SEND_METHOD_BY_NAME END                  SEND_METHOD_BY_NAME 
-FROM PC_NOTICE pn 
-LEFT JOIN PC_NOTICE_SEND_RESULT pnsr ON pnsr.NOTICE_ID = pn.NOTICE_ID 
+           ,CASE WHEN pn.SEND_METHOD = 1 THEN 'ไปรษณีย์' ELSE  pn.SEND_METHOD_BY_NAME END                  SEND_METHOD_BY_NAME
+           ,plsm.SEND_METHOD_ID 
+FROM PC_NOTICE_SEND_RESULT pnsr
+LEFT JOIN PC_NOTICE pn ON pn.NOTICE_ID = pnsr.NOTICE_ID AND pn.REMOVED_BY = 0
 --
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID
 LEFT JOIN PC_NOTICE_ISSUED pni ON pni.NOTICE_ID = pn.NOTICE_ID
@@ -79,16 +80,16 @@ LEFT JOIN PC_LOOKUP_NOTICE_TYPE plnt ON plnt.NOTICE_TYPE_ID = pn.NOTICE_TYPE_ID 
 LEFT JOIN PC_LOOKUP_DISTRICT pld ON pld.DISTRICT_ID =  pn.CURRENT_DISTRICT_ID AND pld.PROVINCE_ID = pn.CURRENT_PROVINCE_ID 
 LEFT JOIN PC_LOOKUP_SUBDISTRICT pls ON pls.SUBDISTRICT_ID = pn.CURRENT_SUBDISTRICT_ID AND  pls.DISTRICT_ID =  pn.CURRENT_DISTRICT_ID AND pls.PROVINCE_ID = pn.CURRENT_PROVINCE_ID
 --
-LEFT JOIN PC_LOOKUP_SEND_METHOD plsm ON plsm.SEND_METHOD_ID = pn.SEND_METHOD
+LEFT JOIN PC_LOOKUP_SEND_METHOD plsm ON plsm.SEND_METHOD_ID = pn.SEND_METHOD AND plsm.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_NOTICE_SEND_RESULT plnsr ON plnsr.NOTICE_SEND_RESULT_ID = pnsr.POST_SEND_RESULT
 
-WHERE ((pn.SEND_METHOD = $P{SEND_METHOD_ID}) OR (0 = $P{SEND_METHOD_ID}))
+WHERE pnsr.REMOVED_BY = 0
+AND pnsr.REPORT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                         AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+AND ((plsm.SEND_METHOD_ID = $P{SEND_METHOD_ID}) OR (0 = $P{SEND_METHOD_ID}))
 AND NVL(pni.HAS_MONEY,1) = 1
-AND pn.IS_COURT_AREA = 1
-AND pn.REMOVED_BY = 0
-AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
-                              AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
-ORDER BY pn.SEND_METHOD, pni.SEND_NOTICE_DATE]]>
+AND pn.SEND_DATE IS NOT NULL
+ORDER BY pn.SEND_METHOD, pnsr.REPORT_DATE]]>
 	</queryString>
 	<field name="SEND_METHOD" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="SEND_METHOD"/>
