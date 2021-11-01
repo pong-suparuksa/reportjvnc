@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/bail_rpt_security_register"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="206"/>
@@ -149,8 +149,11 @@ AND pbs.BAILSMAN_ID = $P{BAILSMAN_ID}]]>
 			<property name="com.jaspersoft.studio.field.label" value="SEC_DESC"/>
 		</field>
 	</subDataset>
-	<parameter name="SELECT_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["18/08/2021"]]></defaultValueExpression>
+	<parameter name="START_DATE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["01/01/2020"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="END_DATE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["31/10/2021"]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
 		<![CDATA[--header
@@ -187,7 +190,8 @@ LEFT JOIN (SELECT plc.COURT_NAME_TH
 			JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
 			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 = 1
 WHERE pb.REMOVED_BY = 0
-AND TO_CHAR(pb.CREATED_DATE,'DD/MM/YYYY') = $P{SELECT_DATE}
+AND pb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
+                      AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
 AND pbs.SEC_TYPE_CODE IS NOT NULL]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
@@ -253,7 +257,7 @@ AND pbs.SEC_TYPE_CODE IS NOT NULL]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="17" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["ประจำวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{SELECT_DATE}))]]></textFieldExpression>
+				<textFieldExpression><![CDATA["ตั้งแต่วันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="730" y="4" width="72" height="25" uuid="a878d0b6-6450-42fc-9880-bcb574df310b">
@@ -612,7 +616,7 @@ AND pbs.SEC_TYPE_CODE IS NOT NULL]]>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
-					<datasetRun subDataset="DS_BAILSEC" uuid="5de090b0-4cf6-4669-94a9-db64cbb2da57">
+					<datasetRun subDataset="DS_BAILSEC" uuid="102a2493-f67f-42f2-9a7f-1c2383039d52">
 						<datasetParameter name="BAIL_ID">
 							<datasetParameterExpression><![CDATA[$F{BAIL_ID}]]></datasetParameterExpression>
 						</datasetParameter>

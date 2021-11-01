@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_daily_inspection"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="315"/>
@@ -50,7 +50,7 @@
     ,j.ADD_1      AS ASSOCIATE_JUDGE   
     ,apd.WITNESS  AS INVESTIGATE
     ,apd.PAGES    AS INVESTIGATE_DATE
-    ,ap_next.START_DATE       AS APPOINT_NEXT_DATE
+    ,ap_next.APPOINT_DATE     AS APPOINT_NEXT_DATE
     ,ap_next.APPOINT_REASON   AS APPOINT_NEXT_REASON
     ,cou.COURT_NAME_TH
 FROM PC_PROCEED_APPOINT_CONTINUE ppac 
@@ -70,18 +70,7 @@ LEFT JOIN (SELECT pprw.APPOINT_CON_ID
 				                                  AND mx.RECORD_DATE = pprw.RECORD_DATE 
 				                                  AND mx.CREATED_DATE = pprw.CREATED_DATE 			
 				  WHERE pprw.REMOVED_BY = 0) apd ON apd.APPOINT_CON_ID = ppac.APPOINT_CON_ID
-			
---next appoint
-LEFT JOIN (SELECT ppa.CASE_ID
-			      ,ppac.START_DATE
-			      ,plal.APPOINT_LIST_NAME APPOINT_REASON
-			      ,ROW_NUMBER() OVER (PARTITION BY ppa.CASE_ID ORDER BY ppac.START_DATE) RN 
-			FROM PC_PROCEED_APPOINT_CONTINUE ppac 
-			JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID AND ppac.REMOVED_BY = 0
-			LEFT JOIN PC_LOOKUP_APPOINT_LIST plal ON plal.APPOINT_LIST_ID = ppac.REASON_APPOINT_ID AND plal.REMOVED_BY = 0
-			WHERE ppac.REMOVED_BY = 0
-			AND ppac.START_DATE > TO_DATE($P{SELECT_DATE}, 'DD/MM/YYYY')
-			) ap_next ON ap_next.CASE_ID = ppa.CASE_ID AND ap_next.RN = 1
+--
 LEFT JOIN PC_LOOKUP_LEVEL_ROOM pllr ON pllr.LEVEL_ROOM_ID = ppac.LEVEL_ROOM_CODE AND pllr.REMOVED_BY = 0
 --lookup proceed
 LEFT JOIN PC_LOOKUP_APPOINT_LIST plal ON plal.APPOINT_LIST_ID = ppac.REASON_APPOINT_ID AND plal.REMOVED_BY = 0
@@ -109,6 +98,17 @@ LEFT JOIN (SELECT pcj.CASE_ID
 			GROUP BY pcj.CASE_ID ,CASE WHEN pcj.TEMPORARY_JUDGE_FLAG = 3 THEN 'continuous' 
 			                           WHEN pcj.TEMPORARY_JUDGE_FLAG = 4 THEN 'special' END
 			) j ON j.CASE_ID = ppa.CASE_ID AND j.APPOINT_TABLE_TYPE = ppat.APPOINT_TABLE_TYPE
+--next appoint
+LEFT JOIN (SELECT ppa.CASE_ID
+			      ,LISTAGG(TO_CHAR(ppac.START_DATE, 'fmdd MON yy', 'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI'),' และ ') WITHIN GROUP(ORDER BY ppa.CASE_ID, ppac.START_DATE) APPOINT_DATE
+			      ,LISTAGG(plal.APPOINT_LIST_NAME,' และ ') WITHIN GROUP(ORDER BY ppa.CASE_ID, ppac.START_DATE)  APPOINT_REASON
+			FROM PC_PROCEED_APPOINT_CONTINUE ppac 
+			JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID AND ppac.REMOVED_BY = 0
+			LEFT JOIN PC_LOOKUP_APPOINT_LIST plal ON plal.APPOINT_LIST_ID = ppac.REASON_APPOINT_ID AND plal.REMOVED_BY = 0
+			WHERE ppac.REMOVED_BY = 0
+			AND ppac.START_DATE > TO_DATE($P{SELECT_DATE}, 'DD/MM/YYYY')
+			GROUP BY ppa.CASE_ID
+			) ap_next ON ap_next.CASE_ID = ppa.CASE_ID
 --court
 LEFT JOIN (SELECT plc.COURT_NAME_TH
 			FROM PC_PARAM pp
@@ -123,7 +123,7 @@ AND (
 	  OR 
 	  '0' IN (SELECT REGEXP_SUBSTR($P{TABLE_CODE}, '[^,]+', 1, LEVEL) FROM DUAL CONNECT BY REGEXP_SUBSTR($P{TABLE_CODE}, '[^,]+', 1, LEVEL) IS NOT NULL)
 	)
-	AND pltc_b.TITLE_CASE_NAME NOT IN ('มต','ตจ','มต.','ตจ.')	]]>
+AND pltc_b.TITLE_CASE_NAME NOT IN ('มต','ตจ','มต.','ตจ.')]]>
 	</queryString>
 	<field name="APPOINT_DATE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="APPOINT_DATE"/>
@@ -225,7 +225,7 @@ AND (
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="13"/>
 				</textElement>
-				<text><![CDATA[โจทก์]]></text>
+				<text><![CDATA[โจทก์/ผู้ร้อง]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="210" y="0" width="70" height="40" uuid="13cdb012-00b3-491f-a9f4-f598546e125e">
@@ -237,7 +237,7 @@ AND (
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="13"/>
 				</textElement>
-				<text><![CDATA[จำเลย]]></text>
+				<text><![CDATA[จำเลย/ผู้คัดค้าน]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="610" y="25" width="30" height="15" uuid="196d9840-bcc0-42ff-8428-064619fb5a77">
@@ -274,7 +274,7 @@ AND (
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="13"/>
 				</textElement>
-				<text><![CDATA[สาเหตุนัด]]></text>
+				<text><![CDATA[สาเหตุที่นัด]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="720" y="25" width="50" height="15" uuid="fc476490-fee2-4c01-984c-2d03d3c69a9c">
@@ -287,7 +287,7 @@ AND (
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="11"/>
 				</textElement>
-				<text><![CDATA[สาเหตุนัด]]></text>
+				<text><![CDATA[สาเหตุที่นัด]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="670" y="25" width="50" height="15" uuid="5bb3235c-2c22-490f-b682-7ea149f279f4">
@@ -352,7 +352,7 @@ AND (
 					<font fontName="THSarabunNew" size="13"/>
 				</textElement>
 				<text><![CDATA[ผู้พิพากษา
-สมทบ]]></text>
+สมทบ 2]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="770" y="0" width="40" height="40" uuid="51c97b5b-6e5e-41ab-aff1-f7a6fc434733">
@@ -378,7 +378,7 @@ AND (
 					<font fontName="THSarabunNew" size="13"/>
 				</textElement>
 				<text><![CDATA[องค์คณะ
-ผู้ตัดสิน1]]></text>
+ผู้ตัดสิน 1]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="500" y="0" width="55" height="40" uuid="8d0e37ba-1c79-48d8-87d9-844b5a26c920">
@@ -391,8 +391,8 @@ AND (
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="13"/>
 				</textElement>
-				<text><![CDATA[องค์คณะ
-ผู้ตัดสิน2]]></text>
+				<text><![CDATA[ผู้พิพากษา
+สมทบ 1]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="280" y="0" width="55" height="40" uuid="6e680be3-e7bc-4fec-b1ee-503b0f12e4f3">
@@ -582,7 +582,7 @@ AND (
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{APPOINT_NEXT_DATE} == null ?  ""  : new SimpleDateFormat("dd/MM/yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("yyyy-MM-dd").parse( $F{APPOINT_NEXT_DATE}))]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{APPOINT_NEXT_DATE}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="770" y="0" width="40" height="25" uuid="da5d700e-d98d-43b6-9d81-3614e4c1ec07">
@@ -620,7 +620,7 @@ AND (
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{IDIOM_ORGANIZATION1}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{ASSOCIATE_JUDGE}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="500" y="0" width="55" height="25" uuid="ea0ea514-702c-4299-8e5f-8ec6b1890ac6">
@@ -633,7 +633,7 @@ AND (
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{IDIOM_ORGANIZATION2}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{IDIOM_ORGANIZATION1}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="555" y="0" width="55" height="25" uuid="d952968a-1076-4aec-b1bd-de0274ca784f">
@@ -646,7 +646,7 @@ AND (
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ASSOCIATE_JUDGE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{IDIOM_ORGANIZATION2}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="640" y="0" width="30" height="25" uuid="0f71562d-8a1a-422f-90c6-05d63724d7dc">
@@ -677,4 +677,23 @@ AND (
 			</textField>
 		</band>
 	</detail>
+	<summary>
+		<band height="25">
+			<textField>
+				<reportElement x="-10" y="0" width="820" height="25" uuid="2a7b7247-d717-437e-b236-0b301d909f31">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["รวม "+$V{REPORT_COUNT}+" เรื่อง"]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
 </jasperReport>

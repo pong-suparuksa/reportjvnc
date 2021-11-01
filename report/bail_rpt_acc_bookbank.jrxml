@@ -11,16 +11,18 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/bail_rpt_acc_bookbank"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="256"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="739"/>
 	<property name="com.jaspersoft.studio.report.description" value="27.บัญชีประกันด้วยสมุดเงินฝาก"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/bail_rpt_acc_bookbank_files/main_jrxml"/>
-	<parameter name="SELECT_MONTH" class="java.lang.String">
-		<defaultValueExpression><![CDATA["03/2020"]]></defaultValueExpression>
+	<parameter name="START_DATE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["01/03/2020"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="END_DATE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["31/10/2021"]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
 		<![CDATA[SELECT DISTINCT B.BAIL_DATE,
@@ -30,7 +32,7 @@ LT.TITLE_NAME || BB.NAME || ' ' || BB.LASTNAME BAILMAN_NAME,
 BS.TOTAL_AMOUNT DEFENDANT_BAIL_COST , COU.COURT_NAME_TH,
 THAIMONTH(EXTRACT(MONTH FROM B.BAIL_DATE)) MONTH_STR,
 THAIMONTH(EXTRACT(YEAR FROM B.BAIL_DATE) +543) YEAR_STR,
-THAISDATE(B.BAIL_DATE) THAIDATE
+THAISDATE(B.BAIL_DATE) THAIDATE,B.BAIL_DATE
 FROM PC_BAIL_SEC_ACCOUNT BSA
 LEFT JOIN PC_BAIL_SEC BS ON(BS.SEC_ID=BSA.SEC_ID AND BS.REMOVED_BY = 0)
 LEFT JOIN PC_BAIL_BAILSMAN BB ON(BS.BAILSMAN_ID=BB.BAILSMAN_ID AND BB.REMOVED_BY = 0)
@@ -44,7 +46,9 @@ LEFT JOIN (SELECT plc.COURT_NAME_TH
 LEFT JOIN PC_LOOKUP_BANK LB ON(LB.BANK_ID=BSA.BANK_ID)
 LEFT JOIN PC_LOOKUP_BOOK_ACCOUNT LBA ON(LBA.BANK_ID=LB.BANK_ID)
 LEFT JOIN PC_LOOKUP_TITLE LT ON(LT.TITLE_ID=BB.NAME_TITLE_ID AND LT.REMOVED_BY = 0)
-WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MONTH}, 'MM-YYYY')]]>
+WHERE B.BAIL_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
+                      AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
+ORDER BY B.BAIL_DATE]]>
 	</queryString>
 	<field name="BAIL_DATE" class="java.util.Date">
 		<property name="com.jaspersoft.studio.field.label" value="BAIL_DATE"/>
@@ -117,7 +121,8 @@ WHERE TO_DATE(TO_CHAR(B.BAIL_DATE, 'MM-YYYY'),'MM-YYYY') = TO_DATE($P{SELECT_MON
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["ประจำเดือน " +  ($F{MONTH_STR} == null ? "" :   $F{MONTH_STR} + " " + $F{YEAR_STR})]]></textFieldExpression>
+				<textFieldExpression><![CDATA["ตั้งแต่วันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))
+]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>
