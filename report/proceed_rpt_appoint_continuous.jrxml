@@ -2,7 +2,7 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="proceed_rpt_appoint_continuous" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2442022f-f774-4941-965d-fac8362ad9aa">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_continuous"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_continuous_files/main_jrxml"/>
@@ -96,7 +96,7 @@
         ,A.WK_DAY_SHORT
         ,B.APPOINT_DESC
         ,C.WK_DAY_SHOW
-        ,ROW_NUMBER() OVER (PARTITION BY A.A_DATE ORDER BY  A.A_DATE) A_ROW
+        ,B.RNUM A_ROW
 --crosstab column
 FROM (SELECT  EXTRACT(DAY FROM A.DT) A_DATE  
 		       ,DECODE(TO_CHAR(A.DT,'D'),'1','อาทิตย์','2','จันทร์','3','อังคาร','4','พุธ','5','พฤหัสฯ','6','ศุกร์','7','เสาร์') WK_DAY 
@@ -109,10 +109,14 @@ FROM (SELECT  EXTRACT(DAY FROM A.DT) A_DATE
 LEFT JOIN (SELECT A.APPOINT_DATE
                   ,A.APPOINT_TABLE_CODE
 			      ,A.APPOINT_DESC
-			FROM(SELECT DISTINCT
-				        ppac.START_DATE APPOINT_DATE
-				        ,ppac.APPOINT_TABLE_CODE
-					    ,pltc.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR APPOINT_DESC
+			      ,A.RNUM
+			FROM (SELECT
+				    	ppac.START_DATE APPOINT_DATE
+				    	,ppac.APPOINT_TABLE_CODE
+				    	,CASE WHEN ppa.CASE_ID = r.CASE_ID 
+				    	      THEN pltc.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR 
+				    	      ELSE ' ' END APPOINT_DESC
+				        ,r.RNUM
 				 FROM PC_PROCEED_APPOINT_CONTINUE ppac 
 				 --appoint
 				 JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID 
@@ -121,20 +125,40 @@ LEFT JOIN (SELECT A.APPOINT_DATE
 				 --case
 				 LEFT JOIN PC_CASE pc ON pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
 				 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc.REMOVED_BY = 0
+				 --manage row number 
+				 LEFT JOIN (SELECT ppa.CASE_ID
+							       ,ROW_NUMBER () OVER(ORDER BY ppa.CASE_ID) RNUM
+							FROM PC_PROCEED_APPOINT_CONTINUE ppac 
+							JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID 
+											           AND ppa.APPOINT_TABLE_CODE = ppac.APPOINT_TABLE_CODE
+											           AND ppa.REMOVED_BY = 0
+							 --case
+						LEFT JOIN PC_CASE pc ON pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
+						LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc.REMOVED_BY = 0
+						WHERE ppac.REMOVED_BY = 0
+						AND ppac.START_DATE BETWEEN TO_DATE($P{FROM_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
+						                        AND TO_DATE($P{TO_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
+						AND ppa.APPOINT_TABLE_CODE = '003'
+						AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE WHERE REF_APPOINT_CON_ID  = ppac.APPOINT_CON_ID)
+						AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE_CANCEL ppacc WHERE ppacc.APPOINT_CON_ID = ppac.APPOINT_CON_ID)
+						AND pltc.TITLE_CASE_NAME NOT IN ('มต','ตจ','มต.','ตจ.')	
+						--
+							GROUP BY ppa.CASE_ID) r	 ON 1 = 1
 				 --
 				 WHERE ppac.REMOVED_BY = 0
+				 AND ppac.START_DATE BETWEEN TO_DATE($P{FROM_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
+				                AND TO_DATE($P{TO_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
 				 AND ppa.APPOINT_TABLE_CODE = '003'
 				 AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE WHERE REF_APPOINT_CON_ID  = ppac.APPOINT_CON_ID)
 				 AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE_CANCEL ppacc WHERE ppacc.APPOINT_CON_ID = ppac.APPOINT_CON_ID)
 				 AND pltc.TITLE_CASE_NAME NOT IN ('มต','ตจ','มต.','ตจ.')	
-				 ) A
-			GROUP BY A.APPOINT_DATE, A.APPOINT_TABLE_CODE, A.APPOINT_DESC) B ON B.APPOINT_DATE = A.DT
+				 ) A ) B ON B.APPOINT_DATE = A.DT
 --day in appoint table			
 LEFT JOIN (SELECT APPOINT_TABLE_CODE, WK_DAY_SHORT, WK_DAY_SHOW 
 		   FROM PC_PROCEED_APPOINT_TABLE ppat 
 		   UNPIVOT(WK_DAY_SHOW FOR WK_DAY_SHORT IN (SUN, MON, TUE, WED, THU, FRI, SAT))
 		   WHERE APPOINT_TABLE_CODE = '003') C ON C.WK_DAY_SHORT = A.WK_DAY_SHORT
-ORDER BY A.A_DATE]]>
+ORDER BY A.A_DATE, A_ROW, B.APPOINT_DESC]]>
 		</queryString>
 		<field name="COL_DAY" class="java.lang.Integer">
 			<property name="com.jaspersoft.studio.field.label" value="COL_DAY"/>
@@ -331,7 +355,7 @@ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
 								<textElement textAlignment="Center" verticalAlignment="Top">
 									<font fontName="THSarabunNew" size="8"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$V{A_ROW}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$V{A_ROW}==null?" ":$V{A_ROW}]]></textFieldExpression>
 							</textField>
 						</cellContents>
 					</crosstabRowHeader>
