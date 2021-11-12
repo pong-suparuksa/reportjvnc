@@ -2,7 +2,7 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="proceed_rpt_appoint_continuous" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2442022f-f774-4941-965d-fac8362ad9aa">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_continuous"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_continuous_files/main_jrxml"/>
@@ -96,7 +96,7 @@
         ,A.WK_DAY_SHORT
         ,B.APPOINT_DESC
         ,C.WK_DAY_SHOW
-        ,B.RNUM A_ROW
+        ,ROW_NUMBER() OVER (PARTITION BY A.A_DATE ORDER BY  A.A_DATE) A_ROW
 --crosstab column
 FROM (SELECT  EXTRACT(DAY FROM A.DT) A_DATE  
 		       ,DECODE(TO_CHAR(A.DT,'D'),'1','อาทิตย์','2','จันทร์','3','อังคาร','4','พุธ','5','พฤหัสฯ','6','ศุกร์','7','เสาร์') WK_DAY 
@@ -109,14 +109,10 @@ FROM (SELECT  EXTRACT(DAY FROM A.DT) A_DATE
 LEFT JOIN (SELECT A.APPOINT_DATE
                   ,A.APPOINT_TABLE_CODE
 			      ,A.APPOINT_DESC
-			      ,A.RNUM
-			FROM (SELECT
-				    	ppac.START_DATE APPOINT_DATE
-				    	,ppac.APPOINT_TABLE_CODE
-				    	,CASE WHEN ppa.CASE_ID = r.CASE_ID 
-				    	      THEN pltc.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR 
-				    	      ELSE ' ' END APPOINT_DESC
-				        ,r.RNUM
+			FROM(SELECT DISTINCT
+				        ppac.START_DATE APPOINT_DATE
+				        ,ppac.APPOINT_TABLE_CODE
+					    ,pltc.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR APPOINT_DESC
 				 FROM PC_PROCEED_APPOINT_CONTINUE ppac 
 				 --appoint
 				 JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID 
@@ -125,40 +121,19 @@ LEFT JOIN (SELECT A.APPOINT_DATE
 				 --case
 				 LEFT JOIN PC_CASE pc ON pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
 				 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc.REMOVED_BY = 0
-				 --manage row number 
-				 LEFT JOIN (SELECT ppa.CASE_ID
-							       ,ROW_NUMBER () OVER(ORDER BY ppa.CASE_ID) RNUM
-							FROM PC_PROCEED_APPOINT_CONTINUE ppac 
-							JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID 
-											           AND ppa.APPOINT_TABLE_CODE = ppac.APPOINT_TABLE_CODE
-											           AND ppa.REMOVED_BY = 0
-							 --case
-						LEFT JOIN PC_CASE pc ON pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
-						LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc.REMOVED_BY = 0
-						WHERE ppac.REMOVED_BY = 0
-						AND ppac.START_DATE BETWEEN TO_DATE($P{FROM_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
-						                        AND TO_DATE($P{TO_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
-						AND ppa.APPOINT_TABLE_CODE = '003'
-						AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE WHERE REF_APPOINT_CON_ID  = ppac.APPOINT_CON_ID)
-						AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE_CANCEL ppacc WHERE ppacc.APPOINT_CON_ID = ppac.APPOINT_CON_ID)
-						AND pltc.TITLE_CASE_NAME NOT IN ('มต','ตจ','มต.','ตจ.')	
-						--
-							GROUP BY ppa.CASE_ID) r	 ON 1 = 1
 				 --
 				 WHERE ppac.REMOVED_BY = 0
-				 AND ppac.START_DATE BETWEEN TO_DATE($P{FROM_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
-				                AND TO_DATE($P{TO_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
 				 AND ppa.APPOINT_TABLE_CODE = '003'
 				 AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE WHERE REF_APPOINT_CON_ID  = ppac.APPOINT_CON_ID)
 				 AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE_CANCEL ppacc WHERE ppacc.APPOINT_CON_ID = ppac.APPOINT_CON_ID)
-				 AND pltc.TITLE_CASE_NAME NOT IN ('มต','ตจ','มต.','ตจ.')	
-				 ) A ) B ON B.APPOINT_DATE = A.DT
+				 ) A
+			GROUP BY A.APPOINT_DATE, A.APPOINT_TABLE_CODE, A.APPOINT_DESC) B ON B.APPOINT_DATE = A.DT
 --day in appoint table			
 LEFT JOIN (SELECT APPOINT_TABLE_CODE, WK_DAY_SHORT, WK_DAY_SHOW 
 		   FROM PC_PROCEED_APPOINT_TABLE ppat 
 		   UNPIVOT(WK_DAY_SHOW FOR WK_DAY_SHORT IN (SUN, MON, TUE, WED, THU, FRI, SAT))
 		   WHERE APPOINT_TABLE_CODE = '003') C ON C.WK_DAY_SHORT = A.WK_DAY_SHORT
-ORDER BY A.A_DATE, A_ROW, B.APPOINT_DESC]]>
+ORDER BY A.A_DATE]]>
 		</queryString>
 		<field name="COL_DAY" class="java.lang.Integer">
 			<property name="com.jaspersoft.studio.field.label" value="COL_DAY"/>
@@ -185,6 +160,8 @@ ORDER BY A.A_DATE, A_ROW, B.APPOINT_DESC]]>
 	<subDataset name="DSET_APPOINT_CONCASE" uuid="43ed65da-76de-4508-90c5-a46318ec045f">
 		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
 		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+		<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 		<parameter name="START_DATE" class="java.lang.String">
 			<defaultValueExpression><![CDATA["01/05/2021"]]></defaultValueExpression>
 		</parameter>
@@ -193,7 +170,12 @@ ORDER BY A.A_DATE, A_ROW, B.APPOINT_DESC]]>
 		</parameter>
 		<queryString>
 			<![CDATA[SELECT A.CASE_BLACK_NO
+       ,A.CASE_RED_NO
+       ,A.PROS_DESC
+       ,A.ACCU_DESC
+       ,A.ALLE_DESC
        ,LISTAGG(THAILDATE(A.START_DATE,1,0,0), CHR(13)) WITHIN GROUP(ORDER BY A.START_DATE)   APPOINT_DATE
+       ,LISTAGG(A.APPOINT_REASON, CHR(13)) WITHIN GROUP(ORDER BY A.START_DATE) APPOINT_REASON
        ,SUM(APPOINT_COUNT) APPOINT_COUNT
        ,A.JUDGE_NAME
        --check
@@ -201,8 +183,13 @@ ORDER BY A.A_DATE, A_ROW, B.APPOINT_DESC]]>
 FROM
 (
 SELECT pc.CASE_ID
-       ,pltc.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR CASE_BLACK_NO
+       ,pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR CASE_BLACK_NO
+       ,CASE WHEN pj.RED_IDNUM IS NULL THEN ' ' ELSE pltc_r.TITLE_CASE_NAME||pj.RED_IDNUM||'/'||pj.RED_YEAR END CASE_RED_NO
+       ,pc.PROS_DESC
+       ,pc.ACCU_DESC
+       ,pc.ALLE_DESC
 	   ,ppac.START_DATE
+	   ,plal.APPOINT_LIST_NAME APPOINT_REASON
        ,SUM(CASE WHEN ppac.CHOICE IN (1,2) THEN 0.5 
                  WHEN ppac.CHOICE = 3 THEN 1
                  ELSE 0 END) APPOINT_COUNT
@@ -214,9 +201,14 @@ JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID
                            AND ppa.REMOVED_BY = 0
 --appoint_table
 LEFT JOIN PC_PROCEED_APPOINT_TABLE ppat ON ppat.APPOINT_TABLE_CODE = ppa.APPOINT_TABLE_CODE AND ppat.REMOVED_BY = 0
+--appoint reason
+LEFT JOIN PC_LOOKUP_APPOINT_LIST plal ON plal.APPOINT_LIST_ID = ppac.REASON_APPOINT_ID AND plal.REMOVED_BY = 0
  --case
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
+--judgement
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = ppa.CASE_ID AND pj.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
 --judge
 LEFT JOIN (SELECT pcj.CASE_ID
 				  ,pcj.JUDGE_ID
@@ -235,22 +227,44 @@ AND ppac.START_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"H
                         AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
 AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE WHERE REF_APPOINT_CON_ID  = ppac.APPOINT_CON_ID)
 AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE_CANCEL ppacc WHERE ppacc.APPOINT_CON_ID = ppac.APPOINT_CON_ID)
-AND pltc.TITLE_CASE_NAME NOT IN ('มต','ตจ','มต.','ตจ.')	
-GROUP BY pc.CASE_ID, pltc.TITLE_CASE_NAME, pc.BLACK_IDNUM, pc.BLACK_YEAR, ppac.START_DATE, j.JUDGE_NAME
+AND pltc_b.TITLE_CASE_NAME NOT IN ('มต','ตจ','มต.','ตจ.')	
+GROUP BY pc.CASE_ID
+ 		 ,pltc_b.TITLE_CASE_NAME, pc.BLACK_IDNUM, pc.BLACK_YEAR
+         ,pltc_r.TITLE_CASE_NAME, pj.RED_IDNUM, pj.RED_YEAR
+         ,pc.PROS_DESC, pc.ACCU_DESC, pc.ALLE_DESC
+         ,ppac.START_DATE, plal.APPOINT_LIST_NAME, j.JUDGE_NAME
 ) A
-GROUP BY A.CASE_BLACK_NO, A.JUDGE_NAME, A.CASE_ID]]>
+GROUP BY A.CASE_BLACK_NO, A.CASE_RED_NO, A.PROS_DESC, A.ACCU_DESC, A.ALLE_DESC, A.JUDGE_NAME, A.CASE_ID]]>
 		</queryString>
 		<field name="CASE_BLACK_NO" class="java.lang.String">
 			<property name="com.jaspersoft.studio.field.label" value="CASE_BLACK_NO"/>
 		</field>
+		<field name="CASE_RED_NO" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_RED_NO"/>
+		</field>
+		<field name="PROS_DESC" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="PROS_DESC"/>
+		</field>
+		<field name="ACCU_DESC" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="ACCU_DESC"/>
+		</field>
+		<field name="ALLE_DESC" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="ALLE_DESC"/>
+		</field>
 		<field name="APPOINT_DATE" class="java.lang.String">
 			<property name="com.jaspersoft.studio.field.label" value="APPOINT_DATE"/>
+		</field>
+		<field name="APPOINT_REASON" class="java.lang.String">
+			<property name="com.jaspersoft.studio.field.label" value="APPOINT_REASON"/>
 		</field>
 		<field name="APPOINT_COUNT" class="java.lang.Double">
 			<property name="com.jaspersoft.studio.field.label" value="APPOINT_COUNT"/>
 		</field>
 		<field name="JUDGE_NAME" class="java.lang.String">
 			<property name="com.jaspersoft.studio.field.label" value="JUDGE_NAME"/>
+		</field>
+		<field name="CASE_ID" class="java.lang.Integer">
+			<property name="com.jaspersoft.studio.field.label" value="CASE_ID"/>
 		</field>
 	</subDataset>
 	<parameter name="START_DATE" class="java.lang.String">
@@ -538,7 +552,7 @@ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
 				<textFieldExpression><![CDATA["ประจำเดือน"+$F{SELECTED_MONTH}+" "+$F{SELECTED_YEAR}]]></textFieldExpression>
 			</textField>
 			<componentElement>
-				<reportElement x="182" y="60" width="438" height="50" uuid="5c26a55d-0153-49aa-8844-86ec4dd21d9b">
+				<reportElement x="0" y="60" width="802" height="50" uuid="5c26a55d-0153-49aa-8844-86ec4dd21d9b">
 					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -552,12 +566,13 @@ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
 						</datasetParameter>
 						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 					</datasetRun>
-					<jr:column width="40" uuid="a17bdf5e-f91c-49aa-840b-7cd2b206569f">
+					<jr:column width="30" uuid="a17bdf5e-f91c-49aa-840b-7cd2b206569f">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
 						<jr:columnHeader height="25" rowSpan="1">
 							<property name="com.jaspersoft.studio.unit.height" value="px"/>
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<staticText>
-								<reportElement x="0" y="0" width="40" height="25" uuid="dec14323-7269-4b07-a96b-c8a310a59529"/>
+								<reportElement x="0" y="0" width="30" height="25" uuid="dec14323-7269-4b07-a96b-c8a310a59529"/>
 								<box>
 									<pen lineWidth="0.5"/>
 								</box>
@@ -571,7 +586,7 @@ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
 							<property name="com.jaspersoft.studio.unit.height" value="px"/>
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<textField isStretchWithOverflow="true">
-								<reportElement stretchType="ContainerHeight" x="0" y="0" width="40" height="25" uuid="4bffe868-a0aa-46bc-a184-396f9b993fb9"/>
+								<reportElement stretchType="ContainerHeight" x="0" y="0" width="30" height="25" uuid="4bffe868-a0aa-46bc-a184-396f9b993fb9"/>
 								<box>
 									<pen lineWidth="0.5"/>
 								</box>
@@ -582,11 +597,12 @@ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="82" uuid="dfe36954-cbc6-4279-8d52-9341a746b6c4">
+					<jr:column width="72" uuid="dfe36954-cbc6-4279-8d52-9341a746b6c4">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
 						<jr:columnHeader height="25" rowSpan="1">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<staticText>
-								<reportElement x="0" y="0" width="82" height="25" uuid="5814faa6-4381-4719-a107-5eed32d10471"/>
+								<reportElement x="0" y="0" width="72" height="25" uuid="5814faa6-4381-4719-a107-5eed32d10471"/>
 								<box>
 									<pen lineWidth="0.5"/>
 								</box>
@@ -599,7 +615,7 @@ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
 						<jr:detailCell height="25">
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<textField isStretchWithOverflow="true">
-								<reportElement stretchType="ContainerHeight" x="0" y="0" width="82" height="25" uuid="3a4a5c5d-0479-4e59-a0e6-dcfbbc6edb2a"/>
+								<reportElement stretchType="ContainerHeight" x="0" y="0" width="72" height="25" uuid="3a4a5c5d-0479-4e59-a0e6-dcfbbc6edb2a"/>
 								<box>
 									<pen lineWidth="0.5"/>
 								</box>
@@ -610,11 +626,123 @@ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="68" uuid="959de669-85a2-42b4-a9e6-1760118b054d">
+					<jr:column width="72" uuid="cd3a2251-fa59-4184-8e5d-4ac31e7979ba">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column3"/>
 						<jr:columnHeader height="25" rowSpan="1">
 							<staticText>
-								<reportElement x="0" y="0" width="68" height="25" uuid="0a8e0a69-266b-47f2-a63a-a5f4c1ea9003"/>
+								<reportElement x="0" y="0" width="72" height="25" uuid="ff58c964-411b-4d88-9e55-58195736b654"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font fontName="THSarabunNew" size="12"/>
+								</textElement>
+								<text><![CDATA[เลขคดีแดง]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="25">
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="ContainerHeight" x="0" y="0" width="72" height="25" uuid="62201e1f-0a98-4300-b13c-087edfa237e0"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font fontName="THSarabunNew" size="12"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{CASE_RED_NO}==null?" ":$F{CASE_RED_NO}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="71" uuid="6bd295f3-cd5e-488d-9863-091f2ce06ce8">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column4"/>
+						<jr:columnHeader height="25" rowSpan="1">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<staticText>
+								<reportElement x="0" y="0" width="71" height="25" uuid="6bfeab44-e865-4aa4-9ae7-fc53c1ccf600"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font fontName="THSarabunNew" size="12"/>
+								</textElement>
+								<text><![CDATA[โจทก์]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="25">
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="ContainerHeight" x="0" y="0" width="71" height="25" uuid="86e20aab-9080-455a-862f-64c792a318ef"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font fontName="THSarabunNew" size="12"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{PROS_DESC}==null?" ":$F{PROS_DESC}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="73" uuid="f8b51600-4813-4ee4-955d-9f9457cf1220">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
+						<jr:columnHeader height="25" rowSpan="1">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<staticText>
+								<reportElement x="0" y="0" width="73" height="25" uuid="2df3728b-9c78-4bc0-867e-2671b22c7744"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font fontName="THSarabunNew" size="12"/>
+								</textElement>
+								<text><![CDATA[จำเลย]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="25">
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="ContainerHeight" x="0" y="0" width="73" height="25" uuid="f1d2887c-92bc-4f1d-82ef-40c3e5ae2d53"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font fontName="THSarabunNew" size="12"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{ACCU_DESC}==null?" ":$F{ACCU_DESC}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="119" uuid="65d6cc9f-6624-4b78-a2dd-db27c543ec24">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
+						<jr:columnHeader height="25" rowSpan="1">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<staticText>
+								<reportElement x="0" y="0" width="119" height="25" uuid="5321846a-0c28-4630-9460-754d4a23a630"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font fontName="THSarabunNew" size="12"/>
+								</textElement>
+								<text><![CDATA[ฐานความผิด]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="25">
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="ContainerHeight" x="0" y="0" width="119" height="25" uuid="c88b5419-95cd-4cb1-a726-9ec801874d58"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font fontName="THSarabunNew" size="12"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{ALLE_DESC}==null?" ":$F{ALLE_DESC}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="78" uuid="959de669-85a2-42b4-a9e6-1760118b054d">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column7"/>
+						<jr:columnHeader height="25" rowSpan="1">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<staticText>
+								<reportElement x="0" y="0" width="78" height="25" uuid="0a8e0a69-266b-47f2-a63a-a5f4c1ea9003"/>
 								<box>
 									<pen lineWidth="0.5"/>
 								</box>
@@ -626,7 +754,7 @@ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
 						</jr:columnHeader>
 						<jr:detailCell height="25">
 							<textField isStretchWithOverflow="true">
-								<reportElement stretchType="ContainerHeight" x="0" y="0" width="68" height="25" uuid="723429c1-5b7a-4269-8e0f-881d4355df01"/>
+								<reportElement stretchType="ContainerHeight" x="0" y="0" width="78" height="25" uuid="723429c1-5b7a-4269-8e0f-881d4355df01"/>
 								<box>
 									<pen lineWidth="0.5"/>
 								</box>
@@ -637,11 +765,40 @@ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="67" uuid="d39ebfa8-b216-4733-b2c4-a88f68c52c28">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column4"/>
+					<jr:column width="119" uuid="f9031879-63a1-47ec-a06b-7ba1cb31993e">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column8"/>
+						<jr:columnHeader height="25" rowSpan="1">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<staticText>
+								<reportElement x="0" y="0" width="119" height="25" uuid="b6889425-e16e-4a02-bfd1-302c2f42a68a"/>
+								<box>
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Center">
+									<font fontName="THSarabunNew" size="12"/>
+								</textElement>
+								<text><![CDATA[สาเหตุที่นัด]]></text>
+							</staticText>
+						</jr:columnHeader>
+						<jr:detailCell height="25">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
+							<textField isStretchWithOverflow="true">
+								<reportElement stretchType="ContainerHeight" x="0" y="0" width="119" height="25" uuid="9d214a72-0a35-4c67-a6c6-cd6eb75d4a71"/>
+								<box leftPadding="3">
+									<pen lineWidth="0.5"/>
+								</box>
+								<textElement textAlignment="Left">
+									<font fontName="THSarabunNew" size="12"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$F{APPOINT_REASON}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column width="39" uuid="d39ebfa8-b216-4733-b2c4-a88f68c52c28">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column9"/>
 						<jr:columnHeader height="25" rowSpan="1">
 							<staticText>
-								<reportElement x="0" y="0" width="67" height="25" uuid="93df51eb-95a4-4acf-b702-6c9805e2310b"/>
+								<reportElement x="0" y="0" width="39" height="25" uuid="93df51eb-95a4-4acf-b702-6c9805e2310b"/>
 								<box>
 									<pen lineWidth="0.5"/>
 								</box>
@@ -653,7 +810,7 @@ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
 						</jr:columnHeader>
 						<jr:detailCell height="25">
 							<textField isStretchWithOverflow="true">
-								<reportElement stretchType="ContainerHeight" x="0" y="0" width="67" height="25" uuid="384773de-d461-48a0-a82b-3613357195ee"/>
+								<reportElement stretchType="ContainerHeight" x="0" y="0" width="39" height="25" uuid="384773de-d461-48a0-a82b-3613357195ee"/>
 								<box>
 									<pen lineWidth="0.5"/>
 								</box>
@@ -664,11 +821,12 @@ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="126" uuid="9fded01d-5c29-4f7d-bb88-f42581ba9c08">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
+					<jr:column width="72" uuid="9fded01d-5c29-4f7d-bb88-f42581ba9c08">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column10"/>
 						<jr:columnHeader height="25" rowSpan="1">
+							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<staticText>
-								<reportElement x="0" y="0" width="126" height="25" uuid="fe78f2cf-8f01-4b41-8f6d-6dbfd5fd601f"/>
+								<reportElement x="0" y="0" width="72" height="25" uuid="fe78f2cf-8f01-4b41-8f6d-6dbfd5fd601f"/>
 								<box>
 									<pen lineWidth="0.5"/>
 								</box>
@@ -680,7 +838,7 @@ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
 						</jr:columnHeader>
 						<jr:detailCell height="25">
 							<textField isStretchWithOverflow="true">
-								<reportElement stretchType="ContainerHeight" x="0" y="0" width="126" height="25" uuid="e18a12bc-f30d-40cf-9bc8-fcdbf2c6d4dd"/>
+								<reportElement stretchType="ContainerHeight" x="0" y="0" width="72" height="25" uuid="e18a12bc-f30d-40cf-9bc8-fcdbf2c6d4dd"/>
 								<box>
 									<pen lineWidth="0.5"/>
 								</box>
@@ -691,11 +849,11 @@ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="55" uuid="b63b05dd-d735-40f4-85f0-e05d2414f3ae">
-						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
+					<jr:column width="57" uuid="b63b05dd-d735-40f4-85f0-e05d2414f3ae">
+						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column11"/>
 						<jr:columnHeader height="25" rowSpan="1">
 							<staticText>
-								<reportElement x="0" y="0" width="55" height="25" uuid="f28679cc-1d8d-48ff-a6be-05edb9dc4d36"/>
+								<reportElement x="0" y="0" width="57" height="25" uuid="f28679cc-1d8d-48ff-a6be-05edb9dc4d36"/>
 								<box>
 									<pen lineWidth="0.5"/>
 								</box>
@@ -707,7 +865,7 @@ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
 						</jr:columnHeader>
 						<jr:detailCell height="25">
 							<textField isStretchWithOverflow="true">
-								<reportElement stretchType="ContainerHeight" x="0" y="0" width="55" height="25" uuid="e331299b-c8a5-42a1-983a-61d74773f488"/>
+								<reportElement stretchType="ContainerHeight" x="0" y="0" width="57" height="25" uuid="e331299b-c8a5-42a1-983a-61d74773f488"/>
 								<box>
 									<pen lineWidth="0.5"/>
 								</box>
