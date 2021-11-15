@@ -12,12 +12,13 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_alert_witness"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="315"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="680"/>
 	<property name="com.jaspersoft.studio.report.description" value=""/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_alert_witness_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/02/2021"]]></defaultValueExpression>
 	</parameter>
@@ -36,7 +37,7 @@
 		,THAISDATE(ppac.START_DATE) APPOINT_DATE 
 		,ppac.CHOICE_TIME AS APPOINT_TIME
 		--
-		,pc.PROS_DESC
+		,NVL(pc.PROS_DESC, pc.COMPLAINANT_DESC) PROS_DESC
 		,pc.ACCU_DESC
 		,pc.ALLE_DESC 
 		--
@@ -72,7 +73,7 @@ GROUP BY
 		--
 		,THAISDATE(ppac.START_DATE)
 		,ppac.CHOICE_TIME
-		,pc.PROS_DESC
+		,NVL(pc.PROS_DESC, pc.COMPLAINANT_DESC) 
 		,pc.ACCU_DESC
 		,pc.ALLE_DESC 
 	    ,ppac.REASON_APPOINT_ID 

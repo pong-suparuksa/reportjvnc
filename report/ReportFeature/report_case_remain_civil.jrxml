@@ -12,9 +12,10 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/ReportFeature/report_case_remain_civil"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/ReportFeature/report_case_remain_civil_files/main_jrxml"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
@@ -73,7 +74,7 @@ LEFT JOIN (SELECT pcj.CASE_ID
 --
 WHERE ppa.REMOVED_BY = 0
 AND ppa.CASE_ID = $P{CASE_ID}
-ORDER BY ppa.APPOINT_ID ]]>
+ORDER BY ppa.APPOINT_ID]]>
 		</queryString>
 		<field name="CASE_ID" class="java.lang.Integer">
 			<property name="com.jaspersoft.studio.field.label" value="CASE_ID"/>
@@ -103,7 +104,7 @@ ORDER BY ppa.APPOINT_ID ]]>
 	<queryString>
 		<![CDATA[--header
 SELECT pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR  CASE_BLACK_NO
-      ,pc.PROS_DESC
+      ,NVL(pc.PROS_DESC, pc.COMPLAINANT_DESC) PROS_DESC
       ,pc.ACCU_DESC
       ,pc.ALLE_DESC
       ,THAISDATE(pc.CASE_DATE) CASE_DATE
@@ -419,7 +420,7 @@ AND pltc_b.TITLE_CASE_CODE = '110011']]>
 				<textElement>
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{PROS_DESC}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{PROS_DESC}==null?" ":$F{PROS_DESC}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="190" y="0" width="90" height="20" uuid="3f0ec57e-2571-4119-af45-479c5992a3a3">
@@ -432,7 +433,7 @@ AND pltc_b.TITLE_CASE_CODE = '110011']]>
 				<textElement>
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ACCU_DESC}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{ACCU_DESC}==null?" ":$F{ACCU_DESC}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="280" y="0" width="110" height="20" uuid="2983b28e-c136-40fb-bb93-4b02a0bdbc40">
@@ -445,7 +446,7 @@ AND pltc_b.TITLE_CASE_CODE = '110011']]>
 				<textElement>
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ALLE_DESC}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{ALLE_DESC}==null?" ":$F{ALLE_DESC}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="390" y="0" width="60" height="20" uuid="487b637d-8208-4231-a9e7-bbc510058fed">

@@ -16,7 +16,7 @@
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_plan"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN121"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_plan_files/main_jrxml"/>
 	<parameter name="SELMONTH" class="java.lang.String">
 		<defaultValueExpression><![CDATA["032021"]]></defaultValueExpression>
@@ -49,7 +49,7 @@ ppac.APPOINT_CON_ID,
 	   ) WITNESS_ADDR,	   
 	   CASE WHEN pc.BLACK_IDNUM IS NULL THEN '-'
 	   ELSE pltc_b.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR END  CASE_BLACK_NO,
-	   pc.PROS_DESC,
+	   NVL(pc.PROS_DESC, pc.COMPLAINANT_DESC) PROS_DESC,
 	   pc.ACCU_DESC,
 	   NVL(a.ALLE_NAME,'-') ALLE_NAME,
 	   NVL(ppac.LEVEL_ROOM_DESC ,' ') JUDGE_ROOM_NAME
@@ -174,7 +174,11 @@ ORDER BY ppa.CASE_ID, ppac.START_DATE, ppac.CHOICE_TIME
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["บัญชีรายชื่อและที่อยู่พยาน คดีนัดพิจารณาต่อเนื่อง ประจำเดือน " +new SimpleDateFormat("MMMM yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("MMyyyy").parse( $P{SELMONTH}))]]></textFieldExpression>
+				<textFieldExpression><![CDATA["บัญชีรายชื่อและที่อยู่พยาน คดีนัดพิจารณาต่อเนื่อง ประจำเดือน " +
+new SimpleDateFormat("MMMM", new Locale("th", "TH")).format(new SimpleDateFormat("MMyyyy").parse($P{SELMONTH}))
++" "+
+(Integer.parseInt($P{SELMONTH}.substring(2))+543)
+]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>

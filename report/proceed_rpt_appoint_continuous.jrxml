@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_continuous"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_continuous_files/main_jrxml"/>
@@ -185,7 +185,7 @@ FROM
 SELECT pc.CASE_ID
        ,pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR CASE_BLACK_NO
        ,CASE WHEN pj.RED_IDNUM IS NULL THEN ' ' ELSE pltc_r.TITLE_CASE_NAME||pj.RED_IDNUM||'/'||pj.RED_YEAR END CASE_RED_NO
-       ,pc.PROS_DESC
+       ,NVL(pc.PROS_DESC, pc.COMPLAINANT_DESC) PROS_DESC
        ,pc.ACCU_DESC
        ,pc.ALLE_DESC
 	   ,ppac.START_DATE
@@ -231,7 +231,7 @@ AND pltc_b.TITLE_CASE_NAME NOT IN ('มต','ตจ','มต.','ตจ.')
 GROUP BY pc.CASE_ID
  		 ,pltc_b.TITLE_CASE_NAME, pc.BLACK_IDNUM, pc.BLACK_YEAR
          ,pltc_r.TITLE_CASE_NAME, pj.RED_IDNUM, pj.RED_YEAR
-         ,pc.PROS_DESC, pc.ACCU_DESC, pc.ALLE_DESC
+         ,pc.PROS_DESC, pc.COMPLAINANT_DESC, pc.ACCU_DESC, pc.ALLE_DESC
          ,ppac.START_DATE, plal.APPOINT_LIST_NAME, j.JUDGE_NAME
 ) A
 GROUP BY A.CASE_BLACK_NO, A.CASE_RED_NO, A.PROS_DESC, A.ACCU_DESC, A.ALLE_DESC, A.JUDGE_NAME, A.CASE_ID]]>
@@ -665,7 +665,7 @@ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
 								<textElement textAlignment="Center">
 									<font fontName="THSarabunNew" size="12"/>
 								</textElement>
-								<text><![CDATA[โจทก์]]></text>
+								<text><![CDATA[โจทก์/ผู้ร้อง]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell height="25">
@@ -693,7 +693,7 @@ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0]]>
 								<textElement textAlignment="Center">
 									<font fontName="THSarabunNew" size="12"/>
 								</textElement>
-								<text><![CDATA[จำเลย]]></text>
+								<text><![CDATA[จำเลย/ผู้คัดค้าน]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell height="25">
