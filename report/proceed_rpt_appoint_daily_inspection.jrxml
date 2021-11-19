@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_daily_inspection"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="315"/>
@@ -20,7 +20,6 @@
 	<property name="com.jaspersoft.studio.report.description" value=""/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="534"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="459"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_daily_inspection_files/main_jrxml"/>
 	<parameter name="SELECT_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["03/03/2021"]]></defaultValueExpression>
 	</parameter>
@@ -39,8 +38,8 @@
 		     THEN pltc_r.TITLE_CASE_NAME||pj.RED_IDNUM||'/'||pj.RED_YEAR 
 		     ELSE '-' END CASE_RED_NO
     ,ppac.CHOICE_TIME                   AS  APPOINT_TIME   
-    ,NVL(pc.PROS_DESC, pc.COMPLAINANT_DESC)  AS CLAIMANT
-	,NVL(pc.ACCU_DESC ,'') AS DEFENDANT
+    ,NVL(pc.PROS_DESC, c.COMPLAINANT)  AS CLAIMANT
+	,NVL(pc.ACCU_DESC, d.DEFENDANT)  AS DEFENDANT
 	,NVL(pc.ALLE_DESC,'')  AS TOPIC
 	,NVL(pllr.LEVEL_ROOM_DESC ,'') AS LEVEL_ROOM_DESC
 	,NVL(plal.APPOINT_LIST_NAME  ,'-') AS APPOINT_REASON
@@ -53,6 +52,7 @@
     ,ap_next.APPOINT_DATE     AS APPOINT_NEXT_DATE
     ,ap_next.APPOINT_REASON   AS APPOINT_NEXT_REASON
     ,cou.COURT_NAME_TH
+    ,sub.REMARK
 FROM PC_PROCEED_APPOINT_CONTINUE ppac 
 LEFT JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID AND ppa.REMOVED_BY = 0
 LEFT JOIN PC_PROCEED_APPOINT_TABLE ppat ON ppat.APPOINT_TABLE_CODE = ppa.APPOINT_TABLE_CODE AND ppat.REMOVED_BY = 0
@@ -114,6 +114,31 @@ LEFT JOIN (SELECT plc.COURT_NAME_TH
 			FROM PC_PARAM pp
 			JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
 			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 = 1
+--complainant
+LEFT JOIN (SELECT pcl.CASE_ID ,pcl.LITIGANT_NAME  COMPLAINANT
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0 AND pllt.LIT_TYPE_CODE = '05'
+		   WHERE pcl.REMOVED_BY = 0) c ON c.CASE_ID = ppa.CASE_ID
+--defendant
+LEFT JOIN (SELECT pcl.CASE_ID ,pcl.LITIGANT_NAME  DEFENDANT
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0 AND pllt.LIT_TYPE_CODE = '06'
+		   WHERE pcl.REMOVED_BY = 0) d ON d.CASE_ID = ppa.CASE_ID	
+--sub case
+LEFT JOIN (SELECT s.HEAD_GROUP_CASE_ID
+			      ,LISTAGG (s.GROUP_TYPE_NAME||': '||s.SUB_CASE_NO,',') WITHIN GROUP(ORDER BY s.HEAD_GROUP_CASE_ID) REMARK
+		   FROM (SELECT pcg.HEAD_GROUP_CASE_ID ,pcgt.GROUP_TYPE_NAME
+				        ,LISTAGG(pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR, ',') WITHIN GROUP(ORDER BY pcg.HEAD_GROUP_CASE_ID) SUB_CASE_NO
+			    FROM PC_CASE_GROUP pcg
+			    JOIN PC_CASE_GROUP_TYPE pcgt ON pcgt.CASE_GROUP_TYPE_ID = pcg.CASE_GROUP_TYPE_ID AND pcgt.REMOVED_BY = 0
+			    --case
+			    JOIN PC_CASE pc ON pc.CASE_ID = pcg.CASE_ID AND pc.REMOVED_BY = 0
+			    JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
+			    WHERE pcg.REMOVED_BY = 0
+			    AND pltc_b.TITLE_CASE_NAME NOT IN ('มต','ตจ','มต.','ตจ.')	
+			    GROUP BY pcg.HEAD_GROUP_CASE_ID ,pcgt.GROUP_TYPE_NAME) s
+		   GROUP BY s.HEAD_GROUP_CASE_ID) sub ON sub.HEAD_GROUP_CASE_ID = ppa.CASE_ID
+--
 WHERE ppac.REMOVED_BY = 0
 AND ppac.START_DATE = TO_DATE($P{SELECT_DATE}, 'DD/MM/YYYY')
 AND ($P{ROOM_COD} IS NULL OR pllr.LEVEL_ROOM_CODE = $P{ROOM_COD})
@@ -125,11 +150,14 @@ AND (
 	)
 AND pltc_b.TITLE_CASE_NAME NOT IN ('มต','ตจ','มต.','ตจ.')]]>
 	</queryString>
-	<field name="APPOINT_DATE" class="java.lang.String">
+	<field name="CASE_ID" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="CASE_ID"/>
+	</field>
+	<field name="APPOINT_DATE" class="java.util.Date">
 		<property name="com.jaspersoft.studio.field.label" value="APPOINT_DATE"/>
 	</field>
 	<field name="CASE_BLACK_NO" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="CASE_BLACE_NO"/>
+		<property name="com.jaspersoft.studio.field.label" value="CASE_BLACK_NO"/>
 	</field>
 	<field name="CASE_RED_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="CASE_RED_NO"/>
@@ -164,10 +192,10 @@ AND pltc_b.TITLE_CASE_NAME NOT IN ('มต','ตจ','มต.','ตจ.')]]>
 	<field name="ASSOCIATE_JUDGE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="ASSOCIATE_JUDGE"/>
 	</field>
-	<field name="INVESTIGATE" class="java.lang.String">
+	<field name="INVESTIGATE" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="INVESTIGATE"/>
 	</field>
-	<field name="INVESTIGATE_DATE" class="java.lang.String">
+	<field name="INVESTIGATE_DATE" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="INVESTIGATE_DATE"/>
 	</field>
 	<field name="APPOINT_NEXT_DATE" class="java.lang.String">
@@ -176,7 +204,12 @@ AND pltc_b.TITLE_CASE_NAME NOT IN ('มต','ตจ','มต.','ตจ.')]]>
 	<field name="APPOINT_NEXT_REASON" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="APPOINT_NEXT_REASON"/>
 	</field>
-	<field name="COURT_NAME_TH" class="java.lang.String"/>
+	<field name="COURT_NAME_TH" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
+	</field>
+	<field name="REMARK" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="REMARK"/>
+	</field>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -595,6 +628,7 @@ AND pltc_b.TITLE_CASE_NAME NOT IN ('มต','ตจ','มต.','ตจ.')]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
+				<textFieldExpression><![CDATA[$F{REMARK}==null?" ":$F{REMARK}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="-10" y="0" width="30" height="25" uuid="e284b8e5-af1b-44ea-a752-457e7a3e8172">

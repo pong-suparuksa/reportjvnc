@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_continuous"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_continuous_files/main_jrxml"/>
@@ -185,8 +185,8 @@ FROM
 SELECT pc.CASE_ID
        ,pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR CASE_BLACK_NO
        ,CASE WHEN pj.RED_IDNUM IS NULL THEN ' ' ELSE pltc_r.TITLE_CASE_NAME||pj.RED_IDNUM||'/'||pj.RED_YEAR END CASE_RED_NO
-       ,NVL(pc.PROS_DESC, pc.COMPLAINANT_DESC) PROS_DESC
-       ,pc.ACCU_DESC
+       ,NVL(pc.PROS_DESC, c.COMPLAINANT) PROS_DESC
+       ,NVL(pc.ACCU_DESC, d.DEFENDANT) ACCU_DESC
        ,pc.ALLE_DESC
 	   ,ppac.START_DATE
 	   ,plal.APPOINT_LIST_NAME APPOINT_REASON
@@ -206,6 +206,16 @@ LEFT JOIN PC_LOOKUP_APPOINT_LIST plal ON plal.APPOINT_LIST_ID = ppac.REASON_APPO
  --case
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
+--complainant
+LEFT JOIN (SELECT pcl.CASE_ID ,pcl.LITIGANT_NAME  COMPLAINANT
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0 AND pllt.LIT_TYPE_CODE = '05'
+		   WHERE pcl.REMOVED_BY = 0) c ON c.CASE_ID = ppa.CASE_ID
+--defendant
+LEFT JOIN (SELECT pcl.CASE_ID ,pcl.LITIGANT_NAME  DEFENDANT
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0 AND pllt.LIT_TYPE_CODE = '06'
+		   WHERE pcl.REMOVED_BY = 0) d ON d.CASE_ID = ppa.CASE_ID		   
 --judgement
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = ppa.CASE_ID AND pj.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
@@ -231,7 +241,7 @@ AND pltc_b.TITLE_CASE_NAME NOT IN ('มต','ตจ','มต.','ตจ.')
 GROUP BY pc.CASE_ID
  		 ,pltc_b.TITLE_CASE_NAME, pc.BLACK_IDNUM, pc.BLACK_YEAR
          ,pltc_r.TITLE_CASE_NAME, pj.RED_IDNUM, pj.RED_YEAR
-         ,pc.PROS_DESC, pc.COMPLAINANT_DESC, pc.ACCU_DESC, pc.ALLE_DESC
+         ,pc.PROS_DESC, c.COMPLAINANT, d.DEFENDANT, pc.ACCU_DESC, pc.ALLE_DESC
          ,ppac.START_DATE, plal.APPOINT_LIST_NAME, j.JUDGE_NAME
 ) A
 GROUP BY A.CASE_BLACK_NO, A.CASE_RED_NO, A.PROS_DESC, A.ACCU_DESC, A.ALLE_DESC, A.JUDGE_NAME, A.CASE_ID]]>

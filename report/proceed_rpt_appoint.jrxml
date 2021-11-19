@@ -2,14 +2,14 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="proceed_rpt_appoint" pageWidth="1008" pageHeight="612" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="968" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="1bfda7a9-ad46-4cbf-9696-758bf76ec1e6">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN121"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="661"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="329"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="265"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="725"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -42,8 +42,8 @@
 	NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || CASE WHEN pj.RED_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pj.RED_YEAR)     RED_CASE_NO,
 	ppac.CHOICE,
 	ppac.CHOICE_TIME ,
-	NVL(pc.PROS_DESC, pc.COMPLAINANT_DESC) PROS_DESC,
-    pc.ACCU_DESC ,
+	NVL(pc.PROS_DESC, c.COMPLAINANT) PROS_DESC,
+    NVL(pc.ACCU_DESC, d.DEFENDANT) ACCU_DESC,
     pc.ALLE_DESC ,   
 	plal.APPOINT_LIST_NAME AS APPOINT_REASON_NAME,
 	pllr.LEVEL_ROOM_DESC,
@@ -52,6 +52,7 @@
 	ja.ONG_1,
 	ja.ONG_2,
 	ja.ADD_1,
+	sub.REMARK,
 	--
 	ppat.APPOINT_TABLE_CODE 
 --
@@ -108,7 +109,31 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
              FROM PC_PARAM pp
              JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
              WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
---           
+--complainant
+LEFT JOIN (SELECT pcl.CASE_ID ,pcl.LITIGANT_NAME  COMPLAINANT
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0 AND pllt.LIT_TYPE_CODE = '05'
+		   WHERE pcl.REMOVED_BY = 0) c ON c.CASE_ID = ppa.CASE_ID
+--defendant
+LEFT JOIN (SELECT pcl.CASE_ID ,pcl.LITIGANT_NAME  DEFENDANT
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0 AND pllt.LIT_TYPE_CODE = '06'
+		   WHERE pcl.REMOVED_BY = 0) d ON d.CASE_ID = ppa.CASE_ID	
+--sub case
+LEFT JOIN (SELECT s.HEAD_GROUP_CASE_ID
+			      ,LISTAGG (s.GROUP_TYPE_NAME||': '||s.SUB_CASE_NO,',') WITHIN GROUP(ORDER BY s.HEAD_GROUP_CASE_ID) REMARK
+		   FROM (SELECT pcg.HEAD_GROUP_CASE_ID ,pcgt.GROUP_TYPE_NAME
+				        ,LISTAGG(pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR, ',') WITHIN GROUP(ORDER BY pcg.HEAD_GROUP_CASE_ID) SUB_CASE_NO
+			    FROM PC_CASE_GROUP pcg
+			    JOIN PC_CASE_GROUP_TYPE pcgt ON pcgt.CASE_GROUP_TYPE_ID = pcg.CASE_GROUP_TYPE_ID AND pcgt.REMOVED_BY = 0
+			    --case
+			    JOIN PC_CASE pc ON pc.CASE_ID = pcg.CASE_ID AND pc.REMOVED_BY = 0
+			    JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
+			    WHERE pcg.REMOVED_BY = 0
+			    AND pltc_b.TITLE_CASE_NAME NOT IN ('มต','ตจ','มต.','ตจ.')	
+			    GROUP BY pcg.HEAD_GROUP_CASE_ID ,pcgt.GROUP_TYPE_NAME) s
+		   GROUP BY s.HEAD_GROUP_CASE_ID) sub ON sub.HEAD_GROUP_CASE_ID = ppa.CASE_ID    
+--
 WHERE ppa.REMOVED_BY = 0 
 AND ppac.START_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS')
                         AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
@@ -124,6 +149,12 @@ AND (
 AND pltc_b.TITLE_CASE_NAME NOT IN ('มต','ตจ','มต.','ตจ.')	
 ORDER BY ppac.START_DATE, ppac.CHOICE, ppac.CHOICE_TIME]]>
 	</queryString>
+	<field name="CASE_ID" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="CASE_ID"/>
+	</field>
+	<field name="APPOINT_ID" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="APPOINT_ID"/>
+	</field>
 	<field name="START_DATE" class="java.util.Date">
 		<property name="com.jaspersoft.studio.field.label" value="START_DATE"/>
 	</field>
@@ -171,6 +202,12 @@ ORDER BY ppac.START_DATE, ppac.CHOICE, ppac.CHOICE_TIME]]>
 	</field>
 	<field name="ADD_1" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="ADD_1"/>
+	</field>
+	<field name="REMARK" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="REMARK"/>
+	</field>
+	<field name="APPOINT_TABLE_CODE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="APPOINT_TABLE_CODE"/>
 	</field>
 	<group name="Group1"/>
 	<pageHeader>
@@ -421,8 +458,9 @@ $F{LEVEL_ROOM_DESC}]]></textFieldExpression>
 				<text><![CDATA[องค์คณะผู้พิพากษาสมทบ 2]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="848" y="2" width="80" height="25" uuid="c303b1b5-f45d-4d41-8821-1a2ea6819534">
+				<reportElement x="848" y="2" width="60" height="25" uuid="c303b1b5-f45d-4d41-8821-1a2ea6819534">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -436,7 +474,7 @@ $F{LEVEL_ROOM_DESC}]]></textFieldExpression>
 				<text><![CDATA[ห้องพิจารณาคดี]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="928" y="2" width="40" height="25" uuid="8e570780-3266-4e3c-82d3-fc084278ed97">
+				<reportElement x="908" y="2" width="60" height="25" uuid="8e570780-3266-4e3c-82d3-fc084278ed97">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
@@ -639,7 +677,9 @@ $F{LEVEL_ROOM_DESC}]]></textFieldExpression>
 				<textFieldExpression><![CDATA[$F{ONG_2} == null ? "-" : $F{ONG_2}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="ContainerHeight" x="848" y="0" width="80" height="20" uuid="9ac3114e-15e5-4d03-a80f-76a3bd45feb0"/>
+				<reportElement stretchType="ContainerHeight" x="848" y="0" width="60" height="20" uuid="9ac3114e-15e5-4d03-a80f-76a3bd45feb0">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -652,7 +692,7 @@ $F{LEVEL_ROOM_DESC}]]></textFieldExpression>
 				<textFieldExpression><![CDATA[$F{LEVEL_ROOM_DESC} == null ? "-" : $F{LEVEL_ROOM_DESC}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement stretchType="ContainerHeight" x="928" y="0" width="40" height="20" uuid="f61903d1-24f8-4ec9-9d5a-7f36e45aced3">
+				<reportElement stretchType="ContainerHeight" x="908" y="0" width="60" height="20" uuid="f61903d1-24f8-4ec9-9d5a-7f36e45aced3">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
@@ -664,7 +704,7 @@ $F{LEVEL_ROOM_DESC}]]></textFieldExpression>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="9"/>
 				</textElement>
-				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{REMARK}==null?" ":$F{REMARK}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

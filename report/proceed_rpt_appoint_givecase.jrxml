@@ -11,7 +11,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_givecase"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="202"/>
@@ -42,8 +42,8 @@
 		,NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || CASE WHEN pj.RED_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pj.RED_YEAR)       CASE_RED_NO
         ,THAISDATE(ppac.START_DATE) APPOINT_DATE
         ,ppac.CHOICE_TIME APPOINT_TIME
-        ,NVL(pc.PROS_DESC, pc.COMPLAINANT_DESC) PROS_DESC
-        ,pc.ACCU_DESC
+        ,NVL(pc.PROS_DESC, c.COMPLAINANT) PROS_DESC
+        ,NVL(pc.ACCU_DESC, d.DEFENDANT) ACCU_DESC
         ,pc.ALLE_DESC 
         ,plal.APPOINT_LIST_NAME 
         ,j.JUDGE_NAME
@@ -65,7 +65,7 @@ LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_I
 --judgement
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = ppa.CASE_ID AND pj.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
---
+--judge
 LEFT JOIN (SELECT pcj.CASE_ID
 			       ,CASE WHEN pcj.TEMPORARY_JUDGE_FLAG = 3 THEN 'continuous'
 			             WHEN pcj.TEMPORARY_JUDGE_FLAG = 4 THEN 'special' END APPOINT_TABLE_TYPE
@@ -80,6 +80,16 @@ LEFT JOIN (SELECT pcj.CASE_ID
 			AND pljt.JUDGE_TYPE_CODE IN ('01','02','03','12')
 			GROUP BY pcj.CASE_ID ,CASE WHEN pcj.TEMPORARY_JUDGE_FLAG = 3 THEN 'continuous' WHEN pcj.TEMPORARY_JUDGE_FLAG = 4 THEN 'special' END
 			) j ON j.CASE_ID = ppa.CASE_ID AND j.APPOINT_TABLE_TYPE = ppat.APPOINT_TABLE_TYPE 
+--complainant
+LEFT JOIN (SELECT pcl.CASE_ID ,pcl.LITIGANT_NAME  COMPLAINANT
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0 AND pllt.LIT_TYPE_CODE = '05'
+		   WHERE pcl.REMOVED_BY = 0) c ON c.CASE_ID = ppa.CASE_ID
+--defendant
+LEFT JOIN (SELECT pcl.CASE_ID ,pcl.LITIGANT_NAME  DEFENDANT
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0 AND pllt.LIT_TYPE_CODE = '06'
+		   WHERE pcl.REMOVED_BY = 0) d ON d.CASE_ID = ppa.CASE_ID
 --
 WHERE ppa.REMOVED_BY = 0
 AND ppac.START_DATE BETWEEN TO_DATE( $P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
