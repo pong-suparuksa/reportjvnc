@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_rpt_mnyctrl_transfer"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -65,7 +65,7 @@ LEFT JOIN PC_LOOKUP_RECEIPT_SUB_TYPE plrst ON plrst.RECEIPT_TYPE_ID = pfrd.RECEI
                                            AND plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE
                                            AND plrst.REMOVED_BY = 0
 --
-LEFT JOIN PC_CASE pc ON pc.CASE_ID = pfpd.CASE_ID AND pc.REMOVED_BY = 0
+LEFT JOIN PC_CASE pc ON pc.CASE_ID = pfpd.CASE_ID
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
 --
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pfr.CASE_ID AND pj.REMOVED_BY = 0
@@ -83,6 +83,7 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
 WHERE pfp.PAYMENT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
                            AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
 AND pfp.TRANSFER_AMOUNT > 0
+AND pc.REMOVED_BY = 0
 ORDER BY pfp.PAYMENT_DATE, pfpd.CASE_ID]]>
 	</queryString>
 	<field name="CASE_BLACK_NO" class="java.lang.String">

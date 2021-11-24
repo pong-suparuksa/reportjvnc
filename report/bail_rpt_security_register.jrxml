@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/bail_rpt_security_register"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="206"/>
@@ -162,7 +162,7 @@ SELECT DISTINCT
 		,THAISDATE(pb.CREATED_DATE)	CREATED_DATE
 		,pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR  CASE_BLACK_NO
 		,CASE WHEN pj.RED_IDNUM IS NULL THEN ' ' ELSE pltc_r.TITLE_CASE_NAME||pj.RED_IDNUM||'/'||pj.RED_YEAR END	 CASE_RED_NO
-		,pc.PROS_DESC
+		,NVL(pc.PROS_DESC, c.COMPLAINANT) PROS_DESC
 		,pc.ACCU_DESC
 		--
 		,pcl.LITIGANT_NAME
@@ -184,15 +184,20 @@ LEFT JOIN PC_BAIL_SEC pbs ON pbs.BAIL_ID = pb.BAIL_ID AND pbs.BAILSMAN_ID = pbb.
 --defendant
 LEFT JOIN PC_BAIL_DEFENDANT pbd ON pbd.BAIL_ID = pb.BAIL_ID AND pbd.REMOVED_BY = 0
 LEFT JOIN PC_CASE_LIT pcl ON pcl.CASE_LIT_ID = pbd.DEFENDANT_ID AND pcl.REMOVED_BY = 0
+--complainant
+LEFT JOIN (SELECT pcl.CASE_ID ,pcl.LITIGANT_NAME  COMPLAINANT
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0 AND pllt.LIT_TYPE_CODE = '05'
+		   WHERE pcl.REMOVED_BY = 0) c ON c.CASE_ID = pb.CASE_ID
 --court
 LEFT JOIN (SELECT plc.COURT_NAME_TH
 			FROM PC_PARAM pp
 			JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
 			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 = 1
+--
 WHERE pb.REMOVED_BY = 0
 AND pb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
-                      AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
-AND pbs.SEC_TYPE_CODE IS NOT NULL]]>
+                      AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') ]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>

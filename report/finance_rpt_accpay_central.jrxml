@@ -11,7 +11,7 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_rpt_accpay_central"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -19,6 +19,7 @@
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="620"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="369"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/finance_rpt_accpay_central_files/main_jrxml"/>
 	<parameter name="RECEIVETYPE" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["1"]]></defaultValueExpression>
 	</parameter>
@@ -65,7 +66,7 @@ LEFT JOIN PC_FIN_RECEIPT_DETAIL pfrd ON pfrd.DETAIL_ID = pfrbh.RECEIPT_DETAIL_ID
 LEFT JOIN PC_FIN_RECEIPT pfr ON pfr.RECEIPT_ID = pfrd.RECEIPT_ID
 LEFT JOIN PC_FIN_RECEIPT_CANCEL pfrc ON pfrc.RECEIPT_ID = pfr.RECEIPT_ID 
 --
-LEFT JOIN PC_CASE pc ON pc.CASE_ID = pfpd.CASE_ID AND pc.REMOVED_BY = 0
+LEFT JOIN PC_CASE pc ON pc.CASE_ID = pfpd.CASE_ID
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID  = pc.CASE_ID AND pc.REMOVED_BY = 0
 --
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
@@ -81,6 +82,7 @@ LEFT JOIN PC_LOOKUP_RECEIPT_SUB_TYPE plrst ON plrst.RECEIPT_TYPE_ID = pfrd.RECEI
 WHERE plrt.RECEIPT_TYPE_CODE = $P{RECEIVETYPE}
 AND pfp.PAYMENT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
                          AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
+AND pc.REMOVED_BY = 0
 ORDER BY pfp.PAYMENT_DATE]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">

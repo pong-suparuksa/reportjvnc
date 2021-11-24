@@ -11,7 +11,7 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_accexpense"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="506"/>
@@ -50,7 +50,7 @@
         THAISDATE(pnsr.REPORT_DATE)                                         RESULT_CREATE_DATE
 --            
 FROM PC_NOTICE pn
-LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID AND pc.REMOVED_BY = 0
+LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pn.CASE_ID AND pj.REMOVED_BY = 0
 --
 LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pn.COURT_ID AND plc.REMOVED_BY = 0
@@ -89,7 +89,8 @@ AND pn.IS_COURT_AREA = 1
 AND NVL(pni.HAS_MONEY,1) = 1 
 AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
                              AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
-AND (pn.SEND_METHOD_BY_NAME = $P{SENDER}  OR '0' = $P{SENDER})]]>
+AND (pn.SEND_METHOD_BY_NAME = $P{SENDER}  OR '0' = $P{SENDER})
+AND pc.REMOVED_BY = 0]]>
 	</queryString>
 	<field name="SEND_NOTICE_DATE" class="java.util.Date">
 		<property name="com.jaspersoft.studio.field.label" value="SEND_NOTICE_DATE"/>

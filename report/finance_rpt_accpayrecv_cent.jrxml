@@ -16,7 +16,7 @@
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="490"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="501"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_rpt_accpayrecv_cent"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/finance_rpt_accpayrecv_cent_files/main_jrxml"/>
@@ -205,7 +205,7 @@ LEFT JOIN PC_FIN_PAYMENT_DETAIL pfpd ON pfpd.DETAIL_ID = pfrbh.PAYMENT_DETAIL_ID
 LEFT JOIN PC_FIN_PAYMENT pfp ON pfp.PAYMENT_ID = pfpd.PAYMENT_ID
 LEFT JOIN PC_FIN_PAYMENT_CHEQUE pfpc ON pfpc.PAYMENT_ID = pfp.PAYMENT_ID 
 --
-LEFT JOIN PC_CASE pc ON pc.CASE_ID = pfr.CASE_ID AND pc.REMOVED_BY = 0
+LEFT JOIN PC_CASE pc ON pc.CASE_ID = pfr.CASE_ID
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID  = pc.CASE_ID AND pj.REMOVED_BY = 0
 LEFT JOIN PC_CASE_LIT pcl ON pcl.CASE_LIT_ID = pfpd.CASE_LIT_ID AND pcl.REMOVED_BY = 0
 --
@@ -222,6 +222,7 @@ AND pfr.RECEIVED_DATE BETWEEN TO_DATE( $P{START_DATE} ||'T00:00:00', 'DD-MM-YYYY
                            AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS') 
 AND  plrst.RECEIPT_SUB_TYPE_NAME IS NOT NULL
 AND ((pfrd.CASH_AMOUNT > 0) OR (pfrd.CHEQUE_AMOUNT > 0))
+AND pc.REMOVED_BY = 0
 ORDER BY plrst.RECEIPT_SUB_TYPE_CODE, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 	</queryString>
 	<field name="RECEIVED_DATE" class="java.util.Date">

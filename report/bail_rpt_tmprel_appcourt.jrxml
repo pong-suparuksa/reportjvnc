@@ -32,22 +32,28 @@
 	</parameter>
 	<queryString language="SQL">
 		<![CDATA[SELECT pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR  BLACK_CASE_NO
-       ,pc.PROS_DESC 
+       ,NVL(pc.PROS_DESC,c.COMPLAINANT) PROS_DESC 
        ,pc.ACCU_DESC
        ,l.LITIGANT_NAME
        ,pbb.FULLNAME
        ,NVL(pc.ALLE_DESC,alle.ALLE_NAME) ALLE_DESC 
        ,pb.RATE_AMOUNT BAIL_COST
-       ,NVL(pbst.TYPE_NAME,'ไม่มีหลักประกัน') TYPE_NAME
+       ,NVL(bm.TYPE_NAME,'ไม่มีหลักประกัน') TYPE_NAME
        ,pb.COURT_ORDER 
        ,CASE WHEN pb.COURT_ORDER  = 1 THEN 'อนุญาต' ELSE 'ไม่อนุญาต' END COURT_ORDER_TEXT
        ,plj.JUDGE_NAME 
        ,plov.NAME   BAIL_CLASS
        --
+       ,pbb.BAILSMAN_ID 
 FROM PC_BAIL pb 
 LEFT JOIN PC_BAIL_BAILSMAN pbb ON pbb.BAIL_ID = pb.BAIL_ID AND pbb.REMOVED_BY = 0
-LEFT JOIN PC_BAIL_SEC pbs ON pbs.BAILSMAN_ID = pbb.BAILSMAN_ID AND pbs.REMOVED_BY = 0
-LEFT JOIN PC_BAIL_SEC_TYPE pbst ON pbst.TYPE_CODE = pbs.SEC_TYPE_CODE AND pbst.REMOVED_BY = 0
+LEFT JOIN (SELECT b.BAILSMAN_ID, LISTAGG(b.TYPE_NAME , CHR(13)) WITHIN GROUP(ORDER BY b.BAILSMAN_ID) TYPE_NAME
+		   FROM (SELECT DISTINCT pbs.BAILSMAN_ID, pbst.TYPE_NAME 
+				 FROM PC_BAIL_SEC pbs 
+				 JOIN PC_BAIL_SEC_TYPE pbst ON pbst.TYPE_CODE = pbs.SEC_TYPE_CODE AND pbst.REMOVED_BY = 0
+				 WHERE pbs.REMOVED_BY = 0
+				 AND pbs.BAILSMAN_ID = 5749) b
+		  GROUP BY b.BAILSMAN_ID) bm ON bm.BAILSMAN_ID = pbb.BAILSMAN_ID 
 --case
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pb.CASE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc.REMOVED_BY = 0
@@ -67,7 +73,11 @@ LEFT JOIN (SELECT pbd.BAIL_ID,LISTAGG(pcl.LITIGANT_NAME , ',') WITHIN GROUP(ORDE
 		   JOIN PC_CASE_LIT pcl ON pcl.CASE_LIT_ID = pbd.DEFENDANT_ID AND pcl.REMOVED_BY = 0
 		   WHERE pbd.REMOVED_BY = 0
 		   GROUP BY pbd.BAIL_ID ) l ON l.BAIL_ID = pb.BAIL_ID 
---
+--complainant
+LEFT JOIN (SELECT pcl.CASE_ID ,pcl.LITIGANT_NAME  COMPLAINANT
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0 AND pllt.LIT_TYPE_CODE = '05'
+		   WHERE pcl.REMOVED_BY = 0) c ON c.CASE_ID = pb.CASE_ID
 WHERE pb.REMOVED_BY = 0 
 AND (pb.BAIL_PERIOD = $P!{BAIL_PERIOD} OR 0 = $P!{BAIL_PERIOD}) 
 AND pb.BAIL_DATE BETWEEN TO_DATE( $P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
@@ -259,7 +269,7 @@ ORDER BY pb.COURT_ORDER, BAIL_CLASS]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="14" isBold="true"/>
 				</textElement>
-				<text><![CDATA[โจทก์]]></text>
+				<text><![CDATA[โจทก์/ผู้ร้อง]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="353" y="0" width="90" height="25" uuid="e2bc0900-4379-45bf-8d91-ea52b73f9677">
