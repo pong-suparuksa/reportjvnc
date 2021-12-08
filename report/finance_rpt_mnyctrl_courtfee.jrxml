@@ -10,7 +10,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
@@ -44,24 +44,61 @@
   	pfr.RECEIPT_BOOK_NO,
   	pfr.RECEIPT_NO,  	
   	pfr.PAYER_NAME,  	
-  	NVL(plrst.RECEIPT_SUB_TYPE_NAME, ' ') PAID_DESCRIPTION,
+  	NVL(pfrd.RECEIPT_SUB_TYPE_NAME, ' ') PAID_DESCRIPTION,
   	pfr.TOTAL_AMOUNT RECV_AMOUNT,   	
-  	pfpd.CASE_LIT_NAME PAYEE,  	
-  	NVL(pfp.TOTAL_AMOUNT,0)  PAY_AMOUNT, 	
-  	pfr.TOTAL_AMOUNT - NVL(pfp.TOTAl_AMOUNT,0)   BALANCE,  	
-    CASE WHEN PFP.PAYMENT_DATE IS NOT NULL THEN THAISDATE(pfp.PAYMENT_DATE) END   PAYMENT_DATE_TEXT,    
-    CASE WHEN pfp.TRANSFER_AMOUNT  > 0 THEN pfp.TRANSFER_ACCOUNT_NO 
-         WHEN pfp.CHEQUE_AMOUNT > 0 THEN pfpc.CHEQUE_CODE END REF_NO,
+	pfrd.CASE_LIT_NAME PAYEE,  	
+	NVL(pfrd.PAY_AMOUNT,0)  PAY_AMOUNT, 	
+	pfr.TOTAL_AMOUNT - NVL(pfrd.PAY_AMOUNT,0)   BALANCE,  	
+	CASE WHEN pfrd.PAYMENT_DATE IS NOT NULL THEN THAISDATE(pfrd.PAYMENT_DATE) END   PAYMENT_DATE_TEXT,    
+	pfrd.REF_NO,
     pfrca.CANCEL_ID 
 --  	
 FROM PC_FIN_RECEIPT pfr 
-LEFT JOIN PC_FIN_RECEIPT_DETAIL pfrd ON pfrd.RECEIPT_ID = pfr.RECEIPT_ID
+JOIN (SELECT pfrd.RECEIPT_ID 
+		       ,pfrd.RECEIPT_TYPE 
+			   ,LISTAGG(pfrd.RECEIPT_SUB_TYPE_NAME||CASE WHEN pfrd.OTHER_DETAIL IS NULL THEN ' ' ELSE '('||pfrd.OTHER_DETAIL||')' END, CHR(13)) WITHIN GROUP(ORDER BY pfrd.RECEIPT_SUB_TYPE_NAME, pfrd.OTHER_DETAIL) RECEIPT_SUB_TYPE_NAME
+			   ,pfrd.CASE_LIT_NAME
+			   ,pfrd.PAYMENT_DATE
+			   ,pfrd.PAY_AMOUNT
+			   ,pfrd.REF_NO
+		FROM (SELECT pfrd.RECEIPT_ID
+			         ,pfrd.RECEIPT_TYPE 
+			         ,plrst.RECEIPT_SUB_TYPE_NAME 
+			         ,pfrd.OTHER_DETAIL 
+			         --
+			         ,pfpd.CASE_LIT_NAME 
+			         ,pfp.PAYMENT_DATE
+			         ,SUM(pfp.TOTAL_AMOUNT) PAY_AMOUNT 
+					 ,CASE WHEN pfp.TRANSFER_AMOUNT  > 0 THEN pfp.TRANSFER_ACCOUNT_NO 
+			               WHEN pfp.CHEQUE_AMOUNT > 0 THEN pfpc.CHEQUE_CODE END REF_NO
+			  FROM PC_FIN_RECEIPT_DETAIL pfrd 
+			  --
+			  LEFT JOIN PC_LOOKUP_RECEIPT_SUB_TYPE plrst ON plrst.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE 
+				                                        AND plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE 
+				                                        AND plrst.REMOVED_BY = 0
+			  --
+			  LEFT JOIN PC_FIN_RECEIPT_BALANCE_HISTORY pfrbh ON pfrbh.RECEIPT_DETAIL_ID = pfrd.DETAIL_ID
+			  LEFT JOIN PC_FIN_PAYMENT_DETAIL pfpd ON pfpd.DETAIL_ID = pfrbh.PAYMENT_DETAIL_ID
+			  LEFT JOIN PC_FIN_PAYMENT pfp ON pfp.PAYMENT_ID = pfpd.PAYMENT_ID
+			  LEFT JOIN PC_FIN_PAYMENT_CHEQUE pfpc ON pfpc.PAYMENT_ID = pfp.PAYMENT_ID AND pfpc.REMOVED_BY = 0
+			  --
+			  GROUP BY pfrd.RECEIPT_ID
+			           ,pfrd.RECEIPT_TYPE 
+			           ,plrst.RECEIPT_SUB_TYPE_NAME 
+			           ,pfrd.OTHER_DETAIL
+			           --
+			           ,pfpd.CASE_LIT_NAME
+			           ,pfp.PAYMENT_DATE
+			           ,CASE WHEN pfp.TRANSFER_AMOUNT  > 0 THEN pfp.TRANSFER_ACCOUNT_NO 
+			                 WHEN pfp.CHEQUE_AMOUNT > 0 THEN pfpc.CHEQUE_CODE END) pfrd 
+		GROUP BY pfrd.RECEIPT_ID
+		         ,pfrd.RECEIPT_TYPE
+				 ,pfrd.CASE_LIT_NAME
+				 ,pfrd.PAYMENT_DATE
+				 ,pfrd.PAY_AMOUNT
+				 ,pfrd.REF_NO) pfrd ON pfrd.RECEIPT_ID = pfr.RECEIPT_ID 
 LEFT JOIN PC_FIN_RECEIPT_CANCEL pfrca ON pfrca.RECEIPT_ID = pfr.RECEIPT_ID
---
-LEFT JOIN PC_FIN_RECEIPT_BALANCE_HISTORY pfrbh ON pfrbh.RECEIPT_DETAIL_ID = pfrd.DETAIL_ID
-LEFT JOIN PC_FIN_PAYMENT_DETAIL pfpd ON pfpd.DETAIL_ID = pfrbh.PAYMENT_DETAIL_ID
-LEFT JOIN PC_FIN_PAYMENT pfp ON pfp.PAYMENT_ID = pfpd.PAYMENT_ID
-LEFT JOIN PC_FIN_PAYMENT_CHEQUE pfpc ON pfpc.PAYMENT_ID = pfp.PAYMENT_ID AND pfpc.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE AND plrt.REMOVED_BY = 0
 --
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pfr.CASE_ID
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID  = pc.CASE_ID AND pc.REMOVED_BY = 0
@@ -70,10 +107,6 @@ LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_I
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
 --
 LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pfr.COURT_ID AND pc.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE  AND plrt.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_RECEIPT_SUB_TYPE plrst ON plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE
-                                           AND plrst.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE 
-                                           AND plrst.REMOVED_BY = 0
 --
 WHERE pfr.RECEIVED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
                           AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
@@ -138,7 +171,7 @@ ORDER BY pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 	<field name="CANCEL_ID" class="java.lang.Long">
 		<property name="com.jaspersoft.studio.field.label" value="CANCEL_ID"/>
 	</field>
-	<variable name="TOTAL_AMOUNT" class="java.lang.Float" calculation="Sum">
+	<variable name="TOTAL_AMOUNT" class="java.lang.Double" calculation="Sum">
 		<variableExpression><![CDATA[$F{RECV_AMOUNT}]]></variableExpression>
 	</variable>
 	<variable name="CNT_CANCEL" class="java.lang.Long" calculation="Sum">
@@ -153,11 +186,10 @@ ORDER BY pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 	<group name="GR_BOOKNO">
 		<groupExpression><![CDATA[$F{RECEIPT_BOOK_NO}]]></groupExpression>
 		<groupHeader>
-			<band height="20">
+			<band height="25">
 				<textField>
-					<reportElement x="0" y="0" width="800" height="20" uuid="2ec1c93e-3993-4834-943f-ca7ba4474477">
+					<reportElement x="0" y="0" width="800" height="25" uuid="2ec1c93e-3993-4834-943f-ca7ba4474477">
 						<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
-						<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					</reportElement>
 					<box leftPadding="3" rightPadding="3">
 						<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -166,7 +198,7 @@ ORDER BY pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font fontName="TH Sarabun New" size="12" isBold="true"/>
+						<font fontName="TH Sarabun New" size="16" isBold="true"/>
 					</textElement>
 					<textFieldExpression><![CDATA[" ใบเสร็จเล่ม/กล่องที่:"+($F{RECEIPT_BOOK_NO}==null?" ":$F{RECEIPT_BOOK_NO})]]></textFieldExpression>
 				</textField>
@@ -710,7 +742,7 @@ ORDER BY pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format($F{BALANCE})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($F{BALANCE})]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="660" y="0" width="40" height="50" uuid="7687be38-5af7-48e4-a935-629e3f2cc491">
@@ -741,7 +773,7 @@ ORDER BY pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format($F{PAY_AMOUNT})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($F{PAY_AMOUNT})]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="700" y="0" width="40" height="50" uuid="d781f9ce-d2b5-4d11-904a-faebcfce94b5">
@@ -848,7 +880,7 @@ ORDER BY pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{TOTAL_BALANCE}==null
 ?"รวมเงินคงเหลือทั้งสิ้น 0 บาท"
-:"รวมเงินคงเหลือทั้งสิ้น "+ new java.text.DecimalFormat("#,##0").format($V{TOTAL_BALANCE})+" บาท"]]></textFieldExpression>
+:"รวมเงินคงเหลือทั้งสิ้น "+ new java.text.DecimalFormat("#,##0.00").format($V{TOTAL_BALANCE})+" บาท"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="388" y="0" width="148" height="25" uuid="708ab656-e841-4cdd-b98f-7640ea367d62">
@@ -866,7 +898,7 @@ ORDER BY pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{TOTAL_PAYAMOUNT}==null
 ?"รวมจ่ายเงินทั้งสิ้น 0 บาท"
-:"รวมจ่ายเงินทั้งสิ้น "+ new java.text.DecimalFormat("#,##0").format($V{TOTAL_PAYAMOUNT})+" บาท"]]></textFieldExpression>
+:"รวมจ่ายเงินทั้งสิ้น "+ new java.text.DecimalFormat("#,##0.00").format($V{TOTAL_PAYAMOUNT})+" บาท"]]></textFieldExpression>
 			</textField>
 		</band>
 	</summary>

@@ -18,7 +18,7 @@
 	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_rpt_accpayrecv_courtfee"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/finance_rpt_accpayrecv_courtfee_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/05/2021"]]></defaultValueExpression>
@@ -40,30 +40,66 @@
   	pfr.RECEIPT_BOOK_NO,
     pfr.RECEIPT_NO,
     pfr.PAYER_NAME,
+    NVL(pfrd.RECEIPT_SUB_TYPE_NAME,'-') PAID_DESCRIPTION,
     pfr.TOTAL_AMOUNT        TOTAL_RECEIVED_AMOUNT,
     --
-    pfpd.CASE_LIT_NAME     PAYEE,
-    NVL(pfp.TOTAL_AMOUNT,0) TOTAL_PAY_AMOUNT,
-    pfr.TOTAL_AMOUNT - NVL(pfp.TOTAL_AMOUNT,0) BALANCE,
-    pfp.PAYMENT_DATE,
-    CASE WHEN pfp.PAYMENT_DATE IS NOT NULL 
-         THEN THAISDATE(pfp.PAYMENT_DATE)
+    pfrd.CASE_LIT_NAME   PAYEE,
+    NVL(pfrd.PAY_AMOUNT,0) TOTAL_PAY_AMOUNT,
+    pfr.TOTAL_AMOUNT - NVL(pfrd.PAY_AMOUNT,0) BALANCE,
+    pfrd.PAYMENT_DATE,
+    CASE WHEN pfrd.PAYMENT_DATE IS NOT NULL 
+         THEN THAISDATE(pfrd.PAYMENT_DATE)
          ELSE '-' END PAYMENT_DATE_TEXT,
-    CASE WHEN pfp.CHEQUE_AMOUNT > 0 THEN NVL(pfpc.CHEQUE_CODE ,'-') ELSE ' ' END    ACCOUNT_NO,
+	pfrd.REF_NO   ACCOUNT_NO,
     plrt.RECEIPT_TYPE_NAME,
-    plrst.RECEIPT_SUB_TYPE_NAME,
-    pfrc.CANCEL_ID 
+    pfrd.RECEIPT_SUB_TYPE_NAME, 
+    pfrc.CANCEL_ID     
+--  
 FROM PC_FIN_RECEIPT pfr
-LEFT JOIN PC_FIN_RECEIPT_DETAIL pfrd ON pfrd.RECEIPT_ID = pfr.RECEIPT_ID
+JOIN (SELECT pfrd.RECEIPT_ID 
+		       ,pfrd.RECEIPT_TYPE 
+			   ,LISTAGG(pfrd.RECEIPT_SUB_TYPE_NAME||CASE WHEN pfrd.OTHER_DETAIL IS NULL THEN ' ' ELSE '('||pfrd.OTHER_DETAIL||')' END, CHR(13)) WITHIN GROUP(ORDER BY pfrd.RECEIPT_SUB_TYPE_NAME, pfrd.OTHER_DETAIL) RECEIPT_SUB_TYPE_NAME
+			   ,pfrd.CASE_LIT_NAME
+			   ,pfrd.PAYMENT_DATE
+			   ,pfrd.PAY_AMOUNT
+			   ,pfrd.REF_NO
+		FROM (SELECT pfrd.RECEIPT_ID
+			         ,pfrd.RECEIPT_TYPE 
+			         ,plrst.RECEIPT_SUB_TYPE_NAME 
+			         ,pfrd.OTHER_DETAIL 
+			         --
+			         ,pfpd.CASE_LIT_NAME 
+			         ,pfp.PAYMENT_DATE
+			         ,SUM(pfp.TOTAL_AMOUNT) PAY_AMOUNT 
+					 ,CASE WHEN pfp.TRANSFER_AMOUNT  > 0 THEN pfp.TRANSFER_ACCOUNT_NO 
+			               WHEN pfp.CHEQUE_AMOUNT > 0 THEN pfpc.CHEQUE_CODE END REF_NO
+			  FROM PC_FIN_RECEIPT_DETAIL pfrd 
+			  --
+			  LEFT JOIN PC_LOOKUP_RECEIPT_SUB_TYPE plrst ON plrst.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE 
+				                                        AND plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE 
+				                                        AND plrst.REMOVED_BY = 0
+			  --
+			  LEFT JOIN PC_FIN_RECEIPT_BALANCE_HISTORY pfrbh ON pfrbh.RECEIPT_DETAIL_ID = pfrd.DETAIL_ID
+			  LEFT JOIN PC_FIN_PAYMENT_DETAIL pfpd ON pfpd.DETAIL_ID = pfrbh.PAYMENT_DETAIL_ID
+			  LEFT JOIN PC_FIN_PAYMENT pfp ON pfp.PAYMENT_ID = pfpd.PAYMENT_ID
+			  LEFT JOIN PC_FIN_PAYMENT_CHEQUE pfpc ON pfpc.PAYMENT_ID = pfp.PAYMENT_ID AND pfpc.REMOVED_BY = 0
+			  --
+			  GROUP BY pfrd.RECEIPT_ID
+			           ,pfrd.RECEIPT_TYPE 
+			           ,plrst.RECEIPT_SUB_TYPE_NAME 
+			           ,pfrd.OTHER_DETAIL
+			           --
+			           ,pfpd.CASE_LIT_NAME
+			           ,pfp.PAYMENT_DATE
+			           ,CASE WHEN pfp.TRANSFER_AMOUNT  > 0 THEN pfp.TRANSFER_ACCOUNT_NO 
+			                 WHEN pfp.CHEQUE_AMOUNT > 0 THEN pfpc.CHEQUE_CODE END) pfrd 
+		GROUP BY pfrd.RECEIPT_ID
+		         ,pfrd.RECEIPT_TYPE
+				 ,pfrd.CASE_LIT_NAME
+				 ,pfrd.PAYMENT_DATE
+				 ,pfrd.PAY_AMOUNT
+				 ,pfrd.REF_NO) pfrd ON pfrd.RECEIPT_ID = pfr.RECEIPT_ID 
 LEFT JOIN PC_FIN_RECEIPT_CANCEL pfrc ON pfrc.RECEIPT_ID = pfr.RECEIPT_ID 
---payment 
-LEFT JOIN PC_FIN_RECEIPT_BALANCE_HISTORY pfrbh ON pfrbh.RECEIPT_DETAIL_ID = pfrd.DETAIL_ID
-LEFT JOIN PC_FIN_PAYMENT_DETAIL pfpd ON pfpd.DETAIL_ID = pfrbh.PAYMENT_DETAIL_ID
-LEFT JOIN PC_FIN_PAYMENT pfp ON pfp.PAYMENT_ID = pfpd.PAYMENT_ID
-LEFT JOIN PC_FIN_PAYMENT_CHEQUE pfpc ON pfpc.PAYMENT_ID = pfp.PAYMENT_ID AND pfpc.REMOVED_BY = 0
---
-LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE AND plrt.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_RECEIPT_SUB_TYPE plrst ON plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE AND plrst.REMOVED_BY = 0
 --
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pfr.CASE_ID
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID  = pc.CASE_ID AND pj.REMOVED_BY = 0
@@ -71,14 +107,12 @@ LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID  = pc.CASE_ID AND pj.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
 --
-CROSS JOIN (SELECT plc.COURT_NAME_TH 
-             FROM PC_PARAM pp
-		     JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
-             WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
+LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pc.COURT_ID
+LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE
 --
 WHERE plrt.RECEIPT_TYPE_CODE = '2'
-AND pfr.RECEIVED_DATE BETWEEN TO_DATE( $P{START_DATE} ||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS')
-                          AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
+AND pfr.RECEIVED_DATE BETWEEN TO_DATE( $P{START_DATE} ||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS')
+                          AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 AND pc.REMOVED_BY = 0
 ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 	</queryString>
@@ -100,14 +134,17 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 	<field name="ACCU_DESC" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="ACCU_DESC"/>
 	</field>
-	<field name="RECEIPT_BOOK_NO" class="java.lang.Long">
+	<field name="RECEIPT_BOOK_NO" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_BOOK_NO"/>
 	</field>
-	<field name="RECEIPT_NO" class="java.lang.Long">
+	<field name="RECEIPT_NO" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_NO"/>
 	</field>
 	<field name="PAYER_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="PAYER_NAME"/>
+	</field>
+	<field name="PAID_DESCRIPTION" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PAID_DESCRIPTION"/>
 	</field>
 	<field name="TOTAL_RECEIVED_AMOUNT" class="java.lang.Double">
 		<property name="com.jaspersoft.studio.field.label" value="TOTAL_RECEIVED_AMOUNT"/>
@@ -136,7 +173,9 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 	<field name="RECEIPT_SUB_TYPE_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_SUB_TYPE_NAME"/>
 	</field>
-	<field name="CANCEL_ID" class="java.lang.Long"/>
+	<field name="CANCEL_ID" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="CANCEL_ID"/>
+	</field>
 	<variable name="GRAND_TOTAL_RECVAMOUNT" class="java.lang.Double" calculation="Sum">
 		<variableExpression><![CDATA[$F{TOTAL_RECEIVED_AMOUNT}]]></variableExpression>
 	</variable>
@@ -171,7 +210,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 					<font fontName="TH Sarabun New" size="14"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{GRAND_TOTAL_RECVAMOUNT}==null?0:
-new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_TOTAL_RECVAMOUNT}))]]></textFieldExpression>
+new java.text.DecimalFormat("#,##0.00").format(Double.valueOf($V{GRAND_TOTAL_RECVAMOUNT}))]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
 				<reportElement mode="Opaque" x="594" y="38" width="100" height="20" backcolor="#E6E6E6" uuid="59056117-a01c-41c7-b1ad-c1d8bff9cbec"/>
@@ -179,7 +218,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_TOTAL_RECVAM
 					<font fontName="TH Sarabun New" size="14"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{GRAND_TOTAL_PAYAMOUNT}==null?0:
-new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_TOTAL_PAYAMOUNT}))]]></textFieldExpression>
+new java.text.DecimalFormat("#,##0.00").format(Double.valueOf($V{GRAND_TOTAL_PAYAMOUNT}))]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="594" y="18" width="100" height="20" uuid="a71f034f-591d-4d12-878c-04e369e68733"/>
@@ -194,7 +233,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_TOTAL_PAYAMO
 					<font fontName="TH Sarabun New" size="14"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{GRAND_BALANCE}==null?0:
-new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]></textFieldExpression>
+new java.text.DecimalFormat("#,##0.00").format(Double.valueOf($V{GRAND_BALANCE}))]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="702" y="18" width="100" height="20" uuid="3832ad73-dd36-4a66-b37d-c3b56017d29d"/>
@@ -247,7 +286,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[วันเดือนปี ที่รับเงิน]]></text>
 			</staticText>
@@ -259,7 +298,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[หมายเลข คดีดำ]]></text>
 			</staticText>
@@ -271,7 +310,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[หมายเลข คดีแดง]]></text>
 			</staticText>
@@ -283,7 +322,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[โจทก์]]></text>
 			</staticText>
@@ -295,7 +334,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[จำเลย]]></text>
 			</staticText>
@@ -308,7 +347,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[เล่มที่]]></text>
 			</staticText>
@@ -321,7 +360,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[เลขที่]]></text>
 			</staticText>
@@ -333,7 +372,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[ได้รับเงิน จากใคร]]></text>
 			</staticText>
@@ -345,7 +384,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[ค่าอะไร]]></text>
 			</staticText>
@@ -357,7 +396,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[จำนวนเงิน]]></text>
 			</staticText>
@@ -369,7 +408,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[จ่ายให้ใคร]]></text>
 			</staticText>
@@ -381,7 +420,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[จำนวนเงิน ที่จ่าย]]></text>
 			</staticText>
@@ -393,7 +432,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[จำนวนเงิน คงเหลือ]]></text>
 			</staticText>
@@ -405,7 +444,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[วันเดือนปี ที่จ่าย]]></text>
 			</staticText>
@@ -417,7 +456,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[เลขที่เช็ค]]></text>
 			</staticText>
@@ -429,7 +468,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[ที่]]></text>
 			</staticText>
@@ -447,7 +486,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIVED_DATE_TEXT}]]></textFieldExpression>
 			</textField>
@@ -461,7 +500,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}]]></textFieldExpression>
 			</textField>
@@ -474,7 +513,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_RED_NO}]]></textFieldExpression>
 			</textField>
@@ -487,7 +526,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PROS_DESC}]]></textFieldExpression>
 			</textField>
@@ -500,7 +539,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ACCU_DESC}]]></textFieldExpression>
 			</textField>
@@ -514,7 +553,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIPT_BOOK_NO}]]></textFieldExpression>
 			</textField>
@@ -528,7 +567,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIPT_NO}]]></textFieldExpression>
 			</textField>
@@ -541,7 +580,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PAYER_NAME}]]></textFieldExpression>
 			</textField>
@@ -554,7 +593,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIPT_SUB_TYPE_NAME} != null ?$F{RECEIPT_SUB_TYPE_NAME}:""]]></textFieldExpression>
 			</textField>
@@ -567,9 +606,9 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{TOTAL_RECEIVED_AMOUNT}))]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format(Double.valueOf($F{TOTAL_RECEIVED_AMOUNT}))]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="537" y="0" width="53" height="25" uuid="77a517e3-6e35-4b4f-9b4a-53f2e10c2101">
@@ -580,7 +619,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PAYEE}==null?" ":$F{PAYEE}]]></textFieldExpression>
 			</textField>
@@ -593,9 +632,9 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{TOTAL_PAY_AMOUNT}))]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format(Double.valueOf($F{TOTAL_PAY_AMOUNT}))]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="643" y="0" width="53" height="25" uuid="7e181468-cb94-4123-91f8-4d05b3d8fe66">
@@ -606,9 +645,9 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format(Double.valueOf($F{BALANCE}))]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format(Double.valueOf($F{BALANCE}))]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="696" y="0" width="53" height="25" uuid="c6921154-c0f1-4e68-9ba7-ee549fa8e6b7">
@@ -619,7 +658,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PAYMENT_DATE_TEXT}]]></textFieldExpression>
 			</textField>
@@ -632,9 +671,9 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ACCOUNT_NO}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{ACCOUNT_NO}==null?" ":$F{ACCOUNT_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="0" y="0" width="25" height="25" uuid="445f8df6-20c0-478d-b9a4-5c6f38237942">
@@ -646,7 +685,7 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="16"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
@@ -725,7 +764,12 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA["รวมเงินคงเหลือทั้งสิ้น "+new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))+" บาท"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["รวมเงินคงเหลือทั้งสิ้น "+
+(
+	$V{GRAND_BALANCE}==null?0:
+	new java.text.DecimalFormat("#,##0.00").format(Double.valueOf($V{GRAND_BALANCE}))
+)
++" บาท"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="484" y="10" width="186" height="25" uuid="3f2ac5b9-285a-4a24-8ed8-e29938bd9c4f">
@@ -741,7 +785,14 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA["รวมเงินรับทั้งสิ้น "+new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_TOTAL_RECVAMOUNT}))+" บาท"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["รวมเงินรับทั้งสิ้น "+
+(
+	$V{GRAND_TOTAL_RECVAMOUNT}==null?
+	 0 :
+	 new 	java.text.DecimalFormat("#,##0.00").format(Double.valueOf($V{GRAND_TOTAL_RECVAMOUNT}))
+)
++" บาท"
+]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="484" y="35" width="186" height="25" uuid="14f7452c-e4a5-4c7a-94d8-209eba53a8e8">
@@ -757,7 +808,12 @@ new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_BALANCE}))]]
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA["รวมเงินจ่ายเงินทั้งสิ้น "+new java.text.DecimalFormat("#,##0").format(Double.valueOf($V{GRAND_TOTAL_PAYAMOUNT}))+" บาท"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["รวมเงินจ่ายเงินทั้งสิ้น "+
+(
+   $V{GRAND_TOTAL_PAYAMOUNT}==null?0:
+	new java.text.DecimalFormat("#,##0.00").format(Double.valueOf($V{GRAND_TOTAL_PAYAMOUNT}))
+)
++" บาท"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="245" y="10" width="186" height="25" uuid="9674bf7a-0e63-4963-b59d-184568dc7bfc">

@@ -3,7 +3,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report_white_warrant" pageWidth="792" pageHeight="612" orientation="Landscape" columnWidth="752" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="3e6303ec-06a9-464d-a535-ad8e12c7129c">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/ReportFeature/report_white_warrant"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -135,10 +135,10 @@ ORDER BY
 	NVL(pc.ACCU_DESC, ' ')  ACCU_DESC ,
 	NVL(pc.ALLE_DESC, ' ') ALLE_DESC ,
 	NVL(pn.NOTICE_TYPE_NAME, ' ') NOTICE_TYPE_NAME ,
-	pn.NOTICE_DATE PRINT_DATE ,
+	TO_CHAR(pn.NOTICE_DATE, 'dd/MM/yyyy', 'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI')  PRINT_DATE,
 	pn.NOTICE_CODE_NO ,
 	pn.NOTICE_CODE_YEAR ,
-	pn.LITIGANT_NAME 
+	pn.LITIGANT_NAME
 FROM
 	PC_NOTICE pn
 	-- Join Case
@@ -199,7 +199,7 @@ ORDER BY
 	<field name="NOTICE_TYPE_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="NOTICE_TYPE_NAME"/>
 	</field>
-	<field name="PRINT_DATE" class="java.util.Date">
+	<field name="PRINT_DATE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="PRINT_DATE"/>
 	</field>
 	<field name="NOTICE_CODE_NO" class="java.lang.Integer">
@@ -465,19 +465,6 @@ ORDER BY
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ROW_NUM}]]></textFieldExpression>
 			</textField>
-			<textField isStretchWithOverflow="true" evaluationTime="Master">
-				<reportElement stretchType="ContainerHeight" x="500" y="0" width="50" height="19" uuid="e153d070-4b83-4444-a99f-f6012ca38902"/>
-				<box leftPadding="0" rightPadding="0">
-					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
-				</box>
-				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="THSarabunNew"/>
-				</textElement>
-				<textFieldExpression><![CDATA[new java.text.SimpleDateFormat("dd/MM/yyyy", new Locale("TH","th")).format( $F{PRINT_DATE} )]]></textFieldExpression>
-			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="679" y="0" width="68" height="19" uuid="72f4dd1a-245f-496f-b4a3-097c4f95c1eb"/>
 				<box leftPadding="5" rightPadding="0">
@@ -542,6 +529,22 @@ ORDER BY
 					<font fontName="THSarabunNew"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{LITIGANT_NAME}==null?" ":$F{LITIGANT_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="500" y="0" width="50" height="19" uuid="e3f2f5b3-2b1a-47d3-887d-940f565662d6">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PRINT_DATE}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
