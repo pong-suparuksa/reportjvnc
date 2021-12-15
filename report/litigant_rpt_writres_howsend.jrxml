@@ -59,6 +59,9 @@
            ,pn.IS_COURT_AREA
            ,CASE WHEN pn.SEND_METHOD = 1 THEN 'ไปรษณีย์' ELSE  pn.SEND_METHOD_BY_NAME END                  SEND_METHOD_BY_NAME
            ,plsm.SEND_METHOD_ID 
+           ,pn.IS_SUBPOENA
+           ,pn.TYPE_OF_SUBPOENA
+           ,pni.HAS_MONEY 
 FROM PC_NOTICE_SEND_RESULT pnsr
 LEFT JOIN PC_NOTICE pn ON pn.NOTICE_ID = pnsr.NOTICE_ID AND pn.REMOVED_BY = 0
 --
@@ -87,9 +90,12 @@ WHERE pnsr.REMOVED_BY = 0
 AND pnsr.REPORT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
                          AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 AND ((plsm.SEND_METHOD_ID = $P{SEND_METHOD_ID}) OR (0 = $P{SEND_METHOD_ID}))
-AND NVL(pni.HAS_MONEY,1) = 1
 AND pn.SEND_DATE IS NOT NULL
-AND pltc_b.TITLE_CASE_NAME NOT IN ('ต','ต.')
+AND (
+		(pn.IS_SUBPOENA = 1)
+     OR 
+     	(pn.IS_SUBPOENA = 0 AND pltc_b.TITLE_CASE_NAME NOT IN ('ต','ต.'))
+     )
 ORDER BY pn.SEND_METHOD, pnsr.REPORT_DATE]]>
 	</queryString>
 	<field name="SEND_METHOD" class="java.lang.Integer">
