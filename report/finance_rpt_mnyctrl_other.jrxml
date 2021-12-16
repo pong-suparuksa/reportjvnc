@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_rpt_mnyctrl_other"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -35,7 +35,9 @@
     plrt.RECEIPT_TYPE_NAME,
   	plc.COURT_NAME_TH,
 	THAISDATE(pfr.RECEIVED_DATE) RECEIVED_DATE_TEXT,   --วันที่ออกใบเสร็จ
-   	pltc_b.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR CASE_BLACK_NO,
+   	CASE WHEN pc.BLACK_IDNUM IS NULL 
+   		THEN ' '
+   		ELSE pltc_b.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR END CASE_BLACK_NO,
   	CASE WHEN pj.RED_IDNUM  IS NULL 
   	     THEN ' ' 
   	     ELSE pltc_r.TITLE_CASE_NAME || pj.RED_IDNUM  || '/' || pj.RED_YEAR END CASE_RED_NO,
@@ -112,7 +114,7 @@ LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pfr.COURT_ID AND pc.REMOVED_BY =
 WHERE pfr.RECEIVED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
                           AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
 AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE}
-AND pc.REMOVED_BY = 0
+AND NVL(pc.REMOVED_BY,0) = 0
 ORDER BY pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 	</queryString>
 	<field name="RECEIPT_TYPE_CODE" class="java.lang.String">
@@ -711,7 +713,7 @@ ORDER BY pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format($F{RECV_AMOUNT})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($F{RECV_AMOUNT})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="150" y="0" width="70" height="30" uuid="732d101e-9397-478c-9a53-5de6e2556b62">

@@ -16,7 +16,7 @@
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="599"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_rpt_dailyrecv_cent"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/finance_rpt_dailyrecv_cent_files/main_jrxml"/>
@@ -120,7 +120,7 @@ LEFT JOIN PC_LOOKUP_RECEIPT_SUB_TYPE plrst ON plrst.RECEIPT_TYPE_ID = pfrd.RECEI
 			<variableExpression><![CDATA[$F{PAY_TYPE}.equals("เงินโอน")&&$P{CANCEL_ID}==null?1:0]]></variableExpression>
 		</variable>
 		<variable name="CNT_CREDIT" class="java.lang.Long" calculation="First">
-			<variableExpression><![CDATA[$F{PAY_TYPE}.equals("บัตรเครดิต")&&$P{CANCEL_ID}==null?1:0]]></variableExpression>
+			<variableExpression><![CDATA[$F{PAY_TYPE}.equals("เครดิต")&&$P{CANCEL_ID}==null?1:0]]></variableExpression>
 		</variable>
 		<variable name="SUM_CHEQUE" class="java.lang.Double" calculation="Sum">
 			<variableExpression><![CDATA[$F{PAY_TYPE}.equals("เช็ค")&&$P{CANCEL_ID}==null?$F{TOTAL_AMOUNT}:0]]></variableExpression>
@@ -132,7 +132,7 @@ LEFT JOIN PC_LOOKUP_RECEIPT_SUB_TYPE plrst ON plrst.RECEIPT_TYPE_ID = pfrd.RECEI
 			<variableExpression><![CDATA[$F{PAY_TYPE}.equals("เงินโอน")&&$P{CANCEL_ID}==null?$F{TOTAL_AMOUNT}:0]]></variableExpression>
 		</variable>
 		<variable name="SUM_CREDIT" class="java.lang.Double" calculation="Sum">
-			<variableExpression><![CDATA[$F{PAY_TYPE}.equals("บัตรเครดิต")&&$P{CANCEL_ID}==null?$F{TOTAL_AMOUNT}:0]]></variableExpression>
+			<variableExpression><![CDATA[$F{PAY_TYPE}.equals("เครดิต")&&$P{CANCEL_ID}==null?$F{TOTAL_AMOUNT}:0]]></variableExpression>
 		</variable>
 	</subDataset>
 	<parameter name="START_DATE" class="java.lang.String">
@@ -1422,7 +1422,7 @@ $P{RECEIPT_TYPE}.equals("6")?"บัญชีรับเงินค่าป�
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{SUM_CHEQUE}==null?0:new java.text.DecimalFormat("#,##0,00").format($V{SUM_CHEQUE})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_CHEQUE}==null?0:new java.text.DecimalFormat("#,##0.00").format($V{SUM_CHEQUE})]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="548" y="15" width="96" height="25" uuid="c9d3ba9e-b91d-4faf-bc93-2219567e2634">
