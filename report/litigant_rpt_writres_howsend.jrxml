@@ -58,10 +58,6 @@
             NVL(pn.UNSEND_DETAIL, ' ')																	UNSEND_DETAIL
            ,pn.IS_COURT_AREA
            ,CASE WHEN pn.SEND_METHOD = 1 THEN 'ไปรษณีย์' ELSE  pn.SEND_METHOD_BY_NAME END                  SEND_METHOD_BY_NAME
-           ,plsm.SEND_METHOD_ID 
-           ,pn.IS_SUBPOENA
-           ,pn.TYPE_OF_SUBPOENA
-           ,pni.HAS_MONEY 
 FROM PC_NOTICE_SEND_RESULT pnsr
 LEFT JOIN PC_NOTICE pn ON pn.NOTICE_ID = pnsr.NOTICE_ID AND pn.REMOVED_BY = 0
 --
@@ -92,6 +88,7 @@ AND pnsr.REPORT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"
 AND ((plsm.SEND_METHOD_ID = $P{SEND_METHOD_ID}) OR (0 = $P{SEND_METHOD_ID}))
 AND pn.SEND_DATE IS NOT NULL
 AND pn.IS_SUBPOENA = 1
+AND pn.NOTICE_STATUS_LOV_CODE <> '04'
 ORDER BY pn.SEND_METHOD, pnsr.REPORT_DATE]]>
 	</queryString>
 	<field name="SEND_METHOD" class="java.lang.Integer">

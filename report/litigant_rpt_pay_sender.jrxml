@@ -14,7 +14,7 @@
 	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_pay_sender"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_pay_sender_files/main_jrxml"/>
@@ -203,7 +203,7 @@ ORDER BY pn.SEND_METHOD_BY_NAME]]>
 					<textElement textAlignment="Right" verticalAlignment="Middle">
 						<font fontName="TH Sarabun New" size="17"/>
 					</textElement>
-					<textFieldExpression><![CDATA[$V{GR_TOTAL}==null?0:$V{GR_TOTAL}]]></textFieldExpression>
+					<textFieldExpression><![CDATA[$V{GR_TOTAL}==null?"0.00":new java.text.DecimalFormat("#,##0").format($V{GR_TOTAL})]]></textFieldExpression>
 				</textField>
 				<staticText>
 					<reportElement x="706" y="0" width="30" height="25" uuid="a9ea604e-1de8-4ec4-b5c4-e998bbeaed9c">
@@ -605,7 +605,7 @@ ORDER BY pn.SEND_METHOD_BY_NAME]]>
 				<textElement textAlignment="Right" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format($F{SEND_FEE})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{SEND_FEE}==null?"0.00":new java.text.DecimalFormat("#,##0").format($F{SEND_FEE})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="701" y="0" width="101" height="25" uuid="65cee6c8-7e8c-437d-93f9-9891b21c35d1">
@@ -674,7 +674,7 @@ ORDER BY pn.SEND_METHOD_BY_NAME]]>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{TOTAL}==null?0:$V{TOTAL}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{TOTAL}==null?"0.00":new java.text.DecimalFormat("#,##0.00").format($V{TOTAL})]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="320" y="6" width="50" height="25" uuid="186d7c02-3ca8-4e7d-a2ac-2bba2312a4bb">

@@ -11,10 +11,10 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_send_othercourt"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[210]"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_send_othercourt_files/main_jrxml"/>
@@ -388,7 +388,7 @@ AND pn.SEND_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24
 				<textElement textAlignment="Right">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format($F{SEND_FEE})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{SEND_FEE}==null?"0.00":new java.text.DecimalFormat("#,##0.00").format($F{SEND_FEE})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="686" y="0" width="116" height="25" uuid="65cee6c8-7e8c-437d-93f9-9891b21c35d1">
@@ -448,7 +448,7 @@ AND pn.SEND_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{TOTAL}==null?0:$V{TOTAL}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{TOTAL}==null?"0.00":new java.text.DecimalFormat("#,##0.00").format($V{TOTAL})]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="320" y="6" width="50" height="25" uuid="186d7c02-3ca8-4e7d-a2ac-2bba2312a4bb">
