@@ -11,7 +11,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_pay_refund"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
@@ -25,19 +25,22 @@
 		<defaultValueExpression><![CDATA["31/05/2021"]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
-		<![CDATA[--new query
-SELECT cou.COURT_NAME_TH
+		<![CDATA[SELECT cou.COURT_NAME_TH
 		,pfp.PAYMENT_DATE 
 	   	,THAISDATE(pfp.PAYMENT_DATE) PAYMENT_DATE_TEXT
 	   	--
 	   	,NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR)    CASE_BLACK_NO    
   		,CASE WHEN pj.RED_IDNUM IS NULL THEN ' ' 
               ELSE NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || '/' || TO_CHAR(pj.RED_YEAR) END  CASE_RED_NO
-        ,pc.PROS_DESC
-        ,pc.ACCU_DESC 
+        ,CASE WHEN pc.PROS_DESC IS NOT NULL THEN pc.PROS_DESC||'(โจทก์)'END CLAIMANT  --โจทก์
+        ,CASE WHEN pc.ACCU_DESC IS NOT NULL THEN pc.ACCU_DESC||'(จำเลย)' END DEFENDANT  --จำเลย
         ,pfpd.CASE_LIT_NAME
         ,CASE WHEN pfp.CHEQUE_AMOUNT > 0 THEN pfpc.CHEQUE_CODE ELSE ' ' END   CHEQUE_NO
         ,pfp.TOTAL_AMOUNT 
+     	--
+    	,CASE WHEN pt.LITIGANT_NAME IS NOT NULL THEN pt.LITIGANT_NAME||'('||pt.LIT_TYPE_DESC||')' END PETITIONER
+    	,CASE WHEN op.LITIGANT_NAME IS NOT NULL THEN op.LITIGANT_NAME||'('||op.LIT_TYPE_DESC||')' END OPPONENT
+		--         
 FROM PC_FIN_PAYMENT pfp 
 LEFT JOIN PC_FIN_PAYMENT_DETAIL pfpd ON pfpd.PAYMENT_ID = pfp.PAYMENT_ID AND pfpd.REMOVED_BY = 0
 LEFT JOIN PC_FIN_PAYMENT_CHEQUE pfpc ON pfpc.PAYMENT_ID = pfp.PAYMENT_ID AND pfpc.REMOVED_BY = 0
@@ -54,7 +57,19 @@ LEFT JOIN (SELECT plc.COURT_NAME_TH
 			 FROM PC_PARAM pp
 			 JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
 			 WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 = 1
---			 
+--
+LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME, pllt.LIT_TYPE_DESC  
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0
+		   WHERE pcl.REMOVED_BY = 0 
+		   AND pllt.LIT_TYPE_CODE = '05') pt ON pt.CASE_ID = pc.CASE_ID
+--
+LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME, pllt.LIT_TYPE_DESC  
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0
+		   WHERE pcl.REMOVED_BY = 0 
+		   AND pllt.LIT_TYPE_CODE = '06') op ON op.CASE_ID = pc.CASE_ID
+--		 
 WHERE pfpd.REMOVED_BY = 0
 AND pfp.PAYMENT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
                          AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
@@ -76,11 +91,11 @@ ORDER BY pfp.PAYMENT_DATE]]>
 	<field name="CASE_RED_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="CASE_RED_NO"/>
 	</field>
-	<field name="PROS_DESC" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="PROS_DESC"/>
+	<field name="CLAIMANT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CLAIMANT"/>
 	</field>
-	<field name="ACCU_DESC" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="ACCU_DESC"/>
+	<field name="DEFENDANT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DEFENDANT"/>
 	</field>
 	<field name="CASE_LIT_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="CASE_LIT_NAME"/>
@@ -90,6 +105,12 @@ ORDER BY pfp.PAYMENT_DATE]]>
 	</field>
 	<field name="TOTAL_AMOUNT" class="java.lang.Double">
 		<property name="com.jaspersoft.studio.field.label" value="TOTAL_AMOUNT"/>
+	</field>
+	<field name="PETITIONER" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PETITIONER"/>
+	</field>
+	<field name="OPPONENT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="OPPONENT"/>
 	</field>
 	<variable name="TOTAL" class="java.math.BigDecimal" calculation="Sum">
 		<variableExpression><![CDATA[$F{TOTAL_AMOUNT}]]></variableExpression>
@@ -216,7 +237,7 @@ ORDER BY pfp.PAYMENT_DATE]]>
 				<textElement textAlignment="Center">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<text><![CDATA[โจทก์]]></text>
+				<text><![CDATA[โจทก์/ผู้ร้อง]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="490" y="0" width="130" height="25" uuid="4b7674d4-6ae9-4abe-ae36-d01632f847cd">
@@ -249,7 +270,7 @@ ORDER BY pfp.PAYMENT_DATE]]>
 				<textElement textAlignment="Center">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<text><![CDATA[จำเลย]]></text>
+				<text><![CDATA[จำเลย/ผู้คัดค้าน]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="620" y="0" width="109" height="25" uuid="4ea4668d-3ebe-4315-ad00-4aa5b10095f9">
@@ -364,7 +385,8 @@ ORDER BY pfp.PAYMENT_DATE]]>
 				<textElement textAlignment="Left">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{PROS_DESC}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{CLAIMANT} == null ? " " : $F{CLAIMANT}+"\n") +
+($F{PETITIONER}==null?" ":$F{PETITIONER})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="490" y="0" width="130" height="25" uuid="6f2d7650-27ed-425d-b65a-af0d70f01b3f">
@@ -397,7 +419,8 @@ ORDER BY pfp.PAYMENT_DATE]]>
 				<textElement textAlignment="Left">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ACCU_DESC}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{DEFENDANT} == null ? " " : $F{DEFENDANT}+"\n")+
+($F{OPPONENT}==null?" ":$F{OPPONENT})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="620" y="0" width="109" height="25" uuid="3d34313d-2a9d-4560-bd17-0263a8ef973b">

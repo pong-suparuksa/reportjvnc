@@ -11,7 +11,7 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_accexpense"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="506"/>
@@ -89,7 +89,7 @@ AND pn.IS_COURT_AREA = 1
 AND NVL(pni.HAS_MONEY,1) = 1 
 AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
                              AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
-AND (pn.SEND_METHOD_BY_NAME = $P{SENDER}  OR '0' = $P{SENDER})
+AND ($P{SENDER} LIKE '%'||NVL(pn.SEND_METHOD_BY_NAME,'-')||'%' OR '0' = $P{SENDER})
 AND pc.REMOVED_BY = 0]]>
 	</queryString>
 	<field name="SEND_NOTICE_DATE" class="java.util.Date">

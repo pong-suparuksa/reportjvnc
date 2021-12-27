@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_deliver_free"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -32,9 +32,9 @@
 		THAILDATE(NVL(pni.SEND_NOTICE_DATE,CURRENT_DATE))                                                               SEND_NOTICE_DATE_TEXT,            
         NVL(plc.COURT_NAME_TH, '-') 	     																           		COURT_NAME_TH,                        
         pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR  												CASE_BLACK_NO,    
-		pltc_red.TITLE_CASE_NAME || pj.RED_IDNUM || '/' || pj.RED_YEAR  												CASE_RED_NO,             
-        NVL(pc.PROS_DESC,'-')	      													          						CLAIMANT, 
-		NVL(pc.ACCU_DESC,'-')																        					DEFENDANT,
+		CASE WHEN pj.RED_IDNUM IS NULL THEN ' ' ELSE pltc_red.TITLE_CASE_NAME || pj.RED_IDNUM || '/' || pj.RED_YEAR END CASE_RED_NO,             
+    	NVL(pc.PROS_DESC||'(โจทก์)',' ')  			        			         											CLAIMANT, 
+		NVL(pc.ACCU_DESC||'(จำเลย)',' ')									     										    DEFENDANT,
         NVL(pup.USER_PROFILE_FULL_NAME,'-')																				PAYER_NAME,
 	    NVL(pn.LITIGANT_NAME,'-')	                                       													TO_NAME,
         NVL(plnt.NOTICE_TYPE_NAME,'-')																					NOTICE_TYPE_NAME,            
@@ -43,7 +43,9 @@
         NVL(pld.DISTRICT_NAME,'-')																						DISTRICT_NAME,
         NVL(plp.PROVINCE_NAME,'-')											 										    PROVINCE_NAME,
         NVL(pn.SEND_FEE, 0)																								SEND_FEE,																																		   
-	    NVL(pn.SEND_METHOD_BY_NAME,'-')																   		            USER_PROFILE_FULL_NAME
+	    NVL(pn.SEND_METHOD_BY_NAME,'-')																   		            USER_PROFILE_FULL_NAME, 
+        CASE WHEN pt.LITIGANT_NAME IS NOT NULL THEN pt.LITIGANT_NAME||'('||pt.LIT_TYPE_DESC||')' END PETITIONER,
+        CASE WHEN op.LITIGANT_NAME IS NOT NULL THEN op.LITIGANT_NAME||'('||op.LIT_TYPE_DESC||')' END OPPONENT
             
 FROM PC_NOTICE pn
 JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID AND pc.REMOVED_BY = 0
@@ -65,7 +67,18 @@ LEFT JOIN PC_LOOKUP_NOTICE_TYPE plnt ON plnt.NOTICE_TYPE_ID = pn.NOTICE_TYPE_ID 
 LEFT JOIN PC_LOOKUP_PROVINCE plp ON plp.PROVINCE_ID = pn.CURRENT_PROVINCE_ID AND plp.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_DISTRICT pld ON pld.DISTRICT_ID =  pn.CURRENT_DISTRICT_ID AND pld.PROVINCE_ID = pn.CURRENT_PROVINCE_ID AND pld.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_SUBDISTRICT pls ON pls.SUBDISTRICT_ID = pn.CURRENT_SUBDISTRICT_ID AND  pls.DISTRICT_ID = pn.CURRENT_DISTRICT_ID AND pls.PROVINCE_ID = pn.CURRENT_PROVINCE_ID AND pls.REMOVED_BY = 0
-
+--
+LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME, pllt.LIT_TYPE_DESC  
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0
+		   WHERE pcl.REMOVED_BY = 0 
+		   AND pllt.LIT_TYPE_CODE = '05') pt ON pt.CASE_ID = pn.CASE_ID
+--
+LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME, pllt.LIT_TYPE_DESC  
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0
+		   WHERE pcl.REMOVED_BY = 0 
+		   AND pllt.LIT_TYPE_CODE = '06') op ON op.CASE_ID = pn.CASE_ID
 WHERE pn.REMOVED_BY = 0
 AND pn.SEND_METHOD = 1 
 AND NVL(pni.HAS_MONEY,0) = 0 
@@ -118,6 +131,12 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYY
 	</field>
 	<field name="USER_PROFILE_FULL_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="USER_PROFILE_FULL_NAME"/>
+	</field>
+	<field name="PETITIONER" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PETITIONER"/>
+	</field>
+	<field name="OPPONENT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="OPPONENT"/>
 	</field>
 	<background>
 		<band splitType="Stretch"/>
@@ -214,7 +233,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYY
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="14" isBold="true"/>
 				</textElement>
-				<text><![CDATA[โจทก์]]></text>
+				<text><![CDATA[โจทก์/ผู้ร้อง]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="225" y="0" width="87" height="25" uuid="7a327622-ee2e-4bdf-9839-69c5fa12595b">
@@ -227,7 +246,7 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYY
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="14" isBold="true"/>
 				</textElement>
-				<text><![CDATA[จำเลย]]></text>
+				<text><![CDATA[จำเลย/ผู้คัดค้าน]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="312" y="0" width="91" height="25" uuid="925bc613-cd65-4381-be5e-65876def7cf9">
@@ -374,7 +393,8 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYY
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CLAIMANT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{CLAIMANT} == null ? " " : $F{CLAIMANT}+"\n") +
+($F{PETITIONER}==null?" ":$F{PETITIONER})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="225" y="0" width="87" height="25" uuid="05f9fd1f-582c-4df5-a394-a22cb3392674">
@@ -387,7 +407,8 @@ AND pni.SEND_NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYY
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{DEFENDANT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{DEFENDANT} == null ? " " : $F{DEFENDANT}+"\n")+
+($F{OPPONENT}==null?" ":$F{OPPONENT})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="312" y="0" width="91" height="25" uuid="8333de1d-9a9d-4bbe-91ab-b99dca488a71">

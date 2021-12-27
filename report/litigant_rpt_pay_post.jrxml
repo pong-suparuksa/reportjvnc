@@ -18,6 +18,8 @@
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_pay_post_files/main_jrxml"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="475"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="515"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/07/2020"]]></defaultValueExpression>
 	</parameter>
@@ -33,17 +35,19 @@
   CASE WHEN pj.RED_IDNUM IS NULL THEN ' '
        ELSE NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || '/' || TO_CHAR(pj.RED_YEAR) END CASE_RED_NO,
   
-  NVL(pc.PROS_DESC,' ')	      						CLAIMANT, 
-  NVL(pc.ACCU_DESC,' ')		   						DEFENDANT, 
-  NVL(pn.LITIGANT_NAME,' ')								TO_NAME,
+  NVL(pc.PROS_DESC||'(โจทก์)',' ')  			        CLAIMANT, 
+  NVL(pc.ACCU_DESC||'(จำเลย)',' ')						DEFENDANT, 
+  NVL(pn.LITIGANT_NAME,' ')							TO_NAME,
   pfr.RECEIPT_BOOK_NO || '/' || pfr.RECEIPT_NO      RECEIPT_REF,
-  NVL(pn.SEND_FEE ,0)                                SEND_FEE,
-  NVL(pn.LITIGANT_NAME, ' ')							PAYER_NAME,
+  NVL(pn.SEND_FEE ,0)                               SEND_FEE,
+  NVL(pn.LITIGANT_NAME, ' ')						PAYER_NAME,
   --  
---  pfpd.PAYMENT_ID,
   pni.RECEIPT_ID,
-  NVL(pn.SEND_METHOD,0)                            SEND_METHOD
-  
+  NVL(pn.SEND_METHOD,0)                            SEND_METHOD,
+  --
+  CASE WHEN pt.LITIGANT_NAME IS NOT NULL THEN pt.LITIGANT_NAME||'('||pt.LIT_TYPE_DESC||')' END PETITIONER,
+  CASE WHEN op.LITIGANT_NAME IS NOT NULL THEN op.LITIGANT_NAME||'('||op.LIT_TYPE_DESC||')' END OPPONENT
+  --   
 FROM PC_NOTICE pn
 LEFT JOIN PC_NOTICE_ISSUED pni ON pni.NOTICE_ID = pn.NOTICE_ID AND pni.REMOVED_BY = 0
 LEFT JOIN PC_NOTICE_LIT_DETAIL pnld ON pnld.NOTICE_ID = pni.NOTICE_ID AND pnld.REMOVED_BY = 0
@@ -70,6 +74,18 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
 			 FROM PC_PARAM pp
 			 JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
 			 WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
+--
+LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME, pllt.LIT_TYPE_DESC  
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0
+		   WHERE pcl.REMOVED_BY = 0 
+		   AND pllt.LIT_TYPE_CODE = '05') pt ON pt.CASE_ID = pn.CASE_ID
+--
+LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME, pllt.LIT_TYPE_DESC  
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0
+		   WHERE pcl.REMOVED_BY = 0 
+		   AND pllt.LIT_TYPE_CODE = '06') op ON op.CASE_ID = pn.CASE_ID
 --			 
 WHERE pn.REMOVED_BY = 0
 AND pn.SEND_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
@@ -103,17 +119,23 @@ AND NVL(pn.SEND_METHOD,1) = 1]]>
 	<field name="RECEIPT_REF" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_REF"/>
 	</field>
-	<field name="SEND_FEE" class="java.math.BigDecimal">
+	<field name="SEND_FEE" class="java.lang.Double">
 		<property name="com.jaspersoft.studio.field.label" value="SEND_FEE"/>
 	</field>
 	<field name="PAYER_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="PAYER_NAME"/>
 	</field>
-	<field name="RECEIPT_ID" class="java.math.BigDecimal">
+	<field name="RECEIPT_ID" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_ID"/>
 	</field>
-	<field name="SEND_METHOD" class="java.math.BigDecimal">
+	<field name="SEND_METHOD" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="SEND_METHOD"/>
+	</field>
+	<field name="PETITIONER" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PETITIONER"/>
+	</field>
+	<field name="OPPONENT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="OPPONENT"/>
 	</field>
 	<variable name="TOTAL" class="java.math.BigDecimal" calculation="Sum">
 		<variableExpression><![CDATA[$F{SEND_FEE}]]></variableExpression>
@@ -239,7 +261,7 @@ AND NVL(pn.SEND_METHOD,1) = 1]]>
 				<textElement textAlignment="Center">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<text><![CDATA[โจทก์]]></text>
+				<text><![CDATA[โจทก์/ผู้ร้อง]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="346" y="0" width="118" height="25" uuid="4b7674d4-6ae9-4abe-ae36-d01632f847cd">
@@ -255,7 +277,7 @@ AND NVL(pn.SEND_METHOD,1) = 1]]>
 				<textElement textAlignment="Center">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<text><![CDATA[จำเลย]]></text>
+				<text><![CDATA[จำเลย/ผู้คัดค้าน]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="464" y="0" width="98" height="25" uuid="2cc840ac-9682-4a44-8ace-8a44ebd69134">
@@ -403,7 +425,8 @@ AND NVL(pn.SEND_METHOD,1) = 1]]>
 				<textElement verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CLAIMANT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{CLAIMANT} == null ? " " : $F{CLAIMANT}+"\n") +
+($F{PETITIONER}==null?" ":$F{PETITIONER})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="346" y="0" width="118" height="25" uuid="6f2d7650-27ed-425d-b65a-af0d70f01b3f">
@@ -419,7 +442,8 @@ AND NVL(pn.SEND_METHOD,1) = 1]]>
 				<textElement verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{DEFENDANT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{DEFENDANT} == null ? " " : $F{DEFENDANT}+"\n")+
+($F{OPPONENT}==null?" ":$F{OPPONENT})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="464" y="0" width="98" height="25" uuid="1b6be6b3-932b-4d86-9182-31011913e3ec">

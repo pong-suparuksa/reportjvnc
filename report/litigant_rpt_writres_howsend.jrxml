@@ -29,6 +29,9 @@
 	<parameter name="SEND_METHOD_ID" class="java.lang.Integer">
 		<defaultValueExpression><![CDATA[0]]></defaultValueExpression>
 	</parameter>
+	<parameter name="IS_COURT_AREA" class="java.lang.Integer" evaluationTime="Early">
+		<defaultValueExpression><![CDATA[0]]></defaultValueExpression>
+	</parameter>
 	<queryString>
 		<![CDATA[SELECT     pn.SEND_METHOD, 
 			pni.SEND_NOTICE_DATE,
@@ -89,6 +92,12 @@ AND ((plsm.SEND_METHOD_ID = $P{SEND_METHOD_ID}) OR (0 = $P{SEND_METHOD_ID}))
 AND pn.SEND_DATE IS NOT NULL
 AND pn.IS_SUBPOENA = 1
 AND pn.NOTICE_STATUS_LOV_CODE <> '04'
+AND 
+(  
+	(0 = $P{IS_COURT_AREA}) OR  
+	(1 = $P{IS_COURT_AREA} AND pn.IS_COURT_AREA = 1) OR
+	(2 = $P{IS_COURT_AREA} AND pn.IS_COURT_AREA = 0)
+)
 ORDER BY pn.SEND_METHOD, pnsr.REPORT_DATE]]>
 	</queryString>
 	<field name="SEND_METHOD" class="java.lang.Integer">
@@ -204,6 +213,14 @@ ORDER BY pn.SEND_METHOD, pnsr.REPORT_DATE]]>
 				</textElement>
 				<textFieldExpression><![CDATA["ระหว่างวันที่  " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +
 " ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="682" y="50" width="120" height="30" uuid="7ff0a22a-0f90-498a-84f0-84a1185cfe02"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="18" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{IS_COURT_AREA}==1?"ในเขตศาล":
+$P{IS_COURT_AREA}==2?"นอกเขตศาล":" "]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>

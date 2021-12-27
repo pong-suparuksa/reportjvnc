@@ -12,14 +12,14 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_deliver"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_deliver_files/main_jrxml"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="480"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="513"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_deliver_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/07/2020"]]></defaultValueExpression>
 	</parameter>
@@ -32,9 +32,9 @@
 	THAILDATE(NVL(pni.SEND_NOTICE_DATE,CURRENT_DATE))                    SEND_NOTICE_DATE_TEXT,
     NVL(plc.COURT_NAME_TH, '-') 	     								 COURT_NAME_TH,                        
     pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR  	 CASE_BLACK_NO,    
-	pltc_red.TITLE_CASE_NAME || pj.RED_IDNUM || '/' || pj.RED_YEAR  	 CASE_RED_NO,
-    NVL(pc.PROS_DESC,'-')	      			        					 CLAIMANT, 
-	NVL(pc.ACCU_DESC,'-')												 DEFENDANT,
+	CASE WHEN pj.RED_IDNUM IS NULL THEN ' ' ELSE pltc_red.TITLE_CASE_NAME || pj.RED_IDNUM || '/' || pj.RED_YEAR END  CASE_RED_NO,
+    NVL(pc.PROS_DESC||'(โจทก์)',' ')  			        			         CLAIMANT, 
+	NVL(pc.ACCU_DESC||'(จำเลย)',' ')									     DEFENDANT,
     NVL(pfr.PAYER_NAME,'-')												 PAYER_NAME,
     NVL(pn.LITIGANT_NAME,'-')	                                       	 TO_NAME,
     NVL(plnt.NOTICE_TYPE_NAME,'-')										 NOTICE_TYPE_NAME,            
@@ -46,7 +46,11 @@
     NVL(pn.SEND_METHOD_BY_NAME,'-')										 USER_PROFILE_FULL_NAME,
     --
     pn.SEND_METHOD,
-    pn.IS_COURT_AREA 
+    pn.IS_COURT_AREA,
+    --
+    CASE WHEN pt.LITIGANT_NAME IS NOT NULL THEN pt.LITIGANT_NAME||'('||pt.LIT_TYPE_DESC||')' END PETITIONER,
+    CASE WHEN op.LITIGANT_NAME IS NOT NULL THEN op.LITIGANT_NAME||'('||op.LIT_TYPE_DESC||')' END OPPONENT
+    --
 FROM PC_NOTICE pn
 JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pn.CASE_ID AND pj.REMOVED_BY = 0
@@ -68,8 +72,20 @@ LEFT JOIN PC_LOOKUP_PROVINCE plp ON plp.PROVINCE_ID = pn.CURRENT_PROVINCE_ID AND
 LEFT JOIN PC_LOOKUP_DISTRICT pld ON pld.DISTRICT_ID =  pn.CURRENT_DISTRICT_ID AND pld.PROVINCE_ID = pn.CURRENT_PROVINCE_ID AND pld.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_SUBDISTRICT pls ON pls.SUBDISTRICT_ID = pn.CURRENT_SUBDISTRICT_ID AND  pls.DISTRICT_ID = pn.CURRENT_DISTRICT_ID 
                                                                                       AND pls.PROVINCE_ID = pn.CURRENT_PROVINCE_ID 
-                                                                                      AND pls.REMOVED_BY = 0
-
+                                                                                     AND pls.REMOVED_BY = 0
+--
+LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME, pllt.LIT_TYPE_DESC  
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0
+		   WHERE pcl.REMOVED_BY = 0 
+		   AND pllt.LIT_TYPE_CODE = '05') pt ON pt.CASE_ID = pn.CASE_ID
+--
+LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME, pllt.LIT_TYPE_DESC  
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0
+		   WHERE pcl.REMOVED_BY = 0 
+		   AND pllt.LIT_TYPE_CODE = '06') op ON op.CASE_ID = pn.CASE_ID
+--
 WHERE pn.REMOVED_BY = 0 
 AND pn.SEND_METHOD = 1  
 AND pn.IS_COURT_AREA = 1
@@ -127,6 +143,12 @@ ORDER BY pni.SEND_NOTICE_DATE]]>
 	</field>
 	<field name="IS_COURT_AREA" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="IS_COURT_AREA"/>
+	</field>
+	<field name="PETITIONER" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PETITIONER"/>
+	</field>
+	<field name="OPPONENT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="OPPONENT"/>
 	</field>
 	<variable name="TOTAL" class="java.lang.Double" calculation="Sum">
 		<variableExpression><![CDATA[$F{SEND_FEE}]]></variableExpression>
@@ -228,7 +250,7 @@ ORDER BY pni.SEND_NOTICE_DATE]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="12" isBold="true"/>
 				</textElement>
-				<text><![CDATA[โจทก์]]></text>
+				<text><![CDATA[โจทก์/ผู้ร้อง]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="212" y="0" width="74" height="25" uuid="7a327622-ee2e-4bdf-9839-69c5fa12595b">
@@ -241,7 +263,7 @@ ORDER BY pni.SEND_NOTICE_DATE]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="12" isBold="true"/>
 				</textElement>
-				<text><![CDATA[จำเลย]]></text>
+				<text><![CDATA[จำเลย/ผู้คัดค้าน]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="286" y="0" width="70" height="25" uuid="5dc2da09-0b75-423c-b610-dd49ef3af7b9">
@@ -365,7 +387,7 @@ ORDER BY pni.SEND_NOTICE_DATE]]>
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="25" splitType="Stretch">
+		<band height="25" splitType="Prevent">
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="25" y="0" width="59" height="25" uuid="9d025b5b-7d66-420c-9da8-1b1b8e7b2ae2">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="1b49e106-10f6-4667-a0d7-75f8ad42e62b"/>
@@ -403,7 +425,8 @@ ORDER BY pni.SEND_NOTICE_DATE]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CLAIMANT} == null ? "-" : $F{CLAIMANT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{CLAIMANT} == null ? " " : $F{CLAIMANT}+"\n") +
+($F{PETITIONER}==null?" ":$F{PETITIONER})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="212" y="0" width="74" height="25" uuid="05f9fd1f-582c-4df5-a394-a22cb3392674">
@@ -416,7 +439,8 @@ ORDER BY pni.SEND_NOTICE_DATE]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{DEFENDANT} == null ? "-" : $F{DEFENDANT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{DEFENDANT} == null ? " " : $F{DEFENDANT}+"\n")+
+($F{OPPONENT}==null?" ":$F{OPPONENT})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="286" y="0" width="70" height="25" uuid="835b9425-b76d-49e9-9e0e-2d14cb4270e2">

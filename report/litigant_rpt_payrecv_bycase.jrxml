@@ -40,8 +40,8 @@
   	CASE WHEN pj.RED_IDNUM  IS NULL 
   	     THEN ' ' 
   	     ELSE pltc_r.TITLE_CASE_NAME || pj.RED_IDNUM  || '/' || pj.RED_YEAR END CASE_RED_NO,
-  	NVL(pc.PROS_DESC,' ')  PROS_DESC,
-  	NVL(pc.ACCU_DESC,' ')  ACCU_DESC,
+    CASE WHEN pc.PROS_DESC IS NOT NULL THEN pc.PROS_DESC||'(โจทก์)'END CLAIMANT,
+    CASE WHEN pc.ACCU_DESC IS NOT NULL THEN pc.ACCU_DESC||'(จำเลย)' END DEFENDANT,
     pfr.PAYER_NAME,
     pfrd.PAY_TYPE,
     NVL(pfrd.PAY_DETAIL,' ')     PAY_DETAIL,
@@ -51,7 +51,11 @@
     plrt.RECEIPT_TYPE_NAME,
     plrst.RECEIPT_SUB_TYPE_NAME,
     pfrc.CANCEL_ID,
-    pfrc.NOTES
+    pfrc.NOTES,
+    --
+    CASE WHEN pt.LITIGANT_NAME IS NOT NULL THEN pt.LITIGANT_NAME||'('||pt.LIT_TYPE_DESC||')' END PETITIONER,
+    CASE WHEN op.LITIGANT_NAME IS NOT NULL THEN op.LITIGANT_NAME||'('||op.LIT_TYPE_DESC||')' END OPPONENT
+	-- 
 FROM PC_FIN_RECEIPT pfr
 LEFT JOIN PC_FIN_RECEIPT_CANCEL pfrc ON pfrc.RECEIPT_ID = pfr.RECEIPT_ID
 LEFT JOIN (SELECT pfrd.RECEIPT_ID,
@@ -95,6 +99,18 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
 		     JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
              WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
 --
+LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME, pllt.LIT_TYPE_DESC  
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0
+		   WHERE pcl.REMOVED_BY = 0 
+		   AND pllt.LIT_TYPE_CODE = '05') pt ON pt.CASE_ID = pc.CASE_ID
+--
+LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME, pllt.LIT_TYPE_DESC  
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0
+		   WHERE pcl.REMOVED_BY = 0 
+		   AND pllt.LIT_TYPE_CODE = '06') op ON op.CASE_ID = pc.CASE_ID
+--
 WHERE  pfr.RECEIVED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
                          AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')  
 --
@@ -121,11 +137,11 @@ ORDER BY  ps.STRUCTURE_NAME, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT
 	<field name="CASE_RED_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="CASE_RED_NO"/>
 	</field>
-	<field name="PROS_DESC" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="PROS_DESC"/>
+	<field name="CLAIMANT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CLAIMANT"/>
 	</field>
-	<field name="ACCU_DESC" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="ACCU_DESC"/>
+	<field name="DEFENDANT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DEFENDANT"/>
 	</field>
 	<field name="PAYER_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="PAYER_NAME"/>
@@ -156,6 +172,12 @@ ORDER BY  ps.STRUCTURE_NAME, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT
 	</field>
 	<field name="NOTES" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="NOTES"/>
+	</field>
+	<field name="PETITIONER" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PETITIONER"/>
+	</field>
+	<field name="OPPONENT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="OPPONENT"/>
 	</field>
 	<variable name="TOTAL" class="java.lang.Double" calculation="Sum">
 		<variableExpression><![CDATA[$F{TOTAL_RECEIVED_AMOUNT}]]></variableExpression>
@@ -282,7 +304,7 @@ ORDER BY  ps.STRUCTURE_NAME, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<text><![CDATA[โจทก์]]></text>
+				<text><![CDATA[โจทก์/ผู้ร้อง]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="383" y="0" width="70" height="50" uuid="4b7674d4-6ae9-4abe-ae36-d01632f847cd">
@@ -293,9 +315,9 @@ ORDER BY  ps.STRUCTURE_NAME, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="16"/>
 				</textElement>
-				<text><![CDATA[จำเลย]]></text>
+				<text><![CDATA[จำเลย/ผู้คัดค้าน]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="0" y="0" width="25" height="50" uuid="3d85c395-de09-4e8b-9ce1-2644a5f92fc5">
@@ -465,7 +487,8 @@ ORDER BY  ps.STRUCTURE_NAME, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT
 				<textElement>
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{PROS_DESC}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{CLAIMANT} == null ? " " : $F{CLAIMANT}+"\n") +
+($F{PETITIONER}==null?" ":$F{PETITIONER})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="383" y="0" width="70" height="25" uuid="6f2d7650-27ed-425d-b65a-af0d70f01b3f">
@@ -479,7 +502,9 @@ ORDER BY  ps.STRUCTURE_NAME, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT
 				<textElement>
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ACCU_DESC}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{DEFENDANT} == null ? " " : $F{DEFENDANT}+"\n")+
+($F{OPPONENT}==null?" ":$F{OPPONENT})
+]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="0" y="0" width="25" height="25" uuid="d5589104-d9ff-436e-8cb9-ef7a9987b288">

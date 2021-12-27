@@ -11,7 +11,7 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_writres_sender"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -19,7 +19,6 @@
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="519"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="474"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_writres_sender_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/05/2020"]]></defaultValueExpression>
 	</parameter>
@@ -71,7 +70,7 @@ LEFT JOIN (SELECT plc.COURT_NAME_TH
 WHERE pnsr.REMOVED_BY = 0
 AND pnsr.REPORT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS')  AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
 AND pn.SEND_DATE IS NOT NULL
-AND (pn.SEND_METHOD_BY_NAME = $P{SENDER} OR '0' = $P{SENDER})
+AND ($P{SENDER} LIKE '%'||NVL(pn.SEND_METHOD_BY_NAME,'-')||'%' OR '0' = $P{SENDER})
 ORDER BY pnsr.REPORT_DATE]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
