@@ -10,19 +10,19 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB210"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_rpt_accpay_fine"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/finance_rpt_accpay_fine_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["01/05/2021"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["04/01/2022"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="END_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["20/05/2021"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["04/01/2022"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="RECEIPT_TYPE" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["3"]]></defaultValueExpression>
@@ -72,7 +72,7 @@ LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYP
 LEFT JOIN PC_LOOKUP_RECEIPT_SUB_TYPE plrst ON plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE AND plrst.REMOVED_BY = 0
 WHERE  pfp.PAYMENT_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
                          AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
-AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPT_TYPE} -- '3'
+AND plrt.RECEIPT_TYPE_CODE IN ('3','6')
 AND pc.REMOVED_BY = 0]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
@@ -568,7 +568,7 @@ AND pc.REMOVED_BY = 0]]>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{TOTAL_AMOUNT}==null 
 ? "รวมเป็นเงินทั้งสิ้น  0 บาท"
-:"รวมเป็นเงินทั้งสิ้น "+ new java.text.DecimalFormat("#,##0,00").format($V{TOTAL_AMOUNT})+" บาท"]]></textFieldExpression>
+:"รวมเป็นเงินทั้งสิ้น "+ new java.text.DecimalFormat("#,##0.00").format($V{TOTAL_AMOUNT})+" บาท"]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="694" y="0" width="100" height="25" uuid="3d2a9534-0b01-4780-86fa-44a2383bb8cb">

@@ -10,14 +10,16 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/consulting/consult_rpt_account"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="383"/>
-	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="611"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/consulting/consult_rpt_account_files/main_jrxml"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="368"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="622"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/10/2020"]]></defaultValueExpression>
 	</parameter>
@@ -46,10 +48,18 @@
 	pap.PARENT_RELATION,
 	--
 	NVL(plc.COURT_NAME_TH, '') COURT_NAME_TH,
-	CASE WHEN pa.ACCESS_DATE IS NULL THEN ' ' ELSE THAISDATE(pa.ACCESS_DATE) END ACCESS_DATE
+	CASE WHEN pa.ACCESS_DATE IS NULL THEN ' ' ELSE THAISDATE(pa.ACCESS_DATE) END ACCESS_DATE,
+    paj.JUDGE_NAME,
+	pap_c.PSYCHOLOGIST_NAME PSYCOLOGIST_COURT,
+	pap_d.PSYCHOLOGIST_NAME PSYCOLOGIST_DETENTION
 --
 FROM PC_ADVICE pa
 JOIN PC_ADVICE_PARENT pap ON pa.ADVICE_ID = pap.ADVICE_ID
+--
+LEFT JOIN PC_ADVICE_EVALUATION pae ON pae.ADVICE_ID = pa.ADVICE_ID AND pae.REMOVED_BY = 0
+LEFT JOIN PC_ADVICE_JUDGE paj ON paj.JUDGE_ID = pae.RESPONSIBLE_JUDGE_ID AND paj.REMOVED_BY = 0
+LEFT JOIN PC_ADVICE_PSYCHOLOGIST pap_c ON pap_c.PSYCHOLOGIST_ID = pae.RESPONSIBLE_PSYCHO_COURT_ID AND pap_c.REMOVED_BY = 0
+LEFT JOIN PC_ADVICE_PSYCHOLOGIST pap_d ON pap_d.PSYCHOLOGIST_ID = pae.RESPONSIBLE_PSYCHO_DETENTION_ID AND pap_d.REMOVED_BY = 0
 --
 LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pa.COURT_ID AND plc.REMOVED_BY = 0	
 --
@@ -87,7 +97,9 @@ AND pap.ADVICE_PARENT_ID = (SELECT MIN(ADVICE_PARENT_ID) FROM PC_ADVICE_PARENT p
 	<field name="CHILD_LASTNAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="CHILD_LASTNAME"/>
 	</field>
-	<field name="ACCU_CAUSE" class="java.lang.String"/>
+	<field name="ACCU_CAUSE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="ACCU_CAUSE"/>
+	</field>
 	<field name="PARENT_PREFIX" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="PARENT_PREFIX"/>
 	</field>
@@ -105,6 +117,15 @@ AND pap.ADVICE_PARENT_ID = (SELECT MIN(ADVICE_PARENT_ID) FROM PC_ADVICE_PARENT p
 	</field>
 	<field name="ACCESS_DATE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="ACCESS_DATE"/>
+	</field>
+	<field name="JUDGE_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="JUDGE_NAME"/>
+	</field>
+	<field name="PSYCOLOGIST_COURT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PSYCOLOGIST_COURT"/>
+	</field>
+	<field name="PSYCOLOGIST_DETENTION" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PSYCOLOGIST_DETENTION"/>
 	</field>
 	<background>
 		<band splitType="Stretch"/>
@@ -149,7 +170,7 @@ AND pap.ADVICE_PARENT_ID = (SELECT MIN(ADVICE_PARENT_ID) FROM PC_ADVICE_PARENT p
 		<band height="30">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<staticText>
-				<reportElement x="600" y="0" width="100" height="30" uuid="020197b4-a879-495c-a7bb-e59d82aa5577">
+				<reportElement x="500" y="0" width="60" height="30" uuid="020197b4-a879-495c-a7bb-e59d82aa5577">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
@@ -164,9 +185,7 @@ AND pap.ADVICE_PARENT_ID = (SELECT MIN(ADVICE_PARENT_ID) FROM PC_ADVICE_PARENT p
 				<text><![CDATA[เกี่ยวข้องเป็น]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="0" y="0" width="80" height="30" uuid="41192a22-2377-423e-850d-f2c3fa9aa374">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
+				<reportElement x="0" y="0" width="40" height="30" uuid="41192a22-2377-423e-850d-f2c3fa9aa374"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -179,9 +198,7 @@ AND pap.ADVICE_PARENT_ID = (SELECT MIN(ADVICE_PARENT_ID) FROM PC_ADVICE_PARENT p
 				<text><![CDATA[ลำดับ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="480" y="0" width="120" height="30" uuid="4374e98c-1f18-4268-9444-5c2e08eb620a">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
+				<reportElement x="400" y="0" width="100" height="30" uuid="4374e98c-1f18-4268-9444-5c2e08eb620a"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -194,7 +211,9 @@ AND pap.ADVICE_PARENT_ID = (SELECT MIN(ADVICE_PARENT_ID) FROM PC_ADVICE_PARENT p
 				<text><![CDATA[ชื่อผู้ปกครอง]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="160" y="0" width="80" height="30" uuid="27c3db57-26cd-4ab5-ab69-c269c7a6d69f"/>
+				<reportElement x="110" y="0" width="70" height="30" uuid="27c3db57-26cd-4ab5-ab69-c269c7a6d69f">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -207,7 +226,9 @@ AND pap.ADVICE_PARENT_ID = (SELECT MIN(ADVICE_PARENT_ID) FROM PC_ADVICE_PARENT p
 				<text><![CDATA[หมายเลข ตจ.]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="80" y="0" width="80" height="30" uuid="86666f94-baa8-4a9d-bd29-daaa65cb0d57"/>
+				<reportElement x="40" y="0" width="70" height="30" uuid="86666f94-baa8-4a9d-bd29-daaa65cb0d57">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -220,9 +241,7 @@ AND pap.ADVICE_PARENT_ID = (SELECT MIN(ADVICE_PARENT_ID) FROM PC_ADVICE_PARENT p
 				<text><![CDATA[หมายเลข ศป.]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="360" y="0" width="120" height="30" uuid="122a2572-8297-4001-a17a-137a904fbd01">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
+				<reportElement x="300" y="0" width="100" height="30" uuid="122a2572-8297-4001-a17a-137a904fbd01"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -235,7 +254,7 @@ AND pap.ADVICE_PARENT_ID = (SELECT MIN(ADVICE_PARENT_ID) FROM PC_ADVICE_PARENT p
 				<text><![CDATA[ชื่อ - สกุล จำเลย]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="700" y="0" width="100" height="30" uuid="1d107e48-d3c9-4787-8900-7e0891f1cdba">
+				<reportElement x="560" y="0" width="70" height="30" uuid="1d107e48-d3c9-4787-8900-7e0891f1cdba">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
@@ -250,7 +269,7 @@ AND pap.ADVICE_PARENT_ID = (SELECT MIN(ADVICE_PARENT_ID) FROM PC_ADVICE_PARENT p
 				<text><![CDATA[วันรับเข้าศูนย์]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="240" y="0" width="120" height="30" uuid="d39c421b-2564-4f6e-acbf-e5e8be5963fd"/>
+				<reportElement x="180" y="0" width="120" height="30" uuid="d39c421b-2564-4f6e-acbf-e5e8be5963fd"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -262,6 +281,34 @@ AND pap.ADVICE_PARENT_ID = (SELECT MIN(ADVICE_PARENT_ID) FROM PC_ADVICE_PARENT p
 				</textElement>
 				<text><![CDATA[ฐานความผิด]]></text>
 			</staticText>
+			<staticText>
+				<reportElement x="630" y="0" width="89" height="30" uuid="53dbb3b9-4b9d-4e99-b0e2-b991a4dc4d40">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ผู้ให้คำปรึกษา]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="719" y="0" width="83" height="30" uuid="e01a091c-3778-4fc5-9d58-d9f62997bb55"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[หมายเหตุ]]></text>
+			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
@@ -269,9 +316,7 @@ AND pap.ADVICE_PARENT_ID = (SELECT MIN(ADVICE_PARENT_ID) FROM PC_ADVICE_PARENT p
 			<property name="com.jaspersoft.studio.layout"/>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="360" y="0" width="120" height="30" uuid="70ddd1e8-6947-4e47-8223-1b5b35eb5ffe">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
+				<reportElement stretchType="ContainerHeight" x="300" y="0" width="100" height="30" uuid="70ddd1e8-6947-4e47-8223-1b5b35eb5ffe"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -284,7 +329,9 @@ AND pap.ADVICE_PARENT_ID = (SELECT MIN(ADVICE_PARENT_ID) FROM PC_ADVICE_PARENT p
 				<textFieldExpression><![CDATA[($F{CHILD_PREFIX}==null?" ":$F{CHILD_PREFIX}) + " " + $F{CHILD_FIRSTNAME} +" " +$F{CHILD_LASTNAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="80" y="0" width="80" height="30" uuid="f9624cda-cdeb-4f51-afd9-be3ebe82b8c3"/>
+				<reportElement stretchType="ContainerHeight" x="40" y="0" width="70" height="30" uuid="f9624cda-cdeb-4f51-afd9-be3ebe82b8c3">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -297,7 +344,7 @@ AND pap.ADVICE_PARENT_ID = (SELECT MIN(ADVICE_PARENT_ID) FROM PC_ADVICE_PARENT p
 				<textFieldExpression><![CDATA["ศป. " + $F{SP_CASE_ID} +"/" + $F{SP_CASE_YEAR}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="600" y="0" width="100" height="30" uuid="46267554-09b3-4cf6-a895-ae5886f10bb0">
+				<reportElement stretchType="ContainerHeight" x="500" y="0" width="60" height="30" uuid="46267554-09b3-4cf6-a895-ae5886f10bb0">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
@@ -312,7 +359,9 @@ AND pap.ADVICE_PARENT_ID = (SELECT MIN(ADVICE_PARENT_ID) FROM PC_ADVICE_PARENT p
 				<textFieldExpression><![CDATA[$F{PARENT_RELATION}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="0" y="0" width="80" height="30" uuid="96ef71b7-6dc8-494c-9b09-d0787e9fc72f"/>
+				<reportElement stretchType="ContainerHeight" x="0" y="0" width="40" height="30" uuid="96ef71b7-6dc8-494c-9b09-d0787e9fc72f">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -325,7 +374,9 @@ AND pap.ADVICE_PARENT_ID = (SELECT MIN(ADVICE_PARENT_ID) FROM PC_ADVICE_PARENT p
 				<textFieldExpression><![CDATA[$F{ROW_NUM}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="160" y="0" width="80" height="30" uuid="9fae35ab-eaca-425a-8f6c-ea119fb90c1e"/>
+				<reportElement stretchType="ContainerHeight" x="110" y="0" width="70" height="30" uuid="9fae35ab-eaca-425a-8f6c-ea119fb90c1e">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -338,9 +389,7 @@ AND pap.ADVICE_PARENT_ID = (SELECT MIN(ADVICE_PARENT_ID) FROM PC_ADVICE_PARENT p
 				<textFieldExpression><![CDATA["ตจ. " + $F{CASE_ID} +"/" + $F{CASE_YEAR}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="480" y="0" width="120" height="30" uuid="70479342-9db1-4a63-8a30-2e60f4a630c0">
-					<property name="com.jaspersoft.studio.unit.width" value="px"/>
-				</reportElement>
+				<reportElement stretchType="ContainerHeight" x="400" y="0" width="100" height="30" uuid="70479342-9db1-4a63-8a30-2e60f4a630c0"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -353,7 +402,7 @@ AND pap.ADVICE_PARENT_ID = (SELECT MIN(ADVICE_PARENT_ID) FROM PC_ADVICE_PARENT p
 				<textFieldExpression><![CDATA[$F{PARENT_PREFIX}+ " " +$F{PARENT_FIRSTNAME}+ " " +$F{PARENT_LASTNAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="700" y="0" width="100" height="30" uuid="0777ce61-b860-4f78-9317-1bef680d3572">
+				<reportElement stretchType="ContainerHeight" x="560" y="0" width="70" height="30" uuid="0777ce61-b860-4f78-9317-1bef680d3572">
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
@@ -368,7 +417,7 @@ AND pap.ADVICE_PARENT_ID = (SELECT MIN(ADVICE_PARENT_ID) FROM PC_ADVICE_PARENT p
 				<textFieldExpression><![CDATA[$F{ACCESS_DATE}==null?" ":$F{ACCESS_DATE}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="240" y="0" width="120" height="30" uuid="d36daaf9-a7e3-4f2b-b621-feff432ad98f"/>
+				<reportElement stretchType="ContainerHeight" x="180" y="0" width="120" height="30" uuid="d36daaf9-a7e3-4f2b-b621-feff432ad98f"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -379,6 +428,36 @@ AND pap.ADVICE_PARENT_ID = (SELECT MIN(ADVICE_PARENT_ID) FROM PC_ADVICE_PARENT p
 					<font fontName="TH Sarabun New" size="14"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ACCU_CAUSE}==null?" ":$F{ACCU_CAUSE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="630" y="0" width="89" height="30" uuid="184b9bad-2351-42b7-9673-1d659ff9a4c6">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="TH Sarabun New" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{JUDGE_NAME}==null?" ":$F{JUDGE_NAME})+" "+
+($F{PSYCOLOGIST_COURT}==null?" ":$F{PSYCOLOGIST_COURT})+" " +
+($F{PSYCOLOGIST_DETENTION}==null?" ":$F{PSYCOLOGIST_DETENTION})]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="719" y="0" width="83" height="30" uuid="084e3d69-59f9-442d-b1db-5bc2fecdd91f"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

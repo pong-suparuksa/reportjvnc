@@ -11,35 +11,47 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_rpt_check_balance"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/finance_rpt_check_balance_files/main_jrxml"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="245"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="750"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="501"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="489"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/finance_rpt_check_balance_files/main_jrxml"/>
 	<parameter name="CASE_ID" class="java.lang.String">
 		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
-		<![CDATA[SELECT pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR  BLACK_CASE_NO,
-pltc_red.TITLE_CASE_NAME || pj.RED_IDNUM || '/' || pj.RED_YEAR  RED_CASE_NO,
-THAISDATE(pfr.RECEIVED_DATE), pup.USER_PROFILE_FULL_NAME, pc.PROS_DESC, pc.ACCU_DESC,
-'เล่มที่' || pfr.RECEIPT_BOOK_NO || '/' || pfr.GOV_BUDGET_YEAR || ' เลขที่' || pfr.RECEIPT_NO RECEIPT_NO,
-pfr.LITIGANT_TYPE LITIGANT_MONEY, plrt.RECEIPT_TYPE_NAME, pfr.PAYER_NAME,
-pfrd.TOTAL_AMOUNT TOTAL_RECEIVE, 
-(SELECT TO_CHAR(CURRENT_DATE, 'DD-MM-YYYY"T"HH24:MI:SS') FROM dual) CURRENT_DATE,
-(SELECT NVL(SUM(pfrtb.TOTAL_AMOUNT),0) FROM PC_FIN_PAYMENT pfrtb LEFT JOIN PC_FIN_PAYMENT_DETAIL pfpdtb ON pfpdtb.PAYMENT_ID = pfrtb.PAYMENT_ID AND pfpdtb.REMOVED_BY = 0 WHERE pfpdtb.RECEIPT_ID = pfr.RECEIPT_ID AND pfpdtb.REMOVED_BY = 0) AS PAID_TOTAL,
-TO_NUMBER(pfrd.TOTAL_AMOUNT) - TO_NUMBER((SELECT NVL(SUM(pfrtb.TOTAL_AMOUNT),0) FROM PC_FIN_PAYMENT pfrtb LEFT JOIN PC_FIN_PAYMENT_DETAIL pfpdtb ON pfpdtb.PAYMENT_ID = pfrtb.PAYMENT_ID AND pfpdtb.REMOVED_BY = 0 WHERE pfpdtb.RECEIPT_ID = pfr.RECEIPT_ID AND pfpdtb.REMOVED_BY = 0)) BALANCE
+		<![CDATA[SELECT pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR  BLACK_CASE_NO
+	   ,CASE WHEN pj.RED_IDNUM IS NULL THEN ' ' ELSE  pltc_red.TITLE_CASE_NAME || pj.RED_IDNUM || '/' || pj.RED_YEAR END  RED_CASE_NO
+	   ,THAISDATE(pfr.RECEIVED_DATE) RECEIVED_DATE 
+	   ,pup.USER_PROFILE_FULL_NAME
+	   ,pc.PROS_DESC
+	   ,pc.ACCU_DESC
+	   ,'เล่มที่' || pfr.RECEIPT_BOOK_NO || '/' || pfr.GOV_BUDGET_YEAR || ' เลขที่' || pfr.RECEIPT_NO RECEIPT_NO
+	   ,pfr.LITIGANT_TYPE LITIGANT_MONEY
+	   ,plrt.RECEIPT_TYPE_NAME
+	   ,pfr.PAYER_NAME
+	   ,pfrd.TOTAL_AMOUNT TOTAL_RECEIVE
+	   ,CURRENT_DATE 
+       ,NVL(pfp.TOTAL_AMOUNT,0) PAID_TOTAL 
+       ,pfrd.TOTAL_AMOUNT - NVL(SUM(pfp.TOTAL_AMOUNT) OVER (PARTITION BY pfr.RECEIPT_ID ORDER BY pfp.PAYMENT_ID),0) BALANCE
 --
 FROM PC_CASE pc
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc.REMOVED_BY = 0
+
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_red ON pltc_red.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_red.REMOVED_BY = 0
-RIGHT JOIN PC_FIN_RECEIPT pfr ON pfr.CASE_ID = pc.CASE_ID AND pfr.REMOVED_BY = 0
+--
+JOIN PC_FIN_RECEIPT pfr ON pfr.CASE_ID = pc.CASE_ID AND pfr.REMOVED_BY = 0
 LEFT JOIN PC_FIN_RECEIPT_DETAIL pfrd ON pfrd.RECEIPT_ID = pfr.RECEIPT_ID AND pfrd.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE AND plrt.REMOVED_BY = 0
-LEFT JOIN PC_FIN_PAYMENT_DETAIL pfpd ON pfpd.RECEIPT_ID = pfr.RECEIPT_ID AND pfpd.REMOVED_BY = 0
+--
+LEFT JOIN PC_FIN_RECEIPT_BALANCE_HISTORY pfrbh ON pfrbh.RECEIPT_DETAIL_ID = pfrd.DETAIL_ID AND pfrbh.REMOVED_BY = 0
+--
+LEFT JOIN PC_FIN_PAYMENT_DETAIL pfpd ON pfpd.DETAIL_ID = pfrbh.PAYMENT_DETAIL_ID AND pfpd.REMOVED_BY = 0
 LEFT JOIN PC_FIN_PAYMENT pfp ON pfp.PAYMENT_ID = pfpd.PAYMENT_ID AND pfp.REMOVED_BY = 0
 LEFT JOIN PC_USER_PROFILE pup ON pup.USER_ID = pfr.RECEIVED_BY AND pup.REMOVED_BY = 0
 --
@@ -51,8 +63,8 @@ WHERE pc.CASE_ID = $P{CASE_ID} AND pc.REMOVED_BY = 0]]>
 	<field name="RED_CASE_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="RED_CASE_NO"/>
 	</field>
-	<field name="THAISDATE(PFR.RECEIVED_DATE)" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="THAISDATE(PFR.RECEIVED_DATE)"/>
+	<field name="RECEIVED_DATE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="RECEIVED_DATE"/>
 	</field>
 	<field name="USER_PROFILE_FULL_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="USER_PROFILE_FULL_NAME"/>
@@ -66,7 +78,7 @@ WHERE pc.CASE_ID = $P{CASE_ID} AND pc.REMOVED_BY = 0]]>
 	<field name="RECEIPT_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_NO"/>
 	</field>
-	<field name="LITIGANT_MONEY" class="java.lang.Integer">
+	<field name="LITIGANT_MONEY" class="java.lang.Double">
 		<property name="com.jaspersoft.studio.field.label" value="LITIGANT_MONEY"/>
 	</field>
 	<field name="RECEIPT_TYPE_NAME" class="java.lang.String">
@@ -78,7 +90,7 @@ WHERE pc.CASE_ID = $P{CASE_ID} AND pc.REMOVED_BY = 0]]>
 	<field name="TOTAL_RECEIVE" class="java.lang.Double">
 		<property name="com.jaspersoft.studio.field.label" value="TOTAL_RECEIVE"/>
 	</field>
-	<field name="CURRENT_DATE" class="java.lang.String">
+	<field name="CURRENT_DATE" class="java.util.Date">
 		<property name="com.jaspersoft.studio.field.label" value="CURRENT_DATE"/>
 	</field>
 	<field name="PAID_TOTAL" class="java.lang.Double">
@@ -523,7 +535,7 @@ WHERE pc.CASE_ID = $P{CASE_ID} AND pc.REMOVED_BY = 0]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{THAISDATE(PFR.RECEIVED_DATE)}==null?" ":$F{THAISDATE(PFR.RECEIVED_DATE)}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{RECEIVED_DATE}==null?" ":$F{RECEIVED_DATE}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="740" y="0" width="60" height="25" isPrintWhenDetailOverflows="true" uuid="636047e5-f6d6-44c5-9973-8207fda21baa">

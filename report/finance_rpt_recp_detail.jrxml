@@ -19,7 +19,6 @@
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="534"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="456"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/finance_rpt_recp_detail_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/06/2020"]]></defaultValueExpression>
 	</parameter>
@@ -153,6 +152,9 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 	<variable name="C_RECPTYP_OTHER" class="java.lang.String">
 		<variableExpression><![CDATA["4"]]></variableExpression>
 	</variable>
+	<variable name="C_RECPTYP_FINE_BAIL" class="java.lang.String">
+		<variableExpression><![CDATA["6"]]></variableExpression>
+	</variable>
 	<variable name="C_RECPSUBTYP_LITSEND" class="java.lang.String">
 		<variableExpression><![CDATA["012"]]></variableExpression>
 	</variable>
@@ -163,7 +165,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 		<variableExpression><![CDATA[$F{RECEIPT_TYPE_CODE}.equals($V{C_RECPTYP_COURTFEE})&&$F{CANCEL_ID}==null?1:0]]></variableExpression>
 	</variable>
 	<variable name="CNT_FINE" class="java.lang.Long" calculation="Sum">
-		<variableExpression><![CDATA[$F{RECEIPT_TYPE_CODE}.equals($V{C_RECPTYP_FINE})&&$F{CANCEL_ID}==null?1:0]]></variableExpression>
+		<variableExpression><![CDATA[($F{RECEIPT_TYPE_CODE}.equals($V{C_RECPTYP_FINE})||$F{RECEIPT_TYPE_CODE}.equals($V{C_RECPTYP_FINE_BAIL}))&&$F{CANCEL_ID}==null?1:0]]></variableExpression>
 	</variable>
 	<variable name="CNT_LITIGANT" class="java.lang.Long" calculation="Sum">
 		<variableExpression><![CDATA[$F{RECEIPT_TYPE_CODE}.equals($V{C_RECPTYPE_LITIGANT}) &&$F{CANCEL_ID}==null?1:0]]></variableExpression>
@@ -187,7 +189,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 		<variableExpression><![CDATA[$F{RECEIPT_TYPE_CODE}.equals($V{C_RECPTYP_COURTFEE})&&$F{CANCEL_ID}==null?$F{TOTAL_AMOUNT}:0]]></variableExpression>
 	</variable>
 	<variable name="SUM_FINE" class="java.lang.Double" calculation="Sum">
-		<variableExpression><![CDATA[$F{RECEIPT_TYPE_CODE}.equals($V{C_RECPTYP_FINE})&&$F{CANCEL_ID}==null?$F{TOTAL_AMOUNT}:0]]></variableExpression>
+		<variableExpression><![CDATA[($F{RECEIPT_TYPE_CODE}.equals($V{C_RECPTYP_FINE})||$F{RECEIPT_TYPE_CODE}.equals($V{C_RECPTYP_FINE_BAIL}))&&$F{CANCEL_ID}==null?$F{TOTAL_AMOUNT}:0]]></variableExpression>
 	</variable>
 	<variable name="SUM_LITIGANT" class="java.lang.Double" calculation="Sum">
 		<variableExpression><![CDATA[$F{RECEIPT_TYPE_CODE}.equals($V{C_RECPTYPE_LITIGANT})&&$F{CANCEL_ID}==null?$F{TOTAL_AMOUNT}:0]]></variableExpression>
