@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="finance_rpt_accpayrecv_cent" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="d03f7ede-1ea2-4619-9ec3-f39b8e97e467">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -181,8 +181,8 @@ AND plrt.RECEIPT_TYPE_CODE =  $P{RECEIVETYPE}]]>
     pfr.TOTAL_AMOUNT        TOTAL_RECEIVED_AMOUNT,
     --
     NVL(pcl.LITIGANT_NAME,pfpd.CASE_LIT_NAME)   PAYEE,
-    NVL(pfp.TOTAL_AMOUNT,0) TOTAL_PAY_AMOUNT,
-    pfr.TOTAL_AMOUNT - NVL(pfp.TOTAL_AMOUNT,0) BALANCE,
+    SUM(NVL(pfp.TOTAL_AMOUNT,0)) TOTAL_PAY_AMOUNT,
+    pfr.TOTAL_AMOUNT - SUM(NVL(pfp.TOTAL_AMOUNT,0)) OVER (PARTITION BY pfr.RECEIPT_ID ORDER BY pfp.PAYMENT_DATE) BALANCE,
     pfp.PAYMENT_DATE,
     CASE WHEN pfp.PAYMENT_DATE IS NOT NULL 
          THEN THAISDATE(pfp.PAYMENT_DATE)
@@ -194,7 +194,8 @@ AND plrt.RECEIPT_TYPE_CODE =  $P{RECEIVETYPE}]]>
     plrst.RECEIPT_SUB_TYPE_CODE,
     pfrc.CANCEL_ID,
     NVL(pfrd.CASH_AMOUNT,0) CASH_AMOUNT,
-    NVL(pfrd.CHEQUE_AMOUNT,0) CHEQUE_AMOUNT
+    NVL(pfrd.CHEQUE_AMOUNT,0) CHEQUE_AMOUNT,
+    pfp.PAYMENT_DATE
 --  
 FROM PC_FIN_RECEIPT pfr
 LEFT JOIN PC_FIN_RECEIPT_DETAIL pfrd ON pfrd.RECEIPT_ID = pfr.RECEIPT_ID
@@ -221,9 +222,40 @@ WHERE plrt.RECEIPT_TYPE_CODE = $P{RECVTYPE}
 AND pfr.RECEIVED_DATE BETWEEN TO_DATE( $P{START_DATE} ||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS')
                            AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS') 
 AND  plrst.RECEIPT_SUB_TYPE_NAME IS NOT NULL
-AND ((pfrd.CASH_AMOUNT > 0) OR (pfrd.CHEQUE_AMOUNT > 0))
 AND pc.REMOVED_BY = 0
-ORDER BY plrst.RECEIPT_SUB_TYPE_CODE, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
+GROUP BY 	
+	pfr.RECEIVED_DATE,
+	THAISDATE(pfr.RECEIVED_DATE),
+	pltc_b.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR,
+  	CASE WHEN pj.RED_IDNUM  IS NULL 
+  	     THEN ' ' 
+  	     ELSE pltc_r.TITLE_CASE_NAME || pj.RED_IDNUM  || '/' || pj.RED_YEAR END,
+  	NVL(pc.PROS_DESC,' '),
+  	NVL(pc.ACCU_DESC,' '),
+    --
+  	pfr.RECEIPT_BOOK_NO,
+    pfr.RECEIPT_NO,
+    pfr.PAYER_NAME,
+    NVL(pfrd.PAID_DESCRIPTION,' '),
+    pfr.TOTAL_AMOUNT,
+    --
+    NVL(pcl.LITIGANT_NAME,pfpd.CASE_LIT_NAME),
+    pfp.PAYMENT_DATE,
+    CASE WHEN pfp.PAYMENT_DATE IS NOT NULL 
+         THEN THAISDATE(pfp.PAYMENT_DATE)
+         ELSE '-' END,
+    CASE WHEN pfp.CHEQUE_AMOUNT > 0 THEN NVL(pfpc.CHEQUE_CODE ,' ') ELSE ' ' END,
+    plrt.RECEIPT_TYPE_CODE,
+    plrt.RECEIPT_TYPE_NAME,
+    plrst.RECEIPT_SUB_TYPE_NAME,
+    plrst.RECEIPT_SUB_TYPE_CODE,
+    pfrc.CANCEL_ID,
+    NVL(pfrd.CASH_AMOUNT,0),
+    NVL(pfrd.CHEQUE_AMOUNT,0),
+    pfp.TOTAL_AMOUNT,
+    pfr.RECEIPT_ID,
+    pfp.PAYMENT_DATE
+ORDER BY plrst.RECEIPT_SUB_TYPE_CODE, pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfp.PAYMENT_DATE ]]>
 	</queryString>
 	<field name="RECEIVED_DATE" class="java.util.Date">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIVED_DATE"/>

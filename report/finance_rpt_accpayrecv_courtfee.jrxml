@@ -45,7 +45,7 @@
     --
     pfrd.CASE_LIT_NAME   PAYEE,
     NVL(pfrd.PAY_AMOUNT,0) TOTAL_PAY_AMOUNT,
-    pfr.TOTAL_AMOUNT - NVL(pfrd.PAY_AMOUNT,0) BALANCE,
+    pfr.TOTAL_AMOUNT - NVL(pfrd.PAY_AMOUNT_ACC,0) BALANCE,
     pfrd.PAYMENT_DATE,
     CASE WHEN pfrd.PAYMENT_DATE IS NOT NULL 
          THEN THAISDATE(pfrd.PAYMENT_DATE)
@@ -53,7 +53,8 @@
 	pfrd.REF_NO   ACCOUNT_NO,
     plrt.RECEIPT_TYPE_NAME,
     pfrd.RECEIPT_SUB_TYPE_NAME, 
-    pfrc.CANCEL_ID     
+    pfrc.CANCEL_ID,
+    pfrd.PAYMENT_DATE
 --  
 FROM PC_FIN_RECEIPT pfr
 JOIN (SELECT pfrd.RECEIPT_ID 
@@ -61,8 +62,9 @@ JOIN (SELECT pfrd.RECEIPT_ID
 			   ,LISTAGG(pfrd.RECEIPT_SUB_TYPE_NAME||CASE WHEN pfrd.OTHER_DETAIL IS NULL THEN ' ' ELSE '('||pfrd.OTHER_DETAIL||')' END, CHR(13)) WITHIN GROUP(ORDER BY pfrd.RECEIPT_SUB_TYPE_NAME, pfrd.OTHER_DETAIL) RECEIPT_SUB_TYPE_NAME
 			   ,pfrd.CASE_LIT_NAME
 			   ,pfrd.PAYMENT_DATE
-			   ,pfrd.PAY_AMOUNT
-			   ,pfrd.REF_NO
+	   		   ,SUM(pfrd.PAY_AMOUNT) OVER (PARTITION BY pfrd.RECEIPT_ID ORDER BY pfrd.PAYMENT_DATE) PAY_AMOUNT_ACC
+	   		   ,pfrd.PAY_AMOUNT
+	   	       ,LISTAGG(pfrd.REF_NO, ',') WITHIN GROUP(ORDER BY pfrd.REF_NO) REF_NO
 		FROM (SELECT pfrd.RECEIPT_ID
 			         ,pfrd.RECEIPT_TYPE 
 			         ,plrst.RECEIPT_SUB_TYPE_NAME 
@@ -97,8 +99,7 @@ JOIN (SELECT pfrd.RECEIPT_ID
 		         ,pfrd.RECEIPT_TYPE
 				 ,pfrd.CASE_LIT_NAME
 				 ,pfrd.PAYMENT_DATE
-				 ,pfrd.PAY_AMOUNT
-				 ,pfrd.REF_NO) pfrd ON pfrd.RECEIPT_ID = pfr.RECEIPT_ID 
+				 ,pfrd.PAY_AMOUNT) pfrd ON pfrd.RECEIPT_ID = pfr.RECEIPT_ID 
 LEFT JOIN PC_FIN_RECEIPT_CANCEL pfrc ON pfrc.RECEIPT_ID = pfr.RECEIPT_ID 
 --
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pfr.CASE_ID
@@ -114,7 +115,7 @@ WHERE plrt.RECEIPT_TYPE_CODE = '2'
 AND pfr.RECEIVED_DATE BETWEEN TO_DATE( $P{START_DATE} ||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS')
                           AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 AND pc.REMOVED_BY = 0
-ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
+ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO,pfrd.PAYMENT_DATE]]>
 	</queryString>
 	<field name="RECEIVED_DATE" class="java.util.Date">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIVED_DATE"/>
@@ -791,8 +792,7 @@ new java.text.DecimalFormat("#,##0.00").format(Double.valueOf($V{GRAND_BALANCE})
 	 0 :
 	 new 	java.text.DecimalFormat("#,##0.00").format(Double.valueOf($V{GRAND_TOTAL_RECVAMOUNT}))
 )
-+" บาท"
-]]></textFieldExpression>
++" บาท"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="484" y="35" width="186" height="25" uuid="14f7452c-e4a5-4c7a-94d8-209eba53a8e8">

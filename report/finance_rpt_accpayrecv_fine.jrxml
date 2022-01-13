@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="finance_rpt_accpayrecv_fine" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="d03f7ede-1ea2-4619-9ec3-f39b8e97e467">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -16,15 +16,15 @@
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="490"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="501"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_rpt_accpayrecv_fine"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/finance_rpt_accpayrecv_fine_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["01/05/2021"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["04/01/2022"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="END_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["31/05/2021"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["04/01/2022"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
 		<![CDATA[SELECT 
@@ -53,7 +53,9 @@
 	pfrd.REF_NO   ACCOUNT_NO,
     plrt.RECEIPT_TYPE_NAME,
     pfrd.RECEIPT_SUB_TYPE_NAME, 
-    pfrc.CANCEL_ID     
+    pfrc.CANCEL_ID,
+    --check
+    pfr.RECEIPT_ID 
 --  
 FROM PC_FIN_RECEIPT pfr
 JOIN (SELECT pfrd.RECEIPT_ID 
@@ -61,8 +63,9 @@ JOIN (SELECT pfrd.RECEIPT_ID
 			   ,LISTAGG(pfrd.RECEIPT_SUB_TYPE_NAME||CASE WHEN pfrd.OTHER_DETAIL IS NULL THEN ' ' ELSE '('||pfrd.OTHER_DETAIL||')' END, CHR(13)) WITHIN GROUP(ORDER BY pfrd.RECEIPT_SUB_TYPE_NAME, pfrd.OTHER_DETAIL) RECEIPT_SUB_TYPE_NAME
 			   ,pfrd.CASE_LIT_NAME
 			   ,pfrd.PAYMENT_DATE
-			   ,pfrd.PAY_AMOUNT
-			   ,pfrd.REF_NO
+	   		   ,SUM(pfrd.PAY_AMOUNT) OVER (PARTITION BY pfrd.RECEIPT_ID ORDER BY pfrd.PAYMENT_DATE) PAY_AMOUNT_ACC
+	   		   ,pfrd.PAY_AMOUNT
+	   	       ,LISTAGG(pfrd.REF_NO, ',') WITHIN GROUP(ORDER BY pfrd.REF_NO) REF_NO
 		FROM (SELECT pfrd.RECEIPT_ID
 			         ,pfrd.RECEIPT_TYPE 
 			         ,plrst.RECEIPT_SUB_TYPE_NAME 
@@ -97,8 +100,7 @@ JOIN (SELECT pfrd.RECEIPT_ID
 		         ,pfrd.RECEIPT_TYPE
 				 ,pfrd.CASE_LIT_NAME
 				 ,pfrd.PAYMENT_DATE
-				 ,pfrd.PAY_AMOUNT
-				 ,pfrd.REF_NO) pfrd ON pfrd.RECEIPT_ID = pfr.RECEIPT_ID 
+				 ,pfrd.PAY_AMOUNT) pfrd ON pfrd.RECEIPT_ID = pfr.RECEIPT_ID 
 LEFT JOIN PC_FIN_RECEIPT_CANCEL pfrc ON pfrc.RECEIPT_ID = pfr.RECEIPT_ID 
 --
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pfr.CASE_ID
@@ -114,7 +116,7 @@ WHERE plrt.RECEIPT_TYPE_CODE IN ('3','6')
 AND pfr.RECEIVED_DATE BETWEEN TO_DATE( $P{START_DATE} ||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS')
                           AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 AND pc.REMOVED_BY = 0
-ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
+ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfrd.PAYMENT_DATE]]>
 	</queryString>
 	<field name="RECEIVED_DATE" class="java.util.Date">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIVED_DATE"/>

@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_daily_inspection"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="315"/>
@@ -83,22 +83,38 @@ LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_I
 --judgement
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
---judge
-LEFT JOIN (SELECT pcj.CASE_ID
-			       ,CASE WHEN pcj.TEMPORARY_JUDGE_FLAG = 3 THEN 'continuous'
-			             WHEN pcj.TEMPORARY_JUDGE_FLAG = 4 THEN 'special' END APPOINT_TABLE_TYPE
-			       ,LISTAGG((CASE WHEN  pljt.JUDGE_TYPE_CODE = '01' THEN plj.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  pljt.JUDGE_TYPE_CODE = '01' THEN plj.JUDGE_NAME END)) JUDGE_NAME
-			       ,LISTAGG((CASE WHEN  pljt.JUDGE_TYPE_CODE = '02' THEN plj.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  pljt.JUDGE_TYPE_CODE = '02' THEN plj.JUDGE_NAME END)) ONG_1
-				   ,LISTAGG((CASE WHEN  pljt.JUDGE_TYPE_CODE = '03' THEN plj.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  pljt.JUDGE_TYPE_CODE = '03' THEN plj.JUDGE_NAME END)) ONG_2
-				   ,LISTAGG((CASE WHEN  pljt.JUDGE_TYPE_CODE = '12' THEN plj.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  pljt.JUDGE_TYPE_CODE = '12' THEN plj.JUDGE_NAME END)) ADD_1
-			FROM PC_CASE_JUDGE pcj 
-			JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID AND plj.REMOVED_BY = 0
-			JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
-			WHERE pcj.REMOVED_BY = 0
-			AND pljt.JUDGE_TYPE_CODE IN ('01','02','03','12')
-			GROUP BY pcj.CASE_ID ,CASE WHEN pcj.TEMPORARY_JUDGE_FLAG = 3 THEN 'continuous' 
-			                           WHEN pcj.TEMPORARY_JUDGE_FLAG = 4 THEN 'special' END
-			) j ON j.CASE_ID = ppa.CASE_ID AND j.APPOINT_TABLE_TYPE = ppat.APPOINT_TABLE_TYPE
+--judge in duty
+LEFT JOIN (SELECT A.CASE_ID
+				,CASE WHEN A.TEMPORARY_JUDGE_FLAG IN (3,32) THEN 'continuous'
+					  WHEN A.TEMPORARY_JUDGE_FLAG IN (4,42) THEN 'special' END APPOINT_TABLE_TYPE
+				,LISTAGG((CASE WHEN  A.JUDGE_TYPE_CODE = '01' THEN A.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  A.JUDGE_TYPE_CODE = '01' THEN A.JUDGE_NAME END)) JUDGE_NAME
+				,LISTAGG((CASE WHEN  A.JUDGE_TYPE_CODE = '02' THEN A.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  A.JUDGE_TYPE_CODE = '02' THEN A.JUDGE_NAME END)) ONG_1
+				,LISTAGG((CASE WHEN  A.JUDGE_TYPE_CODE = '03' THEN A.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  A.JUDGE_TYPE_CODE = '03' THEN A.JUDGE_NAME END)) ONG_2
+				,LISTAGG((CASE WHEN  A.JUDGE_TYPE_CODE = '12' THEN A.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  A.JUDGE_TYPE_CODE = '12' THEN A.JUDGE_NAME END)) ADD_1
+				,A.JUDGE_START_DATE
+				,A.JUDGE_END_DATE
+				FROM
+				(
+					SELECT DISTINCT
+						   pcj.CASE_ID
+					       ,plj.JUDGE_NAME 
+					       ,pljt.JUDGE_TYPE_CODE 
+					       ,pcj.TEMPORARY_JUDGE_FLAG 
+					       ,pcj.JUDGE_START_DATE
+					       ,pcj.JUDGE_END_DATE 
+					FROM PC_CASE_JUDGE pcj 
+					LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID AND plj.REMOVED_BY = 0
+					LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+					WHERE pcj.REMOVED_BY = 0
+					AND pcj.JUDGE_END_DATE IS NULL
+				) A 
+				GROUP BY A.CASE_ID 
+						 ,CASE WHEN A.TEMPORARY_JUDGE_FLAG IN (3,32) THEN 'continuous' 
+				               WHEN A.TEMPORARY_JUDGE_FLAG IN (4,42) THEN 'special' END
+				 		 ,A.JUDGE_END_DATE
+				 		 ,A.JUDGE_START_DATE
+				         ,A.JUDGE_END_DATE
+			) j ON j.CASE_ID = ppa.CASE_ID AND j.APPOINT_TABLE_TYPE = ppat.APPOINT_TABLE_TYPE			
 --next appoint
 LEFT JOIN (SELECT ppa.CASE_ID
 			      ,LISTAGG(TO_CHAR(ppac.START_DATE, 'fmdd MON yy', 'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI'),' และ ') WITHIN GROUP(ORDER BY ppa.CASE_ID, ppac.START_DATE) APPOINT_DATE

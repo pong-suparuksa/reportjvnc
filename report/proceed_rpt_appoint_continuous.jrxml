@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_continuous"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_continuous_files/main_jrxml"/>
@@ -220,31 +220,38 @@ LEFT JOIN (SELECT pcl.CASE_ID ,pcl.LITIGANT_NAME  DEFENDANT
 --judgement
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = ppa.CASE_ID AND pj.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
---judge
-LEFT JOIN (SELECT DISTINCT 
-			      pcj.CASE_ID
-				  ,pcj.JUDGE_ID
-				  ,plj.JUDGE_NAME 
-			      ,CASE WHEN NVL(pcj_temf.TEMPORARY_JUDGE_FLAG, pcj.TEMPORARY_JUDGE_FLAG) = 3 THEN 'continuous'
-			            WHEN NVL(pcj_temf.TEMPORARY_JUDGE_FLAG, pcj.TEMPORARY_JUDGE_FLAG) = 4 THEN 'special' END APPOINT_TABLE_TYPE
-			      ,ROW_NUMBER () OVER (PARTITION BY pcj.CASE_ID ORDER BY pcj.JUDGE_START_DATE DESC) RNUM
-			 FROM PC_CASE_JUDGE pcj 
-			 LEFT JOIN (SELECT DISTINCT pcj.CASE_ID ,pcj.TEMPORARY_JUDGE_FLAG 
-					    FROM PC_CASE_JUDGE pcj 
-						JOIN (SELECT pcj.CASE_ID, MAX(pcj.JUDGE_END_DATE) JUDGE_END_DATE 
-						  	  FROM PC_CASE_JUDGE pcj 
-							  WHERE pcj.REMOVED_BY = 0
-							  AND pcj.JUDGE_END_DATE IS NOT NULL
-							  AND pcj.TEMPORARY_JUDGE_FLAG <> 2 
-							  GROUP BY pcj.CASE_ID) pcj_maxt ON pcj_maxt.CASE_ID = pcj.CASE_ID 
-						 	                                AND pcj.JUDGE_END_DATE = pcj_maxt.JUDGE_END_DATE 
-						 WHERE pcj.REMOVED_BY = 0
-						 AND pcj.TEMPORARY_JUDGE_FLAG <> 2) pcj_temf ON pcj_temf.CASE_ID = pcj.CASE_ID 		   
-			 JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID AND plj.REMOVED_BY = 0
-			 JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
-			 WHERE pcj.REMOVED_BY = 0
-			 AND pcj.JUDGE_END_DATE IS NULL
-			 AND pljt.JUDGE_TYPE_CODE = '01') j ON j.CASE_ID = ppa.CASE_ID AND j.APPOINT_TABLE_TYPE = ppat.APPOINT_TABLE_TYPE AND j.RNUM = 1 
+--judge in duty
+LEFT JOIN (SELECT A.CASE_ID
+				,CASE WHEN A.TEMPORARY_JUDGE_FLAG IN (3,32) THEN 'continuous'
+					  WHEN A.TEMPORARY_JUDGE_FLAG IN (4,42) THEN 'special' END APPOINT_TABLE_TYPE
+				,LISTAGG((CASE WHEN  A.JUDGE_TYPE_CODE = '01' THEN A.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  A.JUDGE_TYPE_CODE = '01' THEN A.JUDGE_NAME END)) JUDGE_NAME
+				,LISTAGG((CASE WHEN  A.JUDGE_TYPE_CODE = '02' THEN A.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  A.JUDGE_TYPE_CODE = '02' THEN A.JUDGE_NAME END)) ONG_1
+				,LISTAGG((CASE WHEN  A.JUDGE_TYPE_CODE = '03' THEN A.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  A.JUDGE_TYPE_CODE = '03' THEN A.JUDGE_NAME END)) ONG_2
+				,LISTAGG((CASE WHEN  A.JUDGE_TYPE_CODE = '12' THEN A.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  A.JUDGE_TYPE_CODE = '12' THEN A.JUDGE_NAME END)) ADD_1
+				,A.JUDGE_START_DATE
+				,A.JUDGE_END_DATE
+				FROM
+				(
+					SELECT DISTINCT
+						   pcj.CASE_ID
+					       ,plj.JUDGE_NAME 
+					       ,pljt.JUDGE_TYPE_CODE 
+					       ,pcj.TEMPORARY_JUDGE_FLAG 
+					       ,pcj.JUDGE_START_DATE
+					       ,pcj.JUDGE_END_DATE 
+					FROM PC_CASE_JUDGE pcj 
+					LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID AND plj.REMOVED_BY = 0
+					LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+					WHERE pcj.REMOVED_BY = 0
+					AND pcj.JUDGE_END_DATE IS NULL
+				) A 
+				GROUP BY A.CASE_ID 
+						 ,CASE WHEN A.TEMPORARY_JUDGE_FLAG IN (3,32) THEN 'continuous' 
+				               WHEN A.TEMPORARY_JUDGE_FLAG IN (4,42) THEN 'special' END
+				 		 ,A.JUDGE_END_DATE
+				 		 ,A.JUDGE_START_DATE
+				         ,A.JUDGE_END_DATE
+			) j ON j.CASE_ID = ppa.CASE_ID AND j.APPOINT_TABLE_TYPE = ppat.APPOINT_TABLE_TYPE
 --
 WHERE ppac.REMOVED_BY = 0
 AND ppa.APPOINT_TABLE_CODE = '003'

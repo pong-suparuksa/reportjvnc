@@ -2,7 +2,7 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="bail_rpt_tmprel_appcourt" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="21e58027-36f9-4d26-bcd5-4608c14b782d">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -22,10 +22,10 @@
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="417"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/bail_rpt_tmprel_appcourt_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["01-08-2021"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["08-01-2022"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="END_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["31-08-2021"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["08-01-2022"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="BAIL_PERIOD" class="java.lang.Integer">
 		<defaultValueExpression><![CDATA[0]]></defaultValueExpression>
@@ -35,19 +35,18 @@
        ,NVL(pc.PROS_DESC,c.COMPLAINANT) PROS_DESC 
        ,pc.ACCU_DESC
        ,l.LITIGANT_NAME
-       ,pbb.FULLNAME
+       ,LISTAGG(pbb.FULLNAME, CHR(10) || '-----------------------------' || CHR(10)) WITHIN GROUP(ORDER BY pbb.FULLNAME)  FULLNAME  
        ,NVL(pc.ALLE_DESC,alle.ALLE_NAME) ALLE_DESC 
-       ,pb.RATE_AMOUNT BAIL_COST
-       ,NVL(bm.TYPE_NAME,'ไม่มีหลักประกัน') TYPE_NAME
+       ,pb.RATE_AMOUNT BAIL_COST     
+	   ,LISTAGG(NVL(bm.TYPE_NAME,'ไม่มีหลักประกัน'), CHR(10) || '------------------------' || CHR(10)) WITHIN GROUP(ORDER BY NVL(bm.TYPE_NAME,'ไม่มีหลักประกัน'))  TYPE_NAME
        ,pb.COURT_ORDER 
        ,CASE WHEN pb.COURT_ORDER  = 1 THEN 'อนุญาต' ELSE 'ไม่อนุญาต' END COURT_ORDER_TEXT
        ,plj.JUDGE_NAME 
        ,plov.NAME   BAIL_CLASS
        --
-       ,pbb.BAILSMAN_ID 
 FROM PC_BAIL pb 
 LEFT JOIN PC_BAIL_BAILSMAN pbb ON pbb.BAIL_ID = pb.BAIL_ID AND pbb.REMOVED_BY = 0
-LEFT JOIN (SELECT b.BAILSMAN_ID, LISTAGG(b.TYPE_NAME , CHR(13)) WITHIN GROUP(ORDER BY b.BAILSMAN_ID) TYPE_NAME
+LEFT JOIN (SELECT b.BAILSMAN_ID, LISTAGG(b.TYPE_NAME  , CHR(13)) WITHIN GROUP(ORDER BY b.BAILSMAN_ID) TYPE_NAME
 		   FROM (SELECT DISTINCT pbs.BAILSMAN_ID, pbst.TYPE_NAME 
 				 FROM PC_BAIL_SEC pbs 
 				 JOIN PC_BAIL_SEC_TYPE pbst ON pbst.TYPE_CODE = pbs.SEC_TYPE_CODE AND pbst.REMOVED_BY = 0
@@ -81,6 +80,19 @@ WHERE pb.REMOVED_BY = 0
 AND (pb.BAIL_PERIOD = $P!{BAIL_PERIOD} OR 0 = $P!{BAIL_PERIOD}) 
 AND pb.BAIL_DATE BETWEEN TO_DATE( $P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
                      AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+--                     
+GROUP BY
+		pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR
+       ,NVL(pc.PROS_DESC,c.COMPLAINANT)
+       ,pc.ACCU_DESC
+       ,l.LITIGANT_NAME
+       ,NVL(pc.ALLE_DESC,alle.ALLE_NAME) 
+       ,pb.RATE_AMOUNT      
+       ,pb.COURT_ORDER 
+       ,CASE WHEN pb.COURT_ORDER  = 1 THEN 'อนุญาต' ELSE 'ไม่อนุญาต' END
+       ,plj.JUDGE_NAME 
+       ,plov.NAME
+--
 ORDER BY pb.COURT_ORDER, BAIL_CLASS]]>
 	</queryString>
 	<field name="BLACK_CASE_NO" class="java.lang.String">

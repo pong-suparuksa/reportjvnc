@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_rpt_mnyctrl_fine"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -50,12 +50,12 @@
 	NVL(pfrd.PAY_AMOUNT,0)  TOTAL_AMOUNT, 	
 	pfr.TOTAL_AMOUNT - NVL(pfrd.PAY_AMOUNT,0)   BALANCE,  	
 	CASE WHEN pfrd.PAYMENT_DATE IS NOT NULL THEN THAISDATE(pfrd.PAYMENT_DATE) END   PAYMENT_DATE_TEXT,    
-	pfrd.REF_NO,
 	plrt.RECEIPT_TYPE_NAME,
     pfrd.RECEIPT_SUB_TYPE_NAME, 
     pfrca.CANCEL_ID,
     TO_CHAR(pfrca.NOTES) NOTES,
-    pfr.RECEIPT_ID
+    pfr.RECEIPT_ID,
+    pfrd.PAYMENT_DATE
 --  	
 FROM PC_FIN_RECEIPT pfr 
 JOIN (SELECT pfrd.RECEIPT_ID 
@@ -63,8 +63,8 @@ JOIN (SELECT pfrd.RECEIPT_ID
 			   ,LISTAGG(pfrd.RECEIPT_SUB_TYPE_NAME||CASE WHEN pfrd.OTHER_DETAIL IS NULL THEN ' ' ELSE '('||pfrd.OTHER_DETAIL||')' END, CHR(13)) WITHIN GROUP(ORDER BY pfrd.RECEIPT_SUB_TYPE_NAME, pfrd.OTHER_DETAIL) RECEIPT_SUB_TYPE_NAME
 			   ,pfrd.CASE_LIT_NAME
 			   ,pfrd.PAYMENT_DATE
-			   ,pfrd.PAY_AMOUNT
-			   ,pfrd.REF_NO
+			   ,SUM(pfrd.PAY_AMOUNT) OVER (PARTITION BY pfrd.RECEIPT_ID ORDER BY pfrd.PAYMENT_DATE) PAY_AMOUNT_ACC
+	   		   ,pfrd.PAY_AMOUNT
 		FROM (SELECT pfrd.RECEIPT_ID
 			         ,pfrd.RECEIPT_TYPE 
 			         ,pfrd.OTHER_DETAIL
@@ -72,9 +72,7 @@ JOIN (SELECT pfrd.RECEIPT_ID
 			         --
 			         ,pfpd.CASE_LIT_NAME 
 			         ,pfp.PAYMENT_DATE
-			         ,SUM(pfp.TOTAL_AMOUNT) PAY_AMOUNT 
-					 ,CASE WHEN pfp.TRANSFER_AMOUNT  > 0 THEN pfp.TRANSFER_ACCOUNT_NO 
-			               WHEN pfp.CHEQUE_AMOUNT > 0 THEN pfpc.CHEQUE_CODE END REF_NO
+			         ,SUM(pfp.TOTAL_AMOUNT) PAY_AMOUNT
 			  FROM PC_FIN_RECEIPT_DETAIL pfrd 
 			  --
 			  LEFT JOIN PC_LOOKUP_RECEIPT_SUB_TYPE plrst ON plrst.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE 
@@ -92,15 +90,12 @@ JOIN (SELECT pfrd.RECEIPT_ID
 			           ,plrst.RECEIPT_SUB_TYPE_NAME 
 			           --
 			           ,pfpd.CASE_LIT_NAME
-			           ,pfp.PAYMENT_DATE
-			           ,CASE WHEN pfp.TRANSFER_AMOUNT  > 0 THEN pfp.TRANSFER_ACCOUNT_NO 
-			                 WHEN pfp.CHEQUE_AMOUNT > 0 THEN pfpc.CHEQUE_CODE END) pfrd 
+			           ,pfp.PAYMENT_DATE) pfrd
 		GROUP BY pfrd.RECEIPT_ID
 		         ,pfrd.RECEIPT_TYPE
 				 ,pfrd.CASE_LIT_NAME
 				 ,pfrd.PAYMENT_DATE
-				 ,pfrd.PAY_AMOUNT
-				 ,pfrd.REF_NO) pfrd ON pfrd.RECEIPT_ID = pfr.RECEIPT_ID 
+				 ,pfrd.PAY_AMOUNT) pfrd ON pfrd.RECEIPT_ID = pfr.RECEIPT_ID 
 LEFT JOIN PC_FIN_RECEIPT_CANCEL pfrca ON pfrca.RECEIPT_ID = pfr.RECEIPT_ID
 LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE AND plrt.REMOVED_BY = 0
 --
@@ -116,7 +111,7 @@ WHERE pfr.RECEIVED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY
                           AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
 AND plrt.RECEIPT_TYPE_CODE IN ('3','6')
 AND pc.REMOVED_BY = 0
-ORDER BY pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
+ORDER BY pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO,pfrd.PAYMENT_DATE]]>
 	</queryString>
 	<field name="RECEIVED_DATE" class="java.util.Date">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIVED_DATE"/>
@@ -162,9 +157,6 @@ ORDER BY pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
 	</field>
 	<field name="PAYMENT_DATE_TEXT" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="PAYMENT_DATE_TEXT"/>
-	</field>
-	<field name="REF_NO" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="REF_NO"/>
 	</field>
 	<field name="RECEIPT_TYPE_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_TYPE_NAME"/>

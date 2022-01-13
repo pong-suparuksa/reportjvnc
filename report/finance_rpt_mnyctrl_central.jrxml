@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_rpt_mnyctrl_central"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -57,7 +57,8 @@
 	plrt.RECEIPT_TYPE_NAME,
     pfrd.RECEIPT_SUB_TYPE_NAME, 
     pfrca.CANCEL_ID,
-    pfr.RECEIPT_ID
+    pfr.RECEIPT_ID,
+    pfrd.PAYMENT_DATE
 --  	
 FROM PC_FIN_RECEIPT pfr 
 JOIN (SELECT pfrd.RECEIPT_ID 
@@ -65,8 +66,9 @@ JOIN (SELECT pfrd.RECEIPT_ID
 			   ,LISTAGG(pfrd.RECEIPT_SUB_TYPE_NAME||CASE WHEN pfrd.OTHER_DETAIL IS NULL THEN ' ' ELSE '('||pfrd.OTHER_DETAIL||')' END, CHR(13)) WITHIN GROUP(ORDER BY pfrd.RECEIPT_SUB_TYPE_NAME, pfrd.OTHER_DETAIL) RECEIPT_SUB_TYPE_NAME
 			   ,pfrd.CASE_LIT_NAME
 			   ,pfrd.PAYMENT_DATE
-			   ,pfrd.PAY_AMOUNT
-			   ,pfrd.REF_NO
+	   		   ,SUM(pfrd.PAY_AMOUNT) OVER (PARTITION BY pfrd.RECEIPT_ID ORDER BY pfrd.PAYMENT_DATE) PAY_AMOUNT_ACC
+	   		   ,pfrd.PAY_AMOUNT
+	   	       ,LISTAGG(pfrd.REF_NO, ',') WITHIN GROUP(ORDER BY pfrd.REF_NO) REF_NO
 		FROM (SELECT pfrd.RECEIPT_ID
 			         ,pfrd.RECEIPT_TYPE 
 			         ,plrst.RECEIPT_SUB_TYPE_NAME 
@@ -101,8 +103,7 @@ JOIN (SELECT pfrd.RECEIPT_ID
 		         ,pfrd.RECEIPT_TYPE
 				 ,pfrd.CASE_LIT_NAME
 				 ,pfrd.PAYMENT_DATE
-				 ,pfrd.PAY_AMOUNT
-				 ,pfrd.REF_NO) pfrd ON pfrd.RECEIPT_ID = pfr.RECEIPT_ID 
+				 ,pfrd.PAY_AMOUNT) pfrd ON pfrd.RECEIPT_ID = pfr.RECEIPT_ID 
 LEFT JOIN PC_FIN_RECEIPT_CANCEL pfrca ON pfrca.RECEIPT_ID = pfr.RECEIPT_ID
 LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE AND plrt.REMOVED_BY = 0
 --
@@ -118,7 +119,7 @@ WHERE pfr.RECEIVED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY
                           AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
 AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPTTYPE}
 AND pc.REMOVED_BY = 0
-ORDER BY pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO]]>
+ORDER BY pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfrd.PAYMENT_DATE]]>
 	</queryString>
 	<field name="RECEIVED_DATE" class="java.util.Date">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIVED_DATE"/>
