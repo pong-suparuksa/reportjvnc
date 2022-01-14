@@ -3,7 +3,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report_payment_st4" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="487f9c12-faf0-4592-ba10-670c6c035660">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/ReportFeature/report_payment_st4"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -16,9 +16,15 @@
 		<defaultValueExpression><![CDATA["10/10/2021"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT DISTINCT 
-	NVL(cou.COURT_NAME_TH, '') COURT_NAME_TH
-	,c.case_id
+		<![CDATA[SELECT * FROM 
+(SELECT plc.COURT_NAME_TH
+ FROM PC_PARAM pp
+ JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
+LEFT JOIN
+(
+SELECT DISTINCT 
+	c.case_id
 	,NVL(tcb.TITLE_CASE_NAME,' ') ||  TO_CHAR(c.BLACK_IDNUM) || '/' || TO_CHAR(c.BLACK_YEAR)  BLACK_CASE_NO 
 	,bb.AMOUNT 
 	,ba.INSTALLMENT_COUNT 
@@ -36,17 +42,14 @@ JOIN PC_BAIL b ON (b.BAIL_ID = bb.BAIL_ID AND b.REMOVED_BY = 0)
 LEFT JOIN PC_CASE c ON (c.CASE_ID = b.CASE_ID AND c.REMOVED_BY = 0)
 LEFT JOIN PC_LOOKUP_TITLE_CASE tcb ON (c.black_title_id = tcb.title_case_id  AND tcb.REMOVED_BY = 0)
 LEFT JOIN PC_BAIL_BAILSMAN pbb ON pbb.BAIL_ID = bb.BAIL_ID AND pbb.REMOVED_BY = 0
---ชื่อศาล
-CROSS JOIN (SELECT plc.COURT_NAME_TH
-             FROM PC_PARAM pp
-             JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
-             WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
+--
 WHERE bb.REMOVED_BY = 0
 AND bb.BREACH_STATUS = 'A'
 AND bb.BREACH_DATE BETWEEN TO_DATE( $P{START_DATE}  || 'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
                        AND TO_DATE(  $P{END_DATE}  || 'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 AND b.IS_PRINTED = 1
-ORDER BY BLACK_CASE_NO]]>
+ORDER BY BLACK_CASE_NO
+) ON 1 = 1]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
@@ -313,7 +316,7 @@ ORDER BY BLACK_CASE_NO]]>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{FULLNAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{FULLNAME}==null?" ":$F{FULLNAME}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="65" y="0" width="60" height="30" uuid="da809718-984b-4597-9cd8-d54ceeca028c"/>
@@ -369,7 +372,7 @@ ORDER BY BLACK_CASE_NO]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{INSTALLMENT_COUNT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{INSTALLMENT_COUNT}==null?"0":$F{INSTALLMENT_COUNT}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="495" y="0" width="64" height="30" uuid="34ea503c-7dc7-4e86-a818-5cc08f582dbb">

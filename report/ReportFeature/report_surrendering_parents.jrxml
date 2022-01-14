@@ -3,7 +3,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report_surrendering_parents" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="9978d201-1d2d-4351-b64e-4b21d5ae9429">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/ReportFeature/report_surrendering_parents"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/ReportFeature/report_surrendering_parents_files/main_jrxml"/>
@@ -14,7 +14,14 @@
 		<defaultValueExpression><![CDATA["28/04/2025"]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
-		<![CDATA[SELECT distinct NVL(cou.COURT_NAME_TH, '') COURT_NAME_TH,
+		<![CDATA[SELECT * FROM
+(SELECT plc.COURT_NAME_TH
+ FROM PC_PARAM pp
+ JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
+LEFT JOIN
+(
+SELECT distinct 
 c.case_id, NVL(tcb.TITLE_CASE_NAME,' ') ||  TO_CHAR(c.BLACK_IDNUM) || '/' || TO_CHAR(c.BLACK_YEAR)  BLACK_CASE_NO ,
  NVL(tcr.TITLE_CASE_NAME,' ') || TO_CHAR(pj.RED_IDNUM) || CASE WHEN pj.RED_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pj.RED_YEAR) RED_CASE_NO ,
  bm.contact_name,
@@ -34,15 +41,12 @@ LEFT JOIN PC_CASE_LIT cl ON (d.defendant_id = cl.case_lit_id  AND cl.REMOVED_BY 
 LEFT JOIN PC_LOOKUP_TITLE_CASE tcb ON (c.black_title_id = tcb.title_case_id  AND tcb.REMOVED_BY = 0)
 LEFT JOIN PC_JUDGEMENT pj ON (pj.CASE_ID = c.CASE_ID AND pj.REMOVED_BY = 0)
 LEFT JOIN PC_LOOKUP_TITLE_CASE tcr ON (pj.RED_TITLE_ID = tcr.title_case_id  AND tcr.REMOVED_BY = 0)
---ชื่อศาล
-CROSS JOIN (SELECT plc.COURT_NAME_TH
-             FROM PC_PARAM pp
-             JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
-             WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
+--
 WHERE  b.REMOVED_BY = 0
 AND b.CREATED_DATE BETWEEN TO_DATE( $P{START_DATE}  || 'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') AND TO_DATE(  $P{END_DATE}  || 'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 ORDER BY 
-	BLACK_CASE_NO]]>
+	BLACK_CASE_NO
+) ON 1 = 1]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>

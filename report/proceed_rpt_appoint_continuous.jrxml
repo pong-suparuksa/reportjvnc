@@ -2,7 +2,7 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="proceed_rpt_appoint_continuous" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2442022f-f774-4941-965d-fac8362ad9aa">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -169,8 +169,7 @@ ORDER BY A.A_DATE]]>
 			<defaultValueExpression><![CDATA["31/05/2021"]]></defaultValueExpression>
 		</parameter>
 		<queryString>
-			<![CDATA[SELECT A.START_DATE
-	   ,A.CASE_BLACK_NO
+			<![CDATA[SELECT  A.CASE_BLACK_NO
        ,A.CASE_RED_NO
        ,A.PROS_DESC
        ,A.ACCU_DESC
@@ -257,17 +256,20 @@ WHERE ppac.REMOVED_BY = 0
 AND ppa.APPOINT_TABLE_CODE = '003'
 AND ppac.START_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
                         AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
+--
 AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE WHERE REF_APPOINT_CON_ID  = ppac.APPOINT_CON_ID)
 AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE_CANCEL ppacc WHERE ppacc.APPOINT_CON_ID = ppac.APPOINT_CON_ID)
 AND pltc_b.TITLE_CASE_NAME NOT IN ('มต','ตจ','มต.','ตจ.')	
+--
 GROUP BY pc.CASE_ID
  		 ,pltc_b.TITLE_CASE_NAME, pc.BLACK_IDNUM, pc.BLACK_YEAR
          ,pltc_r.TITLE_CASE_NAME, pj.RED_IDNUM, pj.RED_YEAR
          ,pc.PROS_DESC, c.COMPLAINANT, d.DEFENDANT, pc.ACCU_DESC, pc.ALLE_DESC
          ,ppac.START_DATE, plal.APPOINT_LIST_NAME, j.JUDGE_NAME
 ) A
-GROUP BY A.START_DATE, A.CASE_BLACK_NO, A.CASE_RED_NO, A.PROS_DESC, A.ACCU_DESC, A.ALLE_DESC, A.JUDGE_NAME, A.CASE_ID
-ORDER BY A.START_DATE]]>
+GROUP BY A.CASE_BLACK_NO, A.CASE_RED_NO, A.PROS_DESC, A.ACCU_DESC, A.ALLE_DESC, A.JUDGE_NAME, A.CASE_ID
+--
+ORDER BY A.CASE_ID]]>
 		</queryString>
 		<field name="CASE_BLACK_NO" class="java.lang.String">
 			<property name="com.jaspersoft.studio.field.label" value="CASE_BLACK_NO"/>
@@ -301,10 +303,10 @@ ORDER BY A.START_DATE]]>
 		</field>
 	</subDataset>
 	<parameter name="START_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["01/05/2021"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["01/01/2022"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="END_DATE" class="java.lang.String">
-		<defaultValueExpression><![CDATA["31/05/2021"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["31/01/2022"]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
 		<![CDATA[SELECT plc.COURT_NAME_TH,

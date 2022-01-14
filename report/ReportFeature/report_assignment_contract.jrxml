@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report_assignment_contract" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="87bc4d23-795c-4156-b9fe-974cc5b8f69c">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
@@ -18,9 +18,16 @@
 		<defaultValueExpression><![CDATA["04/09/2021"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT DISTINCT 
+		<![CDATA[--ชื่อศาล
+SELECT * FROM
+(SELECT plc.COURT_NAME_TH
+ FROM PC_PARAM pp
+ JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
+LEFT JOIN
+(
+SELECT DISTINCT 
     pb.CASE_ID,
-    NVL(cou.COURT_NAME_TH, '') COURT_NAME_TH, 
 	NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR)  BLACK_CASE_NO ,
 	NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || CASE WHEN pj.RED_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pj.RED_YEAR)     RED_CASE_NO ,
     pbb.FULLNAME ,
@@ -54,18 +61,14 @@ LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON
 	pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON
 	pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID 	AND pltc_r.REMOVED_BY = 0
---ชื่อศาล
-CROSS JOIN (SELECT plc.COURT_NAME_TH
-             FROM PC_PARAM pp
-             JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
-             WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
 WHERE 
 	pb.REMOVED_BY = 0
 	AND pb.IS_PRINTED = 1
 	AND pb.BAIL_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
                          AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
 ORDER BY
-	BLACK_CASE_NO ASC]]>
+	BLACK_CASE_NO ASC
+) ON 1 = 1]]>
 	</queryString>
 	<field name="CASE_ID" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="CASE_ID"/>
@@ -392,7 +395,7 @@ ORDER BY
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{BLACK_CASE_NO}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{BLACK_CASE_NO}==null?" ":$F{BLACK_CASE_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="70" y="0" width="50" height="30" uuid="df1ff9ea-b225-4da8-a2d1-9645a131328d"/>
@@ -405,7 +408,7 @@ ORDER BY
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{RED_CASE_NO}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{RED_CASE_NO}==null?" ":$F{RED_CASE_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="120" y="0" width="100" height="30" uuid="cd443cea-4621-4e13-aefd-5d257c76fc35">
@@ -420,7 +423,7 @@ ORDER BY
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{PROS_DESC}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{PROS_DESC}==null?" ":$F{PROS_DESC}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="220" y="0" width="100" height="30" uuid="dfc59eac-6eff-41cd-8887-3d43fd89dcf7">
@@ -435,7 +438,7 @@ ORDER BY
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ACCU_DESC}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{ACCU_DESC}==null?" ":$F{ACCU_DESC}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="320" y="0" width="113" height="30" uuid="f14fe072-ce30-4e39-90da-3bf7141b33fe"/>
@@ -448,7 +451,7 @@ ORDER BY
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ALLE_DESC}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{ALLE_DESC}==null?" ":$F{ALLE_DESC}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
