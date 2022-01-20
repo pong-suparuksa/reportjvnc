@@ -14,11 +14,11 @@
 	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_pay_newspaper"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="538"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="452"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="321"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="669"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_pay_newspaper_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/03/2021"]]></defaultValueExpression>
@@ -31,14 +31,17 @@
              ELSE pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR END CASE_BLACK_NO  --เลขคดีดำ
        ,CASE WHEN pj.RED_IDNUM IS NULL THEN ' '
              ELSE pltc_r.TITLE_CASE_NAME||pj.RED_IDNUM||'/'||pj.RED_YEAR END CASE_RED_NO --เลขคดีแดง
-       ,pc.PROS_DESC  --โจทก์
-       ,pc.ACCU_DESC  --จำเลย
+       ,CASE WHEN pc.PROS_DESC IS NOT NULL THEN pc.PROS_DESC||'(โจทก์)'END CLAIMANT  --โจทก์
+       ,CASE WHEN pc.ACCU_DESC IS NOT NULL THEN pc.ACCU_DESC||'(จำเลย)' END DEFENDANT  --จำเลย
        ,pn.NOTICE_REASON --เรื่อง
        ,pn.ADDRESS_PLACE --รายละเอียด
        ,pn.NOTICE_TYPE_NAME  -- ประเภท
        ,THAISDATE(pn.NOTICE_DATE) NOTICE_DATE --วันที่ประกาศ
        ,cou.COURT_NAME_TH
---       
+       --
+       ,CASE WHEN pt.LITIGANT_NAME IS NOT NULL THEN pt.LITIGANT_NAME||'('||pt.LIT_TYPE_DESC||')' END PETITIONER
+       ,CASE WHEN op.LITIGANT_NAME IS NOT NULL THEN op.LITIGANT_NAME||'('||op.LIT_TYPE_DESC||')' END OPPONENT
+	   --     
 FROM PC_NOTICE pn 
 --case
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID AND pc.REMOVED_BY = 0
@@ -51,6 +54,31 @@ LEFT JOIN (SELECT plc.COURT_NAME_TH
 			FROM PC_PARAM pp
 			JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
 			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 = 1 
+--
+LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME, pllt.LIT_TYPE_DESC  
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0
+		   WHERE pcl.REMOVED_BY = 0 
+		   AND pllt.LIT_TYPE_CODE = '05') pt ON pt.CASE_ID = pn.CASE_ID
+--
+LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME, pllt.LIT_TYPE_DESC  
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0
+		   WHERE pcl.REMOVED_BY = 0 
+		   AND pllt.LIT_TYPE_CODE = '06') op ON op.CASE_ID = pn.CASE_ID
+--
+LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME, pllt.LIT_TYPE_DESC  
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0
+		   WHERE pcl.REMOVED_BY = 0 
+		   AND pllt.LIT_TYPE_CODE = '05') pt ON pt.CASE_ID = pn.CASE_ID
+--
+LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME, pllt.LIT_TYPE_DESC  
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0
+		   WHERE pcl.REMOVED_BY = 0 
+		   AND pllt.LIT_TYPE_CODE = '06') op ON op.CASE_ID = pn.CASE_ID
+--
 WHERE pn.REMOVED_BY = 0
 AND pn.NOTICE_TYPE_CODE = '302'
 AND pn.NOTICE_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
@@ -63,11 +91,11 @@ ORDER BY pn.NOTICE_DATE]]>
 	<field name="CASE_RED_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="CASE_RED_NO"/>
 	</field>
-	<field name="PROS_DESC" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="PROS_DESC"/>
+	<field name="CLAIMANT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CLAIMANT"/>
 	</field>
-	<field name="ACCU_DESC" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="ACCU_DESC"/>
+	<field name="DEFENDANT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DEFENDANT"/>
 	</field>
 	<field name="NOTICE_REASON" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="NOTICE_REASON"/>
@@ -83,6 +111,12 @@ ORDER BY pn.NOTICE_DATE]]>
 	</field>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
+	</field>
+	<field name="PETITIONER" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PETITIONER"/>
+	</field>
+	<field name="OPPONENT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="OPPONENT"/>
 	</field>
 	<background>
 		<band splitType="Stretch"/>
@@ -202,7 +236,7 @@ ORDER BY pn.NOTICE_DATE]]>
 				<textElement textAlignment="Center">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<text><![CDATA[โจทก์]]></text>
+				<text><![CDATA[โจทก์/ผู้ร้อง]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="370" y="0" width="111" height="25" uuid="4b7674d4-6ae9-4abe-ae36-d01632f847cd">
@@ -236,7 +270,7 @@ ORDER BY pn.NOTICE_DATE]]>
 				<textElement textAlignment="Center">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<text><![CDATA[จำเลย]]></text>
+				<text><![CDATA[จำเลย/ผู้คัดค้าน]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="481" y="0" width="95" height="25" uuid="157e74d7-db28-4b18-aa02-ba449a68ed3d">
@@ -368,7 +402,9 @@ ORDER BY pn.NOTICE_DATE]]>
 				<textElement>
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{PROS_DESC}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{CLAIMANT} == null ? " " : $F{CLAIMANT}+"\n") +
+($F{PETITIONER}==null?" ":$F{PETITIONER})
+]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="370" y="0" width="111" height="25" uuid="6f2d7650-27ed-425d-b65a-af0d70f01b3f">
@@ -402,7 +438,9 @@ ORDER BY pn.NOTICE_DATE]]>
 				<textElement>
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ACCU_DESC}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[
+($F{DEFENDANT} == null ? " " : $F{DEFENDANT}+"\n")+
+($F{OPPONENT}==null?" ":$F{OPPONENT})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="481" y="0" width="95" height="25" uuid="7fb97607-dc5a-409f-9b5b-9d954ac1989b">

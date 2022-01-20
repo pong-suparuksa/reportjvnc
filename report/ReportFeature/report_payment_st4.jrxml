@@ -3,9 +3,12 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report_payment_st4" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="487f9c12-faf0-4592-ba10-670c6c035660">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/ReportFeature/report_payment_st4"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/ReportFeature/report_payment_st4_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/01/2021"]]></defaultValueExpression>
 	</parameter>
@@ -13,26 +16,40 @@
 		<defaultValueExpression><![CDATA["10/10/2021"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT distinct NVL(cou.COURT_NAME_TH, '') COURT_NAME_TH,
-c.case_id, NVL(tcb.TITLE_CASE_NAME,' ') ||  TO_CHAR(c.BLACK_IDNUM) || '/' || TO_CHAR(c.BLACK_YEAR)  BLACK_CASE_NO ,
-bb.AMOUNT , ba.INSTALLMENT_COUNT , ba.INSTALLMENT_AMOUNT ,bb.REMAIN_AMOUNT , pbb.FULLNAME ,
-CASE WHEN ba.INSTALLMENT_COUNT = 1 THEN  'ขอลด' ELSE 'ขอผ่อน'END COURT_ORDER, bb.AMOUNT - bb.REMAIN_AMOUNT  PAID_AMOUNT 
+		<![CDATA[SELECT * FROM 
+(SELECT plc.COURT_NAME_TH
+ FROM PC_PARAM pp
+ JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+ WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
+LEFT JOIN
+(
+SELECT DISTINCT 
+	c.case_id
+	,NVL(tcb.TITLE_CASE_NAME,' ') ||  TO_CHAR(c.BLACK_IDNUM) || '/' || TO_CHAR(c.BLACK_YEAR)  BLACK_CASE_NO 
+	,bb.AMOUNT 
+	,ba.INSTALLMENT_COUNT 
+	,ba.INSTALLMENT_AMOUNT 
+	,bb.REMAIN_AMOUNT 
+	,pbb.FULLNAME 
+	,CASE WHEN ba.INSTALLMENT_COUNT = 1 THEN  'ขอลด' ELSE 'ขอผ่อน'END COURT_ORDER
+	,bb.AMOUNT - bb.REMAIN_AMOUNT  PAID_AMOUNT 
+	,TO_CHAR(ba.REQUEST_DATE , 'fmdd Mon yyyy', 'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI') REQUEST_DATE
+	,TO_CHAR(ba.ORDER_DATE , 'fmdd Mon yyyy', 'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI') ORDER_DATE
+--	
 FROM PC_BAIL_BAILSMAN_BREACH bb
 JOIN PC_BAIL_BREACH_ADJUST ba ON (bb.BREACH_ID = ba.BREACH_ID AND ba.REQUEST_TYPE = 1 AND ba.REMOVED_BY = 0 AND ba.IS_ALLOWED = 1)
 JOIN PC_BAIL b ON (b.BAIL_ID = bb.BAIL_ID AND b.REMOVED_BY = 0)
 LEFT JOIN PC_CASE c ON (c.CASE_ID = b.CASE_ID AND c.REMOVED_BY = 0)
 LEFT JOIN PC_LOOKUP_TITLE_CASE tcb ON (c.black_title_id = tcb.title_case_id  AND tcb.REMOVED_BY = 0)
 LEFT JOIN PC_BAIL_BAILSMAN pbb ON pbb.BAIL_ID = bb.BAIL_ID AND pbb.REMOVED_BY = 0
---ชื่อศาล
-CROSS JOIN (SELECT plc.COURT_NAME_TH
-             FROM PC_PARAM pp
-             JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
-             WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
+--
 WHERE bb.REMOVED_BY = 0
 AND bb.BREACH_STATUS = 'A'
-AND bb.BREACH_DATE BETWEEN TO_DATE( $P{START_DATE}  || 'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') AND TO_DATE(  $P{END_DATE}  || 'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
-ORDER BY 
-	BLACK_CASE_NO]]>
+AND bb.BREACH_DATE BETWEEN TO_DATE( $P{START_DATE}  || 'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                       AND TO_DATE(  $P{END_DATE}  || 'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+AND b.IS_PRINTED = 1
+ORDER BY BLACK_CASE_NO
+) ON 1 = 1]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
@@ -46,7 +63,7 @@ ORDER BY
 	<field name="AMOUNT" class="java.lang.Double">
 		<property name="com.jaspersoft.studio.field.label" value="AMOUNT"/>
 	</field>
-	<field name="INSTALLMENT_COUNT" class="java.lang.Integer">
+	<field name="INSTALLMENT_COUNT" class="java.lang.Double">
 		<property name="com.jaspersoft.studio.field.label" value="INSTALLMENT_COUNT"/>
 	</field>
 	<field name="INSTALLMENT_AMOUNT" class="java.lang.Double">
@@ -64,6 +81,12 @@ ORDER BY
 	<field name="PAID_AMOUNT" class="java.lang.Double">
 		<property name="com.jaspersoft.studio.field.label" value="PAID_AMOUNT"/>
 	</field>
+	<field name="REQUEST_DATE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="REQUEST_DATE"/>
+	</field>
+	<field name="ORDER_DATE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="ORDER_DATE"/>
+	</field>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -74,7 +97,7 @@ ORDER BY
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="14" isBold="true"/>
 				</textElement>
-				<text><![CDATA[รายงานประกันตัวชั่วคราว แบบผ่อนชำระ สท.4]]></text>
+				<text><![CDATA[รายงาน กรณีนายประกันผิดสัญญามอบตัว แบบผ่อนชำระ สท.4]]></text>
 			</staticText>
 			<textField>
 				<reportElement x="103" y="30" width="554" height="30" uuid="56c7b3ce-5877-4d35-a8b1-b503f8dc5ed0"/>
@@ -203,7 +226,7 @@ ORDER BY
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<text><![CDATA[อัตราการผ่อนชำระ]]></text>
+				<text><![CDATA[จำนวนงวด]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="495" y="14" width="64" height="30" uuid="127c2a6e-8e1a-46e5-8c68-7f0e56a1c7fb"/>
@@ -280,7 +303,7 @@ ORDER BY
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{REQUEST_DATE}==null?" ":$F{REQUEST_DATE}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="125" y="0" width="90" height="30" uuid="c049f702-5908-4813-b1d8-22d9b7d187d5"/>
@@ -293,7 +316,7 @@ ORDER BY
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{FULLNAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{FULLNAME}==null?" ":$F{FULLNAME}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="65" y="0" width="60" height="30" uuid="da809718-984b-4597-9cd8-d54ceeca028c"/>
@@ -334,7 +357,7 @@ ORDER BY
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{ORDER_DATE}==null?" ":$F{ORDER_DATE}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="435" y="0" width="60" height="30" uuid="98fc3b61-4c33-4e20-95fa-8e7c3c3ce371">
@@ -349,7 +372,7 @@ ORDER BY
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{INSTALLMENT_COUNT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{INSTALLMENT_COUNT}==null?"0":$F{INSTALLMENT_COUNT}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="495" y="0" width="64" height="30" uuid="34ea503c-7dc7-4e86-a818-5cc08f582dbb">

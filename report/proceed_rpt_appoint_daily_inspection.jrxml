@@ -2,7 +2,7 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="proceed_rpt_appoint_daily_inspection" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="91e475d7-d1e6-46cb-8b6b-dde87b1765a0">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-210"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
@@ -12,102 +12,169 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_daily_inspection"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="315"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="680"/>
 	<property name="com.jaspersoft.studio.report.description" value=""/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="534"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="459"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_daily_inspection_files/main_jrxml"/>
 	<parameter name="SELECT_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["03/03/2021"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="ROOM_COD" class="java.lang.String"/>
+	<parameter name="TABLE_CODE" class="java.lang.String">
+		<defaultValueExpression><![CDATA["0"]]></defaultValueExpression>
+	</parameter>
 	<queryString language="SQL">
-		<![CDATA[SELECT
-PCC.CASE_ID,
-    PCPAC.START_DATE   AS  APPOINT_DATE,   
-    CASE WHEN PCC.BLACK_IDNUM IS NOT NULL 
-		     THEN PCLTS.TITLE_CASE_NAME||PCC.BLACK_IDNUM||'/'||PCC.BLACK_YEAR 
-		     ELSE '-' END CASE_BLACE_NO, 
-	CASE WHEN PCJM.RED_IDNUM IS NOT NULL
-		     THEN PCLTS_R.TITLE_CASE_NAME||PCJM.RED_IDNUM||'/'||PCJM.RED_YEAR 
-		     ELSE '-' END CASE_RED_NO,
-    PCPAC.CHOICE_TIME                   AS  APPOINT_TIME,   
-		NVL(PCC.PROS_DESC,'') AS CLAIMANT,
-		NVL(PCC.ACCU_DESC ,'') AS DEFENDANT,
-	    NVL(PCC.ALLE_DESC,'') AS TOPIC,
-	     NVL(pllr.LEVEL_ROOM_DESC ,'') AS LEVEL_ROOM_DESC,
-	      NVL(PCLAR.APPOINT_REASON_NAME  ,'-') AS APPOINT_REASON,
-    IDIOM_OWNER.JUDGE_NAME				AS IDIOM_OWNER,
-    IDIOM_ORGANIZATION1.JUDGE_NAME		AS IDIOM_ORGANIZATION1,
-    IDIOM_ORGANIZATION2.JUDGE_NAME		AS IDIOM_ORGANIZATION2,
-    ASSOCIATE_JUDGE.JUDGE_NAME			AS ASSOCIATE_JUDGE,
-    (COALESCE(PCPA.INVESTIGATE_ACCUSER_CONFESSION ,0)+ COALESCE(PCPA.INVESTIGATE_ACCUSER,0) + COALESCE(PCPA.INVESTIGATE_DEFENDANT,0) + COALESCE(PCPA.INVESTIGATE_OTHER,0)) AS INVESTIGATE,
-    (COALESCE(PCPA.INVESTIGATE_ACCUSER_CONFESSION_DATE,0)+ COALESCE(PCPA.INVESTIGATE_ACCUSER_DATE,0) + COALESCE(PCPA.INVESTIGATE_DEFENDANT_DATE,0) + COALESCE(PCPA.INVESTIGATE_OTHER_DATE,0)) AS INVESTIGATE_DATE
-    ,PCPACNT.APPOINT_NEXT_DATE
-    ,PCPACNT.APPOINT_NEXT_REASON
-    --
-	FROM PC_PROCEED_APPOINT PCPA
-    JOIN PC_PROCEED_APPOINT_CONTINUE PCPAC ON PCPA.APPOINT_ID = PCPAC.APPOINT_ID AND PCPAC.REMOVED_BY = 0 
-    LEFT JOIN PC_CASE PCC ON PCPA.CASE_ID = PCC.CASE_ID    
-    LEFT JOIN PC_JUDGEMENT PCJM ON PCC.CASE_ID = PCJM.CASE_ID
-    LEFT JOIN PC_LOOKUP_TITLE_CASE PCLTS ON PCLTS.TITLE_CASE_ID = PCC.BLACK_TITLE_ID
-    LEFT JOIN PC_LOOKUP_TITLE_CASE PCLTS_R ON PCLTS_R.TITLE_CASE_ID = PCJM.RED_TITLE_ID AND PCLTS_R.REMOVED_BY = 0    
-    LEFT JOIN PC_LOOKUP_APPOINT_REASON PCLAR ON PCPAC.REASON_APPOINT_ID = PCLAR.APPOINT_REASON_ID
-    LEFT JOIN 
-    (
-	    SELECT pcj.CASE_ID ,pljt.JUDGE_TYPE_NAME,plj.JUDGE_NAME ,pljt.JUDGE_TYPE_CODE
-		FROM PC_CASE_JUDGE pcj  
-		LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID
-		LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID 
-		WHERE pcj.REMOVED_BY = 0
-		GROUP BY pcj.CASE_ID ,pljt.JUDGE_TYPE_NAME,plj.JUDGE_NAME ,pljt.JUDGE_TYPE_CODE
-	) IDIOM_OWNER ON IDIOM_OWNER.CASE_ID = PCC.CASE_ID AND IDIOM_OWNER.JUDGE_TYPE_CODE ='01' -- เจ้าของสำนวน
-	LEFT JOIN (
-	    SELECT pcj.CASE_ID ,pljt.JUDGE_TYPE_NAME,plj.JUDGE_NAME ,pljt.JUDGE_TYPE_CODE
-		FROM PC_CASE_JUDGE pcj  
-		LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID
-		LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID 
-		WHERE pcj.REMOVED_BY = 0
-		GROUP BY pcj.CASE_ID ,pljt.JUDGE_TYPE_NAME,plj.JUDGE_NAME ,pljt.JUDGE_TYPE_CODE
-	) IDIOM_ORGANIZATION1 ON IDIOM_ORGANIZATION1.CASE_ID = PCC.CASE_ID AND IDIOM_ORGANIZATION1.JUDGE_TYPE_CODE ='05' --องค์คณะผู้ตัดสิน1
-	LEFT JOIN (
-	    SELECT pcj.CASE_ID ,pljt.JUDGE_TYPE_NAME,plj.JUDGE_NAME ,pljt.JUDGE_TYPE_CODE
-		FROM PC_CASE_JUDGE pcj  
-		LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID
-		LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID 
-		WHERE pcj.REMOVED_BY = 0
-		GROUP BY pcj.CASE_ID ,pljt.JUDGE_TYPE_NAME,plj.JUDGE_NAME ,pljt.JUDGE_TYPE_CODE
-	)  IDIOM_ORGANIZATION2 ON IDIOM_ORGANIZATION2.CASE_ID = PCC.CASE_ID AND IDIOM_ORGANIZATION2.JUDGE_TYPE_CODE ='06' --องค์คณะผู้ตัดสิน1
-    LEFT JOIN (
-	    SELECT pcj.CASE_ID ,pljt.JUDGE_TYPE_NAME,plj.JUDGE_NAME ,pljt.JUDGE_TYPE_CODE
-		FROM PC_CASE_JUDGE pcj  
-		LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID
-		LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID 
-		WHERE pcj.REMOVED_BY = 0
-		GROUP BY pcj.CASE_ID ,pljt.JUDGE_TYPE_NAME,plj.JUDGE_NAME ,pljt.JUDGE_TYPE_CODE
-	)  ASSOCIATE_JUDGE ON ASSOCIATE_JUDGE.CASE_ID = PCC.CASE_ID AND ASSOCIATE_JUDGE.JUDGE_TYPE_CODE ='08' --ผู้พิพากษาสมทบ
-    --
-	LEFT JOIN PC_LOOKUP_LEVEL_ROOM pllr ON pllr.LEVEL_ROOM_ID = PCPAC.LEVEL_ROOM_CODE AND pllr.REMOVED_BY = 0
-	--
-	LEFT JOIN (
-	  SELECT PCPACN.APPOINT_ID ,PCPACN.START_DATE AS  APPOINT_NEXT_DATE, PCLARN.APPOINT_REASON_NAME AS  APPOINT_NEXT_REASON ,ROW_NUMBER() OVER (PARTITION BY PCPACN.APPOINT_ID ORDER BY PCPACN.START_DATE DESC) AS rn
-	  FROM PC_PROCEED_APPOINT_CONTINUE PCPACN 	
-	  LEFT JOIN PC_LOOKUP_APPOINT_REASON PCLARN ON PCPACN.REASON_APPOINT_ID = PCLARN.APPOINT_REASON_ID
-	  WHERE PCPACN.START_DATE > TO_DATE($P{SELECT_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS') AND PCPACN.REMOVED_BY = 0 
-	  --FETCH FIRST 1 ROWS ONLY	  
-	  ) PCPACNT ON PCPACNT.APPOINT_ID = PCPA.APPOINT_ID AND PCPACNT.rn = 1
-	  --
-	WHERE PCPA.REMOVED_BY = 0 AND PCC.CASE_ID IS NOT NULL 
-	AND PCPAC.START_DATE = TO_DATE($P{SELECT_DATE} ||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS')
-	AND ($P{ROOM_COD} IS NULL OR pllr.LEVEL_ROOM_CODE = $P{ROOM_COD})]]>
+		<![CDATA[SELECT DISTINCT 
+	pc.CASE_ID
+    ,ppac.START_DATE   AS  APPOINT_DATE  
+    ,CASE WHEN pc.BLACK_IDNUM IS NOT NULL 
+		     THEN pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR 
+		     ELSE '-' END CASE_BLACK_NO 
+	,CASE WHEN pj.RED_IDNUM IS NOT NULL
+		     THEN pltc_r.TITLE_CASE_NAME||pj.RED_IDNUM||'/'||pj.RED_YEAR 
+		     ELSE '-' END CASE_RED_NO
+    ,ppac.CHOICE_TIME                   AS  APPOINT_TIME   
+    ,NVL(pc.PROS_DESC, c.COMPLAINANT)  AS CLAIMANT
+	,NVL(pc.ACCU_DESC, d.DEFENDANT)  AS DEFENDANT
+	,NVL(pc.ALLE_DESC,'')  AS TOPIC
+	,NVL(pllr.LEVEL_ROOM_DESC ,'') AS LEVEL_ROOM_DESC
+	,NVL(plal.APPOINT_LIST_NAME  ,'-') AS APPOINT_REASON
+    ,j.JUDGE_NAME AS IDIOM_OWNER
+    ,j.ONG_1      AS IDIOM_ORGANIZATION1
+    ,j.ONG_2      AS IDIOM_ORGANIZATION2
+    ,j.ADD_1      AS ASSOCIATE_JUDGE   
+    ,apd.WITNESS  AS INVESTIGATE
+    ,apd.PAGES    AS INVESTIGATE_DATE
+    ,ap_next.APPOINT_DATE     AS APPOINT_NEXT_DATE
+    ,ap_next.APPOINT_REASON   AS APPOINT_NEXT_REASON
+    ,cou.COURT_NAME_TH
+    ,sub.REMARK
+FROM PC_PROCEED_APPOINT_CONTINUE ppac 
+LEFT JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID AND ppa.REMOVED_BY = 0
+LEFT JOIN PC_PROCEED_APPOINT_TABLE ppat ON ppat.APPOINT_TABLE_CODE = ppa.APPOINT_TABLE_CODE AND ppat.REMOVED_BY = 0
+--witness
+LEFT JOIN (SELECT pprw.APPOINT_CON_ID
+				  ,NVL(pprw.WITNESS_DEFENDANT_COUNT,0)+NVL(pprw.WITNESS_DISSENTER_COUNT,0)+NVL(pprw.WITNESS_OTHER_COUNT,0)+NVL(pprw.WITNESS_PLAINTIFF_COUNT,0)+NVL(pprw.WITNESS_REQUESTER_COUNT,0) WITNESS	  
+				  ,NVL(pprw.WITNESS_DEFENDANT_PAGE,0)+NVL(pprw.WITNESS_DISSENTER_PAGE,0)+NVL(pprw.WITNESS_OTHER_DAY,0)+NVL(pprw.WITNESS_PLAINTIFF_PAGE,0)+NVL(pprw.WITNESS_REQUESTER_PAGE,0) PAGES  
+			FROM PC_PROCEED_RECORD_WITNESS pprw
+			JOIN (SELECT pprw.APPOINT_CON_ID 
+						 ,MAX(pprw.RECORD_DATE)  RECORD_DATE 
+						 ,MAX(pprw.CREATED_DATE) CREATED_DATE
+				  FROM PC_PROCEED_RECORD_WITNESS pprw
+				  WHERE pprw.REMOVED_BY = 0
+				  GROUP BY pprw.APPOINT_CON_ID) mx ON mx.APPOINT_CON_ID = pprw.APPOINT_CON_ID 
+				                                  AND mx.RECORD_DATE = pprw.RECORD_DATE 
+				                                  AND mx.CREATED_DATE = pprw.CREATED_DATE 			
+				  WHERE pprw.REMOVED_BY = 0) apd ON apd.APPOINT_CON_ID = ppac.APPOINT_CON_ID
+--
+LEFT JOIN PC_LOOKUP_LEVEL_ROOM pllr ON pllr.LEVEL_ROOM_ID = ppac.LEVEL_ROOM_CODE AND pllr.REMOVED_BY = 0
+--lookup proceed
+LEFT JOIN PC_LOOKUP_APPOINT_LIST plal ON plal.APPOINT_LIST_ID = ppac.REASON_APPOINT_ID AND plal.REMOVED_BY = 0
+
+LEFT JOIN PC_LOOKUP_LEVEL_ROOM pllr ON pllr.LEVEL_ROOM_ID = ppac.LEVEL_ROOM_CODE AND pllr.REMOVED_BY = 0    
+--case
+LEFT JOIN PC_CASE pc ON pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
+--judgement
+LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
+--judge in duty
+LEFT JOIN (SELECT A.CASE_ID
+				,CASE WHEN A.TEMPORARY_JUDGE_FLAG IN (3,32) THEN 'continuous'
+					  WHEN A.TEMPORARY_JUDGE_FLAG IN (4,42) THEN 'special' END APPOINT_TABLE_TYPE
+				,LISTAGG((CASE WHEN  A.JUDGE_TYPE_CODE = '01' THEN A.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  A.JUDGE_TYPE_CODE = '01' THEN A.JUDGE_NAME END)) JUDGE_NAME
+				,LISTAGG((CASE WHEN  A.JUDGE_TYPE_CODE = '02' THEN A.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  A.JUDGE_TYPE_CODE = '02' THEN A.JUDGE_NAME END)) ONG_1
+				,LISTAGG((CASE WHEN  A.JUDGE_TYPE_CODE = '03' THEN A.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  A.JUDGE_TYPE_CODE = '03' THEN A.JUDGE_NAME END)) ONG_2
+				,LISTAGG((CASE WHEN  A.JUDGE_TYPE_CODE = '12' THEN A.JUDGE_NAME END),', ') WITHIN GROUP(ORDER BY (CASE WHEN  A.JUDGE_TYPE_CODE = '12' THEN A.JUDGE_NAME END)) ADD_1
+				,A.JUDGE_START_DATE
+				,A.JUDGE_END_DATE
+				FROM
+				(
+					SELECT DISTINCT
+						   pcj.CASE_ID
+					       ,plj.JUDGE_NAME 
+					       ,pljt.JUDGE_TYPE_CODE 
+					       ,pcj.TEMPORARY_JUDGE_FLAG 
+					       ,pcj.JUDGE_START_DATE
+					       ,pcj.JUDGE_END_DATE 
+					FROM PC_CASE_JUDGE pcj 
+					LEFT JOIN PC_LOOKUP_JUDGE plj ON plj.JUDGE_ID = pcj.JUDGE_ID AND plj.REMOVED_BY = 0
+					LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+					WHERE pcj.REMOVED_BY = 0
+					AND pcj.JUDGE_END_DATE IS NULL
+				) A 
+				GROUP BY A.CASE_ID 
+						 ,CASE WHEN A.TEMPORARY_JUDGE_FLAG IN (3,32) THEN 'continuous' 
+				               WHEN A.TEMPORARY_JUDGE_FLAG IN (4,42) THEN 'special' END
+				 		 ,A.JUDGE_END_DATE
+				 		 ,A.JUDGE_START_DATE
+				         ,A.JUDGE_END_DATE
+			) j ON j.CASE_ID = ppa.CASE_ID AND j.APPOINT_TABLE_TYPE = ppat.APPOINT_TABLE_TYPE			
+--next appoint
+LEFT JOIN (SELECT ppa.CASE_ID
+			      ,LISTAGG(TO_CHAR(ppac.START_DATE, 'fmdd MON yy', 'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI'),' และ ') WITHIN GROUP(ORDER BY ppa.CASE_ID, ppac.START_DATE) APPOINT_DATE
+			      ,LISTAGG(plal.APPOINT_LIST_NAME,' และ ') WITHIN GROUP(ORDER BY ppa.CASE_ID, ppac.START_DATE)  APPOINT_REASON
+			FROM PC_PROCEED_APPOINT_CONTINUE ppac 
+			JOIN PC_PROCEED_APPOINT ppa ON ppa.APPOINT_ID = ppac.APPOINT_ID AND ppac.REMOVED_BY = 0
+			LEFT JOIN PC_LOOKUP_APPOINT_LIST plal ON plal.APPOINT_LIST_ID = ppac.REASON_APPOINT_ID AND plal.REMOVED_BY = 0
+			WHERE ppac.REMOVED_BY = 0
+			AND ppac.START_DATE > TO_DATE($P{SELECT_DATE}, 'DD/MM/YYYY')
+			GROUP BY ppa.CASE_ID
+			) ap_next ON ap_next.CASE_ID = ppa.CASE_ID
+--court
+LEFT JOIN (SELECT plc.COURT_NAME_TH
+			FROM PC_PARAM pp
+			JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 = 1
+--complainant
+LEFT JOIN (SELECT pcl.CASE_ID ,pcl.LITIGANT_NAME  COMPLAINANT
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0 AND pllt.LIT_TYPE_CODE = '05'
+		   WHERE pcl.REMOVED_BY = 0) c ON c.CASE_ID = ppa.CASE_ID
+--defendant
+LEFT JOIN (SELECT pcl.CASE_ID ,pcl.LITIGANT_NAME  DEFENDANT
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0 AND pllt.LIT_TYPE_CODE = '06'
+		   WHERE pcl.REMOVED_BY = 0) d ON d.CASE_ID = ppa.CASE_ID	
+--sub case
+LEFT JOIN (SELECT s.HEAD_GROUP_CASE_ID
+			      ,LISTAGG (s.GROUP_TYPE_NAME||': '||s.SUB_CASE_NO,',') WITHIN GROUP(ORDER BY s.HEAD_GROUP_CASE_ID) REMARK
+		   FROM (SELECT pcg.HEAD_GROUP_CASE_ID ,pcgt.GROUP_TYPE_NAME
+				        ,LISTAGG(pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR, ',') WITHIN GROUP(ORDER BY pcg.HEAD_GROUP_CASE_ID) SUB_CASE_NO
+			    FROM PC_CASE_GROUP pcg
+			    JOIN PC_CASE_GROUP_TYPE pcgt ON pcgt.CASE_GROUP_TYPE_ID = pcg.CASE_GROUP_TYPE_ID AND pcgt.REMOVED_BY = 0
+			    --case
+			    JOIN PC_CASE pc ON pc.CASE_ID = pcg.CASE_ID AND pc.REMOVED_BY = 0
+			    JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
+			    WHERE pcg.REMOVED_BY = 0
+			    AND pltc_b.TITLE_CASE_NAME NOT IN ('มต','ตจ','มต.','ตจ.')	
+			    GROUP BY pcg.HEAD_GROUP_CASE_ID ,pcgt.GROUP_TYPE_NAME) s
+		   GROUP BY s.HEAD_GROUP_CASE_ID) sub ON sub.HEAD_GROUP_CASE_ID = ppa.CASE_ID
+--
+WHERE ppac.REMOVED_BY = 0
+AND ppac.START_DATE = TO_DATE($P{SELECT_DATE}, 'DD/MM/YYYY')
+AND ($P{ROOM_COD} IS NULL OR pllr.LEVEL_ROOM_CODE = $P{ROOM_COD})
+AND NOT EXISTS(SELECT 1 FROM PC_PROCEED_APPOINT_CONTINUE WHERE REF_APPOINT_CON_ID = ppac.APPOINT_CON_ID)
+AND (
+	  ppat.APPOINT_TABLE_CODE IN (SELECT REGEXP_SUBSTR($P{TABLE_CODE}, '[^,]+', 1, LEVEL) FROM DUAL CONNECT BY REGEXP_SUBSTR($P{TABLE_CODE}, '[^,]+', 1, LEVEL) IS NOT NULL) 
+	  OR 
+	  '0' IN (SELECT REGEXP_SUBSTR($P{TABLE_CODE}, '[^,]+', 1, LEVEL) FROM DUAL CONNECT BY REGEXP_SUBSTR($P{TABLE_CODE}, '[^,]+', 1, LEVEL) IS NOT NULL)
+	)
+AND pltc_b.TITLE_CASE_NAME NOT IN ('มต','ตจ','มต.','ตจ.')]]>
 	</queryString>
-	<field name="APPOINT_DATE" class="java.lang.String">
+	<field name="CASE_ID" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="CASE_ID"/>
+	</field>
+	<field name="APPOINT_DATE" class="java.util.Date">
 		<property name="com.jaspersoft.studio.field.label" value="APPOINT_DATE"/>
 	</field>
-	<field name="CASE_BLACE_NO" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="CASE_BLACE_NO"/>
+	<field name="CASE_BLACK_NO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CASE_BLACK_NO"/>
 	</field>
 	<field name="CASE_RED_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="CASE_RED_NO"/>
@@ -142,10 +209,10 @@ PCC.CASE_ID,
 	<field name="ASSOCIATE_JUDGE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="ASSOCIATE_JUDGE"/>
 	</field>
-	<field name="INVESTIGATE" class="java.lang.String">
+	<field name="INVESTIGATE" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="INVESTIGATE"/>
 	</field>
-	<field name="INVESTIGATE_DATE" class="java.lang.String">
+	<field name="INVESTIGATE_DATE" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="INVESTIGATE_DATE"/>
 	</field>
 	<field name="APPOINT_NEXT_DATE" class="java.lang.String">
@@ -153,6 +220,12 @@ PCC.CASE_ID,
 	</field>
 	<field name="APPOINT_NEXT_REASON" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="APPOINT_NEXT_REASON"/>
+	</field>
+	<field name="COURT_NAME_TH" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
+	</field>
+	<field name="REMARK" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="REMARK"/>
 	</field>
 	<background>
 		<band splitType="Stretch"/>
@@ -168,13 +241,13 @@ PCC.CASE_ID,
 				</textElement>
 				<textFieldExpression><![CDATA["วันนัดพิจารณา  " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{SELECT_DATE}))]]></textFieldExpression>
 			</textField>
-			<staticText>
-				<reportElement x="229" y="0" width="337" height="24" uuid="9a7b53d1-8348-4c84-8488-4f3b4e87bffd"/>
+			<textField>
+				<reportElement x="0" y="0" width="802" height="24" uuid="37fd3b27-5679-4d1a-a50d-8353c2c082a9"/>
 				<textElement textAlignment="Center">
 					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
-				<text><![CDATA[บัญชีนัดความ เสนอผู้พิพากษาหัวหน้าศาลฯ ตรวจ]]></text>
-			</staticText>
+				<textFieldExpression><![CDATA["บัญชีนัดความ (หลังการพิจารณา) เสนอผู้พิพากษาหัวหน้า"+($F{COURT_NAME_TH}==null?"ศาล":$F{COURT_NAME_TH} )+"ตรวจ"]]></textFieldExpression>
+			</textField>
 		</band>
 	</title>
 	<columnHeader>
@@ -202,7 +275,7 @@ PCC.CASE_ID,
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="13"/>
 				</textElement>
-				<text><![CDATA[โจทก์]]></text>
+				<text><![CDATA[โจทก์/ผู้ร้อง]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="210" y="0" width="70" height="40" uuid="13cdb012-00b3-491f-a9f4-f598546e125e">
@@ -214,7 +287,7 @@ PCC.CASE_ID,
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="13"/>
 				</textElement>
-				<text><![CDATA[จำเลย]]></text>
+				<text><![CDATA[จำเลย/ผู้คัดค้าน]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="610" y="25" width="30" height="15" uuid="196d9840-bcc0-42ff-8428-064619fb5a77">
@@ -251,7 +324,7 @@ PCC.CASE_ID,
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="13"/>
 				</textElement>
-				<text><![CDATA[สาเหตุนัด]]></text>
+				<text><![CDATA[สาเหตุที่นัด]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="720" y="25" width="50" height="15" uuid="fc476490-fee2-4c01-984c-2d03d3c69a9c">
@@ -264,7 +337,7 @@ PCC.CASE_ID,
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="11"/>
 				</textElement>
-				<text><![CDATA[สาเหตุนัด]]></text>
+				<text><![CDATA[สาเหตุที่นัด]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="670" y="25" width="50" height="15" uuid="5bb3235c-2c22-490f-b682-7ea149f279f4">
@@ -329,7 +402,7 @@ PCC.CASE_ID,
 					<font fontName="THSarabunNew" size="13"/>
 				</textElement>
 				<text><![CDATA[ผู้พิพากษา
-สมทบ]]></text>
+สมทบ 2]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="770" y="0" width="40" height="40" uuid="51c97b5b-6e5e-41ab-aff1-f7a6fc434733">
@@ -355,7 +428,7 @@ PCC.CASE_ID,
 					<font fontName="THSarabunNew" size="13"/>
 				</textElement>
 				<text><![CDATA[องค์คณะ
-ผู้ตัดสิน1]]></text>
+ผู้ตัดสิน 1]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="500" y="0" width="55" height="40" uuid="8d0e37ba-1c79-48d8-87d9-844b5a26c920">
@@ -368,8 +441,8 @@ PCC.CASE_ID,
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="13"/>
 				</textElement>
-				<text><![CDATA[องค์คณะ
-ผู้ตัดสิน2]]></text>
+				<text><![CDATA[ผู้พิพากษา
+สมทบ 1]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="280" y="0" width="55" height="40" uuid="6e680be3-e7bc-4fec-b1ee-503b0f12e4f3">
@@ -438,7 +511,7 @@ PCC.CASE_ID,
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CASE_BLACE_NO}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="60" y="0" width="40" height="25" uuid="297b7a8b-0331-4c6b-aa5e-36ab7263654b">
@@ -559,7 +632,7 @@ PCC.CASE_ID,
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{APPOINT_NEXT_DATE} == null ?  ""  : new SimpleDateFormat("dd/MM/yyyy", new Locale("th", "TH")).format(new SimpleDateFormat("yyyy-MM-dd").parse( $F{APPOINT_NEXT_DATE}))]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{APPOINT_NEXT_DATE}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="770" y="0" width="40" height="25" uuid="da5d700e-d98d-43b6-9d81-3614e4c1ec07">
@@ -572,6 +645,7 @@ PCC.CASE_ID,
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
+				<textFieldExpression><![CDATA[$F{REMARK}==null?" ":$F{REMARK}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="-10" y="0" width="30" height="25" uuid="e284b8e5-af1b-44ea-a752-457e7a3e8172">
@@ -584,7 +658,7 @@ PCC.CASE_ID,
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{COLUMN_COUNT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="445" y="0" width="55" height="25" uuid="5b5a35c1-65fa-4566-b852-089ee6d3fc19">
@@ -597,7 +671,7 @@ PCC.CASE_ID,
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{IDIOM_ORGANIZATION1}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{ASSOCIATE_JUDGE}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="500" y="0" width="55" height="25" uuid="ea0ea514-702c-4299-8e5f-8ec6b1890ac6">
@@ -610,7 +684,7 @@ PCC.CASE_ID,
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{IDIOM_ORGANIZATION2}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{IDIOM_ORGANIZATION1}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="555" y="0" width="55" height="25" uuid="d952968a-1076-4aec-b1bd-de0274ca784f">
@@ -623,7 +697,7 @@ PCC.CASE_ID,
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ASSOCIATE_JUDGE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{IDIOM_ORGANIZATION2}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement stretchType="ContainerHeight" x="640" y="0" width="30" height="25" uuid="0f71562d-8a1a-422f-90c6-05d63724d7dc">
@@ -654,4 +728,23 @@ PCC.CASE_ID,
 			</textField>
 		</band>
 	</detail>
+	<summary>
+		<band height="25">
+			<textField>
+				<reportElement x="-10" y="0" width="820" height="25" uuid="2a7b7247-d717-437e-b236-0b301d909f31">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["รวม "+$V{REPORT_COUNT}+" เรื่อง"]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
 </jasperReport>

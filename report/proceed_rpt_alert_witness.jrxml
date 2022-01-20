@@ -17,6 +17,7 @@
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_alert_witness"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="315"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="680"/>
+	<property name="com.jaspersoft.studio.report.description" value=""/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_alert_witness_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/02/2021"]]></defaultValueExpression>
@@ -36,14 +37,14 @@
 		,THAISDATE(ppac.START_DATE) APPOINT_DATE 
 		,ppac.CHOICE_TIME AS APPOINT_TIME
 		--
-		,pc.PROS_DESC
-		,pc.ACCU_DESC
+        ,NVL(pc.PROS_DESC, c.COMPLAINANT) PROS_DESC
+        ,NVL(pc.ACCU_DESC, d.DEFENDANT) ACCU_DESC
 		,pc.ALLE_DESC 
 		--
 		,ppac.REASON_APPOINT_ID 
 		,plal.APPOINT_LIST_NAME APPOINT_REASON_NAME
         ,COUNT(ppawa.APPOINT_CON_ID) COUNT_ALERT_WITNESS 
-		,SUM(CASE WHEN ppawa.IS_CONFIRM = 2 THEN 1 ELSE 0 END) COUNT_OFFICER_REPORT
+		,SUM(CASE WHEN ppawa.IS_CONFIRM = 1 THEN 1 ELSE 0 END) COUNT_OFFICER_REPORT
 		,(TO_DATE(TO_CHAR(ppac.START_DATE, 'YYYY-MM-DD' ), 'YYYY-MM-DD')-TO_DATE(TO_CHAR( SYSDATE, 'YYYY-MM-DD' ), 'YYYY-MM-DD')) AS DIFFERENCE_DATE
 --proceed
 FROM PC_PROCEED_ALERT_WITNESS_APPOINT ppawa 
@@ -57,10 +58,22 @@ LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_I
 --judgement
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = ppa.CASE_ID AND pj.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
+--complainant
+LEFT JOIN (SELECT pcl.CASE_ID ,pcl.LITIGANT_NAME  COMPLAINANT
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0 AND pllt.LIT_TYPE_CODE = '05'
+		   WHERE pcl.REMOVED_BY = 0) c ON c.CASE_ID = ppa.CASE_ID
+--defendant
+LEFT JOIN (SELECT pcl.CASE_ID ,pcl.LITIGANT_NAME  DEFENDANT
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0 AND pllt.LIT_TYPE_CODE = '06'
+		   WHERE pcl.REMOVED_BY = 0) d ON d.CASE_ID = ppa.CASE_ID
+--
 WHERE ppawa.REMOVED_BY = 0
 AND ppac.START_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS')
                        AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 AND ($P{APPOINT_TABLE_CODE} IS NULL OR ppac.APPOINT_TABLE_CODE = $P{APPOINT_TABLE_CODE})
+AND pltc_b.TITLE_CASE_NAME NOT IN ('มต','ตจ','มต.','ตจ.')	
 GROUP BY
 		CASE WHEN pc.BLACK_IDNUM IS NOT NULL 
 		    THEN pltc_b.TITLE_CASE_NAME||pc.BLACK_IDNUM||'/'||pc.BLACK_YEAR 
@@ -71,8 +84,8 @@ GROUP BY
 		--
 		,THAISDATE(ppac.START_DATE)
 		,ppac.CHOICE_TIME
-		,pc.PROS_DESC
-		,pc.ACCU_DESC
+		,pc.PROS_DESC, c.COMPLAINANT 
+		,pc.ACCU_DESC, d.DEFENDANT
 		,pc.ALLE_DESC 
 	    ,ppac.REASON_APPOINT_ID 
 		,plal.APPOINT_LIST_NAME 
@@ -115,10 +128,10 @@ ORDER BY APPOINT_DATE]]>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
-	<title>
-		<band height="49" splitType="Stretch">
+	<pageHeader>
+		<band height="50">
 			<textField>
-				<reportElement x="0" y="24" width="802" height="25" uuid="94210bd4-d359-4356-aa66-185057b22cea">
+				<reportElement x="0" y="24" width="802" height="25" uuid="d2b2a6a5-2af6-42f9-b2f8-9ecda09b91d7">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -127,14 +140,14 @@ ORDER BY APPOINT_DATE]]>
 				<textFieldExpression><![CDATA["วันที่นัด: " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{START_DATE})) +" ถึงวันที่ " + DateFormat.getDateInstance(DateFormat.LONG,new Locale("th", "TH")).format(new SimpleDateFormat("dd/MM/yyyy",new Locale("th_TH")).parse($P{END_DATE}))]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="229" y="0" width="337" height="24" uuid="9a7b53d1-8348-4c84-8488-4f3b4e87bffd"/>
+				<reportElement x="229" y="0" width="337" height="24" uuid="f9aad89b-4f29-4926-9c3e-98e848428028"/>
 				<textElement textAlignment="Center">
 					<font fontName="THSarabunNew" size="18" isBold="true"/>
 				</textElement>
 				<text><![CDATA[รายงานการแจ้งเตือนพยาน]]></text>
 			</staticText>
 		</band>
-	</title>
+	</pageHeader>
 	<columnHeader>
 		<band height="25" splitType="Stretch">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
@@ -373,7 +386,7 @@ ORDER BY APPOINT_DATE]]>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{APPOINT_TIME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{APPOINT_TIME}  == null ?  "-"  :    $F{APPOINT_TIME}.length()== 8 ?  $F{APPOINT_TIME}.substring(0,5) : $F{APPOINT_TIME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="442" y="0" width="90" height="25" uuid="094f2a88-8c63-4686-a137-fb675f0eb16f">
@@ -446,4 +459,23 @@ ORDER BY APPOINT_DATE]]>
 			</textField>
 		</band>
 	</detail>
+	<summary>
+		<band height="25">
+			<textField>
+				<reportElement x="0" y="0" width="802" height="25" uuid="0bbc4136-e118-4378-99bf-9bc70d4a6a47">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3ba92db4-466e-4706-8c41-c6756cfc0d31"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA["รวม "+$V{REPORT_COUNT}+" เรื่อง"]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
 </jasperReport>

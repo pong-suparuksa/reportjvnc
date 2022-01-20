@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/writ_rpt_acc_imprs_how_to_appsup"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -45,13 +45,13 @@
     NVL(lit.LITIGANT_NAME,'-') DETAINEE,
     NVL(alle.ALLEGATION_NAME,'-') ALLEGATION_NAME,
     NVL(lit.PENALTY_NAME,'-') PENALTY_NAME,
-     NVL(pn.NOTICE_REASON,'') NOTICE_REASON   
+    NVL(TO_CHAR(pn.NOTICE_REASON),'') NOTICE_REASON   
 --
 FROM PC_NOTICE pn 
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pn.CASE_ID
 --
 LEFT JOIN PC_LOOKUP_NOTICE_TYPE plnt ON plnt.NOTICE_TYPE_ID = pn.NOTICE_TYPE_ID AND plnt.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.COURT_ID = pc.COURT_ID AND pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pn.COURT_ID AND plc.REMOVED_BY = 0
 --
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0

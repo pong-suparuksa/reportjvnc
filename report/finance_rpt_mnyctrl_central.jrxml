@@ -10,7 +10,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
@@ -18,6 +18,8 @@
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="com.jaspersoft.studio.report.description" value=""/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="423"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="566"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/finance_rpt_mnyctrl_central_files/main_jrxml"/>
 	<parameter name="RECEIPTTYPE" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["1"]]></defaultValueExpression>
@@ -29,68 +31,112 @@
 		<defaultValueExpression><![CDATA["31/05/2021"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT 
+		<![CDATA[SELECT
 	pfr.RECEIVED_DATE,
 	THAISDATE(pfr.RECEIVED_DATE) RECEIVED_DATE_TEXT,
+    plrt.RECEIPT_TYPE_CODE,
+    plrt.RECEIPT_TYPE_NAME,
+  	plc.COURT_NAME_TH,
+	THAISDATE(pfr.RECEIVED_DATE) RECEIVED_DATE_TEXT,   --วันที่ออกใบเสร็จ
    	pltc_b.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR CASE_BLACK_NO,
   	CASE WHEN pj.RED_IDNUM  IS NULL 
-  	     THEN '-' 
+  	     THEN ' ' 
   	     ELSE pltc_r.TITLE_CASE_NAME || pj.RED_IDNUM  || '/' || pj.RED_YEAR END CASE_RED_NO,
-  	--     
-  	cou.COURT_NAME_TH,
-  	NVL(pc.PROS_DESC,'-')  PROS_DESC,
-  	NVL(pc.ACCU_DESC,'-')  ACCU_DESC,
+  	NVL(pc.PROS_DESC,' ')  PROS_DESC,
+  	NVL(pc.ACCU_DESC,' ')  ACCU_DESC,
   	pfr.RECEIPT_BOOK_NO,
-  	pfr.RECEIPT_NO,
-  	pfr.RECEIPT_ID,
-  	pfr.PAYER_NAME,
-  	NVL(pfrd.PAID_DESCRIPTION,'-') PAID_DESCRIPTION,
-  	NVL(pfp.TOTAL_AMOUNT,0)  TOTAL_AMOUNT,
-  	pfr.TOTAL_AMOUNT - NVL(pfp.TOTAl_AMOUNT,0)   BALANCE,
-    CASE WHEN PFP.PAYMENT_DATE IS NOT NULL THEN THAISDATE(pfp.PAYMENT_DATE) END   PAYMENT_DATE_TEXT,
-    CASE WHEN NVL(pfrc.AMOUNT,0) > 0 THEN pfrc.CHEQUE_CODE
-         WHEN NVL(pfrcr.AMOUNT,0) > 0 THEN pfrcr.CREDIT_NO
-         WHEN NVL(pfrt.AMOUNT,0) > 0 THEN pfrt.ACCOUNT_NO
-    ELSE '-' END REF_NO,
-    plrt.RECEIPT_TYPE_NAME,
-    plrst.RECEIPT_SUB_TYPE_NAME, 
-  	pfrca.CANCEL_ID 
+  	pfr.RECEIPT_NO,  	
+  	pfr.PAYER_NAME,  	
+  	NVL(pfrd.RECEIPT_SUB_TYPE_NAME, ' ') PAID_DESCRIPTION,
+  	pfr.TOTAL_AMOUNT RECV_AMOUNT,   	
+	pfrd.CASE_LIT_NAME PAYEE,  	
+	NVL(pfrd.PAY_AMOUNT,0)  TOTAL_AMOUNT, 	
+	pfr.TOTAL_AMOUNT - NVL(pfrd.PAY_AMOUNT,0)   BALANCE,  	
+	CASE WHEN pfrd.PAYMENT_DATE IS NOT NULL THEN THAISDATE(pfrd.PAYMENT_DATE) END   PAYMENT_DATE_TEXT,    
+	pfrd.REF_NO,
+	plrt.RECEIPT_TYPE_NAME,
+    pfrd.RECEIPT_SUB_TYPE_NAME, 
+    pfrca.CANCEL_ID,
+    pfr.RECEIPT_ID,
+    pfrd.PAYMENT_DATE
+--  	
 FROM PC_FIN_RECEIPT pfr 
-LEFT JOIN PC_FIN_RECEIPT_DETAIL pfrd ON pfrd.RECEIPT_ID = pfr.RECEIPT_ID
+JOIN (SELECT pfrd.RECEIPT_ID 
+		       ,pfrd.RECEIPT_TYPE 
+			   ,LISTAGG(pfrd.RECEIPT_SUB_TYPE_NAME||CASE WHEN pfrd.OTHER_DETAIL IS NULL THEN ' ' ELSE '('||pfrd.OTHER_DETAIL||')' END, CHR(13)) WITHIN GROUP(ORDER BY pfrd.RECEIPT_SUB_TYPE_NAME, pfrd.OTHER_DETAIL) RECEIPT_SUB_TYPE_NAME
+			   ,pfrd.CASE_LIT_NAME
+			   ,pfrd.PAYMENT_DATE
+	   		   ,SUM(pfrd.PAY_AMOUNT) OVER (PARTITION BY pfrd.RECEIPT_ID ORDER BY pfrd.PAYMENT_DATE) PAY_AMOUNT_ACC
+	   		   ,pfrd.PAY_AMOUNT
+	   	       ,LISTAGG(pfrd.REF_NO, ',') WITHIN GROUP(ORDER BY pfrd.REF_NO) REF_NO
+		FROM (SELECT pfrd.RECEIPT_ID
+			         ,pfrd.RECEIPT_TYPE 
+			         ,plrst.RECEIPT_SUB_TYPE_NAME 
+			         ,pfrd.OTHER_DETAIL 
+			         --
+			         ,pfpd.CASE_LIT_NAME 
+			         ,pfp.PAYMENT_DATE
+			         ,SUM(pfp.TOTAL_AMOUNT) PAY_AMOUNT 
+					 ,CASE WHEN pfp.TRANSFER_AMOUNT  > 0 THEN pfp.TRANSFER_ACCOUNT_NO 
+			               WHEN pfp.CHEQUE_AMOUNT > 0 THEN pfpc.CHEQUE_CODE END REF_NO
+			  FROM PC_FIN_RECEIPT_DETAIL pfrd 
+			  --
+			  LEFT JOIN PC_LOOKUP_RECEIPT_SUB_TYPE plrst ON plrst.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE 
+				                                        AND plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE 
+				                                        AND plrst.REMOVED_BY = 0
+			  --
+			  LEFT JOIN PC_FIN_RECEIPT_BALANCE_HISTORY pfrbh ON pfrbh.RECEIPT_DETAIL_ID = pfrd.DETAIL_ID
+			  LEFT JOIN PC_FIN_PAYMENT_DETAIL pfpd ON pfpd.DETAIL_ID = pfrbh.PAYMENT_DETAIL_ID
+			  LEFT JOIN PC_FIN_PAYMENT pfp ON pfp.PAYMENT_ID = pfpd.PAYMENT_ID
+			  LEFT JOIN PC_FIN_PAYMENT_CHEQUE pfpc ON pfpc.PAYMENT_ID = pfp.PAYMENT_ID AND pfpc.REMOVED_BY = 0
+			  --
+			  GROUP BY pfrd.RECEIPT_ID
+			           ,pfrd.RECEIPT_TYPE 
+			           ,plrst.RECEIPT_SUB_TYPE_NAME 
+			           ,pfrd.OTHER_DETAIL
+			           --
+			           ,pfpd.CASE_LIT_NAME
+			           ,pfp.PAYMENT_DATE
+			           ,CASE WHEN pfp.TRANSFER_AMOUNT  > 0 THEN pfp.TRANSFER_ACCOUNT_NO 
+			                 WHEN pfp.CHEQUE_AMOUNT > 0 THEN pfpc.CHEQUE_CODE END) pfrd 
+		GROUP BY pfrd.RECEIPT_ID
+		         ,pfrd.RECEIPT_TYPE
+				 ,pfrd.CASE_LIT_NAME
+				 ,pfrd.PAYMENT_DATE
+				 ,pfrd.PAY_AMOUNT) pfrd ON pfrd.RECEIPT_ID = pfr.RECEIPT_ID 
 LEFT JOIN PC_FIN_RECEIPT_CANCEL pfrca ON pfrca.RECEIPT_ID = pfr.RECEIPT_ID
+LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE AND plrt.REMOVED_BY = 0
 --
-LEFT JOIN PC_FIN_RECEIPT_CHEQUE pfrc ON pfrc.RECEIPT_ID = pfr.RECEIPT_ID
-LEFT JOIN PC_FIN_RECEIPT_CREDIT pfrcr ON pfrcr.RECEIPT_ID = pfr.RECEIPT_ID
-LEFT JOIN PC_FIN_RECEIPT_TRANSFER pfrt ON pfrt.RECEIPT_ID = pfr.RECEIPT_ID
---
-LEFT JOIN PC_FIN_RECEIPT_BALANCE_HISTORY pfrbh ON pfrbh.RECEIPT_DETAIL_ID = pfrd.DETAIL_ID
-LEFT JOIN PC_FIN_PAYMENT_DETAIL pfpd ON pfpd.DETAIL_ID = pfrbh.PAYMENT_DETAIL_ID
-LEFT JOIN PC_FIN_PAYMENT pfp ON pfp.PAYMENT_ID = pfpd.PAYMENT_ID
---
-LEFT JOIN PC_CASE pc ON pc.CASE_ID = pfr.CASE_ID AND pc.REMOVED_BY = 0
+LEFT JOIN PC_CASE pc ON pc.CASE_ID = pfr.CASE_ID
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID  = pc.CASE_ID AND pc.REMOVED_BY = 0
 --
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID AND pltc_r.REMOVED_BY = 0
 --
-LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pc.COURT_ID AND pc.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_RECEIPT_TYPE plrt ON plrt.RECEIPT_TYPE_ID = pfrd.RECEIPT_TYPE  AND plrt.REMOVED_BY = 0
-LEFT JOIN PC_LOOKUP_RECEIPT_SUB_TYPE plrst ON plrst.RECEIPT_SUB_TYPE_ID = pfrd.RECEIPT_SUB_TYPE AND plrst.REMOVED_BY = 0
+LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pfr.COURT_ID AND pc.REMOVED_BY = 0
 --
-CROSS JOIN (SELECT plc.COURT_NAME_TH
-				      FROM PC_PARAM pp
-					 JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
-				     WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
-WHERE plrt.RECEIPT_TYPE_CODE = $P{RECEIPTTYPE} 
-AND pfr.RECEIVED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
-                         AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
---
-ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]]>
+WHERE pfr.RECEIVED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
+                          AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS') 
+AND plrt.RECEIPT_TYPE_CODE = $P{RECEIPTTYPE}
+AND pc.REMOVED_BY = 0
+ORDER BY pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfrd.PAYMENT_DATE]]>
 	</queryString>
 	<field name="RECEIVED_DATE" class="java.util.Date">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIVED_DATE"/>
 	</field>
 	<field name="RECEIVED_DATE_TEXT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="RECEIVED_DATE_TEXT"/>
+	</field>
+	<field name="RECEIPT_TYPE_CODE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_TYPE_CODE"/>
+	</field>
+	<field name="RECEIPT_TYPE_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_TYPE_NAME"/>
+	</field>
+	<field name="COURT_NAME_TH" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
+	</field>
+	<field name="COLUMN_6" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIVED_DATE_TEXT"/>
 	</field>
 	<field name="CASE_BLACK_NO" class="java.lang.String">
@@ -99,29 +145,29 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 	<field name="CASE_RED_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="CASE_RED_NO"/>
 	</field>
-	<field name="COURT_NAME_TH" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
-	</field>
 	<field name="PROS_DESC" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="PROS_DESC"/>
 	</field>
 	<field name="ACCU_DESC" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="ACCU_DESC"/>
 	</field>
-	<field name="RECEIPT_BOOK_NO" class="java.lang.Long">
+	<field name="RECEIPT_BOOK_NO" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_BOOK_NO"/>
 	</field>
-	<field name="RECEIPT_NO" class="java.lang.Long">
+	<field name="RECEIPT_NO" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_NO"/>
-	</field>
-	<field name="RECEIPT_ID" class="java.lang.Long">
-		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_ID"/>
 	</field>
 	<field name="PAYER_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="PAYER_NAME"/>
 	</field>
 	<field name="PAID_DESCRIPTION" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="PAID_DESCRIPTION"/>
+	</field>
+	<field name="RECV_AMOUNT" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.label" value="RECV_AMOUNT"/>
+	</field>
+	<field name="PAYEE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PAYEE"/>
 	</field>
 	<field name="TOTAL_AMOUNT" class="java.lang.Double">
 		<property name="com.jaspersoft.studio.field.label" value="TOTAL_AMOUNT"/>
@@ -135,14 +181,19 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 	<field name="REF_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="REF_NO"/>
 	</field>
-	<field name="RECEIPT_TYPE_NAME" class="java.lang.String">
+	<field name="COLUMN_21" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_TYPE_NAME"/>
 	</field>
-	<field name="RECEIPT_SUB_TYPE_NAME" class="java.lang.String"/>
-	<field name="CANCEL_ID" class="java.lang.Long">
+	<field name="RECEIPT_SUB_TYPE_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_SUB_TYPE_NAME"/>
+	</field>
+	<field name="CANCEL_ID" class="java.lang.Integer">
 		<property name="com.jaspersoft.studio.field.label" value="CANCEL_ID"/>
 	</field>
-	<variable name="TOTAL_AMOUNT" class="java.lang.Float" calculation="Sum">
+	<field name="RECEIPT_ID" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="RECEIPT_ID"/>
+	</field>
+	<variable name="TOTAL_AMOUNT" class="java.lang.Double" calculation="Sum">
 		<variableExpression><![CDATA[$F{TOTAL_AMOUNT}]]></variableExpression>
 	</variable>
 	<variable name="CNT_CANCEL" class="java.lang.Long" calculation="Sum">
@@ -169,7 +220,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 						<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					</box>
 					<textElement textAlignment="Left" verticalAlignment="Middle">
-						<font fontName="TH Sarabun New" size="17"/>
+						<font fontName="TH Sarabun New" size="16"/>
 					</textElement>
 					<textFieldExpression><![CDATA[" ใบเสร็จเล่ม/กล่องที่:"+$F{RECEIPT_BOOK_NO}]]></textFieldExpression>
 				</textField>
@@ -240,7 +291,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[ที่]]></text>
 			</staticText>
@@ -257,7 +308,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[เล่มที่]]></text>
 			</staticText>
@@ -274,7 +325,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[เลขที่]]></text>
 			</staticText>
@@ -291,7 +342,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[วันที่ออก]]></text>
 			</staticText>
@@ -308,7 +359,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[เลขคดีดำ]]></text>
 			</staticText>
@@ -325,7 +376,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[เลขคดีแดง]]></text>
 			</staticText>
@@ -342,7 +393,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[โจทก์]]></text>
 			</staticText>
@@ -359,7 +410,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[จำเลย]]></text>
 			</staticText>
@@ -376,7 +427,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[รับเงินจาก]]></text>
 			</staticText>
@@ -393,7 +444,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[จ่ายให้]]></text>
 			</staticText>
@@ -411,7 +462,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[ค่าอะไร]]></text>
 			</staticText>
@@ -428,7 +479,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[จำนวนเงิน]]></text>
 			</staticText>
@@ -445,7 +496,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[คงเหลือ]]></text>
 			</staticText>
@@ -462,7 +513,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[วันที่จ่าย]]></text>
 			</staticText>
@@ -482,7 +533,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{GROUP_RECPT_BOOKNO_COUNT}]]></textFieldExpression>
 			</textField>
@@ -497,7 +548,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIPT_BOOK_NO}+"/"+$F{RECEIPT_NO}]]></textFieldExpression>
 			</textField>
@@ -513,7 +564,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIVED_DATE_TEXT}]]></textFieldExpression>
 			</textField>
@@ -529,7 +580,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}]]></textFieldExpression>
 			</textField>
@@ -545,7 +596,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_RED_NO}]]></textFieldExpression>
 			</textField>
@@ -561,7 +612,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PROS_DESC}]]></textFieldExpression>
 			</textField>
@@ -577,7 +628,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ACCU_DESC}]]></textFieldExpression>
 			</textField>
@@ -593,7 +644,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PAYER_NAME}]]></textFieldExpression>
 			</textField>
@@ -609,7 +660,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PROS_DESC}]]></textFieldExpression>
 			</textField>
@@ -625,7 +676,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIPT_SUB_TYPE_NAME}==null?" ":$F{RECEIPT_SUB_TYPE_NAME}]]></textFieldExpression>
 			</textField>
@@ -641,9 +692,9 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format($F{TOTAL_AMOUNT})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($F{TOTAL_AMOUNT})]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="690" y="0" width="50" height="50" uuid="af4ad95f-7c3c-47de-9c7f-0ba3baaedb40">
@@ -657,9 +708,9 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format($F{BALANCE})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($F{BALANCE})]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="740" y="0" width="60" height="50" uuid="7687be38-5af7-48e4-a935-629e3f2cc491">
@@ -673,7 +724,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PAYMENT_DATE_TEXT}==null?" ":$F{PAYMENT_DATE_TEXT}]]></textFieldExpression>
 			</textField>
@@ -713,7 +764,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 				</textElement>
 				<textFieldExpression><![CDATA[$V{TOTAL_AMOUNT}==null
 ?"รวมจ่ายเงินทั้งสิ้น 0 บาท"
-:"รวมจ่ายเงินทั้งสิ้น "+ new java.text.DecimalFormat("#,##0").format($V{TOTAL_AMOUNT})+" บาท"]]></textFieldExpression>
+:"รวมจ่ายเงินทั้งสิ้น "+ new java.text.DecimalFormat("#,##0.00").format($V{TOTAL_AMOUNT})+" บาท"]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="694" y="0" width="100" height="25" uuid="3d2a9534-0b01-4780-86fa-44a2383bb8cb">
@@ -770,7 +821,7 @@ ORDER BY pfr.RECEIVED_DATE, pfr.RECEIPT_BOOK_NO, pfr.RECEIPT_NO, pfr.RECEIPT_ID]
 				</textElement>
 				<textFieldExpression><![CDATA[$V{TOTAL_BALANCE}==null
 ?"รวมเงินคงเหลือทั้งสิ้น 0 บาท"
-:"รวมเงินคงเหลือทั้งสิ้น "+ new java.text.DecimalFormat("#,##0").format($V{TOTAL_BALANCE})+" บาท"]]></textFieldExpression>
+:"รวมเงินคงเหลือทั้งสิ้น "+ new java.text.DecimalFormat("#,##0.00").format($V{TOTAL_BALANCE})+" บาท"]]></textFieldExpression>
 			</textField>
 		</band>
 	</summary>

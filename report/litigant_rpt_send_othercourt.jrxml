@@ -14,10 +14,12 @@
 	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/litigant_rpt_send_othercourt"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[210]"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/litigant_rpt_send_othercourt_files/main_jrxml"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="365"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="624"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/03/2020"]]></defaultValueExpression>
 	</parameter>
@@ -32,23 +34,18 @@
   NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR)    CASE_BLACK_NO,    
   CASE WHEN pj.RED_IDNUM IS NULL THEN ' '
   ELSE NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || '/' || TO_CHAR(pj.RED_YEAR) END  CASE_RED_NO,
-  NVL(pc.PROS_DESC,' ')	      						CLAIMANT, 
-  NVL(pc.ACCU_DESC,' ')		   						DEFENDANT, 
-  NVL(pn.LITIGANT_NAME,' ')								TO_NAME,
+  NVL(pc.PROS_DESC||'(โจทก์)',' ')  			        CLAIMANT, 
+  NVL(pc.ACCU_DESC||'(จำเลย)',' ')			        DEFENDANT, 
+  NVL(pn.LITIGANT_NAME,' ')							TO_NAME,
   pfr.RECEIPT_BOOK_NO || '/' || pfr.RECEIPT_NO      RECEIPT_REF,
-  NVL(pn.SEND_FEE, 0 )                                SEND_FEE,
+  NVL(pn.SEND_FEE, 0 )                              SEND_FEE,
   NVL(pfr.PAYER_NAME,' ')							PAYER_NAME,
   NVL(plc1.COURT_NAME_TH, ' ') 	                    TO_COURT, 
-  pn.SEND_METHOD_BY_NAME     NOTICE_SENDER
+  pn.SEND_METHOD_BY_NAME                            NOTICE_SENDER,
+  --
+  CASE WHEN pt.LITIGANT_NAME IS NOT NULL THEN pt.LITIGANT_NAME||'('||pt.LIT_TYPE_DESC||')' END PETITIONER,
+  CASE WHEN op.LITIGANT_NAME IS NOT NULL THEN op.LITIGANT_NAME||'('||op.LIT_TYPE_DESC||')' END OPPONENT
   --                 
---  pfpd.PAYMENT_ID,
---  pfpd.RECEIPT_ID,
---  pn.SEND_METHOD
-  
---FROM PC_FIN_PAYMENT_DETAIL pfpd
---LEFT JOIN PC_FIN_PAYMENT pfp ON pfp.PAYMENT_ID = pfpd.PAYMENT_ID AND pfp.REMOVED_BY = 0
-----
---LEFT JOIN 
 FROM PC_NOTICE_ISSUED pni
 
 LEFT JOIN PC_FIN_RECEIPT pfr ON pni.RECEIPT_ID = pfr.RECEIPT_ID AND pni.REMOVED_BY = 0
@@ -80,6 +77,18 @@ CROSS JOIN (SELECT plc.COURT_NAME_TH
 			FROM PC_PARAM pp
 			JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
 			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0)cou
+--
+LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME, pllt.LIT_TYPE_DESC  
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0
+		   WHERE pcl.REMOVED_BY = 0 
+		   AND pllt.LIT_TYPE_CODE = '05') pt ON pt.CASE_ID = pn.CASE_ID
+--
+LEFT JOIN (SELECT pcl.CASE_ID, pcl.LITIGANT_NAME, pllt.LIT_TYPE_DESC  
+		   FROM PC_CASE_LIT pcl 
+		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0
+		   WHERE pcl.REMOVED_BY = 0 
+		   AND pllt.LIT_TYPE_CODE = '06') op ON op.CASE_ID = pn.CASE_ID
 --
 WHERE pn.IS_COURT_AREA = 0
 AND pn.SEND_METHOD IS NOT NULL 
@@ -125,6 +134,12 @@ AND pn.SEND_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24
 	</field>
 	<field name="NOTICE_SENDER" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="NOTICE_SENDER"/>
+	</field>
+	<field name="PETITIONER" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="PETITIONER"/>
+	</field>
+	<field name="OPPONENT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="OPPONENT"/>
 	</field>
 	<variable name="TOTAL" class="java.math.BigDecimal" calculation="Sum">
 		<variableExpression><![CDATA[$F{SEND_FEE}]]></variableExpression>
@@ -228,7 +243,7 @@ AND pn.SEND_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24
 				<textElement textAlignment="Center">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<text><![CDATA[โจทก์]]></text>
+				<text><![CDATA[โจทก์/ผู้ร้อง]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="252" y="0" width="88" height="25" uuid="4b7674d4-6ae9-4abe-ae36-d01632f847cd">
@@ -241,7 +256,7 @@ AND pn.SEND_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24
 				<textElement textAlignment="Center">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<text><![CDATA[จำเลย]]></text>
+				<text><![CDATA[จำเลย/ผู้คัดค้าน]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="460" y="0" width="150" height="25" uuid="2cc840ac-9682-4a44-8ace-8a44ebd69134">
@@ -349,7 +364,8 @@ AND pn.SEND_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24
 				<textElement>
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{CLAIMANT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{CLAIMANT} == null ? " " : $F{CLAIMANT}+"\n") +
+($F{PETITIONER}==null?" ":$F{PETITIONER})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="252" y="0" width="88" height="25" uuid="6f2d7650-27ed-425d-b65a-af0d70f01b3f">
@@ -362,7 +378,8 @@ AND pn.SEND_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24
 				<textElement>
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{DEFENDANT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{DEFENDANT} == null ? " " : $F{DEFENDANT}+"\n")+
+($F{OPPONENT}==null?" ":$F{OPPONENT})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="460" y="0" width="150" height="25" uuid="1b6be6b3-932b-4d86-9182-31011913e3ec">
@@ -388,7 +405,7 @@ AND pn.SEND_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24
 				<textElement textAlignment="Right">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format($F{SEND_FEE})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{SEND_FEE}==null?"0.00":new java.text.DecimalFormat("#,##0.00").format($F{SEND_FEE})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="686" y="0" width="116" height="25" uuid="65cee6c8-7e8c-437d-93f9-9891b21c35d1">
@@ -448,7 +465,7 @@ AND pn.SEND_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="TH Sarabun New" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{TOTAL}==null?0:$V{TOTAL}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{TOTAL}==null?"0.00":new java.text.DecimalFormat("#,##0.00").format($V{TOTAL})]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="320" y="6" width="50" height="25" uuid="186d7c02-3ca8-4e7d-a2ac-2bba2312a4bb">

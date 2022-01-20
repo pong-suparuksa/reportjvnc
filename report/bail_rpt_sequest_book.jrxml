@@ -11,16 +11,15 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/bail_rpt_sequest_book"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="266"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="728"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="562"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="428"/>
 	<property name="com.jaspersoft.studio.report.description" value="36.ทะเบียนคุมหนังสืออายัด"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/bail_rpt_sequest_book_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["10/01/2020"]]></defaultValueExpression>
 	</parameter>
@@ -28,10 +27,12 @@
 		<defaultValueExpression><![CDATA["10/05/2020"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR  BLACK_CASE_NO,
+		<![CDATA[SELECT 
+pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR  BLACK_CASE_NO,
 pltc_red.TITLE_CASE_NAME || pj.RED_IDNUM || '/' || pj.RED_YEAR  RED_CASE_NO,
 pb.BAIL_CODE_NO || '/' || pb.BAIL_CODE_YEAR BAIL_CASE_NO,
-plt.TITLE_NAME || pbb.NAME || ' ' || pbb.LASTNAME BAILMAN_NAME, pct.LITIGANT_NAME,
+plt.TITLE_NAME || pbb.NAME || ' ' || pbb.LASTNAME BAILMAN_NAME, 
+pct.LITIGANT_NAME,
 THAISDATE(pbs.SEQUESTER_DATE) DATE_SEQUESTER,
 pbs.SEQUESTER_REMARK NOTES,
 --
@@ -51,7 +52,8 @@ pbs.SEQUESTER_REMARK NOTES,
 --
 NVL(pbsa.BALANCE_AMOUNT,0) BAIL_ACCOUNT_AMOUNT, NVL(pbsl.VALUES_FOR_BAILING,0) BAIL_LAND_AMOUNT, NVL(pbsb.VALUE_AMOUNT,0) BAIL_BOND_AMOUNT,
 NVL(pbsbgt.LIMIT_AMOUNT,0) BAIL_BANKGUARANTEE_AMOUNT, NVL(pbsi.VALUE_AMOUNT,0) BAIL_INSURANCE_AMOUNT, NVL(pbscd.VALUES_FOR_BAILING,0) BAIL_CONDO_AMOUNT,
-NVL(pbsp.VALUE_AMOUNT,0) BAIL_POSITION_AMOUNT, NVL(pspc.AMOUNT,0) BAIL_CASH_AMOUNT, NVL(pbsac.AMOUNT,0) BAIL_AFFILIATE_CERTIFICATE_AMOUNT
+NVL(pbsp.VALUE_AMOUNT,0) BAIL_POSITION_AMOUNT, NVL(pspc.AMOUNT,0) BAIL_CASH_AMOUNT, NVL(pbsac.AMOUNT,0) BAIL_AFFILIATE_CERTIFICATE_AMOUNT,
+pbs.SEQUESTER_TYPE 
 --
 FROM PC_BAIL_SEC pbs
 LEFT JOIN PC_BAIL pb ON pb.BAIL_ID = pbs.BAIL_ID AND pb.REMOVED_BY = 0
@@ -77,7 +79,8 @@ LEFT JOIN PC_BAIL_SEC_POSITION pbsp ON pbsp.SEC_ID = pbs.SEC_ID AND pbsp.REMOVED
 LEFT JOIN PC_BAIL_SEC_CASH pspc ON pspc.SEC_ID = pbs.SEC_ID AND pspc.REMOVED_BY = 0
 LEFT JOIN PC_BAIL_SEC_AFFILIATE_CERTIFICATE pbsac ON pbsac.SEC_ID = pbs.SEC_ID AND pbsac.REMOVED_BY = 0
 --
-WHERE pbs.REMOVED_BY = 0 AND pbs.SEQUESTER_TYPE = '01'
+WHERE pbs.REMOVED_BY = 0 
+AND pbs.SEQUESTER_TYPE IN ('01','02')
 AND pbs.SEQUESTER_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')]]>
 	</queryString>
 	<field name="BLACK_CASE_NO" class="java.lang.String">
@@ -125,6 +128,9 @@ AND pbs.SEQUESTER_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"
 	<field name="BAIL_CASH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="BAIL_CASH"/>
 	</field>
+	<field name="BAIL_AFFILIATE_CERTIFICATE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="BAIL_AFFILIATE_CERTIFICATE"/>
+	</field>
 	<field name="BAIL_ACCOUNT_AMOUNT" class="java.lang.Double">
 		<property name="com.jaspersoft.studio.field.label" value="BAIL_ACCOUNT_AMOUNT"/>
 	</field>
@@ -149,8 +155,12 @@ AND pbs.SEQUESTER_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"
 	<field name="BAIL_CASH_AMOUNT" class="java.lang.Double">
 		<property name="com.jaspersoft.studio.field.label" value="BAIL_CASH_AMOUNT"/>
 	</field>
-	<field name="BAIL_AFFILIATE_CERTIFICATE" class="java.lang.String"/>
-	<field name="BAIL_AFFILIATE_CERTIFICATE_AMOUNT" class="java.lang.Double"/>
+	<field name="BAIL_AFFILIATE_CERTIFICATE_AMOUNT" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.label" value="BAIL_AFFILIATE_CERTIFICATE_AMOUNT"/>
+	</field>
+	<field name="SEQUESTER_TYPE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="SEQUESTER_TYPE"/>
+	</field>
 	<variable name="TEMP_START_DATE" class="java.lang.String">
 		<initialValueExpression><![CDATA[$P{START_DATE}]]></initialValueExpression>
 	</variable>
@@ -184,8 +194,9 @@ AND pbs.SEQUESTER_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"
 		<band height="50" splitType="Stretch">
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<staticText>
-				<reportElement x="28" y="0" width="102" height="50" uuid="e4a6fe4d-9772-443c-88ec-94a6c4b43ca3">
+				<reportElement x="28" y="0" width="80" height="50" uuid="e4a6fe4d-9772-443c-88ec-94a6c4b43ca3">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ce36b498-4f6d-4ea6-9869-35a296510b65"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
@@ -196,7 +207,7 @@ AND pbs.SEQUESTER_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"
 				<text><![CDATA[เลขคดีดำ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="130" y="0" width="82" height="50" uuid="002fcb6b-cf33-4c70-84b3-6cdfa8233b2b">
+				<reportElement x="108" y="0" width="75" height="50" uuid="002fcb6b-cf33-4c70-84b3-6cdfa8233b2b">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e0066b4d-ae92-480b-9967-efcb46647ff8"/>
 				</reportElement>
 				<box>
@@ -208,7 +219,7 @@ AND pbs.SEQUESTER_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"
 				<text><![CDATA[วันที่อายัด]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="212" y="0" width="108" height="50" uuid="4a46523d-b415-4cf2-a73e-f8dfe4c22da1">
+				<reportElement x="258" y="0" width="114" height="50" uuid="4a46523d-b415-4cf2-a73e-f8dfe4c22da1">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f4ba5092-01b2-4a05-8486-b0b3ae875322"/>
 				</reportElement>
 				<box>
@@ -220,7 +231,7 @@ AND pbs.SEQUESTER_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"
 				<text><![CDATA[ผู้ขอประกัน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="320" y="0" width="120" height="50" uuid="171b676b-2ec0-49fa-b614-90b343abf10d">
+				<reportElement x="372" y="0" width="120" height="50" uuid="171b676b-2ec0-49fa-b614-90b343abf10d">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4ec3bc11-6b24-4d6b-9a1c-eb492b69c207"/>
 				</reportElement>
 				<box>
@@ -232,7 +243,7 @@ AND pbs.SEQUESTER_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"
 				<text><![CDATA[ผู้ถูกประกัน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="440" y="0" width="140" height="50" uuid="2e37aa72-2128-4086-960f-024619ec2950">
+				<reportElement x="492" y="0" width="140" height="50" uuid="2e37aa72-2128-4086-960f-024619ec2950">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7b89765d-f19d-4c3c-b34d-c9e90451b56e"/>
 				</reportElement>
 				<box>
@@ -244,8 +255,9 @@ AND pbs.SEQUESTER_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"
 				<text><![CDATA[ประเภทหลักทรัพย์]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="580" y="0" width="122" height="50" uuid="86a6292f-f979-4166-8a53-70a1590d3d52">
+				<reportElement x="632" y="0" width="100" height="50" uuid="86a6292f-f979-4166-8a53-70a1590d3d52">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6a1b7f81-4b98-48ab-be2f-937dfff0dfe0"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
@@ -256,8 +268,9 @@ AND pbs.SEQUESTER_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"
 				<text><![CDATA[มูลค่าหลักทรัพย์]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="702" y="0" width="100" height="50" uuid="aa5ce7a2-c954-4852-916f-a24a8540b030">
+				<reportElement x="732" y="0" width="70" height="50" uuid="aa5ce7a2-c954-4852-916f-a24a8540b030">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bb8e03bd-ff9f-4341-9680-eb0efd3b37ce"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box>
 					<pen lineWidth="0.5"/>
@@ -279,14 +292,27 @@ AND pbs.SEQUESTER_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"
 				</textElement>
 				<text><![CDATA[ที่]]></text>
 			</staticText>
+			<staticText>
+				<reportElement x="183" y="0" width="75" height="50" uuid="f33d0c95-a05c-4592-aebf-b72d3cdff2f3">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e0066b4d-ae92-480b-9967-efcb46647ff8"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="TH Sarabun New" size="15" isBold="true"/>
+				</textElement>
+				<text><![CDATA[วันที่ถอนอายัด]]></text>
+			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
 		<band height="25" splitType="Prevent">
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="28" y="0" width="102" height="25" uuid="835fa9c3-a0fb-4db4-bc9a-274494cf31d6">
+				<reportElement stretchType="ContainerHeight" x="28" y="0" width="80" height="25" uuid="835fa9c3-a0fb-4db4-bc9a-274494cf31d6">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ce36b498-4f6d-4ea6-9869-35a296510b65"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
@@ -297,7 +323,7 @@ AND pbs.SEQUESTER_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"
 				<textFieldExpression><![CDATA[$F{BLACK_CASE_NO}==null?" ":$F{BLACK_CASE_NO}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="130" y="0" width="82" height="25" uuid="98e9d42e-2ee6-4feb-8bda-aeea41e6a282">
+				<reportElement stretchType="ContainerHeight" x="108" y="0" width="75" height="25" uuid="98e9d42e-2ee6-4feb-8bda-aeea41e6a282">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e0066b4d-ae92-480b-9967-efcb46647ff8"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -307,10 +333,10 @@ AND pbs.SEQUESTER_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{DATE_SEQUESTER}==null?" ":($F{DATE_SEQUESTER}).replace("-"," ")]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{SEQUESTER_TYPE}.equals("01")? $F{DATE_SEQUESTER}==null?" ":($F{DATE_SEQUESTER}).replace("-"," "):" "]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="212" y="0" width="108" height="25" uuid="075e147b-5c26-4873-83ea-c929fc365fa2">
+				<reportElement stretchType="ContainerHeight" x="258" y="0" width="114" height="25" uuid="075e147b-5c26-4873-83ea-c929fc365fa2">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f4ba5092-01b2-4a05-8486-b0b3ae875322"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -323,7 +349,7 @@ AND pbs.SEQUESTER_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"
 				<textFieldExpression><![CDATA[$F{BAILMAN_NAME}==null?" ":$F{BAILMAN_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="320" y="0" width="120" height="25" uuid="a408758c-2a22-4fd8-b0b3-8872b80dd246">
+				<reportElement stretchType="ContainerHeight" x="372" y="0" width="120" height="25" uuid="a408758c-2a22-4fd8-b0b3-8872b80dd246">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="4ec3bc11-6b24-4d6b-9a1c-eb492b69c207"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -336,7 +362,7 @@ AND pbs.SEQUESTER_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"
 				<textFieldExpression><![CDATA[$F{LITIGANT_NAME}==null?" ":$F{LITIGANT_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="440" y="0" width="140" height="25" uuid="4e6a7db8-8042-42d0-8f0a-2162970272b4">
+				<reportElement stretchType="ContainerHeight" x="492" y="0" width="140" height="25" uuid="4e6a7db8-8042-42d0-8f0a-2162970272b4">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7b89765d-f19d-4c3c-b34d-c9e90451b56e"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -350,9 +376,10 @@ AND pbs.SEQUESTER_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"
 + $F{BAIL_INSURANCE} + $F{BAIL_CONDO}+ $F{BAIL_POSITION}+ $F{BAIL_CASH} + $F{BAIL_AFFILIATE_CERTIFICATE}).replace(" ","")]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="580" y="0" width="122" height="25" uuid="14ab354d-85e4-40a9-8828-751231218501">
+				<reportElement stretchType="ContainerHeight" x="632" y="0" width="100" height="25" uuid="14ab354d-85e4-40a9-8828-751231218501">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="6a1b7f81-4b98-48ab-be2f-937dfff0dfe0"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
@@ -363,9 +390,10 @@ AND pbs.SEQUESTER_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"
 				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($F{BAIL_ACCOUNT_AMOUNT} + $F{BAIL_LAND_AMOUNT} + $F{BAIL_BOND_AMOUNT} +$F{BAIL_BANKGUARANTEE_AMOUNT} + $F{BAIL_INSURANCE_AMOUNT} + $F{BAIL_CONDO_AMOUNT} + $F{BAIL_POSITION_AMOUNT} + $F{BAIL_CASH_AMOUNT} + $F{BAIL_AFFILIATE_CERTIFICATE_AMOUNT})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement stretchType="ContainerHeight" x="702" y="0" width="100" height="25" uuid="431bd41f-136f-448c-a04d-c7197e695d93">
+				<reportElement stretchType="ContainerHeight" x="732" y="0" width="70" height="25" uuid="431bd41f-136f-448c-a04d-c7197e695d93">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="bb8e03bd-ff9f-4341-9680-eb0efd3b37ce"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<box leftPadding="3">
 					<pen lineWidth="0.5"/>
@@ -387,6 +415,19 @@ AND pbs.SEQUESTER_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"
 					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="ContainerHeight" x="183" y="0" width="75" height="25" uuid="ae2c9cbd-c29f-4e0c-9aa0-ac20289a9c3d">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e0066b4d-ae92-480b-9967-efcb46647ff8"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box leftPadding="3">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="TH Sarabun New" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SEQUESTER_TYPE}.equals("02")? $F{DATE_SEQUESTER}==null?" ":($F{DATE_SEQUESTER}).replace("-"," "):" "]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

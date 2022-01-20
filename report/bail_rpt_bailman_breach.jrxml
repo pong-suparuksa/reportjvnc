@@ -11,7 +11,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/bail_rpt_bailman_breach"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
@@ -26,9 +26,11 @@
 		<defaultValueExpression><![CDATA["31/05/2021"]]></defaultValueExpression>
 	</parameter>
 	<queryString language="SQL">
-		<![CDATA[SELECT pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR  BLACK_CASE_NO
+		<![CDATA[SELECT DISTINCT
+	   pltc.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR  BLACK_CASE_NO
 	   ,plt.TITLE_NAME || pbb.NAME || ' ' || pbb.LASTNAME               BAILMAN_FULL_NAME
 	   ,s.SEC_TYPE 
+	   ,pbbb.BREACH_DATE
 	   ,THAISDATE(pbbb.BREACH_DATE) BREACH_START_DATE
 	   ,pbbb.AMOUNT
        ,pbbb.BREACH_DESCRIPTION
@@ -53,8 +55,9 @@ LEFT JOIN PC_LOOKUP_TITLE plt ON plt.TITLE_ID = pbb.NAME_TITLE_ID AND plt.REMOVE
 LEFT JOIN PC_CASE pc ON pc.CASE_ID = pb.CASE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc.REMOVED_BY = 0
 WHERE pbbb.REMOVED_BY = 0 AND pbbb.BREACH_STATUS ='A'
-AND pbbb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
-                          AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')]]>
+AND pbbb.BREACH_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') 
+                          AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+ORDER BY pbbb.BREACH_DATE]]>
 	</queryString>
 	<field name="BLACK_CASE_NO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="BLACK_CASE_NO"/>
@@ -388,4 +391,15 @@ AND pbbb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T
 			</textField>
 		</band>
 	</detail>
+	<pageFooter>
+		<band height="18">
+			<staticText>
+				<reportElement x="0" y="0" width="100" height="18" uuid="c399b60e-386b-4edb-ac20-1adf17dc09fc"/>
+				<textElement>
+					<font fontName="THSarabunNew" size="12"/>
+				</textElement>
+				<text><![CDATA[ver. 20211215]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
 </jasperReport>

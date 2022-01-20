@@ -10,7 +10,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
@@ -24,7 +24,7 @@ CASE WHEN pc.BLACK_IDNUM IS NOT NULL
      THEN pltc_b.TITLE_CASE_NAME||THAINUMSTR(pc.BLACK_IDNUM)||'/'||THAINUMSTR(pc.BLACK_YEAR) 
      ELSE '-' END CASE_BLACE_NO, 
 --
-THAINUMSTR(TO_CHAR(TRUNC(pbsa.BALANCE_AMOUNT),'FM99G999G999G999', 'NLS_NUMERIC_CHARACTERS=",."'))  		AMOUNT,
+THAINUMSTR(TO_CHAR(TRUNC(pbsa.BALANCE_AMOUNT),'FM99G999G999G999D00'))  		AMOUNT,
 BAHT(pbsa.BALANCE_AMOUNT)  AMOUNT_TEXT,
 --
 plt.TITLE_NAME || pbb.FULLNAME  BAILMAN_NAME,
@@ -32,7 +32,8 @@ THAINUMSTR(pbb.NATIONAL_ID) NATIONAL_ID,
 pbsa.ACCOUNT_NAME,
 THAINUMSTR(pbsa.ACCOUNT_NO) ACCOUNT_NO ,
 pbsa.BANK_BRANCH ,
-plb.BANK_NAME
+plb.BANK_NAME,
+pbsa.SEC_ID
 --
 FROM PC_BAIL_SEC_ACCOUNT pbsa
 LEFT JOIN PC_BAIL_SEC pbs ON pbs.SEC_ID = pbsa.SEC_ID 

@@ -3,7 +3,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="finance_frm_officerrep_feerecv" pageWidth="595" pageHeight="842" columnWidth="515" leftMargin="40" rightMargin="40" topMargin="50" bottomMargin="20" uuid="7ea5f4e4-e512-4ffb-9bf7-cf2fd2c37890">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/bail_frm_accprop_position"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -17,9 +17,9 @@ CASE WHEN pc.BLACK_IDNUM IS NOT NULL
      THEN pltc_b.TITLE_CASE_NAME||THAINUMSTR(pc.BLACK_IDNUM)||'/'||THAINUMSTR(pc.BLACK_YEAR) 
      ELSE '-' END CASE_BLACE_NO, 
 --
-THAINUMSTR(TO_CHAR(TRUNC(pbsp.VALUE_AMOUNT),'FM99G999G999G999', 'NLS_NUMERIC_CHARACTERS=",."'))  		AMOUNT,
+THAINUMSTR(TO_CHAR(TRUNC(pbsp.VALUE_AMOUNT),'FM99G999G999G999D00'))  		AMOUNT,
 BAHT(pbsp.VALUE_AMOUNT)  AMOUNT_TEXT,
-THAINUMSTR(TO_CHAR(TRUNC(pbsp.SALARY_AMOUNT),'FM99G999G999G999', 'NLS_NUMERIC_CHARACTERS=",."'))  		SALARY_AMOUNT,
+THAINUMSTR(TO_CHAR(TRUNC(pbsp.SALARY_AMOUNT),'FM99G999G999G999D00'))  		SALARY_AMOUNT,
 BAHT(pbsp.SALARY_AMOUNT)  SALARY_AMOUNT_TEXT,
 pbb.FULLNAME  BAILMAN_NAME,
 THAINUMSTR(pbb.NATIONAL_ID) NATIONAL_ID,
@@ -27,7 +27,8 @@ THAINUMSTR(pbb.NATIONAL_ID) NATIONAL_ID,
 plov.NAME POSITION_TYPE_NAME,
 THAINUMSTR(pbsp."POSITION") "POSITION" ,
 ('กรม '|| THAINUMSTR(NVL(pbsp.DEPARTMENT,'-')) || ' กระทรวง  '|| THAINUMSTR(NVL(pbsp.MINISTRY,'-'))) DIVISION,
-THAINUMSTR(pbsp.POSITION_LEVEL) POSITION_LEVEL 
+THAINUMSTR(pbsp.POSITION_LEVEL) POSITION_LEVEL,
+pbsp.SEC_ID 
 --
 FROM PC_BAIL_SEC_POSITION pbsp
 LEFT JOIN PC_BAIL_SEC pbs ON pbs.SEC_ID = pbsp.SEC_ID 

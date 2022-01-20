@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="calendar_rpt_participant" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="1ce57aef-55bf-4d97-a57e-bb4d74a6927a">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="calendar_rpt_participant" pageWidth="595" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="1ce57aef-55bf-4d97-a57e-bb4d74a6927a">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/Calendar/calendar_rpt_participant"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="jvnc-210"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/Calendar/calendar_rpt_participant_files/main_jrxml"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#575757">
 		<box>
@@ -51,6 +51,7 @@ ACTIVITY_ID
 ,LAST_NAME
 ,TEL_NO
 ,(SELECT name FROM PC_LIST_OF_VALUE pclov WHERE pclov.LOV_TYPE ='PARTICIPANT_TYPE' AND pclov.value = paatp.PARTICIPANT_TYPE) AS PARTICIPANT_TYPE
+,REMARK
 FROM PC_ACTIVITY_PARTICIPANT paatp
 WHERE paatp.REMOVED_BY = 0
 AND paatp.ACTIVITY_ID =  $P{ACTIVITY_ID}]]>
@@ -82,6 +83,7 @@ AND paatp.ACTIVITY_ID =  $P{ACTIVITY_ID}]]>
 		<field name="PARTICIPANT_TYPE" class="java.lang.String">
 			<property name="com.jaspersoft.studio.field.label" value="PARTICIPANT_TYPE"/>
 		</field>
+		<field name="REMARK" class="java.lang.String"/>
 	</subDataset>
 	<parameter name="ACTIVITY_ID" class="java.lang.String">
 		<defaultValueExpression><![CDATA[24]]></defaultValueExpression>
@@ -208,11 +210,12 @@ AND ACTIVITY_ID =  $P{ACTIVITY_ID}]]>
 	<detail>
 		<band height="110" splitType="Prevent">
 			<componentElement>
-				<reportElement stretchType="RelativeToBandHeight" isPrintRepeatedValues="false" x="7" y="14" width="540" height="90" uuid="390f34bc-04e4-4cee-849c-e728adfa98f4">
+				<reportElement stretchType="RelativeToBandHeight" isPrintRepeatedValues="false" x="0" y="14" width="554" height="90" uuid="390f34bc-04e4-4cee-849c-e728adfa98f4">
 					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
 					<property name="com.jaspersoft.studio.table.style.table_header" value="Table_TH"/>
 					<property name="com.jaspersoft.studio.table.style.column_header" value="Table_CH"/>
 					<property name="com.jaspersoft.studio.table.style.detail" value="Table_TD"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 				</reportElement>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" whenNoDataType="AllSectionsNoDetail">
 					<datasetRun subDataset="Dataset1" uuid="78dda1d2-2b39-4657-99a6-924be43e8148">
@@ -221,11 +224,11 @@ AND ACTIVITY_ID =  $P{ACTIVITY_ID}]]>
 						</datasetParameter>
 						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 					</datasetRun>
-					<jr:columnGroup width="540" uuid="3f31f3c5-340e-4be7-9e78-f7d085d54553">
+					<jr:columnGroup width="553" uuid="3f31f3c5-340e-4be7-9e78-f7d085d54553">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Columns [8]"/>
 						<jr:tableHeader style="Table_TH" height="30" rowSpan="1">
 							<staticText>
-								<reportElement x="0" y="0" width="540" height="30" forecolor="#FFFFFF" uuid="6c790da3-d5ea-46b9-a036-cc0d8fdaa500"/>
+								<reportElement x="0" y="0" width="553" height="30" forecolor="#FFFFFF" uuid="6c790da3-d5ea-46b9-a036-cc0d8fdaa500"/>
 								<textElement textAlignment="Left" verticalAlignment="Middle">
 									<font fontName="THSarabunNew" size="16" isBold="true"/>
 								</textElement>
@@ -349,13 +352,12 @@ AND ACTIVITY_ID =  $P{ACTIVITY_ID}]]>
 								</textField>
 							</jr:detailCell>
 						</jr:column>
-						<jr:column width="70" uuid="d766701d-1755-4d3e-8645-f6d61f0ab4ca">
+						<jr:column width="83" uuid="d766701d-1755-4d3e-8645-f6d61f0ab4ca">
 							<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
 							<property name="com.jaspersoft.studio.unit.width" value="px"/>
 							<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
-								<property name="com.jaspersoft.studio.unit.width" value="px"/>
 								<staticText>
-									<reportElement x="0" y="0" width="70" height="30" uuid="994ee14a-9a94-4a1c-9fee-534717f9f69e"/>
+									<reportElement x="0" y="0" width="83" height="30" uuid="994ee14a-9a94-4a1c-9fee-534717f9f69e"/>
 									<textElement textAlignment="Center" verticalAlignment="Middle">
 										<font fontName="THSarabunNew" size="12"/>
 									</textElement>
@@ -365,7 +367,7 @@ AND ACTIVITY_ID =  $P{ACTIVITY_ID}]]>
 							<jr:detailCell style="Table_TD" height="25">
 								<property name="com.jaspersoft.studio.unit.height" value="px"/>
 								<textField isStretchWithOverflow="true">
-									<reportElement x="0" y="0" width="70" height="25" uuid="572ea3de-a2e6-4941-b0e0-a4d10d720620"/>
+									<reportElement x="0" y="0" width="83" height="25" uuid="572ea3de-a2e6-4941-b0e0-a4d10d720620"/>
 									<box leftPadding="5"/>
 									<textElement verticalAlignment="Middle">
 										<font fontName="THSarabunNew" size="14"/>
@@ -401,7 +403,16 @@ AND ACTIVITY_ID =  $P{ACTIVITY_ID}]]>
 									<text><![CDATA[หมายเหตุ]]></text>
 								</staticText>
 							</jr:columnHeader>
-							<jr:detailCell style="Table_TD" height="25"/>
+							<jr:detailCell style="Table_TD" height="25">
+								<textField isStretchWithOverflow="true">
+									<reportElement x="0" y="0" width="70" height="25" uuid="73f65cb7-00a1-405d-ade0-d4145e0cbf44"/>
+									<box leftPadding="5"/>
+									<textElement verticalAlignment="Middle">
+										<font fontName="THSarabunNew" size="14"/>
+									</textElement>
+									<textFieldExpression><![CDATA[$F{REMARK}==null?"-":$F{REMARK}]]></textFieldExpression>
+								</textField>
+							</jr:detailCell>
 						</jr:column>
 					</jr:columnGroup>
 				</jr:table>

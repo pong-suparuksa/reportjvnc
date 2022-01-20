@@ -3,7 +3,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="bail_frm_accprop_bank_certificate" pageWidth="595" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="515" leftMargin="40" rightMargin="40" topMargin="50" bottomMargin="50" uuid="d763bc96-3428-4229-bb24-06f19286e23f">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/bail_frm_accprop_bank_certificate"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -17,13 +17,14 @@ CASE WHEN pc.BLACK_IDNUM IS NOT NULL
      THEN pltc_b.TITLE_CASE_NAME||THAINUMSTR(pc.BLACK_IDNUM)||'/'||THAINUMSTR(pc.BLACK_YEAR) 
      ELSE '-' END CASE_BLACE_NO, 
 --
-THAINUMSTR(TO_CHAR(TRUNC(pbsb.LIMIT_AMOUNT),'FM99G999G999G999', 'NLS_NUMERIC_CHARACTERS=",."'))  		AMOUNT,
+THAINUMSTR(TO_CHAR(TRUNC(pbsb.LIMIT_AMOUNT),'FM99G999G999G999D00'))  		AMOUNT,
 BAHT(pbsb.LIMIT_AMOUNT)  AMOUNT_TEXT,
 --
 pbb.FULLNAME  BAILMAN_NAME,
 THAINUMSTR(pbb.NATIONAL_ID) NATIONAL_ID,
 THAINUMSTR(pbsb.BANKGUARANTEE_NO) BANKGUARANTEE_NO,
-plb.BANK_NAME 
+plb.BANK_NAME,
+pbsb.SEC_ID 
 --
 FROM PC_BAIL_SEC_BANKGUARANTEE pbsb
 LEFT JOIN PC_BAIL_SEC pbs ON pbs.SEC_ID = pbsb.SEC_ID 

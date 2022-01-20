@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_rpt_chqctrl_obudj"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -37,9 +37,11 @@ JOIN PC_FIN_PAYMENT_DETAIL pfpd ON pfpd.PAYMENT_ID = pfpc.PAYMENT_ID AND pfpd.RE
 JOIN PC_FIN_PAYMENT pfp ON pfp.PAYMENT_ID = pfpc.PAYMENT_ID AND pfp.REMOVED_BY = 0
 --
 LEFT JOIN PC_LOOKUP_RECEIPT_SUB_TYPE plrst ON plrst.RECEIPT_SUB_TYPE_ID = pfpd.RECEIPT_SUB_TYPE AND plrst.REMOVED_BY = 0
+LEFT JOIN PC_CASE pc ON pc.CASE_ID = pfpd.CASE_ID 
 WHERE pfpc.REMOVED_BY = 0
 AND pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
-                        AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')]]>
+                        AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
+AND pc.REMOVED_BY = 0]]>
 	</queryString>
 	<field name="REF_CODE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="REF_CODE"/>
@@ -171,7 +173,7 @@ AND pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[เลขที่ใบสำคัญ]]></text>
 			</staticText>
@@ -189,7 +191,7 @@ AND pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[จ่ายค่าอะไร]]></text>
 			</staticText>
@@ -206,7 +208,7 @@ AND pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[จ่ายให้ใคร]]></text>
 			</staticText>
@@ -223,7 +225,7 @@ AND pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[จำนวนเงิน]]></text>
 			</staticText>
@@ -240,7 +242,7 @@ AND pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[เลขที่เช็ค]]></text>
 			</staticText>
@@ -257,7 +259,7 @@ AND pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<text><![CDATA[ผู้รับเงิน/วันเดือนปีที่รับเงิน]]></text>
 			</staticText>
@@ -278,7 +280,7 @@ AND pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{REF_CODE}]]></textFieldExpression>
 			</textField>
@@ -294,7 +296,7 @@ AND pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{RECEIPT_SUB_TYPE_NAME}]]></textFieldExpression>
 			</textField>
@@ -310,7 +312,7 @@ AND pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_LIT_NAME}]]></textFieldExpression>
 			</textField>
@@ -326,9 +328,9 @@ AND pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0").format($F{AMOUNT})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[new java.text.DecimalFormat("#,##0.00").format($F{AMOUNT})]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="531" y="0" width="114" height="25" uuid="e6574757-acd3-4132-9bc5-5a993cd309a8">
@@ -342,7 +344,7 @@ AND pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CHEQUE_CODE}]]></textFieldExpression>
 			</textField>
@@ -358,7 +360,7 @@ AND pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="17"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PAYEE}+"\n"+$F{PAID_DATE_TEXT}]]></textFieldExpression>
 			</textField>

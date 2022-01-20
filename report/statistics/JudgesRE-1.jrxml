@@ -2,442 +2,361 @@
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="JudgesRE-1" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true" uuid="5c49c775-8d40-47bd-9943-cd09345ddf52">
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[210]"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/CaseStat/SubReport/JudgesRE_1_files/main_jrxml"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/CaseStat/SubReport/JudgesRE_1"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="469"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="524"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
+	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<parameter name="MONTH" class="java.lang.String">
 		<defaultValueExpression><![CDATA["04-2021"]]></defaultValueExpression>
 	</parameter>
+	<parameter name="CASE_CATE_CODE" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["21001"]]></defaultValueExpression>
+	</parameter>
 	<queryString language="SQL">
-		<![CDATA[SELECT
- j1.JUDGE_NAME,
- NVL( J4.COUNT_CASE,0) COUNT_CASE,
- NVL( J4.COUNT_REQ,0) COUNT_REQ,
- NVL( J5.COUNT_PREV_MONTH , 0) COUNT_PREV_MONTH,
- NVL( J5.COUNT_RECV_THIS_MONTH , 0) COUNT_RECV_THIS_MONTH,
- NVL( J0.TOTAL_COUNT, 0) TOTAL_COUNT,
- NVL( J0.TOTAL_PAGE, 0) TOTAL_PAGE,
- NVL( J6.RE_JUDGE, 0 ) RE_JUDGE,
- NVL( j2.COUNT_1_2, 0 ) COUNT_1_2,
- NVL( j2.COUNT_03, 0 ) COUNT_03,
- NVL( j2.COUNT_04, 0 ) COUNT_04,
- NVL( j2.COUNT_05, 0 ) COUNT_05,
- NVL( j2.COUNT_06, 0 ) COUNT_06,
- NVL( j2.COUNT_08, 0 ) COUNT_08,
- NVL( j2.COUNT_09, 0 ) COUNT_09,
- NVL( j2.COUNT_1_2, 0 )
- + NVL( j2.COUNT_03, 0 )
- + NVL( j2.COUNT_04, 0 )
- + NVL( j2.COUNT_05, 0 )
- + NVL( j2.COUNT_06, 0 )
- + NVL( j2.COUNT_08, 0 )
- + NVL( j2.COUNT_09, 0 ) AS TOTAL_COUNT_ALL,
- NVL( J7.LESS_6_MONTH , 0 ) LESS_6_MONTH,
- NVL( J7.LESS_1_YEAR , 0 ) LESS_1_YEAR,
- NVL( J7.LESS_2_YEAR , 0 ) LESS_2_YEAR,
- NVL( J7.LESS_5_YEAR , 0 ) LESS_5_YEAR,
- NVL( J7.MORE_5_YEAR , 0 ) MORE_5_YEAR,
- NVL( J7.LESS_6_MONTH , 0 ) 
- + NVL( J7.LESS_1_YEAR , 0 ) 
- + NVL( J7.LESS_2_YEAR , 0 ) 
- + NVL( J7.LESS_5_YEAR , 0 )
- + NVL( J7.MORE_5_YEAR , 0 ) AS TOTAL_CASE,
- NVL( J8.SEND , 0) SEND,
- NVL( J9.RECV , 0) RECV 
-FROM
- PC_LOOKUP_JUDGE j1
-LEFT JOIN ( 
-	SELECT
-		plj.JUDGE_ID,
-		nvl(TOTAL_COUNT, 0) AS TOTAL_COUNT,
-		nvl(TOTAL_PAGE, 0) AS TOTAL_PAGE
-	FROM
-		PC_LOOKUP_JUDGE plj
-	LEFT JOIN (
-		SELECT
-			CUSTOM_JUDGE_NAME,
-			CUSTOM_JUDGE_CODE,
-			COUNT(WITNESS_DEFENDANT_COUNT) + COUNT(WITNESS_OTHER_COUNT) + COUNT(WITNESS_PLAINTIFF_COUNT) AS TOTAL_COUNT,
-			COUNT(WITNESS_DEFENDANT_PAGE) + COUNT(WITNESS_PLAINTIFF_PAGE) AS TOTAL_PAGE
-		FROM
-			(
-			SELECT
-				ppacj.CASE_DETAIL_ID,
-				NVL(ppacj.JUDGE_REPLACE_NAME, ppacj.JUDGE_NAME) AS CUSTOM_JUDGE_NAME,
-				NVL(ppacj.JUDGE_REPLACE_CODE, ppacj.JUDGE_CODE) AS CUSTOM_JUDGE_CODE,
-				WITNESS_DEFENDANT_COUNT,
-				WITNESS_OTHER_COUNT,
-				WITNESS_PLAINTIFF_COUNT,
-				WITNESS_DEFENDANT_PAGE,
-				WITNESS_PLAINTIFF_PAGE
-			FROM
-				pc_proceed_case_detail_judge ppacj
-			JOIN (
-				SELECT
-					DISTINCT ppcd.case_detail_id,
-					ppcd.WITNESS_DEFENDANT_COUNT,
-					ppcd.WITNESS_OTHER_COUNT,
-					ppcd.WITNESS_PLAINTIFF_COUNT,
-					ppcd.WITNESS_DEFENDANT_PAGE,
-					ppcd.WITNESS_PLAINTIFF_PAGE
-				FROM
-					PC_PROCEED_CASE_DETAIL ppcd
-				INNER JOIN (
-					SELECT
-						T1.*
-					FROM
-						PC_CASE T1
-					JOIN PC_CASE_ALLE T2 ON
-						T1.CASE_ID = T2.CASE_ID
-					JOIN PC_LOOKUP_ALLEGATION T3 ON
-						T2.ALLEGATION_ID = T3.ALLEGATION_ID
-					JOIN PC_LOOKUP_TITLE_CASE T4 ON
-						T1.BLACK_TITLE_ID = T4.TITLE_CASE_ID					
-					WHERE
-						T1.Removed_by = 0
-						AND T4.TITLE_CASE_NAME NOT IN ('ตจ', 'มต', 'ผ', 'ฟ') 
-						AND TRUNC(t1.CASE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')
-						) pc ON
-					ppcd.CASE_id = pc.case_id ) CUSTOM_CASE_DETAIL ON
-				ppacj.case_Detail_id = CUSTOM_CASE_DETAIL.case_detail_id)
-		GROUP BY
-			CUSTOM_JUDGE_NAME,
-			CUSTOM_JUDGE_CODE ) CASE_DETAIL_JUDGE_1 ON
-		plj.JUDGE_CODE = CASE_DETAIL_JUDGE_1.CUSTOM_JUDGE_CODE
-		AND plj.JUDGE_NAME = CASE_DETAIL_JUDGE_1.CUSTOM_JUDGE_NAME
-		) j0 ON j0.JUDGE_ID = j1.JUDGE_ID
- LEFT JOIN (
- SELECT
-  t5.JUDGE_ID,
- NVL( SUM( CASE WHEN t4.JUDGE_RESULT_CODE IN ( '01', '02') THEN 1 ELSE 0 END ), 0 ) COUNT_1_2,--
- NVL( SUM( CASE WHEN t4.JUDGE_RESULT_CODE = '03' THEN 1 ELSE 0 END ), 0 ) COUNT_03,--รับสารภาพสืบประกอบ
- NVL( SUM( CASE WHEN t4.JUDGE_RESULT_CODE = '04' THEN 1 ELSE 0 END ), 0 ) COUNT_04,--รับสารภาพ
- NVL( SUM( CASE WHEN t4.JUDGE_RESULT_CODE = '05' THEN 1 ELSE 0 END ), 0 ) COUNT_05,--ประนีประนอมพิพากษาตามยอมความ
- NVL( SUM( CASE WHEN t4.JUDGE_RESULT_CODE = '06' THEN 1 ELSE 0 END ), 0 ) COUNT_06,--ถอนฟ้อง ถอนคำร้อง
- NVL( SUM( CASE WHEN t4.JUDGE_RESULT_CODE = '08' THEN 1 ELSE 0 END ), 0 ) COUNT_08,--จำหน่ายคดี 
- NVL( SUM( CASE WHEN t4.JUDGE_RESULT_CODE = '09' THEN 1 ELSE 0 END ), 0 ) COUNT_09 --โดยเหตุอื่น
-FROM
- PC_CASE t1
- LEFT JOIN PC_JUDGEMENT t2 ON t1.CASE_ID = t2.CASE_ID 
- AND t2.REMOVED_BY = 0
- LEFT JOIN PC_LOOKUP_JUDGE_RESULT t4 ON t4.JUDGE_RESULT_ID = t2.JUDGE_RESULT_ID 
- AND t4.REMOVED_BY = 0
- LEFT JOIN PC_CASE_JUDGE t5 ON t5.CASE_ID = t1.CASE_ID
- JOIN PC_LOOKUP_TITLE_CASE T4 ON t1.BLACK_TITLE_ID = T4.TITLE_CASE_ID 
-WHERE
- t1.REMOVED_BY = 0 
- AND T4.TITLE_CASE_NAME NOT IN ('ตจ', 'มต', 'ผ', 'ฟ') 
- AND T1.CASE_TYPE_ID IN ( SELECT CASE_TYPE_ID FROM PC_LOOKUP_CASE_TYPE WHERE CASE_TYPE_CODE = '1' )
- AND t1.CASE_CATE_ID IN ( SELECT CASE_CATE_ID FROM PC_LOOKUP_CASE_CATE WHERE CASE_CATE_CODE = '11001' ) 
- AND TRUNC(t1.CASE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')
- AND t5.JUDGE_TYPE_ID IN ( SELECT JUDGE_TYPE_ID FROM PC_LOOKUP_JUDGE_TYPE WHERE JUDGE_TYPE_CODE = '01' ) 
-GROUP BY
- t5.JUDGE_ID 
- ) 
- j2 ON j2.JUDGE_ID = j1.JUDGE_ID LEFT JOIN 
- (
- SELECT
-  t1.JUDGE_ID,
-  COUNT( t2.CASE_ID ) COUNT_9 
- FROM
-  PC_CASE_JUDGE t1
-  JOIN PC_JUDGEMENT t2 ON t2.CASE_ID = t1.CASE_ID 
-  AND t2.REMOVED_BY = 0
-  JOIN PC_CASE t3 ON t3.CASE_ID = t1.CASE_ID 
-  AND t3.REMOVED_BY = 0
-  JOIN PC_LOOKUP_CASE_CATE t4 ON t4.CASE_CATE_ID = t3.CASE_CATE_ID 
-  AND t4.REMOVED_BY = 0 
-  JOIN PC_LOOKUP_TITLE_CASE T5 ON t5.TITLE_CASE_ID = T3.BLACK_TITLE_ID
- WHERE
-  t1.REMOVED_BY = 0
-  AND T5.TITLE_CASE_NAME NOT IN ('ตจ', 'มต', 'ผ', 'ฟ') 
-  AND T3.CASE_TYPE_ID IN ( SELECT CASE_TYPE_ID FROM PC_LOOKUP_CASE_TYPE WHERE CASE_TYPE_CODE = '1' )
-  AND TRUNC(t2.JUDGE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH') 
-  AND t1.TEMPORARY_JUDGE_FLAG = 2 -- 1-จ่ายชั่วคราว 2-โอนสำนวน 3-จ่ายต่อเนื่อง 4-จ่ายสำนวน(ปกติ)
- GROUP BY
-  t1.JUDGE_ID 
- ) 
- j3 ON j3.JUDGE_ID = j1.JUDGE_ID LEFT JOIN
- (
- SELECT
- t5.JUDGE_ID,
- NVL( SUM( CASE WHEN T1.CASE_OR_REQ = 1 THEN 1 ELSE 0 END  ) , 0) COUNT_CASE,
-  NVL( SUM( CASE WHEN T1.CASE_OR_REQ = 2 THEN 1 ELSE 0 END  ) , 0) COUNT_REQ
- FROM
-  PC_CASE t1 
-  JOIN PC_JUDGEMENT t2 ON t1.CASE_ID = t2.CASE_ID 
-  AND t2.REMOVED_BY = 0
-  JOIN PC_LOOKUP_JUDGE_RESULT t4 ON t4.JUDGE_RESULT_ID = t2.JUDGE_RESULT_ID 
-  AND t4.REMOVED_BY = 0
-  JOIN PC_CASE_JUDGE t5 ON t5.CASE_ID = t1.CASE_ID 
-  JOIN PC_LOOKUP_TITLE_CASE T6 ON t1.BLACK_TITLE_ID = T6.TITLE_CASE_ID 
- WHERE   t1.REMOVED_BY = 0
- AND T6.TITLE_CASE_NAME NOT IN ('ตจ', 'มต', 'ผ', 'ฟ') 
- AND T1.CASE_TYPE_ID IN ( SELECT CASE_TYPE_ID FROM PC_LOOKUP_CASE_TYPE WHERE CASE_TYPE_CODE = '1' )
- AND TRUNC(t1.CASE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')
- GROUP BY
- t5.JUDGE_ID 
- ) 
- J4 ON J4.JUDGE_ID = j1.JUDGE_ID LEFT JOIN
- (
- SELECT
-  t1.JUDGE_ID,
-  NVL( SUM( CASE WHEN TRUNC(t3.CASE_DATE,'MONTH') < TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH') AND T2.JUDGE_DATE IS NULL THEN 1 ELSE 0 END  ) , 0) COUNT_PREV_MONTH,
-  NVL( SUM( CASE WHEN TRUNC(t3.CASE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')  THEN 1 ELSE 0 END  ) , 0) COUNT_RECV_THIS_MONTH
- FROM
-  PC_CASE_JUDGE t1
-  JOIN PC_JUDGEMENT t2 ON t2.CASE_ID = t1.CASE_ID 
-  AND t2.REMOVED_BY = 0
-  JOIN PC_CASE t3 ON t3.CASE_ID = t1.CASE_ID 
-  AND t3.REMOVED_BY = 0
-  JOIN PC_LOOKUP_CASE_CATE t4 ON t4.CASE_CATE_ID = t3.CASE_CATE_ID 
-  AND t4.REMOVED_BY = 0 
-  JOIN PC_LOOKUP_TITLE_CASE T5 ON T5.TITLE_CASE_ID = t3.BLACK_TITLE_ID 
- WHERE
-  t1.REMOVED_BY = 0
-  AND T5.TITLE_CASE_NAME NOT IN ('ตจ', 'มต', 'ผ', 'ฟ')  
-  AND T3.CASE_TYPE_ID IN ( SELECT CASE_TYPE_ID FROM PC_LOOKUP_CASE_TYPE WHERE CASE_TYPE_CODE = '1' ) 
- GROUP BY
- t1.JUDGE_ID
- ) 
- J5 ON J5.JUDGE_ID = J1.JUDGE_ID LEFT JOIN
- (
- SELECT
- JUDGE_ID,
- NVL( SUM( CASE WHEN RE_JUDGE_STATUS = 1 AND TRUNC(RE_JUDGE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')  THEN 1 ELSE 0 END  ) , 0) RE_JUDGE
- FROM
- PC_JUDGEMENT_SENTENCE_JUDGE T1 LEFT JOIN 
- PC_JUDGEMENT_SENTENCE T2 ON T1.SENTENCE_ID = T2.SENTENCE_ID LEFT JOIN
- PC_CASE T3 ON T2.CASE_ID = T3.CASE_ID
- JOIN PC_LOOKUP_TITLE_CASE T4 ON T4.TITLE_CASE_ID = t3.BLACK_TITLE_ID
- WHERE
-  t1.REMOVED_BY = 0 
-  AND T4.TITLE_CASE_NAME NOT IN ('ตจ', 'มต', 'ผ', 'ฟ')
-  AND T3.CASE_TYPE_ID IN ( SELECT CASE_TYPE_ID FROM PC_LOOKUP_CASE_TYPE WHERE CASE_TYPE_CODE = '1' ) 
- GROUP BY
- JUDGE_ID
- ) 
- J6 ON J6.JUDGE_ID = J1.JUDGE_ID LEFT JOIN 
- (
-  SELECT
-  t5.JUDGE_ID,
- NVL( SUM( CASE WHEN MONTHS_BETWEEN(T1.CASE_DATE,(TO_DATE($P{MONTH},'MM-YYYY'))) <= 6 AND T2.JUDGE_DATE IS NULL THEN 1 ELSE 0 END ), 0 ) LESS_6_MONTH,
- NVL( SUM( CASE WHEN MONTHS_BETWEEN(T1.CASE_DATE,(TO_DATE($P{MONTH},'MM-YYYY'))) > 6 AND MONTHS_BETWEEN(T1.CASE_DATE,(TO_DATE($P{MONTH},'MM-YYYY'))) <= 12  AND T2.JUDGE_DATE IS NULL  THEN 1 ELSE 0 END ), 0 ) LESS_1_YEAR,
- NVL( SUM( CASE WHEN MONTHS_BETWEEN(T1.CASE_DATE,(TO_DATE($P{MONTH},'MM-YYYY'))) > 12 AND MONTHS_BETWEEN(T1.CASE_DATE,(TO_DATE($P{MONTH},'MM-YYYY'))) <= 24  AND T2.JUDGE_DATE IS NULL  THEN 1 ELSE 0 END ), 0 ) LESS_2_YEAR,
- NVL( SUM( CASE WHEN MONTHS_BETWEEN(T1.CASE_DATE,(TO_DATE($P{MONTH},'MM-YYYY'))) > 24 AND MONTHS_BETWEEN(T1.CASE_DATE,(TO_DATE($P{MONTH},'MM-YYYY'))) <= 60  AND T2.JUDGE_DATE IS NULL  THEN 1 ELSE 0 END ), 0 ) LESS_5_YEAR,
- NVL( SUM( CASE WHEN MONTHS_BETWEEN(T1.CASE_DATE,(TO_DATE($P{MONTH},'MM-YYYY'))) > 60 AND T2.JUDGE_DATE IS NULL THEN 1 ELSE 0 END ), 0 ) MORE_5_YEAR
-FROM
- PC_CASE t1
- LEFT JOIN PC_JUDGEMENT t2 ON t1.CASE_ID = t2.CASE_ID 
- AND t2.REMOVED_BY = 0
- LEFT JOIN PC_LOOKUP_JUDGE_RESULT t4 ON t4.JUDGE_RESULT_ID = t2.JUDGE_RESULT_ID 
- AND t4.REMOVED_BY = 0
- LEFT JOIN PC_CASE_JUDGE t5 ON t5.CASE_ID = t1.CASE_ID 
- JOIN PC_LOOKUP_TITLE_CASE T6 ON t1.BLACK_TITLE_ID = T6.TITLE_CASE_ID
-WHERE
- t1.REMOVED_BY = 0 
- AND T6.TITLE_CASE_NAME NOT IN ('ตจ', 'มต', 'ผ', 'ฟ') 
- AND t1.CASE_TYPE_ID IN ( SELECT CASE_TYPE_ID FROM PC_LOOKUP_CASE_TYPE WHERE CASE_TYPE_CODE = '1' ) 
- AND t1.CASE_CATE_ID IN ( SELECT CASE_CATE_ID FROM PC_LOOKUP_CASE_CATE WHERE CASE_CATE_CODE = '11001' ) 
- AND TRUNC(t2.JUDGE_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH') 
- AND t5.JUDGE_TYPE_ID IN ( SELECT JUDGE_TYPE_ID FROM PC_LOOKUP_JUDGE_TYPE WHERE JUDGE_TYPE_CODE = '01' ) 
-GROUP BY
- t5.JUDGE_ID 
- ) 
- J7 ON J7.JUDGE_ID = J1.JUDGE_ID LEFT JOIN 
- (
-  SELECT
-  OLD_JUDGE as JUDGE_ID,
-  COUNT(*) AS SEND
-  FROM
-  PC_MANAGER_JUDGE_TRANSFER_LOG T1 JOIN PC_CASE T2 ON T1.CASE_ID = T2.CASE_ID
-  JOIN PC_LOOKUP_TITLE_CASE T3 ON T2.BLACK_TITLE_ID = T3.TITLE_CASE_ID
-  WHERE
-  T1.REMOVED_BY = 0 
-  AND T3.TITLE_CASE_NAME NOT IN ('ตจ', 'มต', 'ผ', 'ฟ') 
-  AND TRUNC(T1.TRANSFER_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')
-  AND T2.CASE_TYPE_ID IN ( SELECT CASE_TYPE_ID FROM PC_LOOKUP_CASE_TYPE WHERE CASE_TYPE_CODE = '1' )
-  GROUP BY
-  OLD_JUDGE
- ) 
- J8 ON J8.JUDGE_ID = J1.JUDGE_ID LEFT JOIN 
-  (
-  SELECT
-  NEW_JUDGE as JUDGE_ID,
-  COUNT(*) AS RECV
-  FROM
-  PC_MANAGER_JUDGE_TRANSFER_LOG T1 JOIN PC_CASE T2 ON T1.CASE_ID = T2.CASE_ID
-  JOIN PC_LOOKUP_TITLE_CASE T3 ON T2.BLACK_TITLE_ID = T3.TITLE_CASE_ID
-  WHERE
-  T1.REMOVED_BY = 0 
-  AND T3.TITLE_CASE_NAME NOT IN ('ตจ', 'มต', 'ผ', 'ฟ')
-  AND TRUNC(T1.TRANSFER_DATE,'MONTH') = TRUNC((TO_DATE($P{MONTH},'MM-YYYY')),'MONTH')
-  AND T2.CASE_TYPE_ID IN ( SELECT CASE_TYPE_ID FROM PC_LOOKUP_CASE_TYPE WHERE CASE_TYPE_CODE = '1' ) 
-  GROUP BY
-  NEW_JUDGE
- ) 
- J9 ON J9.JUDGE_ID = J1.JUDGE_ID
-WHERE
- j1.REMOVED_BY = 0 AND
- j1.FLAG_JUDGE = 1]]>
+		<![CDATA[SELECT plj.SUPER_ID
+       ,plj.JUDGE_NAME
+       --
+       ,A.C_CASE
+       ,A.C_REQ
+       --
+       ,B.O_PREVM
+       ,B.O_CURRM
+       --
+       ,C.WITNESS
+       ,C.PAGES
+       --
+       ,D.REJUDGE
+       --
+       ,E.J1n2
+       ,E.J3
+       ,E.J4
+       ,E.J5
+       ,E.J6
+       ,E.J7n8
+       ,E.J9
+       --
+       ,F.M6LT
+       ,F.M6Y1
+       ,F.Y1Y2
+       ,F.Y2Y5
+       ,F.Y5UP
+       --
+       ,G.GET_CASE
+       ,G.SEND_CASE
+FROM PC_LOOKUP_JUDGE plj 
+--A:ตรวจฟ้องและคำร้องขอ(check equest or petition)
+LEFT JOIN(SELECT pcj.JUDGE_ID
+			     ,SUM(CASE WHEN pljt.JUDGE_TYPE_CODE = '07' AND pc.CASE_OR_REQ = 1 THEN 1 ELSE 0 END) C_CASE
+			     ,SUM(CASE WHEN pljt.JUDGE_TYPE_CODE = '07' AND pc.CASE_OR_REQ = 1 THEN 1 ELSE 0 END) C_REQ
+		  FROM PC_CASE_JUDGE pcj
+		  LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+		  --
+		  LEFT JOIN PC_CASE pc ON pc.CASE_ID = pcj.CASE_ID AND pcj.REMOVED_BY = 0
+		  LEFT JOIN PC_LOOKUP_CASE_TYPE plct ON plct.CASE_TYPE_ID = pc.CASE_TYPE_ID AND plct.REMOVED_BY = 0
+		  LEFT JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+		  --
+		  WHERE pcj.REMOVED_BY = 0
+		  AND TO_CHAR(pc.CASE_DATE,'MM-YYYY') = $P{MONTH}
+		  AND plct.CASE_TYPE_CODE = '1'
+		  AND plcc.CASE_CATE_CODE =  $P{CASE_CATE_CODE} 
+		  GROUP BY pcj.JUDGE_ID) A ON A.JUDGE_ID = plj.JUDGE_ID 
+--B:เป็นเจ้าของสำนวน จากเดือนก่อน และรับใหม่เดือนนี้(case owner prev and curr month)
+LEFT JOIN (SELECT pcj.JUDGE_ID 
+			       ,SUM(CASE WHEN pc.CASE_DATE < TO_DATE($P{MONTH},'MM-YYYY') THEN 1 ELSE 0 END) O_PREVM
+			       ,SUM(CASE WHEN TO_CHAR(pc.CASE_DATE,'MM-YYYY') = $P{MONTH} THEN 1 ELSE 0 END) O_CURRM
+			FROM PC_CASE_JUDGE pcj
+			LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+			--
+			LEFT JOIN PC_CASE pc ON pc.CASE_ID = pcj.CASE_ID AND pc.REMOVED_BY = 0
+			LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
+			--
+		    LEFT JOIN PC_LOOKUP_CASE_TYPE plct ON plct.CASE_TYPE_ID = pc.CASE_TYPE_ID AND plct.REMOVED_BY = 0
+			LEFT JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+			--
+			WHERE pcj.REMOVED_BY = 0
+			AND pcj.TEMPORARY_JUDGE_FLAG IS NULL
+			AND pljt.JUDGE_TYPE_CODE = '01'
+			AND (pj.JUDGE_DATE IS NULL OR pj.JUDGE_DATE > LAST_DAY(TO_DATE($P{MONTH},'MM-YYYY' )))
+			AND plct.CASE_TYPE_CODE = '1'
+			AND plcc.CASE_CATE_CODE = $P{CASE_CATE_CODE} 
+			GROUP BY pcj.JUDGE_ID) B ON B.JUDGE_ID = plj.JUDGE_ID
+--C:สืบพยาน(witness investigate)
+LEFT JOIN(SELECT pcj.JUDGE_ID 
+		         ,SUM(ap.WITNESS)	WITNESS
+		         ,SUM(ap.PAGES)     PAGES
+		  FROM PC_CASE_JUDGE pcj
+		  LEFT JOIN (SELECT ppa.CASE_ID 
+						   ,SUM(NVL(pprw.WITNESS_DEFENDANT_COUNT,0)+NVL(pprw.WITNESS_DISSENTER_COUNT,0)+NVL(pprw.WITNESS_OTHER_COUNT,0)+NVL(pprw.WITNESS_PLAINTIFF_COUNT,0)+NVL(pprw.WITNESS_REQUESTER_COUNT,0)) WITNESS	  
+						   ,SUM(NVL(pprw.WITNESS_DEFENDANT_PAGE,0)+NVL(pprw.WITNESS_DISSENTER_PAGE,0)+NVL(pprw.WITNESS_OTHER_DAY,0)+NVL(pprw.WITNESS_PLAINTIFF_PAGE,0)+NVL(pprw.WITNESS_REQUESTER_PAGE,0)) PAGES  
+					FROM PC_PROCEED_APPOINT ppa
+					LEFT JOIN PC_PROCEED_APPOINT_CONTINUE ppac ON ppac.APPOINT_ID = ppa.APPOINT_ID AND ppac.REMOVED_BY = 0
+					LEFT JOIN PC_PROCEED_RECORD_WITNESS pprw ON pprw.APPOINT_CON_ID = ppac.APPOINT_CON_ID AND pprw.REMOVED_BY = 0
+					WHERE ppa.REMOVED_BY = 0
+					AND TO_CHAR(ppac.START_DATE,'MM-YYYY') = $P{MONTH}  
+					GROUP BY ppa.CASE_ID) ap ON ap.CASE_ID = pcj.CASE_ID
+		  LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+		  --
+		  LEFT JOIN PC_CASE pc ON pc.CASE_ID = pcj.CASE_ID AND pcj.REMOVED_BY = 0
+		  LEFT JOIN PC_LOOKUP_CASE_TYPE plct ON plct.CASE_TYPE_ID = pc.CASE_TYPE_ID AND plct.REMOVED_BY = 0
+		  LEFT JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+		  --
+		  WHERE pcj.REMOVED_BY = 0
+		  AND pljt.JUDGE_TYPE_CODE IN ('01','02','03','12')
+		  AND plct.CASE_TYPE_CODE = '1'
+		  AND plcc.CASE_CATE_CODE =  $P{CASE_CATE_CODE} 
+		  GROUP BY pcj.JUDGE_ID) C ON C.JUDGE_ID = plj.JUDGE_ID 
+--D:คดีแดงที่นำมาพิจารณาใหม่(re-judgement)
+LEFT JOIN (SELECT pcj.JUDGE_ID
+                  ,COUNT(j.CASE_ID)  REJUDGE
+			FROM PC_CASE_JUDGE pcj
+			JOIN (SELECT pj.CASE_ID 
+					FROM PC_JUDGEMENT pj 
+					LEFT JOIN PC_JUDGEMENT_SENTENCE pjs ON pjs.CASE_ID = pj.CASE_ID 
+					WHERE pj.REMOVED_BY = 0
+					AND pjs.RE_JUDGE_STATUS = 1
+					AND TO_CHAR(pj.JUDGE_DATE, 'MM-YYYY') = $P{MONTH}) j ON j.CASE_ID = pcj.CASE_ID
+			--
+			LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+			--
+			LEFT JOIN PC_CASE pc ON pc.CASE_ID = pcj.CASE_ID AND pcj.REMOVED_BY = 0
+			LEFT JOIN PC_LOOKUP_CASE_TYPE plct ON plct.CASE_TYPE_ID = pc.CASE_TYPE_ID AND plct.REMOVED_BY = 0
+		    LEFT JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+			--
+		    WHERE pcj.REMOVED_BY = 0
+			AND pcj.TEMPORARY_JUDGE_FLAG IS NULL
+			AND pljt.JUDGE_TYPE_CODE = '04'
+			AND plct.CASE_TYPE_CODE = '1'
+			AND plcc.CASE_CATE_CODE = $P{CASE_CATE_CODE} 
+			GROUP BY pcj.JUDGE_ID) D ON D.JUDGE_ID = plj.JUDGE_ID
+--E:คดีเสร็จไป(judgement done)
+LEFT JOIN (SELECT pcj.JUDGE_ID
+                   ,SUM(CASE WHEN pljr.JUDGE_RESULT_CODE IN ('01','02') THEN 1 ELSE 0 END) J1n2 --พิพากษาความเรียง
+				   ,SUM(CASE WHEN pljr.JUDGE_RESULT_CODE = '03' THEN 1 ELSE 0 END) J3  --รับสารภาพสืบประอบ
+			       ,SUM(CASE WHEN pljr.JUDGE_RESULT_CODE = '04' THEN 1 ELSE 0 END) J4	--รับสภาพ
+			       ,SUM(CASE WHEN pljr.JUDGE_RESULT_CODE = '05' THEN 1 ELSE 0 END) J5  --ยอมความ
+			       ,SUM(CASE WHEN pljr.JUDGE_RESULT_CODE = '06' THEN 1 ELSE 0 END) J6  --ถอนฟ้อง ถอนคำร้อง
+			       ,SUM(CASE WHEN pljr.JUDGE_RESULT_CODE IN ('07','08') THEN 1 ELSE 0 END) J7n8 --จำหน่ายคดี
+			       ,SUM(CASE WHEN pljr.JUDGE_RESULT_CODE = '09' THEN 1 ELSE 0 END) J9   --โดยเหตุอื่น
+			FROM PC_CASE_JUDGE pcj 
+			LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+			--
+			LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pcj.CASE_ID AND pj.REMOVED_BY = 0
+			LEFT JOIN PC_LOOKUP_JUDGE_RESULT pljr ON pljr.JUDGE_RESULT_ID = pj.JUDGE_RESULT_ID AND pljr.REMOVED_BY = 0
+			--
+			LEFT JOIN PC_CASE pc ON pc.CASE_ID = pcj.CASE_ID AND pcj.REMOVED_BY = 0
+			LEFT JOIN PC_LOOKUP_CASE_TYPE plct ON plct.CASE_TYPE_ID = pc.CASE_TYPE_ID AND plct.REMOVED_BY = 0
+		    LEFT JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+			--
+		    WHERE pcj.REMOVED_BY = 0
+			AND pljt.JUDGE_TYPE_CODE = '04'
+			AND TO_CHAR(pj.JUDGE_DATE,'MM-YYYY') = $P{MONTH} 
+			AND plct.CASE_TYPE_CODE = '1'
+			AND plcc.CASE_CATE_CODE =  $P{CASE_CATE_CODE} 
+			GROUP BY pcj.JUDGE_ID) E ON E.JUDGE_ID = plj.JUDGE_ID 
+--F:คดีค้างไปเดือนหน้า(remain to next month)
+LEFT JOIN (SELECT pcj.JUDGE_ID 
+			       ,SUM(CASE WHEN cj.MONTHS <= 6 THEN 1 ELSE 0 END)  AS M6LT
+			       ,SUM(CASE WHEN (cj.MONTHS > 6 AND cj.MONTHS <= 12) THEN 1 ELSE 0 END) AS M6Y1
+			       ,SUM(CASE WHEN (cj.MONTHS > 12 AND cj.MONTHS <= 24) THEN 1 ELSE 0 END) AS Y1Y2
+			       ,SUM(CASE WHEN (cj.MONTHS > 24 AND cj.MONTHS <= 60) THEN 1 ELSE 0 END) AS Y2Y5
+			       ,SUM(CASE WHEN (cj.MONTHS > 60) THEN 1 ELSE 0 END) AS Y5UP
+			FROM PC_CASE_JUDGE pcj
+			LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+			--
+			LEFT JOIN (SELECT pc.CASE_ID
+						      ,MONTHS_BETWEEN(LAST_DAY(TO_DATE( $P{MONTH},'MM-YYYY' )), pc.CASE_DATE)  MONTHS
+					   FROM PC_CASE pc 
+					   LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = pc.CASE_ID AND pj.REMOVED_BY = 0
+					   LEFT JOIN PC_LOOKUP_CASE_TYPE plct ON plct.CASE_TYPE_ID = pc.CASE_TYPE_ID AND plct.REMOVED_BY = 0
+					   LEFT JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+					   WHERE pc.REMOVED_BY = 0
+					   AND pc.CASE_DATE <= LAST_DAY(TO_DATE( $P{MONTH},'MM-YYYY' ))
+					   AND (pj.JUDGE_DATE IS NULL OR pj.JUDGE_DATE > LAST_DAY(TO_DATE( $P{MONTH},'MM-YYYY' )))
+					   AND plct.CASE_TYPE_CODE = '1'
+					   AND plcc.CASE_CATE_CODE =  $P{CASE_CATE_CODE} 
+					   ) cj ON cj.CASE_ID = pcj.CASE_ID
+			--
+			WHERE pcj.REMOVED_BY = 0
+			AND pcj.TEMPORARY_JUDGE_FLAG IS NULL
+			AND pljt.JUDGE_TYPE_CODE = '01'
+			GROUP BY pcj.JUDGE_ID ) F ON F.JUDGE_ID = plj.JUDGE_ID 
+--G:จำนวนคดีที่รับโอนมา(transfer case)
+LEFT JOIN (SELECT pcj.JUDGE_ID
+			       ,SUM(CASE WHEN pcj.JUDGE_END_DATE IS NULL THEN 1 ELSE 0 END)  GET_CASE
+			       ,SUM(CASE WHEN pcj.JUDGE_END_DATE IS NULL THEN 1 ELSE 0 END)  SEND_CASE
+			FROM PC_CASE_JUDGE pcj 
+			LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+			LEFT JOIN PC_CASE pc ON pc.CASE_ID = pcj.CASE_ID AND pc.REMOVED_BY = 0
+			LEFT JOIN PC_LOOKUP_CASE_TYPE plct ON plct.CASE_TYPE_ID = pc.CASE_TYPE_ID AND plct.REMOVED_BY = 0
+			LEFT JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
+			WHERE pcj.REMOVED_BY = 0
+			AND pcj.TEMPORARY_JUDGE_FLAG = 2
+			AND pljt.JUDGE_TYPE_CODE = '01'
+			AND TO_CHAR(pc.CASE_DATE,'MM-YYYY') = $P{MONTH} 
+			AND plct.CASE_TYPE_CODE = '1'
+			AND plcc.CASE_CATE_CODE =  $P{CASE_CATE_CODE} 
+			GROUP BY pcj.JUDGE_ID ) G ON G.JUDGE_ID = plj.JUDGE_ID 
+--
+WHERE plj.REMOVED_BY = 0
+AND plj.FLAG_JUDGE = 1
+AND plj.ACTIVE_FLAG = 1
+AND plj.SUPER_ID IS NOT NULL
+ORDER BY plj.SUPER_ID]]>
 	</queryString>
+	<field name="SUPER_ID" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="SUPER_ID"/>
+	</field>
 	<field name="JUDGE_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="JUDGE_NAME"/>
 	</field>
-	<field name="COUNT_CASE" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="COUNT_CASE"/>
+	<field name="C_CASE" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="C_CASE"/>
 	</field>
-	<field name="COUNT_REQ" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="COUNT_REQ"/>
+	<field name="C_REQ" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="C_REQ"/>
 	</field>
-	<field name="COUNT_PREV_MONTH" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="COUNT_PREV_MONTH"/>
+	<field name="O_PREVM" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="O_PREVM"/>
 	</field>
-	<field name="COUNT_RECV_THIS_MONTH" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="COUNT_RECV_THIS_MONTH"/>
+	<field name="O_CURRM" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="O_CURRM"/>
 	</field>
-	<field name="TOTAL_COUNT" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="TOTAL_COUNT"/>
+	<field name="WITNESS" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="WITNESS"/>
 	</field>
-	<field name="TOTAL_PAGE" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="TOTAL_PAGE"/>
+	<field name="PAGES" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="PAGES"/>
 	</field>
-	<field name="RE_JUDGE" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="RE_JUDGE"/>
+	<field name="REJUDGE" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="REJUDGE"/>
 	</field>
-	<field name="COUNT_1_2" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="COUNT_1_2"/>
+	<field name="J1N2" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="J1N2"/>
 	</field>
-	<field name="COUNT_03" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="COUNT_03"/>
+	<field name="J3" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="J3"/>
 	</field>
-	<field name="COUNT_04" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="COUNT_04"/>
+	<field name="J4" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="J4"/>
 	</field>
-	<field name="COUNT_05" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="COUNT_05"/>
+	<field name="J5" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="J5"/>
 	</field>
-	<field name="COUNT_06" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="COUNT_06"/>
+	<field name="J6" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="J6"/>
 	</field>
-	<field name="COUNT_08" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="COUNT_08"/>
+	<field name="J7N8" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="J7N8"/>
 	</field>
-	<field name="COUNT_09" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="COUNT_09"/>
+	<field name="J9" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="J9"/>
 	</field>
-	<field name="TOTAL_COUNT_ALL" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="TOTAL_COUNT_ALL"/>
+	<field name="M6LT" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="M6LT"/>
 	</field>
-	<field name="LESS_6_MONTH" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="LESS_6_MONTH"/>
+	<field name="M6Y1" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="M6Y1"/>
 	</field>
-	<field name="LESS_1_YEAR" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="LESS_1_YEAR"/>
+	<field name="Y1Y2" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="Y1Y2"/>
 	</field>
-	<field name="LESS_2_YEAR" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="LESS_2_YEAR"/>
+	<field name="Y2Y5" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="Y2Y5"/>
 	</field>
-	<field name="LESS_5_YEAR" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="LESS_5_YEAR"/>
+	<field name="Y5UP" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="Y5UP"/>
 	</field>
-	<field name="MORE_5_YEAR" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="MORE_5_YEAR"/>
+	<field name="GET_CASE" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="GET_CASE"/>
 	</field>
-	<field name="TOTAL_CASE" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="TOTAL_CASE"/>
+	<field name="SEND_CASE" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.label" value="SEND_CASE"/>
 	</field>
-	<field name="SEND" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="SEND"/>
-	</field>
-	<field name="RECV" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.label" value="RECV"/>
-	</field>
-	<variable name="sum1_1" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{COUNT_CASE}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{COUNT_CASE}.doubleValue()]]></initialValueExpression>
+	<variable name="ALL_J" class="java.lang.Integer">
+		<variableExpression><![CDATA[$F{J1N2}+
+$F{J3}+
+$F{J4}+
+$F{J5}+
+$F{J6}+
+$F{J7N8}+
+$F{J9}]]></variableExpression>
 	</variable>
-	<variable name="sum1_2" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{COUNT_REQ}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{COUNT_REQ}.doubleValue()]]></initialValueExpression>
+	<variable name="ALL_MY" class="java.lang.Integer">
+		<variableExpression><![CDATA[$F{M6LT}+$F{M6Y1}+$F{Y1Y2}+$F{Y2Y5}+$F{Y5UP}]]></variableExpression>
 	</variable>
-	<variable name="sum1_3" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{COUNT_PREV_MONTH}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{COUNT_PREV_MONTH}.doubleValue()]]></initialValueExpression>
+	<variable name="SUM_C_CASE" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{C_CASE}]]></variableExpression>
 	</variable>
-	<variable name="sum1_4" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{COUNT_RECV_THIS_MONTH}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{COUNT_RECV_THIS_MONTH}.doubleValue()]]></initialValueExpression>
+	<variable name="SUM_C_REQ" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{C_REQ}]]></variableExpression>
 	</variable>
-	<variable name="sum1_5" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{TOTAL_COUNT}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{TOTAL_COUNT}.doubleValue()]]></initialValueExpression>
+	<variable name="SUM_O_PREVM" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{O_PREVM}]]></variableExpression>
 	</variable>
-	<variable name="sum1_6" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{TOTAL_PAGE}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{TOTAL_PAGE}.doubleValue()]]></initialValueExpression>
+	<variable name="SUM_O_CURRM" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{O_CURRM}]]></variableExpression>
 	</variable>
-	<variable name="sum1_7" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{RE_JUDGE}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{RE_JUDGE}.doubleValue()]]></initialValueExpression>
+	<variable name="SUM_WITNESS" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{WITNESS}]]></variableExpression>
 	</variable>
-	<variable name="sum1_8" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{COUNT_1_2}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{COUNT_1_2}.doubleValue()]]></initialValueExpression>
+	<variable name="SUM_PAGES" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{PAGES}]]></variableExpression>
 	</variable>
-	<variable name="sum1_9" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{COUNT_1_2}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{COUNT_1_2}.doubleValue()]]></initialValueExpression>
+	<variable name="SUM_REJUDGE" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{REJUDGE}]]></variableExpression>
 	</variable>
-	<variable name="sum1_10" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{COUNT_03}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{COUNT_03}.doubleValue()]]></initialValueExpression>
+	<variable name="SUM_J1N2" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{J1N2}]]></variableExpression>
 	</variable>
-	<variable name="sum1_11" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{COUNT_04}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{COUNT_04}.doubleValue()]]></initialValueExpression>
+	<variable name="SUM_J3" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{J3}]]></variableExpression>
 	</variable>
-	<variable name="sum1_12" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{COUNT_05}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{COUNT_05}.doubleValue()]]></initialValueExpression>
+	<variable name="SUM_J4" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{J4}]]></variableExpression>
 	</variable>
-	<variable name="sum1_13" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{TOTAL_COUNT_ALL}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{TOTAL_COUNT_ALL}.doubleValue()]]></initialValueExpression>
+	<variable name="SUM_J5" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{J5}]]></variableExpression>
 	</variable>
-	<variable name="sum1_14" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{TOTAL_COUNT_ALL}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{TOTAL_COUNT_ALL}.doubleValue()]]></initialValueExpression>
+	<variable name="SUM_J6" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{J6}]]></variableExpression>
 	</variable>
-	<variable name="sum1_15" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{LESS_1_YEAR}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{LESS_1_YEAR}.doubleValue()]]></initialValueExpression>
+	<variable name="SUM_J7NJ8" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{J7N8}]]></variableExpression>
 	</variable>
-	<variable name="sum1_16" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{LESS_2_YEAR}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{LESS_2_YEAR}.doubleValue()]]></initialValueExpression>
+	<variable name="SUM_J9" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{J9}]]></variableExpression>
 	</variable>
-	<variable name="sum1_17" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{LESS_5_YEAR}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{LESS_5_YEAR}.doubleValue()]]></initialValueExpression>
+	<variable name="SUM_ALLJ" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$V{ALL_J}]]></variableExpression>
 	</variable>
-	<variable name="sum1_18" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{MORE_5_YEAR}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{MORE_5_YEAR}.doubleValue()]]></initialValueExpression>
+	<variable name="SUM_M6LT" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{M6LT}]]></variableExpression>
 	</variable>
-	<variable name="sum1_19" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{TOTAL_CASE}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{TOTAL_CASE}.doubleValue()]]></initialValueExpression>
+	<variable name="SUM_M6Y1" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{M6Y1}]]></variableExpression>
 	</variable>
-	<variable name="sum1_20" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{SEND}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{SEND}.doubleValue()]]></initialValueExpression>
+	<variable name="SUMY1Y2" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{Y1Y2}]]></variableExpression>
 	</variable>
-	<variable name="sum1_21" class="java.lang.Integer" calculation="Sum">
-		<variableExpression><![CDATA[$F{RECV}.doubleValue()]]></variableExpression>
-		<initialValueExpression><![CDATA[$F{RECV}.doubleValue()]]></initialValueExpression>
+	<variable name="SUM_Y2Y5" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{Y2Y5}]]></variableExpression>
+	</variable>
+	<variable name="SUM_Y5UP" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{Y5UP}]]></variableExpression>
+	</variable>
+	<variable name="SUM_ALLMY" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$V{ALL_MY}]]></variableExpression>
+	</variable>
+	<variable name="SUM_GETCASE" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{GET_CASE}]]></variableExpression>
+	</variable>
+	<variable name="SUM_SENDCASE" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{SEND_CASE}]]></variableExpression>
 	</variable>
 	<background>
 		<band splitType="Stretch"/>
@@ -458,7 +377,9 @@ WHERE
 				<text><![CDATA[ลำดับ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="15" y="-20" width="237" height="120" uuid="81216bc6-41b2-400d-9b92-9aa2891de678"/>
+				<reportElement x="15" y="-20" width="187" height="120" uuid="81216bc6-41b2-400d-9b92-9aa2891de678">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -471,7 +392,7 @@ WHERE
 				<text><![CDATA[ชื่อผู้พิพากษา]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="277" y="10" width="25" height="90" uuid="1abe1347-078b-4c17-b40f-dd44b3ea3bff"/>
+				<reportElement x="227" y="10" width="25" height="90" uuid="1abe1347-078b-4c17-b40f-dd44b3ea3bff"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -484,7 +405,7 @@ WHERE
 				<text><![CDATA[คำร้องขอ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="252" y="10" width="25" height="90" uuid="3d1b7cd8-a6c5-44d5-9a13-d2556bc6ebe2"/>
+				<reportElement x="202" y="10" width="25" height="90" uuid="3d1b7cd8-a6c5-44d5-9a13-d2556bc6ebe2"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -497,7 +418,7 @@ WHERE
 				<text><![CDATA[คำฟ้อง]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="252" y="-20" width="50" height="30" uuid="68751e5b-17c8-4b11-9301-69c11aeafb30"/>
+				<reportElement x="202" y="-20" width="50" height="30" uuid="68751e5b-17c8-4b11-9301-69c11aeafb30"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -510,7 +431,7 @@ WHERE
 				<text><![CDATA[ตรวจฟ้องและ  คำร้องขอ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="302" y="-20" width="50" height="30" uuid="c1394dae-c3a3-44e9-b545-5c78e872e950"/>
+				<reportElement x="252" y="-20" width="50" height="30" uuid="c1394dae-c3a3-44e9-b545-5c78e872e950"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -523,7 +444,7 @@ WHERE
 				<text><![CDATA[เป็นเจ้าของสำนวน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="302" y="10" width="25" height="90" uuid="7183cb9f-7609-4dc6-9efb-01bf47e3df27"/>
+				<reportElement x="252" y="10" width="25" height="90" uuid="7183cb9f-7609-4dc6-9efb-01bf47e3df27"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -536,7 +457,7 @@ WHERE
 				<text><![CDATA[ค้างจากเดือนก่อน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="327" y="10" width="25" height="90" uuid="4a6af4a6-7401-4dcd-9691-188024013ec5"/>
+				<reportElement x="277" y="10" width="25" height="90" uuid="4a6af4a6-7401-4dcd-9691-188024013ec5"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -549,7 +470,7 @@ WHERE
 				<text><![CDATA[รับใหม่เดือนนี้]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="352" y="-20" width="50" height="30" uuid="948142ad-54cd-45d3-b454-d762a466a68f"/>
+				<reportElement x="302" y="-20" width="50" height="30" uuid="948142ad-54cd-45d3-b454-d762a466a68f"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -562,7 +483,7 @@ WHERE
 				<text><![CDATA[สืบพยาน]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="352" y="10" width="25" height="90" uuid="d6abf2f5-a1f1-4512-ab13-0942e4649605"/>
+				<reportElement x="302" y="10" width="25" height="90" uuid="d6abf2f5-a1f1-4512-ab13-0942e4649605"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -576,7 +497,7 @@ WHERE
 ปาก]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="377" y="10" width="25" height="90" uuid="d82c4ef5-9a9b-4d90-96c8-d4dce3b8da9b"/>
+				<reportElement x="327" y="10" width="25" height="90" uuid="d82c4ef5-9a9b-4d90-96c8-d4dce3b8da9b"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -590,7 +511,7 @@ WHERE
 กระดาษ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="402" y="-20" width="30" height="120" uuid="f6f16f0f-396e-4062-8d4d-97f63779a694"/>
+				<reportElement x="352" y="-20" width="30" height="120" uuid="f6f16f0f-396e-4062-8d4d-97f63779a694"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -606,7 +527,7 @@ WHERE
 ใหม่]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="432" y="-20" width="150" height="30" uuid="3468c0b2-679e-4cc1-889f-4e5a366e21ce"/>
+				<reportElement x="382" y="-20" width="200" height="30" uuid="3468c0b2-679e-4cc1-889f-4e5a366e21ce"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -632,7 +553,7 @@ WHERE
 				<text><![CDATA[คดีค้างไปเดือนหน้า]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="432" y="10" width="25" height="90" uuid="997712c1-60d1-4927-bb8b-5bc48a3fc2fd"/>
+				<reportElement x="382" y="10" width="25" height="90" uuid="997712c1-60d1-4927-bb8b-5bc48a3fc2fd"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -646,7 +567,7 @@ WHERE
 ความเรียง]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="457" y="10" width="25" height="90" uuid="67085831-8c37-4c60-a51d-d5d34c1876b8"/>
+				<reportElement x="407" y="10" width="25" height="90" uuid="67085831-8c37-4c60-a51d-d5d34c1876b8"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -656,13 +577,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="9"/>
 				</textElement>
-				<text><![CDATA[ประนี
-ประนอม
-พิพากษา
-ตามยอม]]></text>
+				<text><![CDATA[รับสารภาพสืบประกอบ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="482" y="10" width="25" height="90" uuid="3db7bc83-4ea7-4d03-be20-d6fd297a8dff"/>
+				<reportElement x="432" y="10" width="25" height="90" uuid="3db7bc83-4ea7-4d03-be20-d6fd297a8dff"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -672,10 +590,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="9"/>
 				</textElement>
-				<text><![CDATA[ถอนฟ้องถอนคำร้องขอ]]></text>
+				<text><![CDATA[รับสภาพ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="507" y="10" width="25" height="90" uuid="63e68bc7-b8a6-4239-8079-de04b2b2eae6"/>
+				<reportElement x="457" y="10" width="25" height="90" uuid="63e68bc7-b8a6-4239-8079-de04b2b2eae6"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -685,12 +603,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="9"/>
 				</textElement>
-				<text><![CDATA[จำ
-หน่าย
-คดี]]></text>
+				<text><![CDATA[ยอมความ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="532" y="10" width="25" height="90" uuid="8cbea886-0532-4da5-923f-d19a203a5e58"/>
+				<reportElement x="482" y="10" width="25" height="90" uuid="8cbea886-0532-4da5-923f-d19a203a5e58"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -700,9 +616,7 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="9"/>
 				</textElement>
-				<text><![CDATA[โดย
-เหตุ
-อื่น]]></text>
+				<text><![CDATA[ถอนฟ้องถอนคำร้อง]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="557" y="10" width="25" height="90" uuid="ebce0afa-5e1d-4429-8dcd-2a59757fb4eb"/>
@@ -852,6 +766,32 @@ WHERE
 โอนมา
  (คดี)]]></text>
 			</staticText>
+			<staticText>
+				<reportElement x="507" y="10" width="25" height="90" uuid="68f39335-4728-4b75-8249-f6bfcf3a6dc8"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="9"/>
+				</textElement>
+				<text><![CDATA[จำหน่ายคดี]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="532" y="10" width="25" height="90" uuid="39c6ff8f-c2ef-403b-9611-52521c5a9a2c"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew" size="9"/>
+				</textElement>
+				<text><![CDATA[โดยเหตุอื่น]]></text>
+			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
@@ -867,10 +807,12 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{COLUMN_COUNT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="15" y="0" width="237" height="30" uuid="aa4b9b0b-c46f-4842-ac5c-85f5825d1675"/>
+				<reportElement x="15" y="0" width="187" height="30" uuid="aa4b9b0b-c46f-4842-ac5c-85f5825d1675">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<box leftPadding="5">
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -883,7 +825,7 @@ WHERE
 				<textFieldExpression><![CDATA[$F{JUDGE_NAME}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="252" y="0" width="25" height="30" uuid="60071514-5a12-4fd6-832a-8b319d5535f3"/>
+				<reportElement x="202" y="0" width="25" height="30" uuid="60071514-5a12-4fd6-832a-8b319d5535f3"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -893,10 +835,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{COUNT_CASE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{C_CASE}==null?0:$F{C_CASE}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="277" y="0" width="25" height="30" uuid="340b2ef0-0d7c-427d-94de-1661c1ecb30f"/>
+				<reportElement x="227" y="0" width="25" height="30" uuid="340b2ef0-0d7c-427d-94de-1661c1ecb30f"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -906,10 +848,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{COUNT_REQ}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{C_REQ}==null?0:$F{C_REQ}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="302" y="0" width="25" height="30" uuid="8e3634c9-512b-4c10-a27f-798c1af7e957"/>
+				<reportElement x="252" y="0" width="25" height="30" uuid="8e3634c9-512b-4c10-a27f-798c1af7e957"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -919,10 +861,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{COUNT_PREV_MONTH}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{O_PREVM}==null?0:$F{O_PREVM}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="327" y="0" width="25" height="30" uuid="6560f597-6390-4e49-9feb-55131eedf0f9"/>
+				<reportElement x="277" y="0" width="25" height="30" uuid="6560f597-6390-4e49-9feb-55131eedf0f9"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -932,10 +874,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{COUNT_RECV_THIS_MONTH}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{O_CURRM}==null?0:$F{O_CURRM}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="352" y="0" width="25" height="30" uuid="8dfc7651-6a15-4d56-b4b1-1c4a665a807e"/>
+				<reportElement x="302" y="0" width="25" height="30" uuid="8dfc7651-6a15-4d56-b4b1-1c4a665a807e"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -945,10 +887,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{TOTAL_COUNT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{WITNESS}==null?0:$F{WITNESS}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="377" y="0" width="25" height="30" uuid="a9b58bd4-fc84-4f70-9570-6bda7bb553db"/>
+				<reportElement x="327" y="0" width="25" height="30" uuid="a9b58bd4-fc84-4f70-9570-6bda7bb553db"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -958,10 +900,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{TOTAL_PAGE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{PAGES}==null?0:$F{PAGES}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="402" y="0" width="30" height="30" uuid="f0e05d8b-e547-4124-bf31-95697fc18e90"/>
+				<reportElement x="352" y="0" width="30" height="30" uuid="f0e05d8b-e547-4124-bf31-95697fc18e90"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -971,10 +913,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{RE_JUDGE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{REJUDGE}==null?0:$F{REJUDGE}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="432" y="0" width="25" height="30" uuid="baa3925e-104b-46ac-a93f-73639708ae78"/>
+				<reportElement x="382" y="0" width="25" height="30" uuid="baa3925e-104b-46ac-a93f-73639708ae78"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -984,10 +926,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{COUNT_1_2}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{J1N2}==null?0:$F{J1N2}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="457" y="0" width="25" height="30" uuid="eeb4b434-2eb9-41c9-a8ca-4e1293defe85"/>
+				<reportElement x="407" y="0" width="25" height="30" uuid="eeb4b434-2eb9-41c9-a8ca-4e1293defe85"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -997,10 +939,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{COUNT_1_2}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{J3}==null?0:$F{J3}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="482" y="0" width="25" height="30" uuid="e57176dd-3521-4214-9e04-ae2bb5c455d1"/>
+				<reportElement x="432" y="0" width="25" height="30" uuid="e57176dd-3521-4214-9e04-ae2bb5c455d1"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -1010,10 +952,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{COUNT_03}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{J4}==null?0:$F{J4}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="507" y="0" width="25" height="30" uuid="fd7750f9-3ea7-4c71-b89a-cd5ab8706e39"/>
+				<reportElement x="457" y="0" width="25" height="30" uuid="fd7750f9-3ea7-4c71-b89a-cd5ab8706e39"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -1023,10 +965,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{COUNT_04}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{J5}==null?0:$F{J5}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="532" y="0" width="25" height="30" uuid="1964939e-d409-4ef8-b782-a60cf22288e8"/>
+				<reportElement x="482" y="0" width="25" height="30" uuid="1964939e-d409-4ef8-b782-a60cf22288e8"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -1036,7 +978,7 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{COUNT_05}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{J6}==null?0:$F{J6}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="557" y="0" width="25" height="30" uuid="b99f7a9f-a13b-4f39-b6e7-3f082362c792"/>
@@ -1049,7 +991,7 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{TOTAL_COUNT_ALL}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{ALL_J}==null?0:$V{ALL_J}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="582" y="0" width="25" height="30" uuid="4b3a261f-471a-48d7-b018-ceacbceccf4b"/>
@@ -1062,7 +1004,7 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{LESS_6_MONTH}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{M6LT}==null?0:$F{M6LT}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="607" y="0" width="25" height="30" uuid="3a6d0d37-f2bc-41ad-92aa-912953cc6721"/>
@@ -1075,7 +1017,7 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{LESS_1_YEAR}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{M6Y1}==null?0:$F{M6Y1}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="632" y="0" width="25" height="30" uuid="90ae5c98-01b2-4bab-ae14-0ef705ea3ebc"/>
@@ -1088,7 +1030,7 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{LESS_2_YEAR}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{Y1Y2}==null?0:$F{Y1Y2}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="657" y="0" width="25" height="30" uuid="8ad35b7d-1da4-4874-8e66-297a0ad59ab4"/>
@@ -1101,7 +1043,7 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{LESS_5_YEAR}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{Y2Y5}==null?0:$F{Y2Y5}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="682" y="0" width="25" height="30" uuid="97228b7c-4099-4899-b10c-991b1e04186d"/>
@@ -1114,7 +1056,7 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{MORE_5_YEAR}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{Y5UP}==null?0:$F{Y5UP}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="707" y="0" width="25" height="30" uuid="d876587f-ec02-4cf8-9613-f255d03c9fc2"/>
@@ -1127,7 +1069,7 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{TOTAL_CASE}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{ALL_MY}==null?0:$V{ALL_MY}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="732" y="0" width="25" height="30" uuid="c3f4f447-b3b6-4769-aef2-6983d5b8e9a3"/>
@@ -1140,7 +1082,7 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{SEND}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{GET_CASE}==null?0:$F{GET_CASE}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="757" y="0" width="25" height="30" uuid="84778103-cd2f-4464-b56a-f9fe933064de"/>
@@ -1153,7 +1095,33 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{RECV}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{SEND_CASE}==null?0:$F{SEND_CASE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="507" y="0" width="25" height="30" uuid="efd96929-8e89-4c4e-8eda-cf941db0587e"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{J7N8}==null?0:$F{J7N8}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="532" y="0" width="25" height="30" uuid="6cd2920e-fac2-4342-a57f-a0f8feec96ff"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{J9}==null?0:$F{J9}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
@@ -1170,7 +1138,7 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_18}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_Y5UP}==null?0:$V{SUM_Y5UP}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="557" y="0" width="25" height="30" uuid="6b4e13f2-6fe8-4d76-b606-21dac147cc0f"/>
@@ -1183,10 +1151,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_13}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_ALLJ}==null?0:$V{SUM_ALLJ}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="532" y="0" width="25" height="30" uuid="5f53d97f-33df-4a5f-bcb4-c3d372d2665d"/>
+				<reportElement x="482" y="0" width="25" height="30" uuid="5f53d97f-33df-4a5f-bcb4-c3d372d2665d"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -1196,10 +1164,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_12}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_J6}==null?0:$V{SUM_J6}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="482" y="0" width="25" height="30" uuid="f07cbaf8-bbeb-4ff6-912e-1be1bd54bf08"/>
+				<reportElement x="432" y="0" width="25" height="30" uuid="f07cbaf8-bbeb-4ff6-912e-1be1bd54bf08"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -1209,10 +1177,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_10}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_J4}==null?0:$V{SUM_J4}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="302" y="0" width="25" height="30" uuid="3a1410a7-7129-41f7-8a48-2695705d7257"/>
+				<reportElement x="252" y="0" width="25" height="30" uuid="3a1410a7-7129-41f7-8a48-2695705d7257"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -1222,7 +1190,7 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_3}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_O_PREVM}==null?0:$V{SUM_O_PREVM}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="657" y="0" width="25" height="30" uuid="3842fcb4-d0ff-4bb6-b1b6-c882c31ff252"/>
@@ -1235,10 +1203,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_17}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_Y2Y5}==null?0:$V{SUM_Y2Y5}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="507" y="0" width="25" height="30" uuid="8b9452f9-18ea-444c-9ae1-4a435476cd9f"/>
+				<reportElement x="457" y="0" width="25" height="30" uuid="8b9452f9-18ea-444c-9ae1-4a435476cd9f"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -1248,7 +1216,7 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_11}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_J5}==null?0:$V{SUM_J5}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="757" y="0" width="25" height="30" uuid="631c8023-94e8-42dc-a45f-e462021f776a"/>
@@ -1261,7 +1229,7 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_21}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_SENDCASE}==null?0:$V{SUM_SENDCASE}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="607" y="0" width="25" height="30" uuid="5f0eac7c-c554-4a9c-a1f3-520ac54d1fb6"/>
@@ -1274,10 +1242,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_15}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_M6Y1}==null?0:$V{SUM_M6Y1}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="277" y="0" width="25" height="30" uuid="0ed94527-5783-4b14-a24f-30b76644d40c"/>
+				<reportElement x="227" y="0" width="25" height="30" uuid="0ed94527-5783-4b14-a24f-30b76644d40c"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -1287,10 +1255,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_2}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_C_REQ}==null?0:$V{SUM_C_REQ}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="327" y="0" width="25" height="30" uuid="44f0f97c-47bb-4fe2-bd2e-87dcfdc5d587"/>
+				<reportElement x="277" y="0" width="25" height="30" uuid="44f0f97c-47bb-4fe2-bd2e-87dcfdc5d587"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -1300,10 +1268,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_4}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_O_CURRM}==null?0:$V{SUM_O_CURRM}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="457" y="0" width="25" height="30" uuid="24669c11-1c28-40be-b961-b458f2a03aab"/>
+				<reportElement x="407" y="0" width="25" height="30" uuid="24669c11-1c28-40be-b961-b458f2a03aab"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -1313,7 +1281,7 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_9}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_J3}==null?0:$V{SUM_J3}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="582" y="0" width="25" height="30" uuid="b92fc05e-1297-46ea-a8eb-906e8e6b50e2"/>
@@ -1326,10 +1294,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_14}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_M6LT}==null?0:$V{SUM_M6LT}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="252" y="0" width="25" height="30" uuid="27a2668a-0385-45d8-b856-dfcb23d8a1df"/>
+				<reportElement x="202" y="0" width="25" height="30" uuid="27a2668a-0385-45d8-b856-dfcb23d8a1df"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -1339,7 +1307,7 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_1}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_C_CASE}==null?0:$V{SUM_C_CASE}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="732" y="0" width="25" height="30" uuid="d008c489-1578-4e92-ac8e-21ae24eb7f8c"/>
@@ -1352,10 +1320,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_20}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_GETCASE}==null?0:$V{SUM_GETCASE}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="402" y="0" width="30" height="30" uuid="cab97749-0531-431c-a033-add2ddbad9d8"/>
+				<reportElement x="352" y="0" width="30" height="30" uuid="cab97749-0531-431c-a033-add2ddbad9d8"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -1365,7 +1333,7 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_7}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_REJUDGE}==null?0:$V{SUM_REJUDGE}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="632" y="0" width="25" height="30" uuid="fbaeeffb-a278-4ab1-856f-2ad1a9d5c2ea"/>
@@ -1378,10 +1346,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_16}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUMY1Y2}==null?0:$V{SUMY1Y2}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="377" y="0" width="25" height="30" uuid="aea5ea22-7c07-4fa1-b02f-a099d729ca35"/>
+				<reportElement x="327" y="0" width="25" height="30" uuid="aea5ea22-7c07-4fa1-b02f-a099d729ca35"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -1391,7 +1359,7 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_6}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_PAGES}==null?0:$V{SUM_PAGES}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="707" y="0" width="25" height="30" uuid="13b10ed6-f071-44f9-9ee7-671ae366bfb9"/>
@@ -1404,10 +1372,10 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_19}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_ALLMY}==null?0:$V{SUM_ALLMY}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="432" y="0" width="25" height="30" uuid="50e56449-bd9c-430a-8599-348778d48579"/>
+				<reportElement x="382" y="0" width="25" height="30" uuid="50e56449-bd9c-430a-8599-348778d48579"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -1417,10 +1385,12 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_8}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_J1N2}==null?0:$V{SUM_J1N2}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="15" y="0" width="237" height="30" uuid="f8fdebac-fd33-4f44-a6e0-3af9c0cc3a4c"/>
+				<reportElement x="15" y="0" width="187" height="30" uuid="f8fdebac-fd33-4f44-a6e0-3af9c0cc3a4c">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -1433,7 +1403,7 @@ WHERE
 				<textFieldExpression><![CDATA["รวม"]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="352" y="0" width="25" height="30" uuid="301a84f8-7457-4ef1-b622-3ca087931b58"/>
+				<reportElement x="302" y="0" width="25" height="30" uuid="301a84f8-7457-4ef1-b622-3ca087931b58"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
@@ -1443,7 +1413,33 @@ WHERE
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{sum1_5}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{SUM_WITNESS}==null?0:$V{SUM_WITNESS}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="507" y="0" width="25" height="30" uuid="09405f67-6ca3-4a00-afc8-2cb1c15389e3"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_J7NJ8}==null?0:$V{SUM_J7NJ8}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="532" y="0" width="25" height="30" uuid="5089e56e-963c-4815-9858-2f44830a971c"/>
+				<box>
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="THSarabunNew"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{SUM_J9}==null?0:$V{SUM_J9}]]></textFieldExpression>
 			</textField>
 		</band>
 	</columnFooter>

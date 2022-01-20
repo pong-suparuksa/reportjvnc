@@ -3,11 +3,12 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report_release_request" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="6c764f9c-3895-4e11-899c-7ebef02596fa">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/ReportFeature/report_release_request"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/ReportFeature/report_release_request_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["10/03/2020"]]></defaultValueExpression>
 	</parameter>
@@ -15,8 +16,18 @@
 		<defaultValueExpression><![CDATA["28/04/2025"]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT 
-	NVL(cou.COURT_NAME_TH, '') COURT_NAME_TH, 
+		<![CDATA[--ชื่อศาล
+SELECT *
+FROM 
+(
+SELECT plc.COURT_NAME_TH
+FROM PC_PARAM pp
+JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0
+) A
+LEFT JOIN
+(
+SELECT 
 	NVL(pltc_b.TITLE_CASE_NAME,' ') ||  TO_CHAR(pc.BLACK_IDNUM) || '/' || TO_CHAR(pc.BLACK_YEAR)  BLACK_CASE_NO ,
 	NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || CASE WHEN pj.RED_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pj.RED_YEAR)     RED_CASE_NO ,
     pc.ACCU_DESC ,
@@ -25,15 +36,20 @@
 	CASE WHEN pb.BAIL_TYPE = '1'  THEN  '(ป.๑) คำร้องขอปล่อยตัวชั่วคราวตลอดชั้นสอบสวนและชั้นพิจรณา' ELSE 
 	CASE WHEN pb.BAIL_TYPE = '2'  THEN  '(๕๗) คำร้องขอปล่อยตัวชั่วคราว' ELSE 
 	CASE WHEN pb.BAIL_TYPE = '3'  THEN  '(๗) คำร้องขอปล่อยตัวชั่วคราวโดยไม่มีประกัน  (สาบานตน)' END END END   BAIL_TYPE ,
-	pbst.TYPE_NAME ,
-	pbs.TOTAL_AMOUNT 
+	s.TYPE_NAME ,
+	pb.RATE_AMOUNT TOTAL_AMOUNT 
 FROM  PC_BAIL pb
 LEFT JOIN  PC_BAIL_BAILSMAN pbb ON pbb.BAIL_ID = pb.BAIL_ID AND pbb.REMOVED_BY = 0
-JOIN  PC_BAIL_SEC pbs ON pbs.BAILSMAN_ID = pbb.BAILSMAN_ID  AND pbs.REMOVED_BY = 0
-LEFT JOIN PC_BAIL_SEC_TYPE pbst ON pbst.TYPE_CODE = pbs.SEC_TYPE_CODE 
-LEFT JOIN  PC_LIST_OF_VALUE plov ON plov.VALUE = pb.BAIL_PERIOD   AND plov.LOV_TYPE = 'BAIL_CLASS' AND PLOV.REMOVED_BY = 0
+--bail security
+LEFT JOIN (SELECT sec.BAILSMAN_ID,	LISTAGG(sec.TYPE_NAME , CHR(13)) WITHIN GROUP(ORDER BY sec.TYPE_CODE) TYPE_NAME
+		   FROM (SELECT DISTINCT pbs.BAILSMAN_ID, pbst.TYPE_CODE, pbst.TYPE_NAME 
+			     FROM PC_BAIL_SEC pbs 
+			     JOIN PC_BAIL_SEC_TYPE pbst ON pbst.TYPE_CODE = pbs.SEC_TYPE_CODE AND pbst.REMOVED_BY = 0
+			     WHERE pbs.REMOVED_BY = 0) sec
+		   GROUP BY sec.BAILSMAN_ID) s ON s.BAILSMAN_ID = pbb.BAILSMAN_ID 
 
---Case
+LEFT JOIN  PC_LIST_OF_VALUE plov ON plov.VALUE = pb.BAIL_PERIOD   AND plov.LOV_TYPE = 'BAIL_CLASS' AND PLOV.REMOVED_BY = 0
+--case
 LEFT JOIN PC_CASE pc ON
 	pc.CASE_ID = pb.CASE_ID AND pc.REMOVED_BY = 0
 LEFT JOIN PC_JUDGEMENT pj ON
@@ -42,16 +58,13 @@ LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON
 	pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_r ON
 	pltc_r.TITLE_CASE_ID = pj.RED_TITLE_ID 	AND pltc_r.REMOVED_BY = 0
---ชื่อศาล
-CROSS JOIN (SELECT plc.COURT_NAME_TH
-             FROM PC_PARAM pp
-             JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
-             WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou
+
 WHERE 
 	pb.REMOVED_BY = 0
-	AND pb.CREATED_DATE BETWEEN TO_DATE($P{START_DATE} || 'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') AND TO_DATE($P{END_DATE} || 'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
+	AND pb.BAIL_DATE BETWEEN TO_DATE($P{START_DATE} || 'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS') AND TO_DATE($P{END_DATE} || 'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
 ORDER BY
-	pb.BAIL_CODE_NO ASC]]>
+	pb.BAIL_CODE_NO ASC
+) B ON 1 = 1]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>

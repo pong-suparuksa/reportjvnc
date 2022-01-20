@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="consult_rpt_consult_appointment" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2980339d-51ca-436a-b0a2-4a1afceb8c80">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="329"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="660"/>
+<<<<<<< HEAD
 	<property name="ireport.jasperserver.url" value="http://119.59.126.210/jasperserver/"/>
+=======
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+>>>>>>> master
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/consulting/consult_rpt_consult_appointment"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
@@ -40,8 +44,13 @@
 --
 FROM PC_ADVICE pa
 JOIN PC_ADVICE_PARENT pap ON pap.ADVICE_ID = pa.ADVICE_ID AND pap.REMOVED_BY = 0
+JOIN PC_LOOKUP_TITLE_CASE pltc ON 
+	pltc.title_case_name like '%ตจ%'
 --
-JOIN PC_CASE pc ON pc.CASE_ID = pa.CASE_ID AND pc.REMOVED_BY = 0
+JOIN PC_CASE pc ON 
+	(pc.BLACK_IDNUM = pa.CASE_ID 
+	AND pc.BLACK_YEAR = pa.CASE_YEAR 
+	AND pc.BLACK_TITLE_ID = pltc.TITLE_CASE_ID)
 --court
 LEFT JOIN (SELECT plc.COURT_NAME_TH
 			FROM PC_PARAM pp

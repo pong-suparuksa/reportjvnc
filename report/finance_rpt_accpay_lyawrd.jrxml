@@ -16,7 +16,7 @@
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_rpt_accpay_lyawrd"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="OracleDB229"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/finance_rpt_accpay_lyawrd_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/06/2020"]]></defaultValueExpression>
@@ -43,7 +43,7 @@
        ,pfpc.TOTAL_AMOUNT 
 FROM PC_FIN_PAID_COMPENSATION pfpc
 --case
-LEFT JOIN PC_CASE pc ON pc.CASE_ID = pfpc.CASE_ID AND pc.REMOVED_BY = 0
+LEFT JOIN PC_CASE pc ON pc.CASE_ID = pfpc.CASE_ID
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
 --judgement 
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID  = pc.CASE_ID AND pj.REMOVED_BY = 0
@@ -56,7 +56,8 @@ LEFT JOIN (SELECT plc.COURT_NAME_TH
 WHERE pfpc.REMOVED_BY = 0
 AND pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
                        AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
-AND pfpc.PERS_TYPE_NAME LIKE '%ทนายขอแรง%']]>
+AND (pfpc.PERS_TYPE_NAME LIKE '%ทนายขอแรง%' OR pfpc.PERS_LITIGANT_TYPE_ID IN (16,17,20))
+AND pc.REMOVED_BY = 0]]>
 	</queryString>
 	<field name="COURT_NAME_TH" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
@@ -149,7 +150,7 @@ AND pfpc.PERS_TYPE_NAME LIKE '%ทนายขอแรง%']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[ที่]]></text>
 			</staticText>
@@ -166,7 +167,7 @@ AND pfpc.PERS_TYPE_NAME LIKE '%ทนายขอแรง%']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[วันที่จ่ายเงิน]]></text>
 			</staticText>
@@ -183,7 +184,7 @@ AND pfpc.PERS_TYPE_NAME LIKE '%ทนายขอแรง%']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[เลขดำที่]]></text>
 			</staticText>
@@ -201,7 +202,7 @@ AND pfpc.PERS_TYPE_NAME LIKE '%ทนายขอแรง%']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[เลขแดงที่]]></text>
 			</staticText>
@@ -218,7 +219,7 @@ AND pfpc.PERS_TYPE_NAME LIKE '%ทนายขอแรง%']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[โจทก์]]></text>
 			</staticText>
@@ -235,7 +236,7 @@ AND pfpc.PERS_TYPE_NAME LIKE '%ทนายขอแรง%']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[จำเลย]]></text>
 			</staticText>
@@ -252,7 +253,7 @@ AND pfpc.PERS_TYPE_NAME LIKE '%ทนายขอแรง%']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[จำนวนเงิน]]></text>
 			</staticText>
@@ -269,7 +270,7 @@ AND pfpc.PERS_TYPE_NAME LIKE '%ทนายขอแรง%']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[ประเภท]]></text>
 			</staticText>
@@ -286,7 +287,7 @@ AND pfpc.PERS_TYPE_NAME LIKE '%ทนายขอแรง%']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<text><![CDATA[ชื่อทนาย]]></text>
 			</staticText>
@@ -307,7 +308,7 @@ AND pfpc.PERS_TYPE_NAME LIKE '%ทนายขอแรง%']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Right">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
 			</textField>
@@ -324,7 +325,7 @@ AND pfpc.PERS_TYPE_NAME LIKE '%ทนายขอแรง%']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PAID_DATE}]]></textFieldExpression>
 			</textField>
@@ -341,7 +342,7 @@ AND pfpc.PERS_TYPE_NAME LIKE '%ทนายขอแรง%']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_BLACK_NO}]]></textFieldExpression>
 			</textField>
@@ -357,7 +358,7 @@ AND pfpc.PERS_TYPE_NAME LIKE '%ทนายขอแรง%']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CASE_RED_NO}]]></textFieldExpression>
 			</textField>
@@ -374,7 +375,7 @@ AND pfpc.PERS_TYPE_NAME LIKE '%ทนายขอแรง%']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PROS_DESC}]]></textFieldExpression>
 			</textField>
@@ -391,7 +392,7 @@ AND pfpc.PERS_TYPE_NAME LIKE '%ทนายขอแรง%']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{ACCU_DESC}]]></textFieldExpression>
 			</textField>
@@ -408,9 +409,9 @@ AND pfpc.PERS_TYPE_NAME LIKE '%ทนายขอแรง%']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Right">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{TOTAL_AMOUNT}==null?0: new java.text.DecimalFormat("#,##0").format($F{TOTAL_AMOUNT})+" "]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{TOTAL_AMOUNT}==null?0: new java.text.DecimalFormat("#,##0.00").format($F{TOTAL_AMOUNT})+" "]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="550" y="0" width="184" height="25" uuid="f3ac310d-53e9-469f-9e38-61aa5b20bf3d">
@@ -425,7 +426,7 @@ AND pfpc.PERS_TYPE_NAME LIKE '%ทนายขอแรง%']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PAYMENT_TYPE_TEXT}]]></textFieldExpression>
 			</textField>
@@ -442,7 +443,7 @@ AND pfpc.PERS_TYPE_NAME LIKE '%ทนายขอแรง%']]>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="THSarabunNew" size="17"/>
+					<font fontName="THSarabunNew" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{PAID_TO}]]></textFieldExpression>
 			</textField>

@@ -10,6 +10,8 @@
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
 	<property name="ireport.jasperserver.report.resource" value="/reports/bail_frm_accprop_bonds_files/main_jrxml"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="526"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="464"/>
 	<parameter name="SEC_ID" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[SELECT 
@@ -17,7 +19,7 @@ CASE WHEN pc.BLACK_IDNUM IS NOT NULL
      THEN pltc_b.TITLE_CASE_NAME||THAINUMSTR(pc.BLACK_IDNUM)||'/'||THAINUMSTR(pc.BLACK_YEAR) 
      ELSE '-' END CASE_BLACE_NO, 
 --
-THAINUMSTR(TO_CHAR(TRUNC(pbsb.VALUE_AMOUNT),'FM99G999G999G999', 'NLS_NUMERIC_CHARACTERS=",."'))  		AMOUNT,
+THAINUMSTR(TO_CHAR(TRUNC(pbsb.VALUE_AMOUNT),'FM99G999G999G999D00'))  		AMOUNT,
 BAHT(pbsb.VALUE_AMOUNT)  AMOUNT_TEXT,
 --
 pbb.FULLNAME  BAILMAN_NAME,
@@ -27,7 +29,10 @@ plb.BANK_NAME ,
 THAINUMSTR(pbsb.BOND_NO) BOND_NO,
 THAINUMSTR(pbsb.UNIT_START_NO) UNIT_START_NO,
 THAINUMSTR(pbsb.UNIT_END_NO) UNIT_END_NO,
-CASE WHEN pbsb.BOND_TYPE_ID = '1' THEN 'สลาก' ELSE 'พันธบัตร' END BOND_TYPE_NAME
+CASE WHEN pbsb.BOND_TYPE_ID = '1' THEN 'สลาก' ELSE 'พันธบัตร' END BOND_TYPE_NAME,
+THAINUMSTR(THAISDATE(pbsb.WITHDRAW_DATE))  WITHDRAW_DATE,
+pbsb.BOND_DESCIPTION,
+pbsb.SEC_ID 
 --
 FROM PC_BAIL_SEC_BOND pbsb
 LEFT JOIN PC_BAIL_SEC pbs ON pbs.SEC_ID = pbsb.SEC_ID 
@@ -71,6 +76,12 @@ FETCH FIRST 1 ROWS ONLY]]>
 	</field>
 	<field name="BOND_TYPE_NAME" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="BOND_TYPE_NAME"/>
+	</field>
+	<field name="WITHDRAW_DATE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="WITHDRAW_DATE"/>
+	</field>
+	<field name="BOND_DESCIPTION" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="BOND_DESCIPTION"/>
 	</field>
 	<title>
 		<band height="79" splitType="Stretch">
@@ -207,7 +218,7 @@ FETCH FIRST 1 ROWS ONLY]]>
 				<textElement textAlignment="Left">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{BOND_TYPE_NAME}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{BOND_TYPE_NAME} +" "+ ($F{BOND_DESCIPTION}==null?" ": "("+$F{BOND_DESCIPTION}+")")]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="6" width="414" height="25" uuid="212b9fcc-97f7-4f09-a15d-0d757428653f">
@@ -385,7 +396,7 @@ FETCH FIRST 1 ROWS ONLY]]>
 				<textElement>
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<text><![CDATA[เลขตัวแดง]]></text>
+				<text><![CDATA[วันครบกำหนดถอนเงิน]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="23" y="159" width="110" height="25" uuid="5ce0b58c-d6fb-48b9-81f2-26aec11b2afd">
@@ -469,6 +480,23 @@ FETCH FIRST 1 ROWS ONLY]]>
 					<pen lineStyle="Dotted"/>
 				</graphicElement>
 			</line>
+			<textField>
+				<reportElement x="154" y="134" width="241" height="25" uuid="08bb6ad6-960e-40e3-989a-670164273889">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<box>
+					<topPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Left">
+					<font fontName="THSarabunNew" size="17"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{WITHDRAW_DATE}]]></textFieldExpression>
+			</textField>
 		</band>
 	</detail>
 	<noData>

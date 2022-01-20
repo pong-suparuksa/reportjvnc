@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.8.0.final using JasperReports Library version 6.8.0-2ed8dfabb690ff337a5797129f2cd92902b0c87b  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="finance_rpt_daily_paycheque" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isSummaryWithPageHeaderAndFooter="true" uuid="334ccb36-f6bc-4bc8-98d6-c70ee54f5f4c">
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JvncDB[229]"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/finance_rpt_daily_paycheque"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="353"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="639"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/finance_rpt_daily_paycheque_files/main_jrxml"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/01/2021"]]></defaultValueExpression>
 	</parameter>
@@ -39,6 +40,7 @@ LEFT JOIN PC_FIN_RECEIPT_BALANCE_HISTORY pfrbh ON pfrbh.PAYMENT_DETAIL_ID = pfpd
 --
 LEFT JOIN PC_CASE_LIT pcl ON pcl.CASE_ID = pfpd.CASE_ID AND pcl.CASE_LIT_ID = pfpd.CASE_LIT_ID
 LEFT JOIN PC_LOOKUP_TITLE plt ON plt.TITLE_ID = pcl.LITIGANT_TITLE_ID AND plt.REMOVED_BY = 0
+LEFT JOIN PC_CASE pc ON pc.CASE_ID = pfpd.CASE_ID 
 --
 LEFT JOIN (SELECT plc.COURT_NAME_TH
 			FROM PC_PARAM pp
@@ -46,7 +48,8 @@ LEFT JOIN (SELECT plc.COURT_NAME_TH
 			WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0) cou ON 1 = 1
 --
 WHERE  pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') 
-                         AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')]]>
+                         AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
+AND pc.REMOVED_BY = 0]]>
 	</queryString>
 	<field name="PAYMENT_DATE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="PAYMENT_DATE"/>
@@ -156,7 +159,7 @@ WHERE  pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14" isBold="true"/>
+					<font fontName="TH Sarabun New" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[วันที่รับเช็ค]]></text>
 			</staticText>
@@ -169,7 +172,7 @@ WHERE  pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14" isBold="true"/>
+					<font fontName="TH Sarabun New" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[วันที่หน้าเช็ค]]></text>
 			</staticText>
@@ -182,7 +185,7 @@ WHERE  pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14" isBold="true"/>
+					<font fontName="TH Sarabun New" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[เลขที่เช็ค]]></text>
 			</staticText>
@@ -195,7 +198,7 @@ WHERE  pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14" isBold="true"/>
+					<font fontName="TH Sarabun New" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ชื่อสั่งจ่าย]]></text>
 			</staticText>
@@ -208,7 +211,7 @@ WHERE  pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14" isBold="true"/>
+					<font fontName="TH Sarabun New" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[จำนวนเงิน]]></text>
 			</staticText>
@@ -221,7 +224,7 @@ WHERE  pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14" isBold="true"/>
+					<font fontName="TH Sarabun New" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[ธนาคาร]]></text>
 			</staticText>
@@ -234,7 +237,7 @@ WHERE  pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14" isBold="true"/>
+					<font fontName="TH Sarabun New" size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[หมายเหตุ]]></text>
 			</staticText>
@@ -251,7 +254,7 @@ WHERE  pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new java.text.SimpleDateFormat("dd/MM/yyyy", new Locale("TH","th")).format($F{CREATED_DATE} )]]></textFieldExpression>
 			</textField>
@@ -264,7 +267,7 @@ WHERE  pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[new java.text.SimpleDateFormat("dd/MM/yyyy", new Locale("TH","th")).format($F{COLUMN_4} )]]></textFieldExpression>
 			</textField>
@@ -277,7 +280,7 @@ WHERE  pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CHEQUE_CODE}==null? "-":$F{CHEQUE_CODE}]]></textFieldExpression>
 			</textField>
@@ -290,7 +293,7 @@ WHERE  pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{CHEQUE_NAME}==null? "-":$F{CHEQUE_NAME}]]></textFieldExpression>
 			</textField>
@@ -303,9 +306,9 @@ WHERE  pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{AMOUNT}==null? "-" :$F{AMOUNT}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{AMOUNT}==null? "-" :new java.text.DecimalFormat("#,##0.00").format(Double.valueOf($F{AMOUNT}))]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="380" y="0" width="96" height="25" uuid="0398843f-3e01-461c-ab55-cf79d95370b7">
@@ -316,7 +319,7 @@ WHERE  pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{BANK_NAME}==null? "-":$F{BANK_NAME}]]></textFieldExpression>
 			</textField>
@@ -329,7 +332,7 @@ WHERE  pfpc.PAID_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T
 					<pen lineWidth="0.5"/>
 				</box>
 				<textElement verticalAlignment="Top">
-					<font fontName="TH Sarabun New" size="14"/>
+					<font fontName="TH Sarabun New" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[""]]></textFieldExpression>
 			</textField>
