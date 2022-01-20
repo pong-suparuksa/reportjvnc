@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/bail_rpt_tmprel_appcourt"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="196"/>
@@ -38,7 +38,7 @@
        ,LISTAGG(pbb.FULLNAME, CHR(10) || '-----------------------------' || CHR(10)) WITHIN GROUP(ORDER BY pbb.FULLNAME)  FULLNAME  
        ,NVL(pc.ALLE_DESC,alle.ALLE_NAME) ALLE_DESC 
        ,pb.RATE_AMOUNT BAIL_COST     
-	   ,LISTAGG(NVL(bm.TYPE_NAME,'ไม่มีหลักประกัน'), CHR(10) || '------------------------' || CHR(10)) WITHIN GROUP(ORDER BY NVL(bm.TYPE_NAME,'ไม่มีหลักประกัน'))  TYPE_NAME
+	   ,LISTAGG(NVL(bm.TYPE_NAME,'ไม่มีหลักประกัน'), CHR(10) || '------------------------' || CHR(10)) WITHIN GROUP(ORDER BY pbb.FULLNAME, NVL(bm.TYPE_NAME,'ไม่มีหลักประกัน'))  TYPE_NAME
        ,pb.COURT_ORDER 
        ,CASE WHEN pb.COURT_ORDER  = 1 THEN 'อนุญาต' ELSE 'ไม่อนุญาต' END COURT_ORDER_TEXT
        ,plj.JUDGE_NAME 

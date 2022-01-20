@@ -16,9 +16,9 @@
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="0"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="1000"/>
-	<property name="ireport.jasperserver.report.resource" value="/reports/bail_frm_accprop_land_files/main_jrxml"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="577"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="413"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/bail_frm_accprop_land_files/main_jrxml"/>
 	<parameter name="SEC_ID" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[SELECT 
@@ -27,7 +27,7 @@ CASE WHEN pc.BLACK_IDNUM IS NOT NULL
      THEN pltc_b.TITLE_CASE_NAME||THAINUMSTR(pc.BLACK_IDNUM)||'/'||THAINUMSTR(pc.BLACK_YEAR) 
      ELSE '-' END CASE_BLACE_NO, 
 --
-THAINUMSTR(TO_CHAR(TRUNC(pbsl.VALUES_FOR_BAILING),'FM99G999G999G999', 'NLS_NUMERIC_CHARACTERS=",."'))  		AMOUNT,
+THAINUMSTR(TO_CHAR(TRUNC(pbsl.VALUES_FOR_BAILING),'FM99G999G999G999D00'))  		AMOUNT,
 BAHT(pbsl.VALUES_FOR_BAILING)  AMOUNT_TEXT,
 --
 pbb.FULLNAME  BAILMAN_NAME,
@@ -39,7 +39,8 @@ pld.DISTRICT_NAME,
 plp.PROVINCE_NAME,
 THAINUMSTR(NVL(pbsl.RAI,'0')||' ไร่  '||NVL(pbsl.NGAN,'0')||' งาน '||NVL(pbsl.SQUARE_WA,'0')||' ตารางวา') AREA,
 pbsl.SEC_ID,
-THAINUMSTR(TO_CHAR(TRUNC(pbsl.LAND_APPRAISAL_TOTAL),'FM99G999G999G999', 'NLS_NUMERIC_CHARACTERS=",."')) EST_AMOUNT
+CASE WHEN (pbsl.LAND_APPRAISAL_TOTAL = NULL) OR (pbsl.LAND_APPRAISAL_TOTAL = 0) THEN '๐' 
+     ELSE THAINUMSTR(TO_CHAR(TRUNC(pbsl.LAND_APPRAISAL_TOTAL),'FM99G999G999G999D00')) END EST_AMOUNT   
 --
 FROM PC_BAIL_SEC_LAND pbsl
 LEFT JOIN PC_BAIL_SEC pbs ON pbs.SEC_ID = pbsl.SEC_ID 
@@ -512,7 +513,7 @@ FETCH FIRST 1 ROWS ONLY]]>
 				<textElement textAlignment="Left" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="17"/>
 				</textElement>
-				<textFieldExpression><![CDATA["ราคาประเมิน   " + $F{EST_AMOUNT} + " บาท"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["ราคาประเมิน   " + ($F{EST_AMOUNT}.equals("๐")?" ": $F{EST_AMOUNT})+ " บาท"]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

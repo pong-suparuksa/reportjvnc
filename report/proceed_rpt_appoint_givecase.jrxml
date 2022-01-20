@@ -11,14 +11,15 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/proceed_rpt_appoint_givecase"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="202"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="793"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="570"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="420"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="464"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="526"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/proceed_rpt_appoint_givecase_files/main_jrxml"/>
 	<parameter name="PERIOD" class="java.lang.String"/>
 	<parameter name="START_DATE" class="java.lang.String">
 		<defaultValueExpression><![CDATA["01/11/2021"]]></defaultValueExpression>
@@ -37,12 +38,15 @@
 	       WHEN ppat.APPOINT_TABLE_TYPE = 'special' AND ppat.APPOINT_TABLE_CODE = '002' THEN 'เสนอจ่ายสำนวนเข้าจัดการพิเศษ'
 	       ELSE 'เสนอจ่ายสำนวน'
         END) APPOINT_TITLE
-		,NVL(pltc_b.TITLE_CASE_NAME,' ')  || TO_CHAR(pc.BLACK_IDNUM) || CASE WHEN pc.BLACK_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pc.BLACK_YEAR) CASE_BLACK_NO
-		,NVL(pltc_r.TITLE_CASE_NAME,' ')  || TO_CHAR(pj.RED_IDNUM) || CASE WHEN pj.RED_IDNUM IS NOT NULL THEN  '/' END || TO_CHAR(pj.RED_YEAR)       CASE_RED_NO
+        ,CASE WHEN pc.BLACK_IDNUM IS NULL THEN ' ' ELSE pltc_b.TITLE_CASE_NAME || pc.BLACK_IDNUM || '/' || pc.BLACK_YEAR END CASE_BLACK_NO
+		,CASE WHEN pj.RED_IDNUM IS NULL THEN ' ' ELSE pltc_r.TITLE_CASE_NAME || pj.RED_IDNUM || '/' || pj.RED_YEAR END CASE_RED_NO	
         ,THAISDATE(ppac.START_DATE) APPOINT_DATE
         ,ppac.CHOICE_TIME APPOINT_TIME
-        ,NVL(pc.PROS_DESC, c.COMPLAINANT) PROS_DESC
-        ,NVL(pc.ACCU_DESC, d.DEFENDANT) ACCU_DESC
+        ,pc.PROS_DESC
+        ,pc.ACCU_DESC
+        ,pc.COMPLAINANT_DESC 
+		,c.COMPLAINANT
+		,d.DEFENDANT
         ,pc.ALLE_DESC 
         ,plal.APPOINT_LIST_NAME 
         ,j.JUDGE_NAME
@@ -59,7 +63,7 @@ LEFT JOIN PC_PROCEED_APPOINT_TABLE ppat ON ppat.APPOINT_TABLE_CODE = ppa.APPOINT
 --appoint reason lookup
 LEFT JOIN PC_LOOKUP_APPOINT_LIST plal ON plal.APPOINT_LIST_ID = ppac.REASON_APPOINT_ID AND plal.REMOVED_BY = 0 
 --case
-LEFT JOIN PC_CASE pc ON pc.CASE_ID = ppa.CASE_ID AND pc.REMOVED_BY = 0
+LEFT JOIN PC_CASE pc ON ppa.CASE_ID = pc.CASE_ID
 LEFT JOIN PC_LOOKUP_TITLE_CASE pltc_b ON pltc_b.TITLE_CASE_ID = pc.BLACK_TITLE_ID AND pltc_b.REMOVED_BY = 0
 --judgement
 LEFT JOIN PC_JUDGEMENT pj ON pj.CASE_ID = ppa.CASE_ID AND pj.REMOVED_BY = 0
@@ -97,15 +101,17 @@ LEFT JOIN (SELECT A.CASE_ID
 				         ,A.JUDGE_END_DATE
 			) j ON j.CASE_ID = ppa.CASE_ID AND j.APPOINT_TABLE_TYPE = ppat.APPOINT_TABLE_TYPE			
 --complainant
-LEFT JOIN (SELECT pcl.CASE_ID ,pcl.LITIGANT_NAME  COMPLAINANT
+LEFT JOIN (SELECT pcl.CASE_ID ,pcl.LITIGANT_NAME  COMPLAINANT, pcl.ORDER_NO
+                  ,COUNT(pcl.CASE_ID) OVER (PARTITION BY pcl.CASE_ID ORDER BY pcl.CASE_ID)  COUNT_COMPLAINANT
 		   FROM PC_CASE_LIT pcl 
 		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0 AND pllt.LIT_TYPE_CODE = '05'
-		   WHERE pcl.REMOVED_BY = 0) c ON c.CASE_ID = ppa.CASE_ID
+		   WHERE pcl.REMOVED_BY = 0) c ON c.CASE_ID = ppa.CASE_ID AND c.ORDER_NO = 1
 --defendant
-LEFT JOIN (SELECT pcl.CASE_ID ,pcl.LITIGANT_NAME  DEFENDANT
+LEFT JOIN (SELECT pcl.CASE_ID ,pcl.LITIGANT_NAME DEFENDANT, pcl.ORDER_NO
+                  ,COUNT(pcl.CASE_ID) OVER (PARTITION BY pcl.CASE_ID ORDER BY pcl.CASE_ID) COUNT_DEFENDANT
 		   FROM PC_CASE_LIT pcl 
 		   JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0 AND pllt.LIT_TYPE_CODE = '06'
-		   WHERE pcl.REMOVED_BY = 0) d ON d.CASE_ID = ppa.CASE_ID
+		   WHERE pcl.REMOVED_BY = 0) d ON d.CASE_ID = ppa.CASE_ID AND d.ORDER_NO = 1
 --
 WHERE ppa.REMOVED_BY = 0
 AND ppac.START_DATE BETWEEN TO_DATE( $P{START_DATE}||'T00:00:00', 'DD/MM/YYYY"T"HH24:MI:SS') AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD/MM/YYYY"T"HH24:MI:SS')
@@ -128,7 +134,8 @@ AND
 	(
 		ppat.APPOINT_TABLE_CODE	= $P{APPOIN_TABLE_CODE}
 	)
-)]]>
+)
+AND pc.REMOVED_BY = 0]]>
 	</queryString>
 	<field name="APPOINT_TITLE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="APPOINT_TITLE"/>
@@ -150,6 +157,15 @@ AND
 	</field>
 	<field name="ACCU_DESC" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="ACCU_DESC"/>
+	</field>
+	<field name="COMPLAINANT_DESC" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="COMPLAINANT_DESC"/>
+	</field>
+	<field name="COMPLAINANT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="COMPLAINANT"/>
+	</field>
+	<field name="DEFENDANT" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="DEFENDANT"/>
 	</field>
 	<field name="ALLE_DESC" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="ALLE_DESC"/>
@@ -432,7 +448,8 @@ $F{APPOINT_TIME}]]></textFieldExpression>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{PROS_DESC}==null?"-":$F{PROS_DESC}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[($F{PROS_DESC}==null?" ":$F{PROS_DESC}+" (โจทก์)") +"\n" +
+($F{COMPLAINANT_DESC}==null?" ":$F{COMPLAINANT_DESC})+" (ผู้ร้อง)"]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
 				<reportElement stretchType="ContainerHeight" x="280" y="0" width="60" height="25" isPrintWhenDetailOverflows="true" uuid="b4a8a027-5135-49d9-996b-61e28613de30">
@@ -446,7 +463,10 @@ $F{APPOINT_TIME}]]></textFieldExpression>
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="THSarabunNew" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ACCU_DESC}==null?"-":$F{ACCU_DESC}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{ACCU_DESC}.equals($F{DEFENDANT})
+?($F{ACCU_DESC}==null?"-":$F{ACCU_DESC}+" (ผู้คัดค้าน)")
+:($F{ACCU_DESC}==null?"-":$F{ACCU_DESC}+" (จำเลย)")+"\n"+($F{DEFENDANT}==null?" ":$F{DEFENDANT}+ " (ผู้คัดค้าน)")
+]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="false">
 				<reportElement stretchType="ContainerHeight" x="429" y="0" width="89" height="25" isPrintWhenDetailOverflows="true" uuid="bc99cea3-f903-4eb0-850d-d3063f39bb14">

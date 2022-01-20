@@ -15,10 +15,11 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.229:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/CaseStat/m4_MonthlyCriminal"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
+	<property name="ireport.jasperserver.report.resource" value="/reports/CaseStat/m4_MonthlyCriminal_files/main_jrxml"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#FFFFFF">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
@@ -583,45 +584,78 @@ connect by level <= 3]]>
 		<queryString language="SQL">
 			<![CDATA[SELECT plj.SUPER_ID
        ,plj.JUDGE_NAME
-       ,t.*
+--
+       ,NVL(a1.DETECT_WITNESS,0) DETECT_WITNESS
+       ,NVL(a2.DETECT_NOWITNESS,0)  DETECT_NOWITNESS
+--
+       ,NVL(b.WITNESS,0)  WITNESS
+       ,NVL(b.PAGES,0)    PAGES
+--
+       ,NVL(c.REVIEW_FLAG,0) REVIEW_FLAG
 FROM PC_LOOKUP_JUDGE plj 
-LEFT JOIN (SELECT pcj.JUDGE_ID
-			       ,SUM(CASE WHEN pcc.DERIVE_WITNESS_FLAG = 1 THEN 1 ELSE 0 END) AS DETECT_WITNESS
-			       ,SUM(CASE WHEN pcc.DERIVE_WITNESS_FLAG = 2 THEN 1 ELSE 0 END) AS DETECT_NO_WITNESS
-			       ,SUM(w.WITNESS) AS WITNESS
-			       ,SUM(w.PAGES)   AS PAGES
-			       ,SUM(CASE WHEN l.REVIEW_FLAG = 1 THEN 1 ELSE 0 END) REVIEW_FLAG
-			--
-			FROM PC_CASE_JUDGE pcj 
-			JOIN PC_CASE pc ON pc.CASE_ID = pcj.CASE_ID AND pc.REMOVED_BY = 0
-			LEFT JOIN PC_LOOKUP_TITLE_CASE pltc ON pltc.TITLE_CASE_ID = pc.BLACK_IDNUM AND pltc.REMOVED_BY = 0
-			LEFT JOIN PC_LOOKUP_CASE_CATE plcc ON plcc.CASE_CATE_ID = pltc.CASE_CATE_ID AND plcc.REMOVED_BY = 0
-			LEFT JOIN PC_LOOKUP_CASE_KIND plck ON plck.CASE_KIND_ID = plcc.CASE_KIND_ID AND plck.REMOVED_BY = 0
-			--
-			LEFT JOIN PC_CASE_CATCH pcc ON pcc.CASE_ID = pc.CASE_ID AND pcc.REMOVED_BY = 0
-			--
-			LEFT JOIN (SELECT DISTINCT pcl.CASE_ID, pclr.REVIEW_FLAG 
-						FROM PC_CASE_LIT pcl 
-						JOIN PC_CASE_LIT_REVIEW pclr ON pclr.CASE_LIT_ID = pcl.CASE_LIT_ID AND pclr.REMOVED_BY = 0
-						WHERE pcl.REMOVED_BY = 0) l ON l.CASE_ID = pcj.CASE_ID 
-			--
-			LEFT JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
-			--witness
-			LEFT JOIN (SELECT ppa.CASE_ID 
-						       ,SUM(NVL(pprw.WITNESS_DEFENDANT_COUNT,0)+NVL(pprw.WITNESS_DISSENTER_COUNT,0)+NVL(pprw.WITNESS_OTHER_COUNT,0)+NVL(pprw.WITNESS_PLAINTIFF_COUNT,0)+NVL(pprw.WITNESS_REQUESTER_COUNT,0)) WITNESS	  
-							   ,SUM(NVL(pprw.WITNESS_DEFENDANT_PAGE,0)+NVL(pprw.WITNESS_DISSENTER_PAGE,0)+NVL(pprw.WITNESS_OTHER_DAY,0)+NVL(pprw.WITNESS_PLAINTIFF_PAGE,0)+NVL(pprw.WITNESS_REQUESTER_PAGE,0))       PAGES  
-							
-						FROM PC_PROCEED_APPOINT ppa 
-						LEFT JOIN PC_PROCEED_APPOINT_CONTINUE ppac ON ppac.APPOINT_ID = ppa.APPOINT_ID AND ppac.REMOVED_BY = 0
-						LEFT JOIN PC_PROCEED_RECORD_WITNESS pprw ON pprw.APPOINT_CON_ID = ppac.APPOINT_CON_ID AND pprw.REMOVED_BY = 0
-						WHERE ppa.REMOVED_BY = 0
-						GROUP BY ppa.CASE_ID) w ON w.CASE_ID = pcj.CASE_ID
-			--
-			WHERE pcj.REMOVED_BY = 0
-			AND TO_CHAR(pc.CASE_DATE,'MM-YYYY') = $P{MONTH}
-			AND plck.CASE_KIND_CODE = 'DETECTION'
-			AND pljt.JUDGE_TYPE_CODE = '07'
-			GROUP BY pcj.JUDGE_ID) t ON t.JUDGE_ID = plj.JUDGE_ID
+--arrest with witness
+LEFT JOIN
+(
+	SELECT pcj.JUDGE_ID, COUNT(pcc.CASE_ID) DETECT_WITNESS
+	FROM PC_CASE_CATCH pcc 
+	JOIN PC_CASE pc ON pc.CASE_ID = pcc.CASE_ID AND pc.REMOVED_BY = 0
+	JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID = pcc.CASE_ID AND pcj.REMOVED_BY = 0
+	JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+	WHERE pcc.REMOVED_BY = 0
+	AND pcc.DERIVE_WITNESS_FLAG = 1 
+	AND TO_CHAR(pc.CASE_DATE,'MM-YYYY') = $P{MONTH}
+	GROUP BY pcj.JUDGE_ID
+) a1 ON a1.JUDGE_ID = plj.JUDGE_ID 
+--arrest with no witness
+LEFT JOIN
+(
+	SELECT pcj.JUDGE_ID, COUNT(pcc.CASE_ID) DETECT_NOWITNESS
+	FROM PC_CASE_CATCH pcc 
+	JOIN PC_CASE pc ON pc.CASE_ID = pcc.CASE_ID AND pc.REMOVED_BY = 0
+	JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID = pcc.CASE_ID AND pcj.REMOVED_BY = 0
+	JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+	WHERE pcc.REMOVED_BY = 0
+	AND pcc.DERIVE_WITNESS_FLAG = 2 
+	AND TO_CHAR(pc.CASE_DATE,'MM-YYYY') = $P{MONTH}
+	GROUP BY pcj.JUDGE_ID
+) a2 ON a2.JUDGE_ID = plj.JUDGE_ID 
+--witness
+LEFT JOIN
+(			
+	SELECT pcj.JUDGE_ID
+		   ,SUM(NVL(pprw.WITNESS_DEFENDANT_COUNT,0)+NVL(pprw.WITNESS_DISSENTER_COUNT,0)+NVL(pprw.WITNESS_OTHER_COUNT,0)+NVL(pprw.WITNESS_PLAINTIFF_COUNT,0)+NVL(pprw.WITNESS_REQUESTER_COUNT,0)) WITNESS	  
+		   ,SUM(NVL(pprw.WITNESS_DEFENDANT_PAGE,0)+NVL(pprw.WITNESS_DISSENTER_PAGE,0)+NVL(pprw.WITNESS_OTHER_DAY,0)+NVL(pprw.WITNESS_PLAINTIFF_PAGE,0)+NVL(pprw.WITNESS_REQUESTER_PAGE,0))       PAGES  
+	FROM PC_CASE_JUDGE pcj 
+	JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+	JOIN PC_PROCEED_RECORD_WITNESS pprw ON pprw.CASE_ID = pcj.CASE_ID AND pprw.REMOVED_BY = 0
+	JOIN PC_PROCEED_APPOINT_CONTINUE ppac ON ppac.APPOINT_CON_ID = pprw.APPOINT_CON_ID AND ppac.REMOVED_BY = 0
+	WHERE pcj.REMOVED_BY = 0
+	AND pcj.JUDGE_END_DATE IS NULL
+	AND pljt.JUDGE_TYPE_CODE = '01'
+	AND TO_CHAR(ppac.START_DATE,'MM-YYYY') = $P{MONTH}
+	GROUP BY pcj.JUDGE_ID
+	ORDER BY JUDGE_ID 
+) 
+b ON b.JUDGE_ID = plj.JUDGE_ID
+
+--review
+LEFT JOIN
+(
+	SELECT pcj.JUDGE_ID, COUNT(pc.CASE_ID) REVIEW_FLAG
+	FROM PC_CASE_LIT_REVIEW pclr
+	JOIN PC_CASE_LIT pcl ON pcl.CASE_LIT_ID = pclr.CASE_LIT_ID AND pcl.REMOVED_BY = 0
+	JOIN PC_LOOKUP_LIT_TYPE pllt ON pllt.LIT_TYPE_ID = pcl.LITIGANT_TYPE_ID AND pllt.REMOVED_BY = 0
+	--
+	JOIN PC_CASE pc ON pc.CASE_ID = pcl.CASE_ID AND pc.REMOVED_BY = 0
+	JOIN PC_CASE_JUDGE pcj ON pcj.CASE_ID = pc.CASE_ID AND pcj.REMOVED_BY = 0
+	JOIN PC_LOOKUP_JUDGE_TYPE pljt ON pljt.JUDGE_TYPE_ID = pcj.JUDGE_TYPE_ID AND pljt.REMOVED_BY = 0
+	WHERE pclr.REMOVED_BY = 0
+	AND pllt.LIT_TYPE_CODE = '07'
+	AND pclr.REVIEW_FLAG IS NOT NULL
+	AND TO_CHAR(pc.CASE_DATE,'MM-YYYY') = $P{MONTH}
+	GROUP BY pcj.JUDGE_ID 
+) 
+c ON c.JUDGE_ID = plj.JUDGE_ID 
 --
 WHERE plj.REMOVED_BY = 0
 AND plj.FLAG_JUDGE = 1
@@ -4383,8 +4417,15 @@ ORDER BY ALLE_ORDER]]>
 		<![CDATA[SELECT TO_CHAR(TRUNC(TO_DATE($P{MONTH},'MM-YYYY') ,'YEAR'),'DD-MM-YYYY')   AS YEAR_FIRSTDAY,
        '31-12-'||TO_CHAR(EXTRACT (YEAR FROM TO_DATE($P{MONTH},'MM-YYYY'))) AS YEAR_LASTDAY,
        TO_CHAR(TO_DATE($P{MONTH},'MM-YYYY'),'DD-MM-YYYY')                  AS MONTH_FIRSTDAY,
-       TO_CHAR(LAST_DAY(TO_DATE($P{MONTH},'MM-YYYY')),'DD-MM-YYYY')        AS MONTH_LASTDAY
-FROM DUAL]]>
+       TO_CHAR(LAST_DAY(TO_DATE($P{MONTH},'MM-YYYY')),'DD-MM-YYYY')        AS MONTH_LASTDAY,
+       COURT_NAME_TH
+FROM DUAL,
+(
+	SELECT plc.COURT_NAME_TH
+	FROM PC_PARAM pp
+	JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pp.PARAM_VALUE AND plc.REMOVED_BY = 0
+	WHERE pp.PARAM_NAME = 'COURT_ID' AND pp.REMOVED_BY = 0
+)]]>
 	</queryString>
 	<field name="YEAR_FIRSTDAY" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="YEAR_FIRSTDAY"/>
@@ -4397,6 +4438,9 @@ FROM DUAL]]>
 	</field>
 	<field name="MONTH_LASTDAY" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="MONTH_LASTDAY"/>
+	</field>
+	<field name="COURT_NAME_TH" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="COURT_NAME_TH"/>
 	</field>
 	<variable name="TEST1" class="java.lang.String"/>
 	<variable name="SUM_CASE" class="java.lang.Integer">
@@ -5494,7 +5538,10 @@ $F{ALLE_GROUP}.equals("C01")]]></printWhenExpression>
 					<property name="com.jaspersoft.studio.components.autoresize.proportional" value="true"/>
 				</reportElement>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
-					<datasetRun subDataset="JUDGEPORTFOLIO" uuid="5888ace6-42a3-4290-8609-70933ed00beb">
+					<datasetRun subDataset="JUDGEPORTFOLIO" uuid="de0ed55d-4f24-4172-95e0-e33d570694e6">
+						<datasetParameter name="MONTH">
+							<datasetParameterExpression><![CDATA[$P{MONTH}]]></datasetParameterExpression>
+						</datasetParameter>
 						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 					</datasetRun>
 					<jr:column width="102" uuid="4823216b-fec3-44b3-b32a-d93f7518555c">
@@ -5726,7 +5773,7 @@ $F{ALLE_GROUP}.equals("C01")]]></printWhenExpression>
 								<textElement textAlignment="Center" verticalAlignment="Middle">
 									<font fontName="THSarabunNew" size="14"/>
 								</textElement>
-								<textFieldExpression><![CDATA[$F{REVIEW_FLAG}==null?0:$F{REVIEW_FLAG}]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$V{TOTAL_REVIEW_FLAG}==null?0:$V{TOTAL_REVIEW_FLAG}]]></textFieldExpression>
 							</textField>
 						</jr:columnFooter>
 						<jr:detailCell style="Table_TD" height="30">
@@ -5838,7 +5885,7 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA["ศาลเยาวชนและครอบครัวจังหวัด................................"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{COURT_NAME_TH}==null?" ":$F{COURT_NAME_TH}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="427" y="40" width="30" height="30" uuid="59852ac2-98e9-4a5c-b45b-f2c6efd90ff4">
@@ -5852,7 +5899,7 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA["\u2610"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="637" y="40" width="165" height="30" uuid="4d28f088-ca5c-4dbb-a087-296d8b2d29d6">
@@ -5869,7 +5916,7 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="THSarabunNew" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA["ศาลจังหวัด ................ แผนกคดีเยาวชนและครอบครัว"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="607" y="40" width="30" height="30" uuid="c6429631-f7bc-467e-93d7-c66e2fe6b061">
@@ -5884,7 +5931,7 @@ Integer.parseInt($P{MONTH}.split("-")[0]) ==12 ? "ธันวาคม" : "") +
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA["\u2610"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement positionType="Float" x="390" y="210" width="135" height="30" uuid="d2b98e5f-d863-4979-a636-a280e7db90ab">

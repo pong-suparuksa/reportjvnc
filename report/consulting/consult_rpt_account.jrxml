@@ -10,8 +10,8 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN210"/>
-	<property name="ireport.jasperserver.url" value="http://202.9.90.121:16001/jasperserver/"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="JVN229"/>
+	<property name="ireport.jasperserver.url" value="http://119.59.126.210:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
 	<property name="ireport.jasperserver.reportUnit" value="/reports/consulting/consult_rpt_account"/>
 	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
@@ -41,6 +41,8 @@
 	pa.CHILD_FIRSTNAME ,
 	pa.CHILD_LASTNAME ,
 	pa.ACCU_CAUSE,
+    plov.NAME AS CONSULT_BY,
+    pup.USER_PROFILE_FULL_NAME AS CONSULT_NAME,
 	--
 	pap.PARENT_PREFIX ,
 	pap.PARENT_FIRSTNAME ,
@@ -63,6 +65,8 @@ LEFT JOIN PC_ADVICE_PSYCHOLOGIST pap_d ON pap_d.PSYCHOLOGIST_ID = pae.RESPONSIBL
 --
 LEFT JOIN PC_LOOKUP_COURT plc ON plc.COURT_ID = pa.COURT_ID AND plc.REMOVED_BY = 0	
 --
+LEFT JOIN PC_LIST_OF_VALUE plov ON plov.LOV_TYPE = pa.CONSULT_BY_LOV_TYPE AND plov.VALUE = pa.CONSULT_BY_LOV_CODE AND plov.REMOVED_BY = 0
+LEFT JOIN PC_USER_PROFILE pup ON pup.USER_PROFILE_ID = pa.CONSULT_BY_ID AND pup.REMOVED_BY = 0
 WHERE
 pa.CREATED_DATE BETWEEN TO_DATE($P{START_DATE}||'T00:00:00', 'DD-MM-YYYY"T"HH24:MI:SS')
                     AND TO_DATE($P{END_DATE}||'T23:59:59', 'DD-MM-YYYY"T"HH24:MI:SS')
@@ -99,6 +103,12 @@ AND pap.ADVICE_PARENT_ID = (SELECT MIN(ADVICE_PARENT_ID) FROM PC_ADVICE_PARENT p
 	</field>
 	<field name="ACCU_CAUSE" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="ACCU_CAUSE"/>
+	</field>
+	<field name="CONSULT_BY" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CONSULT_BY"/>
+	</field>
+	<field name="CONSULT_NAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.label" value="CONSULT_NAME"/>
 	</field>
 	<field name="PARENT_PREFIX" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.label" value="PARENT_PREFIX"/>
@@ -442,9 +452,7 @@ AND pap.ADVICE_PARENT_ID = (SELECT MIN(ADVICE_PARENT_ID) FROM PC_ADVICE_PARENT p
 				<textElement textAlignment="Center" verticalAlignment="Top">
 					<font fontName="TH Sarabun New" size="14"/>
 				</textElement>
-				<textFieldExpression><![CDATA[($F{JUDGE_NAME}==null?" ":$F{JUDGE_NAME})+" "+
-($F{PSYCOLOGIST_COURT}==null?" ":$F{PSYCOLOGIST_COURT})+" " +
-($F{PSYCOLOGIST_DETENTION}==null?" ":$F{PSYCOLOGIST_DETENTION})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{CONSULT_NAME}==null?" ":$F{CONSULT_NAME}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement stretchType="ContainerHeight" x="719" y="0" width="83" height="30" uuid="084e3d69-59f9-442d-b1db-5bc2fecdd91f"/>
@@ -454,10 +462,10 @@ AND pap.ADVICE_PARENT_ID = (SELECT MIN(ADVICE_PARENT_ID) FROM PC_ADVICE_PARENT p
 					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="TH Sarabun New" size="14" isBold="true"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="TH Sarabun New" size="14" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{CONSULT_BY}==null?" ":$F{CONSULT_BY}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
