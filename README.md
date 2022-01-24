@@ -1,1 +1,1 @@
-This is the master branch for development for programmers.
+This is the branch for development for programmers.
