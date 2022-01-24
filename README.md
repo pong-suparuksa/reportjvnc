@@ -1,1 +1,1 @@
-This is the master branch for production.
+This is the staging branch for testing.
