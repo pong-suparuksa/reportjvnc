@@ -1,1 +1,1 @@
-This is the branch for development for programmers.
+This is the branch to development by programmers.
