@@ -1,1 +1,1 @@
-This is the staging branch for testing.
+This is the branch for testing.
